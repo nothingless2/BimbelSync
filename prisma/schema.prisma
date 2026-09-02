@@ -1,0 +1,282 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Superadmin {
+  id               String    @id @default(uuid()) @db.Uuid
+  email            String    @unique
+  password_hash    String
+  last_login       DateTime?
+  deleted_at       DateTime?
+  
+  verified_platform_invoices PlatformInvoice[] @relation("SuperadminVerifies")
+}
+
+model Plan {
+  id                     String    @id @default(uuid()) @db.Uuid
+  name                   String
+  price                  Int
+  max_students           Int?
+  max_staff              Int?
+  max_rooms              Int?
+  allows_payment_gateway Boolean   @default(false)
+  allows_installment     Boolean   @default(false)
+  is_active              Boolean   @default(true)
+  deleted_at             DateTime?
+
+  academies         Academy[]
+  platform_invoices PlatformInvoice[]
+}
+
+model Academy {
+  id                           String    @id @default(uuid()) @db.Uuid
+  plan_id                      String    @db.Uuid
+  name                         String
+  path_url                     String    @unique
+  encrypted_payment_server_key String?
+  max_leave_per_month          Int       @default(0)
+  subscription_status          SubscriptionStatus @default(TRIAL)
+  subscription_due_date        DateTime? @db.Date
+  deleted_at                   DateTime?
+
+  plan              Plan              @relation(fields: [plan_id], references: [id])
+  staff             Staff[]
+  students          Student[]
+  programs          Program[]
+  rooms             Room[]
+  invoices          Invoice[]
+  platform_invoices PlatformInvoice[]
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  SUSPENDED
+}
+
+model Room {
+  id         String    @id @default(uuid()) @db.Uuid
+  academy_id String    @db.Uuid
+  name       String
+  capacity   Int
+  deleted_at DateTime?
+
+  academy   Academy    @relation(fields: [academy_id], references: [id])
+  schedules Schedule[]
+}
+
+model Staff {
+  id            String    @id @default(uuid()) @db.Uuid
+  academy_id    String    @db.Uuid
+  email         String
+  password_hash String
+  role          StaffRole
+  deleted_at    DateTime?
+
+  academy               Academy       @relation(fields: [academy_id], references: [id])
+  schedules             Schedule[]
+  verified_invoices     Invoice[]     @relation("StaffVerifiesInvoice")
+  verified_installments Installment[] @relation("StaffVerifiesInstallment")
+
+  @@unique([academy_id, email])
+}
+
+enum StaffRole {
+  ADMIN
+  TUTOR
+}
+
+model Student {
+  id                   String    @id @default(uuid()) @db.Uuid
+  academy_id           String    @db.Uuid
+  full_name            String
+  username             String
+  password_hash        String
+  must_change_password Boolean   @default(true)
+  parent_whatsapp      String?
+  deleted_at           DateTime?
+
+  academy     Academy      @relation(fields: [academy_id], references: [id])
+  enrollments Enrollment[]
+  attendances Attendance[]
+  invoices    Invoice[]
+
+  @@unique([academy_id, username])
+}
+
+model Program {
+  id              String    @id @default(uuid()) @db.Uuid
+  academy_id      String    @db.Uuid
+  name            String
+  max_capacity    Int
+  monthly_fee     Int
+  duration_months Int?
+  deleted_at      DateTime?
+
+  academy     Academy      @relation(fields: [academy_id], references: [id])
+  schedules   Schedule[]
+  enrollments Enrollment[]
+}
+
+model Schedule {
+  id               String         @id @default(uuid()) @db.Uuid
+  program_id       String         @db.Uuid
+  tutor_id         String         @db.Uuid
+  room_id          String         @db.Uuid
+  start_time       DateTime
+  end_time         DateTime
+  status           ScheduleStatus @default(SCHEDULED)
+  cancelled_reason String?
+
+  program     Program      @relation(fields: [program_id], references: [id])
+  tutor       Staff        @relation(fields: [tutor_id], references: [id])
+  room        Room         @relation(fields: [room_id], references: [id])
+  attendances Attendance[]
+}
+
+enum ScheduleStatus {
+  SCHEDULED
+  CANCELLED
+}
+
+model Attendance {
+  id                String           @id @default(uuid()) @db.Uuid
+  student_id        String           @db.Uuid
+  schedule_id       String           @db.Uuid
+  scanned_at        DateTime         @default(now())
+  attendance_status AttendanceStatus
+
+  student  Student  @relation(fields: [student_id], references: [id])
+  schedule Schedule @relation(fields: [schedule_id], references: [id])
+
+  @@unique([student_id, schedule_id])
+}
+
+enum AttendanceStatus {
+  PRESENT
+  EXCUSED
+  ABSENT
+}
+
+model Enrollment {
+  id               String           @id @default(uuid()) @db.Uuid
+  student_id       String           @db.Uuid
+  program_id       String           @db.Uuid
+  enrolled_date    DateTime         @default(now())
+  status           EnrollmentStatus @default(ACTIVE)
+  withdrawn_at     DateTime?
+  withdrawn_reason WithdrawnReason?
+  withdrawn_notes  String?
+
+  student Student @relation(fields: [student_id], references: [id])
+  program Program @relation(fields: [program_id], references: [id])
+  
+  @@unique([student_id, program_id])
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  WITHDRAWN
+}
+
+enum WithdrawnReason {
+  PINDAH_DOMISILI
+  TIDAK_PUAS_LAYANAN
+  KENDALA_BIAYA
+  PROGRAM_SELESAI
+  LAINNYA
+}
+
+model Invoice {
+  id                   String        @id @default(uuid()) @db.Uuid
+  academy_id           String        @db.Uuid
+  student_id           String        @db.Uuid
+  verified_by_staff_id String?       @db.Uuid
+  total_amount         Int
+  payment_option       PaymentOption
+  payment_url          String?
+  proof_of_payment_url String?
+  payment_method       PaymentMethod?
+  payment_status       PaymentStatus @default(UNPAID)
+
+  academy      Academy       @relation(fields: [academy_id], references: [id])
+  student      Student       @relation(fields: [student_id], references: [id])
+  verified_by  Staff?        @relation("StaffVerifiesInvoice", fields: [verified_by_staff_id], references: [id])
+  items        InvoiceItem[]
+  installments Installment[]
+}
+
+enum PaymentOption {
+  FULL
+  INSTALLMENT
+}
+
+enum PaymentMethod {
+  GATEWAY
+  MANUAL_TRANSFER
+  CASH
+}
+
+enum PaymentStatus {
+  VOID
+  UNPAID
+  PAID
+  OVERDUE
+}
+
+model InvoiceItem {
+  id          String @id @default(uuid()) @db.Uuid
+  invoice_id  String @db.Uuid
+  description String
+  amount      Int
+
+  invoice Invoice @relation(fields: [invoice_id], references: [id])
+}
+
+model Installment {
+  id                   String        @id @default(uuid()) @db.Uuid
+  invoice_id           String        @db.Uuid
+  installment_number   Int
+  due_date             DateTime      @db.Date
+  amount               Int
+  status               PaymentStatus @default(UNPAID)
+  paid_at              DateTime?
+  payment_method       PaymentMethod?
+  payment_url          String?
+  proof_of_payment_url String?
+  verified_by_staff_id String?       @db.Uuid
+
+  invoice     Invoice @relation(fields: [invoice_id], references: [id])
+  verified_by Staff?  @relation("StaffVerifiesInstallment", fields: [verified_by_staff_id], references: [id])
+
+  @@unique([invoice_id, installment_number])
+}
+
+model PlatformInvoice {
+  id                        String        @id @default(uuid()) @db.Uuid
+  academy_id                String        @db.Uuid
+  plan_id                   String        @db.Uuid
+  billing_period            DateTime      @db.Date
+  amount                    Int
+  due_date                  DateTime      @db.Date
+  payment_status            PaymentStatus @default(UNPAID)
+  paid_at                   DateTime?
+  verified_by_superadmin_id String?       @db.Uuid
+  proof_of_payment_url      String?
+
+  academy     Academy     @relation(fields: [academy_id], references: [id])
+  plan        Plan        @relation(fields: [plan_id], references: [id])
+  verified_by Superadmin? @relation("SuperadminVerifies", fields: [verified_by_superadmin_id], references: [id])
+}

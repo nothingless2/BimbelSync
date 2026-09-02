@@ -1,9 +1,14 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-primary-blue: #2563EB;
+  --color-accent-green: #16A34A;
+  --color-accent-red: #DC2626;
+  --color-neutral-white: #FFFFFF;
+  --color-soft-gray: #F3F4F6;
+}
 
 body {
-  background-color: theme('colors.neutral-white');
+  background-color: var(--color-neutral-white);
   color: #1f2937;
-  /* abu-abu tua untuk teks biasa */
 }

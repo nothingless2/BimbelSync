@@ -17,3 +17,11 @@ Aturan:
 ## [Tahap 1] Inisialisasi Proyek Next.js
 - **Aksi:** Mengeksekusi `create-next-app`, mengatur palet warna di `tailwind.config.ts`, dan membersihkan boilerplate bawaan.
 - **Status:** Selesai.
+
+## [Tahap 2] Setup Database & Prisma
+- **Aksi:** Instalasi Prisma, menyalin ERD ke `schema.prisma`, dan eksekusi `npx prisma db push`.
+- **Status:** Selesai. Database berhasil dibuat.
+
+## [Tahap 3] Multi-Tenant & Middleware
+- **Aksi:** Instalasi `jose` untuk JWT, pembuatan `src/lib/auth.ts`, dan pengaturan proteksi routing di `src/middleware.ts`.
+- **Status:** Selesai.
