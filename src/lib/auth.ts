@@ -1,15 +1,18 @@
 import { jwtVerify, SignJWT } from 'jose';
 
-// Secret key ini nantinya sebaiknya ditaruh di .env
-const SECRET_KEY = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'bimbelsync-super-secret-key-2024'
-);
+// Secret key ini WAJIB ada di .env (Poin 3 Security)
+const secretKeyString = process.env.JWT_SECRET;
+if (!secretKeyString) {
+  throw new Error("CRITICAL: JWT_SECRET belum diatur di file .env!");
+}
+const SECRET_KEY = new TextEncoder().encode(secretKeyString);
 
 // Tipe data sesi yang akan disimpan di Cookie pengguna
 export type SessionPayload = {
   id: string;
   role: 'SUPERADMIN' | 'ADMIN' | 'TUTOR' | 'STUDENT';
   academy_id?: string;
+  tenant_slug?: string;
 };
 
 // Fungsi untuk membuat Token/Sesi (Saat Login)
@@ -17,7 +20,7 @@ export async function encrypt(payload: SessionPayload) {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime('30d')
+    .setExpirationTime('8h')
     .sign(SECRET_KEY);
 }
 

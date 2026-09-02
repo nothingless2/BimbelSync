@@ -25,3 +25,7 @@ Aturan:
 ## [Tahap 3] Multi-Tenant & Middleware
 - **Aksi:** Instalasi `jose` untuk JWT, pembuatan `src/lib/auth.ts`, dan pengaturan proteksi routing di `src/middleware.ts`.
 - **Status:** Selesai.
+- **Security Notes:**
+  1. File `auth.ts` telah di-*patch* untuk WAJIB membaca `JWT_SECRET` dari `.env`. (Kunci rahasia dummy telah disuntikkan ke `.env`).
+  2. Middleware telah menambal celah IDOR (Cross-Tenant) dengan membaca `tenant_slug` dari JWT.
+  3. **Untuk Tahap Selanjutnya:** Semua Server Action (API) **WAJIB** mengecek token JWT ulang, dan semua *query* database **WAJIB** membawa filter `academy_id`.

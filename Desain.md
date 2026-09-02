@@ -7,7 +7,7 @@
   - `/siswa` (Portal Siswa)
 - **Strategi Rendering (Per Rute):**
   - **SSR (Dynamic Rendering):** Halaman Dashboard Admin/Tutor, Portal Siswa, dan halaman internal Superadmin WAJIB di-render secara dinamis. Hal ini memastikan isolasi tenant dan mencegah caching yang dapat melayani data satu akademi ke pengguna akademi lain.
-  - **Client Component:** Digunakan khusus pada layar QR Presensi dengan implementasi interval polling per 15 detik.
+  - **Client Component:** Digunakan khusus pada layar QR Presensi dengan implementasi interval polling per 3 detik.
   - **SSG / ISR:** Digunakan pada Landing Page publik BimbelSync (termasuk halaman paket harga).
 - **State Management:** Zustand untuk state lokal di sisi client.
 - **ORM & Database:** Prisma ORM dengan database PostgreSQL.
@@ -20,7 +20,7 @@
   - Middleware Next.js bertugas membaca subdomain atau `path_url` akademi.
   - Middleware mencocokkan URL dengan `academy_id` dan menyuntikkannya ke dalam request header untuk pengamanan di layer API/Server Action.
 - **Skema Database:** Multi-tenant shared-database, shared-schema. Isolasi data ditangani secara ketat di tingkat basis data menggunakan fitur **PostgreSQL Row-Level Security (RLS)**.
-- **Otentikasi (Sesi Terpisah):** JWT via HTTP-Only Cookies (SameSite=Lax) dengan masa kedaluwarsa 30 hari. Sesi dibedakan secara tegas antara Staff, Superadmin, dan Siswa.
+- **Otentikasi (Sesi Terpisah):** JWT via HTTP-Only Cookies (SameSite=Lax) dengan masa kedaluwarsa 8 jam. Sesi dibedakan secara tegas antara Staff, Superadmin, dan Siswa.
 
 ## 3. Design System & Branding
 Tampilan platform ditargetkan bernuansa B2B modern, padat informasi (data-centric), namun tidak mengorbankan estetika dan kemudahan navigasi.

@@ -38,12 +38,20 @@ export async function middleware(req: NextRequest) {
         if (!session || (session.role !== 'ADMIN' && session.role !== 'TUTOR')) {
           return NextResponse.redirect(new URL(`/${tenantSlug}/login`, req.url));
         }
+        // Cegah Admin lompat ke bimbel orang lain
+        if (session.tenant_slug !== tenantSlug) {
+            return NextResponse.redirect(new URL(`/${session.tenant_slug}/dashboard`,req.url));
+        }
       }
       
       // Proteksi /siswa (Hanya untuk Student)
       if (isSiswa && !isLoginSiswa) {
         if (!session || session.role !== 'STUDENT') {
           return NextResponse.redirect(new URL(`/${tenantSlug}/siswa/login`, req.url));
+        }
+        // Cegah Siswa lompat ke bimbel orang lain
+        if (session.tenant_slug !== tenantSlug){
+            return NextResponse.redirect(new URL(`/${session.tenant_slug}/siswa`, req.url));
         }
       }
     }
