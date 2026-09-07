@@ -6,8 +6,9 @@ import { ThemeToggle } from "@/components/theme-toggle";
 export function SuperadminHeader() {
   const pathname = usePathname();
 
-  let pageTitle = "Dashboard";
-  if (pathname.includes("/academies")) pageTitle = "Daftar Akademi Berlangganan";
+  let pageTitle = "Overview";
+  if (pathname.includes("/dashboard")) pageTitle = "Dashboard Overview";
+  else if (pathname.includes("/academies")) pageTitle = "Daftar Akademi Berlangganan";
   else if (pathname.includes("/plans")) pageTitle = "Plans & Pricing";
   else if (pathname.includes("/billing")) pageTitle = "Platform Billing";
   else if (pathname.includes("/users")) pageTitle = "System Users";

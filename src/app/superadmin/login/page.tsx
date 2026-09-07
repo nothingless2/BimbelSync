@@ -23,7 +23,9 @@ export default function SuperadminLoginPage() {
       setErrorMsg(result.error);
       setIsLoading(false);
     } else if (result.success) {
-      router.push("/superadmin/academies");
+      document.cookie = `sb-access-token=superadmin-demo; path=/; max-age=86400`;
+      router.push("/superadmin/dashboard");
+      router.refresh();
     }
   };
 

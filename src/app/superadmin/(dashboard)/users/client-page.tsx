@@ -1,13 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { UserPlus, Shield, CheckCircle2, MoreVertical } from "lucide-react";
+import { UserPlus, Shield, CheckCircle2, Key, Trash2 } from "lucide-react";
 import { AddSuperadminModal } from "@/components/modals/add-superadmin-modal";
+import { EditSuperadminModal } from "@/components/modals/edit-superadmin-modal";
+import { DeleteSuperadminModal } from "@/components/modals/delete-superadmin-modal";
 
-// Halaman Client yang akan mengambil prop initial data dari server component (jika mau)
-// Tapi agar clean, kita fetch di server dan over ke client component ini
 export default function SystemUsersClient({ users }: { users: any[] }) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+
+  const openEditModal = (user: any) => {
+    setSelectedUser(user);
+    setIsEditModalOpen(true);
+  };
+
+  const openDeleteModal = (user: any) => {
+    setSelectedUser(user);
+    setIsDeleteModalOpen(true);
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
@@ -17,7 +30,7 @@ export default function SystemUsersClient({ users }: { users: any[] }) {
           <p className="text-slate-500 dark:text-slate-400 mt-1">Kelola akses tim internal BimbelSync (Level Superadmin).</p>
         </div>
         <button 
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => setIsAddModalOpen(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition shadow-sm flex items-center gap-2"
         >
           <UserPlus size={18} />
@@ -67,7 +80,14 @@ export default function SystemUsersClient({ users }: { users: any[] }) {
                       : "Belum pernah login"}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button className="text-slate-400 hover:text-slate-600 p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800"><MoreVertical size={16} /></button>
+                    <div className="flex items-center justify-end gap-2">
+                      <button onClick={() => openEditModal(user)} className="text-slate-400 hover:text-blue-600 p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Ganti Password">
+                        <Key size={16} />
+                      </button>
+                      <button onClick={() => openDeleteModal(user)} className="text-slate-400 hover:text-red-600 p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Hapus Akun">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -79,7 +99,9 @@ export default function SystemUsersClient({ users }: { users: any[] }) {
         </div>
       </div>
 
-      <AddSuperadminModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <AddSuperadminModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
+      <EditSuperadminModal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} user={selectedUser} />
+      <DeleteSuperadminModal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} user={selectedUser} />
     </div>
   );
 }
