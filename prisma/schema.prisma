@@ -34,7 +34,7 @@ model AuditLog {
   action        String
   entity_type   String    
   entity_id     String?   @db.Uuid
-  details       String?   
+  details       Json?   
   created_at    DateTime  @default(now())
 
   superadmin    Superadmin? @relation(fields: [superadmin_id], references: [id])

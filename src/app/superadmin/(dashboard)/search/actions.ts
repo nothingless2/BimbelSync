@@ -12,7 +12,7 @@ async function getSuperadminId() {
   return session.id as string;
 }
 
-export async function logAuditAction(action: string, entityType: string, entityId?: string, details?: string) {
+export async function logAuditAction(action: string, entityType: string, entityId?: string, details?: any) {
   try {
     const superadminId = await getSuperadminId();
     if (!superadminId) return;
@@ -41,7 +41,7 @@ export async function searchTenantsAction(query: string) {
     const q = query.trim();
     
     // Log audit
-    await logAuditAction("SEARCH_TENANT", "Academy", undefined, JSON.stringify({ keyword: q }));
+    await logAuditAction("SEARCH_TENANT", "Academy", undefined, { keyword: q });
 
     // Search by academy name or staff email
     const academies = await prisma.academy.findMany({

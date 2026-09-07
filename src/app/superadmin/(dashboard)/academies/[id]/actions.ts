@@ -31,7 +31,7 @@ export async function deactivateAdminAction(staffId: string, academyId: string) 
       data: { deleted_at: new Date() }
     });
 
-    await logAuditAction("DEACTIVATE_TENANT_ADMIN", "Staff", staffId, JSON.stringify({ email: staff.email, academy_id: academyId }));
+    await logAuditAction("DEACTIVATE_TENANT_ADMIN", "Staff", academyId, { staff_id: staffId, email: staff.email, academy_id: academyId });
     
     revalidatePath(`/superadmin/academies/${academyId}`);
     return { success: true };
@@ -55,7 +55,7 @@ export async function sendResetPasswordLinkAction(staffId: string, academyId: st
     // MOCK: Simulate email sending delay
     await new Promise((resolve) => setTimeout(resolve, 1000));
     
-    await logAuditAction("SEND_RESET_PASSWORD", "Staff", staffId, JSON.stringify({ email: staff.email, academy_id: academyId }));
+    await logAuditAction("SEND_RESET_PASSWORD", "Staff", academyId, { staff_id: staffId, email: staff.email, academy_id: academyId });
 
     return { success: true, message: `Link reset password telah dikirim ke ${staff.email}` };
   } catch (error) {
@@ -82,7 +82,7 @@ export async function inviteAdminAction(email: string, academyId: string) {
     // MOCK: Simulate email sending delay
     await new Promise((resolve) => setTimeout(resolve, 1500));
     
-    await logAuditAction("INVITE_TENANT_ADMIN", "Academy", academyId, JSON.stringify({ invited_email: email }));
+    await logAuditAction("INVITE_TENANT_ADMIN", "Academy", academyId, { invited_email: email });
 
     return { success: true };
   } catch (error) {
@@ -108,7 +108,7 @@ export async function reactivateAdminAction(staffId: string, academyId: string) 
       data: { deleted_at: null }
     });
 
-    await logAuditAction("REACTIVATE_TENANT_ADMIN", "Staff", staffId, JSON.stringify({ email: staff.email, academy_id: academyId }));
+    await logAuditAction("REACTIVATE_TENANT_ADMIN", "Staff", academyId, { staff_id: staffId, email: staff.email, academy_id: academyId });
     
     revalidatePath(`/superadmin/academies/${academyId}`);
     return { success: true };

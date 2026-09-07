@@ -7,8 +7,8 @@ import { UserAvatar } from "@/components/user-avatar";
 import { toast } from "@/components/ui/sonner";
 import { deactivateAdminAction, reactivateAdminAction, sendResetPasswordLinkAction, inviteAdminAction } from "./actions";
 
-export default function TenantDetailClientPage({ academy, logs }: { academy: any, logs: any[] }) {
-  const [activeTab, setActiveTab] = useState<"overview" | "admins" | "billing" | "logs">("admins");
+export default function TenantDetailClientPage({ academy }: { academy: any }) {
+  const [activeTab, setActiveTab] = useState<"overview" | "admins" | "billing">("overview");
   
   // Modals state
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
@@ -91,7 +91,6 @@ export default function TenantDetailClientPage({ academy, logs }: { academy: any
           { id: "overview", label: "Overview", icon: Activity },
           { id: "admins", label: "Admin Bimbel", icon: Users },
           { id: "billing", label: "Billing & Tagihan", icon: CreditCard },
-          { id: "logs", label: "Audit Logs", icon: ShieldAlert },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -115,7 +114,11 @@ export default function TenantDetailClientPage({ academy, logs }: { academy: any
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 md:p-12 text-center text-slate-500">
             <Activity className="mx-auto mb-4 opacity-50" size={48} />
             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Ikhtisar Platform (Segera Hadir)</h3>
-            <p>Statistik pendaftaran murid dan penggunaan fitur akan ditampilkan di sini.</p>
+            <p className="mb-6">Statistik pendaftaran murid dan penggunaan fitur akan ditampilkan di sini.</p>
+
+            <Link href={`/superadmin/audit-logs?tenant=${academy.id}`} className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/30 px-4 py-2 rounded-xl transition">
+              <ShieldAlert size={16} /> Lihat semua log aktivitas tenant ini
+            </Link>
           </div>
         )}
 
@@ -220,36 +223,6 @@ export default function TenantDetailClientPage({ academy, logs }: { academy: any
             <CreditCard className="mx-auto mb-4 opacity-50" size={48} />
             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Sistem Tagihan Platform (Segera Hadir)</h3>
             <p>Pengelolaan invoice untuk langganan tenant ini akan dikelola dari tab ini.</p>
-          </div>
-        )}
-
-        {/* TAB LOGS */}
-        {activeTab === "logs" && (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden p-6">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Log Aktivitas Superadmin</h3>
-            {logs.length === 0 ? (
-              <p className="text-sm text-slate-500 py-4 text-center">Belum ada aktivitas tercatat untuk tenant ini.</p>
-            ) : (
-              <div className="space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 dark:before:via-slate-800 before:to-transparent">
-                {logs.map((log: any) => (
-                  <div key={log.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white dark:border-slate-950 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm z-10">
-                      <ShieldAlert size={16} />
-                    </div>
-                    <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 shadow-sm">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-bold text-slate-900 dark:text-white text-sm">{log.action}</span>
-                        <span className="text-xs font-medium text-slate-400">{new Date(log.created_at).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit'})}</span>
-                      </div>
-                      <p className="text-xs text-slate-500 mb-2">Oleh: {log.superadmin?.name || log.superadmin?.email || 'Unknown'}</p>
-                      <div className="text-xs bg-white dark:bg-slate-900 p-2 rounded-md border border-slate-200 dark:border-slate-700 font-mono text-slate-600 dark:text-slate-400 break-words">
-                        {log.details || "-"}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         )}
       </div>

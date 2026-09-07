@@ -1,8 +1,8 @@
 "use client";
-
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserAvatar } from "@/components/user-avatar";
+import { SuperadminSearch } from "@/components/superadmin-search";
 import Link from "next/link";
 
 interface SuperadminHeaderProps {
@@ -34,14 +34,7 @@ export function SuperadminHeader({ user }: SuperadminHeaderProps) {
       </div>
       
       <div className="flex items-center gap-5">
-        <div className="relative">
-          <input 
-            type="text" 
-            placeholder="Search..." 
-            className="pl-9 pr-4 py-1.5 bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none w-48 text-slate-800 dark:text-slate-200"
-          />
-          <svg className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        </div>
+        <SuperadminSearch />
         <ThemeToggle />
         <Link href="/superadmin/users/profile" className="block hover:opacity-80 transition cursor-pointer" title="Edit Profile">
           <UserAvatar id={user.id} email={user.email} avatarUrl={user.avatar_url} size={32} />
