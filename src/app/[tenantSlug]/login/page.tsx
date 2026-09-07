@@ -118,17 +118,10 @@ export default function StaffLoginPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-1">
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <div className="relative flex items-center justify-center">
-                </div>
-              </label>
-            </div>
-
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#1D4ED8] hover:bg-blue-800 text-white font-medium py-3.5 px-4 rounded-xl transition-all shadow-sm flex justify-center items-center disabled:opacity-70 mt-4 text-[15px]"
+              className="w-full bg-[#1D4ED8] hover:bg-blue-800 text-white font-medium py-3.5 px-4 rounded-xl transition-all shadow-sm flex justify-center items-center disabled:opacity-70 mt-2 text-[15px]"
             >
               {isLoading ? (
                 <span className="animate-pulse">Memverifikasi...</span>

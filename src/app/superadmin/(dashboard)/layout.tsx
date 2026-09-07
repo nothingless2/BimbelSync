@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { LayoutDashboard, Users, CreditCard, Building2, LogOut, ShieldCheck, HelpCircle } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SuperadminNav } from "@/components/superadmin-nav";
 
 export default async function SuperadminLayout({
   children,
@@ -26,25 +26,7 @@ export default async function SuperadminLayout({
           </div>
         </div>
 
-        <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto custom-scrollbar">
-          <NavItem href="/superadmin" icon={<LayoutDashboard size={18} />} label="Dashboard" />
-          <NavItem href="/superadmin/academies" icon={<Building2 size={18} />} label="Academies" active />
-          <NavItem href="/superadmin/plans" icon={<ShieldCheck size={18} />} label="Plans & Pricing" />
-          <NavItem href="/superadmin/billing" icon={<CreditCard size={18} />} label="Platform Billing" />
-          <NavItem href="/superadmin/users" icon={<Users size={18} />} label="System Users" />
-        </nav>
-
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800 space-y-1">
-          <div className="px-3 py-2 flex items-center gap-2 mb-2">
-            <div className="w-2 h-2 rounded-full bg-green-500"></div>
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">System Healthy</span>
-          </div>
-          <NavItem href="/superadmin/support" icon={<HelpCircle size={18} />} label="Support" />
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-medium text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20">
-            <LogOut size={18} />
-            Logout
-          </button>
-        </div>
+        <SuperadminNav />
       </aside>
 
       {/* Main Content */}
@@ -85,18 +67,3 @@ export default async function SuperadminLayout({
   );
 }
 
-function NavItem({ href, icon, label, active = false }: { href: string; icon: React.ReactNode; label: string; active?: boolean }) {
-  return (
-    <Link
-      href={href}
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-medium text-sm ${
-        active 
-          ? "bg-blue-600 text-white shadow-md shadow-blue-500/20" 
-          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
-      }`}
-    >
-      {icon}
-      {label}
-    </Link>
-  );
-}
