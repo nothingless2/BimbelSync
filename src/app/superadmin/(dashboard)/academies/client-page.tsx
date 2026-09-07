@@ -4,7 +4,8 @@ import { useState } from "react";
 import { AddAcademyModal } from "@/components/modals/add-academy-modal";
 import { EditAcademyModal } from "@/components/modals/edit-academy-modal";
 import { DeleteAcademyModal } from "@/components/modals/delete-academy-modal";
-import { Building2, ArrowUpRight, Activity, Clock, AlertTriangle, MoreVertical, Edit2, Trash2 } from "lucide-react";
+import { Building2, ArrowUpRight, Activity, Clock, AlertTriangle, MoreVertical, Edit2, Trash2, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export default function AcademiesClientPage({ academies, plans }: { academies: any[], plans: any[] }) {
   const [selectedAcademy, setSelectedAcademy] = useState<any>(null);
@@ -117,8 +118,13 @@ export default function AcademiesClientPage({ academies, plans }: { academies: a
                 return (
                   <tr key={academy.id} className={`transition-colors ${isSuspended ? "bg-red-50/30 dark:bg-red-900/10 hover:bg-red-50/80" : "hover:bg-slate-50/50 dark:hover:bg-slate-800/20"}`}>
                     <td className="px-6 py-4">
-                      <p className="font-semibold text-slate-900 dark:text-slate-100">{academy.name}</p>
-                      <p className="text-xs text-slate-500 font-mono">/{academy.path_url}</p>
+                      <Link href={`/superadmin/academies/${academy.id}`} className="group inline-block">
+                        <p className="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex items-center gap-1.5">
+                          {academy.name}
+                          <ArrowRight size={14} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-blue-600 dark:text-blue-400" />
+                        </p>
+                        <p className="text-xs text-slate-500 font-mono">/{academy.path_url}</p>
+                      </Link>
                     </td>
                     <td className="px-6 py-4">
                       <span className="bg-slate-800 dark:bg-slate-700 text-white text-[10px] font-bold px-2 py-1 rounded">

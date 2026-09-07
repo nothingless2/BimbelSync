@@ -6,7 +6,6 @@ import { LayoutDashboard, Building2, ShieldCheck, CreditCard, Users, HelpCircle,
 
 const navItems = [
   { href: "/superadmin/dashboard", icon: LayoutDashboard, label: "Dashboard", exact: true },
-  { href: "/superadmin/search", icon: Search, label: "Pencarian Tenant" },
   { href: "/superadmin/academies", icon: Building2, label: "Academies" },
   { href: "/superadmin/plans", icon: ShieldCheck, label: "Plans & Pricing" },
   { href: "/superadmin/billing", icon: CreditCard, label: "Platform Billing" },
