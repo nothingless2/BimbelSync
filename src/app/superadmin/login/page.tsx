@@ -2,19 +2,19 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, User } from "lucide-react";
 import { superadminLoginAction } from "./actions";
 
 export default function SuperadminLoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    setErrorMsg(null);
+    setErrorMsg("");
 
     const formData = new FormData(e.currentTarget);
     const result = await superadminLoginAction(formData);
@@ -28,66 +28,60 @@ export default function SuperadminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex font-sans">
-      {/* Left Panel — Branded / Photo */}
-      <div className="hidden lg:flex lg:w-5/12 relative flex-col justify-between p-10 overflow-hidden">
-        {/* Background image */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/login-bg.png')" }}
-        />
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/60 via-slate-900/50 to-slate-900/80" />
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#F8FAFC]">
+      {/* Left Panel */}
+      <div className="hidden md:flex flex-col justify-between w-5/12 bg-slate-900 relative p-12 overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/login-bg.png"
+            alt="BimbelSync Background"
+            className="w-full h-full object-cover opacity-50 mix-blend-overlay"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/60 to-slate-900/10"></div>
+        </div>
 
         {/* Logo */}
         <div className="relative z-10 flex items-center gap-3">
-          <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2L2 7l10 5 10-5-10-5z" />
-              <path d="M2 17l10 5 10-5" />
-              <path d="M2 12l10 5 10-5" />
-            </svg>
+          <div className="bg-white p-2.5 rounded-xl shadow-sm">
+            <img src="/logo.png" alt="BimbelSync Logo" className="w-7 h-7 object-contain" />
           </div>
-          <span className="text-white font-bold text-xl tracking-tight">BimbelSync</span>
+          <span className="text-xl font-bold text-white tracking-tight">BimbelSync</span>
         </div>
 
-        {/* Bottom tagline */}
-        <div className="relative z-10">
-          <h2 className="text-3xl font-bold text-white leading-tight mb-3">
-            Kelola Bimbel<br />Lebih Mudah dan<br />Otomatis.
-          </h2>
-          <p className="text-slate-300 text-sm leading-relaxed">
-            Satu platform terpadu untuk efisiensi<br />operasional bimbingan belajar Anda.
+        {/* Tagline */}
+        <div className="relative z-10 mb-20">
+          <h1 className="text-[2.75rem] font-bold text-white mb-6 leading-[1.15] tracking-tight">
+            Kelola Bimbel <br />Lebih Mudah dan <br />Otomatis.
+          </h1>
+          <p className="text-slate-300 text-lg max-w-sm leading-relaxed font-medium">
+            Satu platform terpadu untuk efisiensi operasional bimbingan belajar Anda.
           </p>
         </div>
       </div>
 
       {/* Right Panel — Form */}
-      <div className="flex-1 flex flex-col items-center justify-center bg-white dark:bg-slate-950 p-6 sm:p-12">
+      <div className="flex-1 flex items-center justify-center p-8 sm:p-12 relative bg-[#F8FAFC]">
         {/* Mobile logo */}
-        <div className="lg:hidden flex items-center gap-3 mb-10">
-          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2L2 7l10 5 10-5-10-5z" />
-              <path d="M2 17l10 5 10-5" />
-              <path d="M2 12l10 5 10-5" />
-            </svg>
-          </div>
-          <span className="text-slate-800 dark:text-white font-bold text-xl tracking-tight">BimbelSync</span>
+        <div className="absolute top-8 left-8 md:hidden flex items-center gap-3">
+          <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-lg" />
+          <span className="text-xl font-bold text-slate-800 tracking-tight">BimbelSync</span>
         </div>
 
-        <div className="w-full max-w-sm">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {errorMsg && (
-              <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl flex items-start gap-3 text-sm border border-red-100 dark:border-red-900/50">
-                <AlertCircle size={16} className="shrink-0 mt-0.5" />
-                <p>{errorMsg}</p>
-              </div>
-            )}
+        {/* Form Card */}
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 sm:p-10 border border-slate-100">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-slate-900">Masuk ke Akun Anda</h2>
+          </div>
 
-            {/* Email */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+          {errorMsg && (
+            <div className="mb-6 p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm text-center font-medium">
+              {errorMsg}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-[13px] font-semibold text-slate-700 mb-2">
                 Email atau Username
               </label>
               <div className="relative">
@@ -95,21 +89,17 @@ export default function SuperadminLoginPage() {
                   type="email"
                   name="email"
                   required
+                  className="w-full pl-4 pr-10 py-3.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-slate-700 placeholder-slate-400 bg-white text-[15px]"
                   placeholder="Masukkan email atau username"
-                  className="w-full px-4 py-3 pr-11 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm"
                 />
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                  <User className="w-5 h-5 text-slate-400" />
                 </div>
               </div>
             </div>
 
-            {/* Password */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+            <div>
+              <label className="block text-[13px] font-semibold text-slate-700 mb-2">
                 Password
               </label>
               <div className="relative">
@@ -117,30 +107,26 @@ export default function SuperadminLoginPage() {
                   type={showPassword ? "text" : "password"}
                   name="password"
                   required
+                  className="w-full pl-4 pr-10 py-3.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-slate-700 placeholder-slate-400 bg-white text-[15px]"
                   placeholder="Masukkan password"
-                  className="w-full px-4 py-3 pr-11 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                  className="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-slate-600 transition-colors"
                 >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-sm shadow-blue-500/30 transition-all focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm mt-2"
+              className="w-full bg-[#1D4ED8] hover:bg-blue-800 text-white font-medium py-3.5 px-4 rounded-xl transition-all shadow-sm flex justify-center items-center disabled:opacity-70 mt-4 text-[15px]"
             >
               {isLoading ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  Memverifikasi...
-                </>
+                <span className="animate-pulse">Memverifikasi...</span>
               ) : (
                 "Masuk"
               )}
