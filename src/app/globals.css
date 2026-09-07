@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-primary-blue: #2563EB;
   --color-accent-green: #16A34A;
