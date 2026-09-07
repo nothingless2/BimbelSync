@@ -1,13 +1,13 @@
 'use client';
 
 import React from 'react';
-import { CheckCircle2, Calendar, QrCode, MessageSquare, CreditCard, Menu, X, ArrowRight, Globe, Mail } from 'lucide-react';
+import { CheckCircle2, Check, Calendar, QrCode, MessageSquare, CreditCard, Menu, X, ArrowRight, Globe, Mail } from 'lucide-react';
 
 const WA_URL = "https://wa.me/6281234567890?text=Halo%20tim%20BimbelSync,%20saya%20tertarik%20menggunakan%20platform%20ini.";
 
 function Logo({ className }: { className?: string }) {
   return (
-    <img src="/logo.png" alt="BimbelSync Logo" className={`object-contain ${className}`} />
+    <img src="/logo.png" alt="BimbelSync Logo" className={`object-contain rounded-[20%] ${className}`} />
   );
 }
 
@@ -16,8 +16,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900 selection:bg-blue-200 overflow-x-hidden">
-      
-      {/* --- NAVBAR --- */}
+
       <header className="sticky top-0 z-50 bg-[#F8FAFC]/90 backdrop-blur-md border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
           <div className="flex items-center gap-2">
@@ -46,10 +45,8 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* --- HERO SECTION --- */}
       <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 text-center">
         
-        {/* Floating elements (Desktop only) */}
         <div className="hidden lg:block absolute left-10 top-32 bg-white p-4 rounded-2xl shadow-xl border border-slate-100 animate-bounce" style={{animationDuration: '3s'}}>
           <div className="flex items-center gap-3">
             <div className="bg-green-100 p-2 rounded-full">
@@ -76,7 +73,6 @@ export default function LandingPage() {
            </div>
         </div>
 
-        {/* Hero Content */}
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100/50 border border-blue-200 text-blue-700 text-sm font-medium mb-8">
           Tingkatkan efisiensi bimbel Anda
         </div>
@@ -95,7 +91,6 @@ export default function LandingPage() {
           </a>
         </div>
 
-        {/* Hero Image */}
         <div className="relative max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-2xl border border-slate-200">
            <img 
              src="/photo.avif" 
@@ -106,12 +101,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* --- TRUSTED BY --- */}
       <section className="border-y border-slate-200 bg-white/50 py-10">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Dipercaya oleh ratusan bimbel di Indonesia</p>
           <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-8 opacity-60 grayscale">
-             {/* Dummy Logos */}
              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 bg-slate-800 rounded-md"></div> EduCerdas</div>
              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 rounded-full border-4 border-slate-800"></div> SmartLearn</div>
              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 bg-slate-800 rotate-45"></div> PintarBangsa</div>
@@ -120,7 +113,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* --- FEATURES (BENTO GRID) --- */}
       <section id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Satu Platform,<br/>Semua Kebutuhan Operasional</h2>
@@ -129,15 +121,12 @@ export default function LandingPage() {
 
         <div className="flex flex-col gap-24">
           
-          {/* Row 1: Penjadwalan (Visual Left, Text Right) */}
           <div className="flex flex-col md:flex-row gap-12 items-center">
-            {/* Visual */}
             <div className="flex-1 w-full flex justify-center">
                <div className="relative">
                   <img src="/features/calendar-bg.png" alt="Mockup Penjadwalan" className="w-full max-w-md h-auto object-contain drop-shadow-2xl" />
                </div>
             </div>
-            {/* Text */}
             <div className="flex-1">
               <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
                 <Calendar className="w-6 h-6 text-[#2563EB]" />
@@ -151,15 +140,12 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Row 2: Presensi QR (Text Left, Visual Right) -> md:flex-row-reverse */}
           <div className="flex flex-col md:flex-row-reverse gap-12 items-center">
-            {/* Visual */}
             <div className="flex-1 w-full flex justify-center">
                <div className="relative">
                   <img src="/features/qr-bg.png" alt="Mockup Presensi QR" className="w-full max-w-sm h-auto object-contain drop-shadow-2xl" />
                </div>
             </div>
-            {/* Text */}
             <div className="flex-1">
               <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
                 <QrCode className="w-6 h-6 text-[#2563EB]" />
@@ -173,15 +159,12 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Row 3: Tagihan WA (Visual Left, Text Right) */}
           <div className="flex flex-col md:flex-row gap-12 items-center">
-            {/* Visual */}
             <div className="flex-1 w-full flex justify-center">
                <div className="relative">
                   <img src="/features/whatsapp-bg.png" alt="Mockup Tagihan WhatsApp" className="w-full max-w-sm h-auto object-contain drop-shadow-2xl" />
                </div>
             </div>
-            {/* Text */}
             <div className="flex-1">
               <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
                 <MessageSquare className="w-6 h-6 text-[#2563EB]" />
@@ -195,15 +178,12 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Row 4: Payment (Text Left, Visual Right) -> md:flex-row-reverse */}
           <div className="flex flex-col md:flex-row-reverse gap-12 items-center">
-            {/* Visual */}
             <div className="flex-1 w-full flex justify-center">
                <div className="relative">
                   <img src="/features/payment-bg.png" alt="Mockup Payment Gateway" className="w-full max-w-sm h-auto object-contain drop-shadow-2xl" />
                </div>
             </div>
-            {/* Text */}
             <div className="flex-1">
               <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
                 <CreditCard className="w-6 h-6 text-[#2563EB]" />
@@ -220,7 +200,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* --- SHOWCASE / IMAGE SECTION --- */}
       <section id="about" className="bg-slate-200/50 py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center gap-16">
@@ -236,9 +215,9 @@ export default function LandingPage() {
             </div>
             <div className="flex-1 relative">
               <div className="aspect-video w-full rounded-2xl overflow-hidden shadow-2xl relative">
-                {/* Fallback Unsplash Image representing Classroom */}
+               
                 <img 
-                  src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=1000" 
+                  src="/photo-2.avif" 
                   alt="Siswa Belajar" 
                   className="w-full h-full object-cover"
                 />
@@ -249,7 +228,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* --- PRICING --- */}
+
       <section id="pricing" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Harga Transparan</h2>
@@ -257,7 +236,7 @@ export default function LandingPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {/* Starter */}
+
           <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col">
             <h3 className="text-xl font-bold text-slate-900 mb-2">Starter</h3>
             <p className="text-sm text-slate-500 mb-6">Untuk bimbel baru atau privat kecil</p>
@@ -276,7 +255,6 @@ export default function LandingPage() {
             </a>
           </div>
 
-          {/* Growth (Highlighted) */}
           <div className="bg-white rounded-3xl p-8 border-2 border-blue-600 shadow-xl relative transform md:-translate-y-4 flex flex-col z-10">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
               Paling Populer
@@ -299,7 +277,6 @@ export default function LandingPage() {
             </a>
           </div>
 
-          {/* Pro */}
           <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col">
             <h3 className="text-xl font-bold text-slate-900 mb-2">Pro</h3>
             <p className="text-sm text-slate-500 mb-6">Fitur lengkap untuk jaringan bimbel besar</p>
@@ -319,9 +296,96 @@ export default function LandingPage() {
             </a>
           </div>
         </div>
+
+        <div className="max-w-5xl mx-auto mt-20 overflow-x-auto">
+          <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 min-w-[700px] p-2">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-100">
+                  <th className="py-6 px-8 text-xs font-bold text-slate-400 uppercase tracking-widest w-2/5">Fitur</th>
+                  <th className="py-6 px-8 text-sm font-bold text-slate-700 text-center w-1/5">Starter</th>
+                  <th className="py-6 px-8 text-sm font-bold text-blue-600 text-center w-1/5">Growth</th>
+                  <th className="py-6 px-8 text-sm font-bold text-slate-700 text-center w-1/5">Pro</th>
+                </tr>
+              </thead>
+              <tbody className="text-slate-600 text-sm font-medium">
+                <tr className="border-b border-slate-100">
+                  <td className="py-5 px-8">Manajemen Data Siswa & Tutor</td>
+                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
+                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
+                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-slate-100">
+                  <td className="py-5 px-8">Laporan Keuangan Dasar</td>
+                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
+                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
+                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-slate-100">
+                  <td className="py-5 px-8">Rekap Presensi Otomatis</td>
+                  <td className="py-5 px-8 text-center"><X className="w-4 h-4 text-slate-300 mx-auto" /></td>
+                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
+                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
+                </tr>
+                <tr className="border-b border-slate-100">
+                  <td className="py-5 px-8">Notifikasi WhatsApp Harian</td>
+                  <td className="py-5 px-8 text-center"><X className="w-4 h-4 text-slate-300 mx-auto" /></td>
+                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
+                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
+                </tr>
+                <tr>
+                  <td className="py-5 px-8">Manajemen Aset & Ruangan Lanjutan</td>
+                  <td className="py-5 px-8 text-center"><X className="w-4 h-4 text-slate-300 mx-auto" /></td>
+                  <td className="py-5 px-8 text-center"><X className="w-4 h-4 text-slate-300 mx-auto" /></td>
+                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </section>
 
-      {/* --- FOOTER --- */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <div className="relative bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl">
+
+          <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-blue-600/30 blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-blue-500/20 blur-3xl"></div>
+          
+          <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between p-12 md:p-20 gap-16">
+            <div className="flex-1 text-center lg:text-left">
+              <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6 leading-tight tracking-tight">
+                Siap Transformasi <br/><span className="text-blue-400">Operasional Bimbel</span> Anda?
+              </h2>
+              <p className="text-lg text-slate-300 mb-10 max-w-lg mx-auto lg:mx-0 leading-relaxed">
+                Tinggalkan cara manual. Bergabunglah dengan ratusan pemilik bimbel yang telah menghemat waktu dan meningkatkan omzet bersama BimbelSync.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-8 rounded-full shadow-lg hover:shadow-blue-500/30 transition-all flex items-center justify-center gap-2">
+                  Mulai Gratis Sekarang <ArrowRight className="w-5 h-5" />
+                </a>
+                <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-white/10 hover:bg-white/20 text-white font-semibold py-4 px-8 rounded-full backdrop-blur-sm border border-white/10 transition-all flex items-center justify-center">
+                  Jadwalkan Demo
+                </a>
+              </div>
+            </div>
+            
+            <div className="flex-1 w-full relative hidden lg:block">
+               <img src="/photo-2.avif" alt="Guru dan Siswa" className="w-full h-80 object-cover rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-slate-700/50 transform rotate-2 hover:rotate-0 transition duration-500" />
+               
+               <div className="absolute -bottom-8 -left-8 bg-white p-4 rounded-2xl shadow-xl flex items-center gap-4 animate-bounce" style={{ animationDuration: '4s' }}>
+                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                   <CheckCircle2 className="w-6 h-6 text-green-600" />
+                 </div>
+                 <div>
+                   <p className="text-sm font-bold text-slate-900">100% Siap Pakai</p>
+                   <p className="text-xs text-slate-500">Setup selesai dalam 5 menit</p>
+                 </div>
+               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <footer className="bg-[#1E293B] text-slate-300 py-16 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
