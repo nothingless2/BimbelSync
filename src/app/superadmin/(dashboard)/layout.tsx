@@ -2,12 +2,33 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SuperadminNav } from "@/components/superadmin-nav";
 import { SuperadminHeader } from "@/components/superadmin-header";
+import { cookies } from "next/headers";
+import { decrypt } from "@/lib/auth";
+import prisma from "@/lib/prisma";
+import { redirect } from "next/navigation";
 
 export default async function SuperadminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get('bimbelsync_session')?.value;
+  const session = sessionCookie ? await decrypt(sessionCookie) : null;
+
+  let dbUser = null;
+  if (session && session.role === 'SUPERADMIN') {
+    dbUser = await prisma.superadmin.findUnique({ 
+      where: { id: session.id }, 
+      select: { id: true, email: true, name: true, avatar_url: true, session_version: true } 
+    });
+    
+    // Invalidate session if session_version changed (e.g. password changed)
+    if (!dbUser || dbUser.session_version !== session.session_version) {
+      redirect('/superadmin/logout');
+    }
+  }
+
   return (
     <div className="flex h-screen bg-[#F8FAFC] dark:bg-slate-950 font-sans">
       {/* Sidebar - Clean Light Theme */}
@@ -26,7 +47,7 @@ export default async function SuperadminLayout({
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        <SuperadminHeader />
+        {dbUser && <SuperadminHeader user={dbUser} />}
 
         {/* Page Content */}
         <div className="flex-1 overflow-y-auto p-8 text-slate-900 dark:text-slate-100">

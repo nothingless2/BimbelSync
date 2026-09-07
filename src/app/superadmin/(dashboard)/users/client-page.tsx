@@ -5,6 +5,7 @@ import { UserPlus, Shield, CheckCircle2, Key, Trash2 } from "lucide-react";
 import { AddSuperadminModal } from "@/components/modals/add-superadmin-modal";
 import { EditSuperadminModal } from "@/components/modals/edit-superadmin-modal";
 import { DeleteSuperadminModal } from "@/components/modals/delete-superadmin-modal";
+import { UserAvatar } from "@/components/user-avatar";
 
 export default function SystemUsersClient({ users }: { users: any[] }) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -55,12 +56,10 @@ export default function SystemUsersClient({ users }: { users: any[] }) {
                 <tr key={user.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden border border-slate-300 dark:border-slate-600 shrink-0">
-                         <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=${user.email}`} alt="Avatar" className="w-full h-full object-cover" />
-                      </div>
+                      <UserAvatar id={user.id} email={user.email} avatarUrl={user.avatar_url} size={32} />
                       <div>
-                        <p className="font-semibold text-slate-900 dark:text-slate-100">{user.email}</p>
-                        <p className="text-xs text-slate-500 font-mono mt-0.5" title={user.id}>{user.id.split("-")[0]}...</p>
+                        <p className="font-semibold text-slate-900 dark:text-slate-100">{user.name || user.email}</p>
+                        <p className="text-xs text-slate-500 font-mono mt-0.5" title={user.email}>{user.email}</p>
                       </div>
                     </div>
                   </td>

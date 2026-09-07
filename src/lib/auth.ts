@@ -13,6 +13,7 @@ export type SessionPayload = {
   role: 'SUPERADMIN' | 'ADMIN' | 'TUTOR' | 'STUDENT';
   academy_id?: string;
   tenant_slug?: string;
+  session_version?: number; // utk membandingkan session jwt dgn session database
 };
 
 // Fungsi untuk membuat Token/Sesi (Saat Login)

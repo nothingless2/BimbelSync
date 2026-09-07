@@ -2,8 +2,19 @@
 
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { UserAvatar } from "@/components/user-avatar";
+import Link from "next/link";
 
-export function SuperadminHeader() {
+interface SuperadminHeaderProps {
+  user: {
+    id: string;
+    email: string;
+    name?: string | null;
+    avatar_url?: string | null;
+  };
+}
+
+export function SuperadminHeader({ user }: SuperadminHeaderProps) {
   const pathname = usePathname();
 
   let pageTitle = "Overview";
@@ -32,9 +43,9 @@ export function SuperadminHeader() {
           <svg className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
         <ThemeToggle />
-        <div className="w-8 h-8 rounded-full bg-slate-200 border-2 border-slate-300 overflow-hidden">
-          <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Felix" alt="Admin" className="w-full h-full object-cover" />
-        </div>
+        <Link href="/superadmin/users/profile" className="block hover:opacity-80 transition cursor-pointer" title="Edit Profile">
+          <UserAvatar id={user.id} email={user.email} avatarUrl={user.avatar_url} size={32} />
+        </Link>
       </div>
     </header>
   );

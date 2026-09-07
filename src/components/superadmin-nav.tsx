@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Building2, ShieldCheck, CreditCard, Users, HelpCircle, LogOut } from "lucide-react";
+import { LayoutDashboard, Building2, ShieldCheck, CreditCard, Users, HelpCircle, LogOut, Search } from "lucide-react";
 
 const navItems = [
   { href: "/superadmin/dashboard", icon: LayoutDashboard, label: "Dashboard", exact: true },
+  { href: "/superadmin/search", icon: Search, label: "Pencarian Tenant" },
   { href: "/superadmin/academies", icon: Building2, label: "Academies" },
   { href: "/superadmin/plans", icon: ShieldCheck, label: "Plans & Pricing" },
   { href: "/superadmin/billing", icon: CreditCard, label: "Platform Billing" },
@@ -45,10 +46,10 @@ export function SuperadminNav() {
           <HelpCircle size={18} />
           Support
         </Link>
-        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-medium text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20">
+        <Link href="/superadmin/logout" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-medium text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20">
           <LogOut size={18} />
           Logout
-        </button>
+        </Link>
       </div>
     </>
   );
