@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import bcrypt from "bcryptjs";
 
 export async function createPlanAction(formData: FormData) {
   const name = formData.get("name") as string;
@@ -30,6 +31,7 @@ export async function createPlanAction(formData: FormData) {
     });
 
     revalidatePath("/superadmin/plans");
+    revalidatePath("/"); // Update landing page pricing
     return { success: true };
   } catch (error) {
     console.error(error);
@@ -54,7 +56,6 @@ export async function createAcademyAction(formData: FormData) {
   }
 
   try {
-    const bcrypt = await import("bcryptjs");
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
     // Buat academy dan admin dalam satu transaksi
@@ -75,6 +76,7 @@ export async function createAcademyAction(formData: FormData) {
     });
 
     revalidatePath("/superadmin/academies");
+    revalidatePath("/superadmin");
     return { success: true, academyId: academy.id };
   } catch (error: any) {
     if (error?.code === "P2002") {
@@ -97,9 +99,43 @@ export async function verifyPlatformInvoiceAction(invoiceId: string, superadminI
     });
 
     revalidatePath("/superadmin/billing");
+    revalidatePath("/superadmin");
     return { success: true };
   } catch (error) {
     console.error(error);
     return { error: "Gagal memverifikasi tagihan." };
+  }
+}
+
+export async function createSuperadminAction(formData: FormData) {
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+
+  if (!email || !password) {
+    return { error: "Email dan password wajib diisi." };
+  }
+
+  if (password.length < 6) {
+    return { error: "Password minimal 6 karakter." };
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    await prisma.superadmin.create({
+      data: {
+        email,
+        password_hash: hashedPassword,
+      },
+    });
+
+    revalidatePath("/superadmin/users");
+    return { success: true };
+  } catch (error: any) {
+    if (error?.code === "P2002") {
+      return { error: "Email ini sudah digunakan oleh akun Superadmin lain." };
+    }
+    console.error(error);
+    return { error: "Gagal membuat akun Superadmin." };
   }
 }

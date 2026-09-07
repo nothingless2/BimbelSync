@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Memulai seeder...');
 
-  // 1. Buat Plan (Paket Berlangganan) — cek dulu sebelum buat
+  // 1. Buat Plan (Paket Berlangganan)
   let plan = await prisma.plan.findFirst({ where: { name: 'Premium Plan' } });
   if (!plan) {
     plan = await prisma.plan.create({
@@ -19,7 +19,7 @@ async function main() {
     });
   }
 
-  // 2. Buat Akademi (Bimbel) — aman dijalankan ulang
+  // 2. Buat Akademi (Bimbel)
   const academy = await prisma.academy.upsert({
     where: { path_url: 'nusantara' },
     update: {},
@@ -31,7 +31,7 @@ async function main() {
     },
   });
 
-  // 3. Buat Akun Admin — aman dijalankan ulang
+  // 3. Buat Akun Admin
   const hashedPassword = await bcrypt.hash('nusantara123', 10);
   await prisma.staff.upsert({
     where: {

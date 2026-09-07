@@ -1,49 +1,19 @@
-'use client';
-
 import React from 'react';
-import { CheckCircle2, Check, Calendar, QrCode, MessageSquare, CreditCard, Menu, X, ArrowRight, Globe, Mail } from 'lucide-react';
+import { CheckCircle2, Check, Calendar, QrCode, MessageSquare, CreditCard, ArrowRight, Globe, Mail, X } from 'lucide-react';
+import { LandingHeader } from '@/components/landing-header';
+import prisma from '@/lib/prisma';
 
 const WA_URL = "https://wa.me/6281234567890?text=Halo%20tim%20BimbelSync,%20saya%20tertarik%20menggunakan%20platform%20ini.";
 
-function Logo({ className }: { className?: string }) {
-  return (
-    <img src="/logo.png" alt="BimbelSync Logo" className={`object-contain rounded-[20%] ${className}`} />
-  );
-}
-
-export default function LandingPage() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+export default async function LandingPage() {
+  const plans = await prisma.plan.findMany({
+    where: { deleted_at: null, is_active: true },
+    orderBy: { price: 'asc' },
+  });
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900 selection:bg-blue-200 overflow-x-hidden">
-
-      <header className="sticky top-0 z-50 bg-[#F8FAFC]/90 backdrop-blur-md border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
-          <div className="flex items-center gap-2">
-            <Logo className="w-8 h-8" />
-            <span className="text-xl font-bold tracking-tight text-slate-900">BimbelSync</span>
-          </div>
-          
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-            <a href="#features" className="hover:text-blue-600 transition">Fitur</a>
-            <a href="#pricing" className="hover:text-blue-600 transition">Harga</a>
-            <a href="#about" className="hover:text-blue-600 transition">Tentang</a>
-          </nav>
-
-          <div className="hidden md:flex items-center gap-4">
-            <a href={WA_URL} target="_blank" rel="noreferrer" className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition">
-              Konsultasi
-            </a>
-            <a href={WA_URL} target="_blank" rel="noreferrer" className="text-sm font-semibold bg-slate-900 text-white px-5 py-2.5 rounded-full hover:bg-slate-800 transition shadow-sm">
-              Hubungi Sales
-            </a>
-          </div>
-
-          <button className="md:hidden p-2 text-slate-600" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-        </div>
-      </header>
+      <LandingHeader />
 
       <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 text-center">
         
@@ -228,121 +198,133 @@ export default function LandingPage() {
         </div>
       </section>
 
-
       <section id="pricing" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Harga Transparan</h2>
-          <p className="text-slate-600">Pilih paket yang sesuai dengan ukuran bimbingan belajar Anda. Tidak ada biaya tersembunyi.</p>
+          <p className="text-slate-600">Pilih paket yang sesuai dengan ukuran bimbingan belajar Anda. Terintegrasi langsung dengan database platform.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-
-          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col">
-            <h3 className="text-xl font-bold text-slate-900 mb-2">Starter</h3>
-            <p className="text-sm text-slate-500 mb-6">Untuk bimbel baru atau privat kecil</p>
-            <div className="mb-6">
-              <span className="text-4xl font-extrabold text-slate-900">Rp 99k</span>
-              <span className="text-slate-500">/bulan</span>
+          {plans.length === 0 ? (
+            <div className="col-span-3 text-center text-slate-500 py-10">
+              Belum ada paket tersedia saat ini. Silakan hubungi tim sales.
             </div>
-            <ul className="space-y-4 mb-8 flex-1">
-              <li className="flex items-center gap-3 text-sm text-slate-700"><CheckCircle2 className="w-5 h-5 text-green-500"/> Maksimal 50 Siswa</li>
-              <li className="flex items-center gap-3 text-sm text-slate-700"><CheckCircle2 className="w-5 h-5 text-green-500"/> Penjadwalan Dasar</li>
-              <li className="flex items-center gap-3 text-sm text-slate-700"><CheckCircle2 className="w-5 h-5 text-green-500"/> Presensi Manual</li>
-              <li className="flex items-center gap-3 text-sm text-slate-400 opacity-60"><X className="w-5 h-5"/> Integrasi WhatsApp</li>
-            </ul>
-            <a href={WA_URL} target="_blank" rel="noreferrer" className="w-full block text-center py-3 px-4 rounded-xl font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50 transition">
-              Pilih Starter
-            </a>
-          </div>
-
-          <div className="bg-white rounded-3xl p-8 border-2 border-blue-600 shadow-xl relative transform md:-translate-y-4 flex flex-col z-10">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
-              Paling Populer
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">Growth</h3>
-            <p className="text-sm text-slate-500 mb-6">Cocok untuk bimbel menengah yang sedang berkembang</p>
-            <div className="mb-6">
-              <span className="text-4xl font-extrabold text-slate-900">Rp 299k</span>
-              <span className="text-slate-500">/bulan</span>
-            </div>
-            <ul className="space-y-4 mb-8 flex-1">
-              <li className="flex items-center gap-3 text-sm text-slate-900 font-medium"><CheckCircle2 className="w-5 h-5 text-blue-600"/> Maksimal 250 Siswa</li>
-              <li className="flex items-center gap-3 text-sm text-slate-700"><CheckCircle2 className="w-5 h-5 text-blue-600"/> Penjadwalan Lanjutan</li>
-              <li className="flex items-center gap-3 text-sm text-slate-700"><CheckCircle2 className="w-5 h-5 text-blue-600"/> Presensi QR Dinamis</li>
-              <li className="flex items-center gap-3 text-sm text-slate-700"><CheckCircle2 className="w-5 h-5 text-blue-600"/> Integrasi WhatsApp</li>
-              <li className="flex items-center gap-3 text-sm text-slate-700"><CheckCircle2 className="w-5 h-5 text-blue-600"/> Payment Gateway (Basic)</li>
-            </ul>
-            <a href={WA_URL} target="_blank" rel="noreferrer" className="w-full block text-center py-3 px-4 rounded-xl font-semibold bg-blue-600 text-white hover:bg-blue-700 transition shadow-md hover:shadow-lg">
-              Pilih Growth
-            </a>
-          </div>
-
-          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col">
-            <h3 className="text-xl font-bold text-slate-900 mb-2">Pro</h3>
-            <p className="text-sm text-slate-500 mb-6">Fitur lengkap untuk jaringan bimbel besar</p>
-            <div className="mb-6">
-              <span className="text-4xl font-extrabold text-slate-900">Rp 599k</span>
-              <span className="text-slate-500">/bulan</span>
-            </div>
-            <ul className="space-y-4 mb-8 flex-1">
-              <li className="flex items-center gap-3 text-sm text-slate-700"><CheckCircle2 className="w-5 h-5 text-green-500"/> Unlimited Siswa</li>
-              <li className="flex items-center gap-3 text-sm text-slate-700"><CheckCircle2 className="w-5 h-5 text-green-500"/> Multi-cabang Support</li>
-              <li className="flex items-center gap-3 text-sm text-slate-700"><CheckCircle2 className="w-5 h-5 text-green-500"/> Custom Domain/Branding</li>
-              <li className="flex items-center gap-3 text-sm text-slate-700"><CheckCircle2 className="w-5 h-5 text-green-500"/> API Access</li>
-              <li className="flex items-center gap-3 text-sm text-slate-700"><CheckCircle2 className="w-5 h-5 text-green-500"/> Priority Support 24/7</li>
-            </ul>
-            <a href={WA_URL} target="_blank" rel="noreferrer" className="w-full block text-center py-3 px-4 rounded-xl font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50 transition">
-              Hubungi Sales
-            </a>
-          </div>
+          ) : plans.map((plan, index) => {
+            const isPopular = index === 1 || plan.name.toLowerCase() === 'growth'; // Highlight the middle/second plan or "Growth"
+            return (
+              <div key={plan.id} className={`bg-white rounded-3xl p-8 flex flex-col ${isPopular ? "border-2 border-blue-600 shadow-xl relative transform md:-translate-y-4 z-10" : "border border-slate-200 shadow-sm"}`}>
+                {isPopular && (
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
+                    Paling Populer
+                  </div>
+                )}
+                <h3 className="text-xl font-bold text-slate-900 mb-2">{plan.name}</h3>
+                <p className="text-sm text-slate-500 mb-6">Sempurna untuk skala bisnis Anda</p>
+                <div className="mb-6">
+                  <span className="text-4xl font-extrabold text-slate-900">
+                    {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(plan.price).replace(",00", "")}
+                  </span>
+                  <span className="text-slate-500">/bulan</span>
+                </div>
+                <ul className="space-y-4 mb-8 flex-1">
+                  <li className="flex items-center gap-3 text-sm text-slate-700">
+                    <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/> 
+                    Maks {plan.max_students === null ? "Unlimited" : plan.max_students} Siswa
+                  </li>
+                  <li className="flex items-center gap-3 text-sm text-slate-700">
+                    <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/> 
+                    Maks {plan.max_staff === null ? "Unlimited" : plan.max_staff} Staff
+                  </li>
+                  <li className="flex items-center gap-3 text-sm text-slate-700">
+                    <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/> 
+                    Maks {plan.max_rooms === null ? "Unlimited" : plan.max_rooms} Ruangan
+                  </li>
+                  
+                  {plan.allows_payment_gateway ? (
+                    <li className="flex items-center gap-3 text-sm text-slate-700">
+                      <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/> 
+                      Payment Gateway Integrasi
+                    </li>
+                  ) : (
+                    <li className="flex items-center gap-3 text-sm text-slate-400 opacity-60">
+                      <X className="w-5 h-5"/> Payment Gateway Integrasi
+                    </li>
+                  )}
+                  
+                  {plan.allows_installment ? (
+                    <li className="flex items-center gap-3 text-sm text-slate-700">
+                      <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/> 
+                      Fitur Bayar Cicilan (Installment)
+                    </li>
+                  ) : (
+                    <li className="flex items-center gap-3 text-sm text-slate-400 opacity-60">
+                      <X className="w-5 h-5"/> Fitur Bayar Cicilan (Installment)
+                    </li>
+                  )}
+                </ul>
+                <a href={WA_URL} target="_blank" rel="noreferrer" className={`w-full block text-center py-3 px-4 rounded-xl font-semibold transition ${isPopular ? "bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg" : "border border-slate-200 text-slate-700 hover:bg-slate-50"}`}>
+                  Pilih {plan.name}
+                </a>
+              </div>
+            );
+          })}
         </div>
 
-        <div className="max-w-5xl mx-auto mt-20 overflow-x-auto">
-          <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 min-w-[700px] p-2">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-100">
-                  <th className="py-6 px-8 text-xs font-bold text-slate-400 uppercase tracking-widest w-2/5">Fitur</th>
-                  <th className="py-6 px-8 text-sm font-bold text-slate-700 text-center w-1/5">Starter</th>
-                  <th className="py-6 px-8 text-sm font-bold text-blue-600 text-center w-1/5">Growth</th>
-                  <th className="py-6 px-8 text-sm font-bold text-slate-700 text-center w-1/5">Pro</th>
-                </tr>
-              </thead>
-              <tbody className="text-slate-600 text-sm font-medium">
-                <tr className="border-b border-slate-100">
-                  <td className="py-5 px-8">Manajemen Data Siswa & Tutor</td>
-                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
-                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
-                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
-                </tr>
-                <tr className="border-b border-slate-100">
-                  <td className="py-5 px-8">Laporan Keuangan Dasar</td>
-                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
-                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
-                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
-                </tr>
-                <tr className="border-b border-slate-100">
-                  <td className="py-5 px-8">Rekap Presensi Otomatis</td>
-                  <td className="py-5 px-8 text-center"><X className="w-4 h-4 text-slate-300 mx-auto" /></td>
-                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
-                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
-                </tr>
-                <tr className="border-b border-slate-100">
-                  <td className="py-5 px-8">Notifikasi WhatsApp Harian</td>
-                  <td className="py-5 px-8 text-center"><X className="w-4 h-4 text-slate-300 mx-auto" /></td>
-                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
-                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
-                </tr>
-                <tr>
-                  <td className="py-5 px-8">Manajemen Aset & Ruangan Lanjutan</td>
-                  <td className="py-5 px-8 text-center"><X className="w-4 h-4 text-slate-300 mx-auto" /></td>
-                  <td className="py-5 px-8 text-center"><X className="w-4 h-4 text-slate-300 mx-auto" /></td>
-                  <td className="py-5 px-8 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
-                </tr>
-              </tbody>
-            </table>
+        {/* Dynamic Comparison Table */}
+        {plans.length > 0 && (
+          <div className="max-w-5xl mx-auto mt-20 overflow-x-auto">
+            <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 min-w-[700px] p-2">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-100">
+                    <th className="py-6 px-8 text-xs font-bold text-slate-400 uppercase tracking-widest w-1/4">Fitur</th>
+                    {plans.map((plan, i) => (
+                      <th key={plan.id} className={`py-6 px-8 text-sm font-bold text-center w-1/4 ${i === 1 || plan.name.toLowerCase() === 'growth' ? "text-blue-600" : "text-slate-700"}`}>
+                        {plan.name}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="text-slate-600 text-sm font-medium">
+                  <tr className="border-b border-slate-100">
+                    <td className="py-5 px-8">Kapasitas Siswa</td>
+                    {plans.map((p) => (
+                      <td key={p.id} className="py-5 px-8 text-center">{p.max_students === null ? '∞' : p.max_students}</td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-slate-100">
+                    <td className="py-5 px-8">Kapasitas Staff/Tutor</td>
+                    {plans.map((p) => (
+                      <td key={p.id} className="py-5 px-8 text-center">{p.max_staff === null ? '∞' : p.max_staff}</td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-slate-100">
+                    <td className="py-5 px-8">Kapasitas Ruangan</td>
+                    {plans.map((p) => (
+                      <td key={p.id} className="py-5 px-8 text-center">{p.max_rooms === null ? '∞' : p.max_rooms}</td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-slate-100">
+                    <td className="py-5 px-8">Payment Gateway</td>
+                    {plans.map((p) => (
+                      <td key={p.id} className="py-5 px-8 text-center">
+                        {p.allows_payment_gateway ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-slate-300 mx-auto" />}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="py-5 px-8">Sistem Pembayaran Cicilan</td>
+                    {plans.map((p) => (
+                      <td key={p.id} className="py-5 px-8 text-center">
+                        {p.allows_installment ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-slate-300 mx-auto" />}
+                      </td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )}
       </section>
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
@@ -392,7 +374,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             <div className="col-span-1 md:col-span-1">
               <div className="bg-white w-10 h-10 rounded mb-6 flex items-center justify-center">
-                 <Logo className="w-6 h-6" />
+                 <img src="/logo.png" alt="BimbelSync Logo" className="object-contain rounded-[20%] w-6 h-6" />
               </div>
               <p className="text-sm leading-relaxed text-slate-400 max-w-xs">
                 Solusi operasional cerdas untuk bimbingan belajar modern di Indonesia.
@@ -436,7 +418,6 @@ export default function LandingPage() {
 
         </div>
       </footer>
-
     </div>
   );
 }
