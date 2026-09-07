@@ -10,7 +10,7 @@ export default async function RoomsPage({ params }: { params: Promise<{ tenantSl
   const tenantSlug = resolvedParams.tenantSlug;
 
   const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("session")?.value;
+  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
   
   if (!sessionToken) {
     redirect(`/${tenantSlug}/login`);
@@ -21,7 +21,6 @@ export default async function RoomsPage({ params }: { params: Promise<{ tenantSl
     redirect(`/${tenantSlug}/login`);
   }
 
-  // Fetch rooms for this academy
   const rooms = await prisma.room.findMany({
     where: {
       academy_id: session.academy_id,

@@ -10,7 +10,7 @@ export default async function ProgramsPage({ params }: { params: Promise<{ tenan
   const tenantSlug = resolvedParams.tenantSlug;
 
   const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("session")?.value;
+  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
   
   if (!sessionToken) {
     redirect(`/${tenantSlug}/login`);

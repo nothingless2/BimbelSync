@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 
 export async function createProgramAction(formData: FormData) {
   const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("session")?.value;
+  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
   if (!sessionToken) return { error: "Autentikasi diperlukan." };
 
   const session = await decrypt(sessionToken);

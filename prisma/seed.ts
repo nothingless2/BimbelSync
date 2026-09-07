@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Memulai seeder...');
 
-  // 1. Buat Plan (Paket Berlangganan)
+  // Buat Plan (Paket Berlangganan)
   const plan = await prisma.plan.create({
     data: {
       name: 'Premium Plan',
@@ -16,7 +16,7 @@ async function main() {
     },
   });
 
-  // 2. Buat Akademi (Bimbel)
+  // Buat Akademi (Bimbel)
   const academy = await prisma.academy.create({
     data: {
       plan_id: plan.id,
@@ -26,7 +26,7 @@ async function main() {
     },
   });
 
-  // 3. Buat Akun Admin
+  // Buat Akun Admin
   const hashedPassword = await bcrypt.hash('nusantara123', 10);
   await prisma.staff.create({
     data: {
@@ -34,6 +34,17 @@ async function main() {
       email: 'admin@nusantara.com',
       password_hash: hashedPassword,
       role: 'ADMIN',
+    },
+  });
+
+  // Buat Akun Superadmin (Statis)
+  const superadminPassword = await bcrypt.hash('superadmin123', 10);
+  await prisma.superadmin.upsert({
+    where: { email: 'superadmin@bimbelsync.com' },
+    update: {},
+    create: {
+      email: 'superadmin@bimbelsync.com',
+      password_hash: superadminPassword,
     },
   });
 

@@ -6,14 +6,24 @@ export async function proxy(req: NextRequest) {
   const path = url.pathname;
 
   // Baca sesi dari cookie browser
+  // Baca sesi dari cookie browser
   const sessionCookie = req.cookies.get('bimbelsync_session')?.value;
   const session = sessionCookie ? await decrypt(sessionCookie) : null;
 
-  // 1. Proteksi Superadmin Panel (/internal)
+  // 1. Proteksi Superadmin Panel (/internal dan /superadmin)
   if (path.startsWith('/internal')) {
     if (path === '/internal/login') return NextResponse.next();
     if (!session || session.role !== 'SUPERADMIN') {
       return NextResponse.redirect(new URL('/internal/login', req.url));
+    }
+    return NextResponse.next();
+  }
+
+  // Proteksi rute /superadmin (redirect ke halaman login superadmin)
+  if (path.startsWith('/superadmin')) {
+    if (path === '/superadmin/login') return NextResponse.next();
+    if (!session || session.role !== 'SUPERADMIN') {
+      return NextResponse.redirect(new URL('/superadmin/login', req.url));
     }
     return NextResponse.next();
   }
