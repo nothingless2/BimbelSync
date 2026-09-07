@@ -14,13 +14,7 @@ export default async function SuperadminLayout({
       <aside className="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full z-20">
         <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center gap-3">
-            <div className="text-blue-600">
-               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                 <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                 <path d="M2 17l10 5 10-5" />
-                 <path d="M2 12l10 5 10-5" />
-               </svg>
-            </div>
+            <img src="/logo.png" alt="BimbelSync Logo" className="w-7 h-7 object-contain rounded-md" />
             <span className="text-xl font-bold text-slate-800 dark:text-white tracking-tight">
               BimbelSync
             </span>

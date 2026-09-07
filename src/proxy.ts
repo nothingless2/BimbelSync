@@ -6,7 +6,6 @@ export async function proxy(req: NextRequest) {
   const path = url.pathname;
 
   // Baca sesi dari cookie browser
-  // Baca sesi dari cookie browser
   const sessionCookie = req.cookies.get('bimbelsync_session')?.value;
   const session = sessionCookie ? await decrypt(sessionCookie) : null;
 
