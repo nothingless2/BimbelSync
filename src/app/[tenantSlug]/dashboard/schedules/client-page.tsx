@@ -6,6 +6,7 @@ import { toast } from "@/components/ui/sonner";
 import { deleteScheduleAction } from "./actions";
 import { CancelScheduleModal } from "@/components/modals/cancel-schedule-modal";
 import { Schedule, Program, Staff, Room } from "@prisma/client";
+import { useRouter } from "next/navigation";
 
 type ScheduleWithRelations = Schedule & {
   program: Program;
@@ -20,6 +21,7 @@ export default function SchedulesClientPage({
   schedules: ScheduleWithRelations[], 
   tenantSlug: string 
 }) {
+  const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [cancellingSchedule, setCancellingSchedule] = useState<ScheduleWithRelations | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
@@ -146,13 +148,26 @@ export default function SchedulesClientPage({
                               <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 z-20 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                                 <div className="py-1">
                                   {!isCancelled && (
-                                    <button
-                                      onClick={() => { setCancellingSchedule(schedule); setOpenDropdownId(null); }}
-                                      className="w-full text-left px-4 py-2.5 text-sm text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 flex items-center gap-2"
-                                    >
-                                      <XCircle size={16} />
-                                      Batalkan Kelas
-                                    </button>
+                                    <>
+                                      <button
+                                        onClick={() => {
+                                          setOpenDropdownId(null);
+                                          router.push(`/${tenantSlug}/dashboard/schedules/${schedule.id}`);
+                                        }}
+                                        className="w-full text-left px-4 py-2.5 text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center gap-2 font-medium"
+                                      >
+                                        <User size={16} />
+                                        Presensi Kelas
+                                      </button>
+                                      <div className="border-t border-slate-100 dark:border-slate-800 my-1"></div>
+                                      <button
+                                        onClick={() => { setCancellingSchedule(schedule); setOpenDropdownId(null); }}
+                                        className="w-full text-left px-4 py-2.5 text-sm text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 flex items-center gap-2"
+                                      >
+                                        <XCircle size={16} />
+                                        Batalkan Kelas
+                                      </button>
+                                    </>
                                   )}
                                   
                                   {isCancelled && <div className="border-t border-slate-100 dark:border-slate-800 my-1"></div>}

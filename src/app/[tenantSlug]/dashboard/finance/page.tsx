@@ -1,0 +1,103 @@
+import { cookies } from "next/headers";
+import { decrypt } from "@/lib/auth";
+import prisma from "@/lib/prisma";
+import { redirect } from "next/navigation";
+import FinanceClientPage from "./client-page";
+import { AddInvoiceModal } from "@/components/modals/add-invoice-modal";
+
+export default async function FinancePage({ params }: { params: Promise<{ tenantSlug: string }> }) {
+  const resolvedParams = await params;
+  const tenantSlug = resolvedParams.tenantSlug;
+
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
+  
+  if (!sessionToken) {
+    redirect(`/${tenantSlug}/login`);
+  }
+
+  const session = await decrypt(sessionToken);
+  if (!session || !session.academy_id) {
+    redirect(`/${tenantSlug}/login`);
+  }
+
+  // Fetch all invoices for this academy
+  const invoices = await prisma.invoice.findMany({
+    where: {
+      academy_id: session.academy_id,
+    },
+    include: {
+      student: true,
+      items: true,
+      verified_by: true
+    },
+    orderBy: {
+      id: 'desc' // Newest first
+    }
+  });
+
+  // Fetch active students for the AddInvoiceModal dropdown
+  const students = await prisma.student.findMany({
+    where: {
+      academy_id: session.academy_id,
+      deleted_at: null
+    },
+    orderBy: {
+      full_name: 'asc'
+    }
+  });
+
+  // Calculate some stats
+  const totalInvoices = invoices.length;
+  const paidInvoices = invoices.filter(i => i.payment_status === 'PAID');
+  const unpaidInvoices = invoices.filter(i => i.payment_status === 'UNPAID');
+
+  const totalRevenue = paidInvoices.reduce((acc, curr) => acc + curr.total_amount, 0);
+  const potentialRevenue = unpaidInvoices.reduce((acc, curr) => acc + curr.total_amount, 0);
+
+  const formatRupiah = (num: number) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Keuangan & Tagihan</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Kelola tagihan SPP, biaya registrasi, dan verifikasi pembayaran siswa.
+          </p>
+        </div>
+        
+        <AddInvoiceModal students={students} />
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm flex flex-col gap-1">
+          <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Tagihan (Semua)</p>
+          <div className="flex items-end gap-3 mt-1">
+            <span className="text-3xl font-bold text-slate-900 dark:text-white">{totalInvoices}</span>
+            <span className="text-sm font-medium text-slate-400 mb-1">Invoices</span>
+          </div>
+        </div>
+        <div className="bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 p-5 shadow-sm flex flex-col gap-1">
+          <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-500 uppercase tracking-wider">Pendapatan Diterima (Lunas)</p>
+          <div className="flex items-end gap-3 mt-1">
+            <span className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">{formatRupiah(totalRevenue)}</span>
+            <span className="text-sm font-medium text-emerald-600/70 mb-1">dari {paidInvoices.length} inv</span>
+          </div>
+        </div>
+        <div className="bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-100 dark:border-amber-900/30 p-5 shadow-sm flex flex-col gap-1">
+          <p className="text-sm font-semibold text-amber-600 dark:text-amber-500 uppercase tracking-wider">Potensi Pendapatan (Belum Bayar)</p>
+          <div className="flex items-end gap-3 mt-1">
+            <span className="text-3xl font-bold text-amber-700 dark:text-amber-400">{formatRupiah(potentialRevenue)}</span>
+            <span className="text-sm font-medium text-amber-600/70 mb-1">dari {unpaidInvoices.length} inv</span>
+          </div>
+        </div>
+      </div>
+
+      <FinanceClientPage invoices={invoices} />
+    </div>
+  );
+}

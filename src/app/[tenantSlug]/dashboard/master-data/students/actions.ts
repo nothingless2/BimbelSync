@@ -156,7 +156,11 @@ export async function deleteStudentAction(studentId: string) {
 
     await prisma.student.update({
       where: { id: studentId },
-      data: { deleted_at: new Date() }
+      data: { 
+        deleted_at: new Date(),
+        // Membebaskan username agar bisa digunakan lagi oleh pendaftar baru
+        username: `${existing.username}_del_${Date.now()}`
+      }
     });
 
     revalidatePath(`/${session.tenant_slug}/dashboard/master-data/students`);
