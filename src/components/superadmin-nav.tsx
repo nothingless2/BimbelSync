@@ -46,10 +46,10 @@ export function SuperadminNav() {
           <HelpCircle size={18} />
           Support
         </Link>
-        <Link href="/superadmin/logout" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-medium text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20">
+        <a href="/superadmin/logout" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-medium text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20">
           <LogOut size={18} />
           Logout
-        </Link>
+        </a>
       </div>
     </>
   );

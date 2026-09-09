@@ -79,6 +79,8 @@ export async function createAcademyAction(formData: FormData) {
   const planId = formData.get("plan_id") as string;
   const adminEmail = formData.get("admin_email") as string;
   const adminPassword = formData.get("admin_password") as string;
+  const status = (formData.get("status") as string || "TRIAL") as "TRIAL" | "ACTIVE" | "SUSPENDED";
+  const dueDate = formData.get("subscription_due_date") as string | null;
 
   if (!name || !pathUrl || !planId || !adminEmail || !adminPassword) return { error: "Semua field wajib diisi." };
   if (!/^[a-z0-9-]+$/.test(pathUrl)) return { error: "Slug hanya boleh berisi huruf kecil, angka, dan tanda (-) tanpa spasi." };
@@ -90,7 +92,8 @@ export async function createAcademyAction(formData: FormData) {
         plan_id: planId,
         name,
         path_url: pathUrl,
-        subscription_status: "TRIAL",
+        subscription_status: status,
+        subscription_due_date: dueDate ? new Date(dueDate) : null,
         staff: { create: { email: adminEmail, password_hash: hashedPassword, role: "ADMIN" } },
       },
     });

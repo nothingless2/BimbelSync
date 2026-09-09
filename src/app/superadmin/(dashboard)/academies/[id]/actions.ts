@@ -117,3 +117,46 @@ export async function reactivateAdminAction(staffId: string, academyId: string) 
     return { error: "Gagal mengaktifkan kembali admin" };
   }
 }
+
+export async function updateAcademyAction(
+  academyId: string,
+  data: {
+    name: string;
+    planId: string;
+    subscriptionStatus: "TRIAL" | "ACTIVE" | "SUSPENDED";
+    subscriptionDueDate: string | null;
+  }
+) {
+  try {
+    const superadminId = await getSuperadminId();
+    if (!superadminId) return { error: "Unauthorized" };
+
+    const existing = await prisma.academy.findUnique({ where: { id: academyId } });
+    if (!existing) return { error: "Akademi tidak ditemukan." };
+
+    await prisma.academy.update({
+      where: { id: academyId },
+      data: {
+        name: data.name.trim(),
+        plan_id: data.planId,
+        subscription_status: data.subscriptionStatus,
+        subscription_due_date: data.subscriptionDueDate ? new Date(data.subscriptionDueDate) : null,
+      },
+    });
+
+    await logAuditAction("UPDATE_ACADEMY", "Academy", academyId, {
+      academy_id: academyId,
+      name: data.name,
+      plan_id: data.planId,
+      subscription_status: data.subscriptionStatus,
+    });
+
+    revalidatePath(`/superadmin/academies/${academyId}`);
+    revalidatePath("/superadmin/academies");
+    revalidatePath("/superadmin/dashboard");
+    return { success: true };
+  } catch (error) {
+    console.error("updateAcademyAction error:", error);
+    return { error: "Gagal memperbarui data akademi." };
+  }
+}

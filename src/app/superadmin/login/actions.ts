@@ -45,6 +45,12 @@ export async function superadminLoginAction(formData: FormData) {
       path: "/",
     });
 
+    // Update last_login timestamp
+    await prisma.superadmin.update({
+      where: { id: superadmin.id },
+      data: { last_login: new Date() },
+    });
+
     return { success: true };
   } catch (error) {
     console.error("Superadmin login error:", error);

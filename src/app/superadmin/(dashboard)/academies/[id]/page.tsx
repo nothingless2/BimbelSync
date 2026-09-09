@@ -15,21 +15,42 @@ export default async function TenantDetailPage({ params }: { params: { id: strin
 
   const { id } = await params;
 
-  // Query academy details + Admin staff
-  const academy = await prisma.academy.findUnique({
-    where: { id },
-    include: {
-      plan: true,
-      staff: {
-        where: { role: "ADMIN" },
-        orderBy: { email: "asc" }
+  const [academy, plans, invoices] = await Promise.all([
+    prisma.academy.findUnique({
+      where: { id },
+      include: {
+        plan: true,
+        staff: {
+          where: { role: "ADMIN" },
+          orderBy: { email: "asc" }
+        }
       }
-    }
-  });
+    }),
+    prisma.plan.findMany({
+      where: { deleted_at: null, is_active: true },
+      orderBy: { price: "asc" },
+    }),
+    prisma.platformInvoice.findMany({
+      where: { academy_id: id },
+      include: { plan: true, verified_by: { select: { name: true, email: true } } },
+      orderBy: { billing_period: "desc" },
+    }),
+  ]);
 
   if (!academy) {
-    redirect("/superadmin/search");
+    redirect("/superadmin/academies");
   }
 
-  return <TenantDetailClientPage academy={academy} />;
+  const serializedInvoices = invoices.map(inv => ({
+    id: inv.id,
+    billing_period: inv.billing_period.toISOString(),
+    due_date: inv.due_date.toISOString(),
+    paid_at: inv.paid_at?.toISOString() ?? null,
+    amount: inv.amount,
+    payment_status: inv.payment_status,
+    plan: { name: inv.plan.name },
+    verified_by: inv.verified_by,
+  }));
+
+  return <TenantDetailClientPage academy={academy} plans={plans} invoices={serializedInvoices} />;
 }

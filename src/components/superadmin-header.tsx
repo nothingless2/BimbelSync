@@ -19,10 +19,12 @@ export function SuperadminHeader({ user }: SuperadminHeaderProps) {
 
   let pageTitle = "Overview";
   if (pathname.includes("/dashboard")) pageTitle = "Dashboard Overview";
+  else if (pathname.match(/\/academies\/[^/]+/)) pageTitle = "Detail Akademi";
   else if (pathname.includes("/academies")) pageTitle = "Daftar Akademi Berlangganan";
   else if (pathname.includes("/plans")) pageTitle = "Plans & Pricing";
   else if (pathname.includes("/billing")) pageTitle = "Platform Billing";
   else if (pathname.includes("/users")) pageTitle = "System Users";
+  else if (pathname.includes("/audit-logs")) pageTitle = "Audit Logs";
   else if (pathname.includes("/support")) pageTitle = "Bantuan & Support";
 
   return (

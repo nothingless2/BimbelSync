@@ -24,7 +24,12 @@ export async function proxy(req: NextRequest) {
     if (!session || session.role !== 'SUPERADMIN') {
       return NextResponse.redirect(new URL('/superadmin/login', req.url));
     }
-    return NextResponse.next();
+    const res = NextResponse.next();
+    // Mencegah browser cache agar tidak bisa back ke dashboard setelah logout
+    res.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.headers.set('Pragma', 'no-cache');
+    res.headers.set('Expires', '0');
+    return res;
   }
 
   // 2. Proteksi Halaman Tenant (Bimbel)
