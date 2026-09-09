@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, UserCog, Calendar, CreditCard, Box, HelpCircle, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, UserCog, Calendar, CreditCard, Box, HelpCircle, LogOut, FileText } from "lucide-react";
 
-export function TenantNav({ tenantSlug }: { tenantSlug: string }) {
+export function TenantNav({ tenantSlug, userRole }: { tenantSlug: string, userRole?: string }) {
   const pathname = usePathname();
 
   const isRouteActive = (route: string) => {
@@ -73,6 +73,22 @@ export function TenantNav({ tenantSlug }: { tenantSlug: string }) {
           label="Finance" 
           active={isRouteActive(`/${tenantSlug}/dashboard/finance`)} 
         />
+        
+        {userRole === 'ADMIN' && (
+          <>
+            <div className="pt-6 pb-2">
+              <p className="px-3 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                System
+              </p>
+            </div>
+            <NavItem 
+              href={`/${tenantSlug}/dashboard/audit-logs`} 
+              icon={<FileText size={18} />} 
+              label="Audit Logs" 
+              active={isRouteActive(`/${tenantSlug}/dashboard/audit-logs`)} 
+            />
+          </>
+        )}
       </nav>
 
       <div className="p-4 border-t border-slate-200 dark:border-slate-800 space-y-1">

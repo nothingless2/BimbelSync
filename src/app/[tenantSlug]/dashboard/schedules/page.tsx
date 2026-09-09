@@ -5,9 +5,17 @@ import { AddScheduleModal } from "@/components/modals/add-schedule-modal";
 import { redirect } from "next/navigation";
 import SchedulesClientPage from "./client-page";
 
-export default async function SchedulesPage({ params }: { params: Promise<{ tenantSlug: string }> }) {
+export default async function SchedulesPage({ 
+  params,
+  searchParams
+}: { 
+  params: Promise<{ tenantSlug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const resolvedParams = await params;
   const tenantSlug = resolvedParams.tenantSlug;
+  const resolvedSearchParams = await searchParams;
+  const q = resolvedSearchParams?.q as string || "";
 
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("bimbelsync_session")?.value;
@@ -28,7 +36,14 @@ export default async function SchedulesPage({ params }: { params: Promise<{ tena
       where: {
         program: {
           academy_id: session.academy_id,
-        }
+        },
+        ...(q ? {
+          OR: [
+            { program: { name: { contains: q, mode: 'insensitive' } } },
+            { room: { name: { contains: q, mode: 'insensitive' } } },
+            { tutor: { name: { contains: q, mode: 'insensitive' } } },
+          ]
+        } : {})
       },
       include: {
         program: true,

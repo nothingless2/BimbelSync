@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { TenantNav } from "@/components/tenant-nav";
+import { TenantSearch } from "@/components/tenant-search";
 import { UserAvatar } from "@/components/user-avatar";
 import { cookies } from "next/headers";
 import { decrypt } from "@/lib/auth";
@@ -28,7 +29,7 @@ export default async function DashboardLayout({
   // Find the staff user (or superadmin if impersonating, but standard is staff)
   const dbUser = await prisma.staff.findUnique({
     where: { id: session.id },
-    select: { id: true, email: true, avatar_url: true }
+    select: { id: true, email: true, avatar_url: true, role: true }
   });
 
   return (
@@ -44,7 +45,7 @@ export default async function DashboardLayout({
           </div>
         </div>
 
-        <TenantNav tenantSlug={tenantSlug} />
+        <TenantNav tenantSlug={tenantSlug} userRole={dbUser?.role} />
       </aside>
 
       {/* Main Content */}
@@ -56,7 +57,8 @@ export default async function DashboardLayout({
             <span className="text-slate-300 dark:text-slate-600">/</span>
             <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 capitalize">{tenantSlug}</span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-5">
+            <TenantSearch />
             <ThemeToggle />
             {dbUser && (
               <Link href={`/${tenantSlug}/dashboard/profile`} className="block hover:opacity-80 transition cursor-pointer" title="Edit Profile">

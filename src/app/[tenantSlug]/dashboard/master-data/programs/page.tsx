@@ -5,9 +5,17 @@ import { AddProgramModal } from "@/components/modals/add-program-modal";
 import { redirect } from "next/navigation";
 import ProgramsClientPage from "./client-page";
 
-export default async function ProgramsPage({ params }: { params: Promise<{ tenantSlug: string }> }) {
+export default async function ProgramsPage({ 
+  params,
+  searchParams
+}: { 
+  params: Promise<{ tenantSlug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const resolvedParams = await params;
   const tenantSlug = resolvedParams.tenantSlug;
+  const resolvedSearchParams = await searchParams;
+  const q = resolvedSearchParams?.q as string || "";
 
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("bimbelsync_session")?.value;
@@ -25,7 +33,8 @@ export default async function ProgramsPage({ params }: { params: Promise<{ tenan
   const programs = await prisma.program.findMany({
     where: {
       academy_id: session.academy_id,
-      deleted_at: null
+      deleted_at: null,
+      ...(q ? { name: { contains: q, mode: 'insensitive' } } : {})
     },
     orderBy: {
       name: 'asc'

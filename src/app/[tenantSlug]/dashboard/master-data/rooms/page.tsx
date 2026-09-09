@@ -5,9 +5,17 @@ import { AddRoomModal } from "@/components/modals/add-room-modal";
 import { redirect } from "next/navigation";
 import RoomsClientPage from "./client-page";
 
-export default async function RoomsPage({ params }: { params: Promise<{ tenantSlug: string }> }) {
+export default async function RoomsPage({ 
+  params,
+  searchParams
+}: { 
+  params: Promise<{ tenantSlug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const resolvedParams = await params;
   const tenantSlug = resolvedParams.tenantSlug;
+  const resolvedSearchParams = await searchParams;
+  const q = resolvedSearchParams?.q as string || "";
 
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("bimbelsync_session")?.value;
@@ -24,7 +32,8 @@ export default async function RoomsPage({ params }: { params: Promise<{ tenantSl
   const rooms = await prisma.room.findMany({
     where: {
       academy_id: session.academy_id,
-      deleted_at: null
+      deleted_at: null,
+      ...(q ? { name: { contains: q, mode: 'insensitive' } } : {})
     },
     orderBy: {
       name: 'asc'

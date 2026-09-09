@@ -38,33 +38,33 @@ export default function DashboardClientPage({
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="p-6 rounded-3xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 shadow-sm relative overflow-hidden group">
-          <div className="absolute -right-6 -top-6 text-blue-100 dark:text-blue-900/20 transition-transform group-hover:scale-110">
+        <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+          <div className="absolute -right-6 -top-6 text-blue-50 dark:text-blue-900/20 transition-transform group-hover:scale-110">
             <Users size={120} />
           </div>
           <div className="relative z-10">
-            <h3 className="text-sm font-bold text-blue-600 dark:text-blue-500 uppercase tracking-wider mb-2">Total Siswa Aktif</h3>
-            <p className="text-4xl font-black text-blue-900 dark:text-blue-400">{totalStudents}</p>
+            <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Total Siswa Aktif</h3>
+            <p className="text-4xl font-black text-slate-900 dark:text-white">{totalStudents}</p>
           </div>
         </div>
         
-        <div className="p-6 rounded-3xl bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 shadow-sm relative overflow-hidden group">
-          <div className="absolute -right-6 -top-6 text-emerald-100 dark:text-emerald-900/20 transition-transform group-hover:scale-110">
+        <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+          <div className="absolute -right-6 -top-6 text-emerald-50 dark:text-emerald-900/20 transition-transform group-hover:scale-110">
             <BookOpen size={120} />
           </div>
           <div className="relative z-10">
-            <h3 className="text-sm font-bold text-emerald-600 dark:text-emerald-500 uppercase tracking-wider mb-2">Kelas Hari Ini</h3>
-            <p className="text-4xl font-black text-emerald-900 dark:text-emerald-400">{todayClassesCount}</p>
+            <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Kelas Hari Ini</h3>
+            <p className="text-4xl font-black text-slate-900 dark:text-white">{todayClassesCount}</p>
           </div>
         </div>
 
-        <div className="p-6 rounded-3xl bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 shadow-sm relative overflow-hidden group">
-          <div className="absolute -right-6 -top-6 text-amber-100 dark:text-amber-900/20 transition-transform group-hover:scale-110">
+        <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+          <div className="absolute -right-6 -top-6 text-amber-50 dark:text-amber-900/20 transition-transform group-hover:scale-110">
             <Receipt size={120} />
           </div>
           <div className="relative z-10">
-            <h3 className="text-sm font-bold text-amber-600 dark:text-amber-500 uppercase tracking-wider mb-2">Tunggakan (Piutang)</h3>
-            <p className="text-4xl font-black text-amber-900 dark:text-amber-400">{formatRupiah(totalUnpaid)}</p>
+            <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Tunggakan (Piutang)</h3>
+            <p className="text-4xl font-black text-slate-900 dark:text-white">{formatRupiah(totalUnpaid)}</p>
           </div>
         </div>
       </div>

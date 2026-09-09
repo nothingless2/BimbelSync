@@ -31,6 +31,8 @@ model Superadmin {
 model AuditLog {
   id            String    @id @default(uuid()) @db.Uuid
   superadmin_id String?   @db.Uuid
+  academy_id    String?   @db.Uuid
+  staff_id      String?   @db.Uuid
   action        String
   entity_type   String    
   entity_id     String?   @db.Uuid
@@ -38,6 +40,8 @@ model AuditLog {
   created_at    DateTime  @default(now())
 
   superadmin    Superadmin? @relation(fields: [superadmin_id], references: [id])
+  academy       Academy?    @relation(fields: [academy_id], references: [id])
+  staff         Staff?      @relation(fields: [staff_id], references: [id])
 }
 
 model Plan {
@@ -74,6 +78,7 @@ model Academy {
   rooms             Room[]
   invoices          Invoice[]
   platform_invoices PlatformInvoice[]
+  audit_logs        AuditLog[]
 }
 
 enum SubscriptionStatus {
@@ -107,6 +112,7 @@ model Staff {
   schedules             Schedule[]
   verified_invoices     Invoice[]     @relation("StaffVerifiesInvoice")
   verified_installments Installment[] @relation("StaffVerifiesInstallment")
+  audit_logs            AuditLog[]
 
   @@unique([academy_id, email])
 }

@@ -5,9 +5,17 @@ import { AddStaffModal } from "@/components/modals/add-staff-modal";
 import { redirect } from "next/navigation";
 import StaffClientPage from "./client-page";
 
-export default async function StaffPage({ params }: { params: Promise<{ tenantSlug: string }> }) {
+export default async function StaffPage({ 
+  params,
+  searchParams
+}: { 
+  params: Promise<{ tenantSlug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const resolvedParams = await params;
   const tenantSlug = resolvedParams.tenantSlug;
+  const resolvedSearchParams = await searchParams;
+  const q = resolvedSearchParams?.q as string || "";
 
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("bimbelsync_session")?.value;
@@ -25,7 +33,13 @@ export default async function StaffPage({ params }: { params: Promise<{ tenantSl
   const staffList = await prisma.staff.findMany({
     where: {
       academy_id: session.academy_id,
-      deleted_at: null
+      deleted_at: null,
+      ...(q ? {
+        OR: [
+          { name: { contains: q, mode: 'insensitive' } },
+          { email: { contains: q, mode: 'insensitive' } }
+        ]
+      } : {})
     },
     orderBy: {
       email: 'asc'

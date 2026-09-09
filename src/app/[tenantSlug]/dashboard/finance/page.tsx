@@ -5,9 +5,17 @@ import { redirect } from "next/navigation";
 import FinanceClientPage from "./client-page";
 import { AddInvoiceModal } from "@/components/modals/add-invoice-modal";
 
-export default async function FinancePage({ params }: { params: Promise<{ tenantSlug: string }> }) {
+export default async function FinancePage({ 
+  params,
+  searchParams
+}: { 
+  params: Promise<{ tenantSlug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const resolvedParams = await params;
   const tenantSlug = resolvedParams.tenantSlug;
+  const resolvedSearchParams = await searchParams;
+  const q = resolvedSearchParams?.q as string || "";
 
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("bimbelsync_session")?.value;
@@ -25,6 +33,9 @@ export default async function FinancePage({ params }: { params: Promise<{ tenant
   const invoices = await prisma.invoice.findMany({
     where: {
       academy_id: session.academy_id,
+      ...(q ? {
+        student: { full_name: { contains: q, mode: 'insensitive' } }
+      } : {})
     },
     include: {
       student: true,
@@ -81,18 +92,18 @@ export default async function FinancePage({ params }: { params: Promise<{ tenant
             <span className="text-sm font-medium text-slate-400 mb-1">Invoices</span>
           </div>
         </div>
-        <div className="bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 p-5 shadow-sm flex flex-col gap-1">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm flex flex-col gap-1">
           <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-500 uppercase tracking-wider">Pendapatan Diterima (Lunas)</p>
           <div className="flex items-end gap-3 mt-1">
-            <span className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">{formatRupiah(totalRevenue)}</span>
-            <span className="text-sm font-medium text-emerald-600/70 mb-1">dari {paidInvoices.length} inv</span>
+            <span className="text-3xl font-bold text-slate-900 dark:text-white">{formatRupiah(totalRevenue)}</span>
+            <span className="text-sm font-medium text-slate-400 mb-1">dari {paidInvoices.length} inv</span>
           </div>
         </div>
-        <div className="bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-100 dark:border-amber-900/30 p-5 shadow-sm flex flex-col gap-1">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm flex flex-col gap-1">
           <p className="text-sm font-semibold text-amber-600 dark:text-amber-500 uppercase tracking-wider">Potensi Pendapatan (Belum Bayar)</p>
           <div className="flex items-end gap-3 mt-1">
-            <span className="text-3xl font-bold text-amber-700 dark:text-amber-400">{formatRupiah(potentialRevenue)}</span>
-            <span className="text-sm font-medium text-amber-600/70 mb-1">dari {unpaidInvoices.length} inv</span>
+            <span className="text-3xl font-bold text-slate-900 dark:text-white">{formatRupiah(potentialRevenue)}</span>
+            <span className="text-sm font-medium text-slate-400 mb-1">dari {unpaidInvoices.length} inv</span>
           </div>
         </div>
       </div>
