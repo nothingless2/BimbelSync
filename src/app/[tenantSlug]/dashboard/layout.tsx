@@ -28,7 +28,7 @@ export default async function DashboardLayout({
   // Find the staff user (or superadmin if impersonating, but standard is staff)
   const dbUser = await prisma.staff.findUnique({
     where: { id: session.id },
-    select: { id: true, email: true }
+    select: { id: true, email: true, avatar_url: true }
   });
 
   return (
@@ -60,7 +60,7 @@ export default async function DashboardLayout({
             <ThemeToggle />
             {dbUser && (
               <Link href={`/${tenantSlug}/dashboard/profile`} className="block hover:opacity-80 transition cursor-pointer" title="Edit Profile">
-                <UserAvatar id={dbUser.id} email={dbUser.email} avatarUrl={null} size={32} />
+                <UserAvatar id={dbUser.id} email={dbUser.email} avatarUrl={dbUser.avatar_url} size={32} />
               </Link>
             )}
           </div>
