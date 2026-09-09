@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcrypt";
 import { WithdrawnReason } from "@prisma/client";
+import { createAuditLog } from "@/lib/audit";
 
 export async function createStudentAction(formData: FormData) {
   const cookieStore = await cookies();
@@ -85,6 +86,14 @@ export async function createStudentAction(formData: FormData) {
       });
     });
 
+    await createAuditLog({
+      academy_id: session.academy_id,
+      staff_id: session.id,
+      action: "CREATE",
+      entity_type: "Student",
+      details: { username, full_name: fullName, program_id: programId }
+    });
+
     revalidatePath(`/${session.tenant_slug}/dashboard/master-data/students`);
     return { success: true };
   } catch (error) {
@@ -131,6 +140,15 @@ export async function updateStudentAction(studentId: string, formData: FormData)
       data: updateData
     });
 
+    await createAuditLog({
+      academy_id: session.academy_id,
+      staff_id: session.id,
+      action: "UPDATE",
+      entity_type: "Student",
+      entity_id: studentId,
+      details: { full_name: fullName, updated_password: !!password }
+    });
+
     revalidatePath(`/${session.tenant_slug}/dashboard/master-data/students`);
     return { success: true };
   } catch (error) {
@@ -161,6 +179,15 @@ export async function deleteStudentAction(studentId: string) {
         // Membebaskan username agar bisa digunakan lagi oleh pendaftar baru
         username: `${existing.username}_del_${Date.now()}`
       }
+    });
+
+    await createAuditLog({
+      academy_id: session.academy_id,
+      staff_id: session.id,
+      action: "DELETE",
+      entity_type: "Student",
+      entity_id: studentId,
+      details: { previous_username: existing.username, name: existing.full_name }
     });
 
     revalidatePath(`/${session.tenant_slug}/dashboard/master-data/students`);

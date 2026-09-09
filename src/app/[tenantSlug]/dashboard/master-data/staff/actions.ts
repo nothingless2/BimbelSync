@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcrypt";
 import { StaffRole } from "@prisma/client";
+import { createAuditLog } from "@/lib/audit";
 
 export async function createStaffAction(formData: FormData) {
   const cookieStore = await cookies();
@@ -72,6 +73,14 @@ export async function createStaffAction(formData: FormData) {
       }
     });
 
+    await createAuditLog({
+      academy_id: session.academy_id,
+      staff_id: session.id,
+      action: "CREATE",
+      entity_type: "Staff",
+      details: { email, role }
+    });
+
     revalidatePath(`/${session.tenant_slug}/dashboard/master-data/staff`);
     return { success: true };
   } catch (error) {
@@ -108,6 +117,15 @@ export async function updateStaffAction(staffId: string, formData: FormData) {
       data: updateData
     });
 
+    await createAuditLog({
+      academy_id: session.academy_id,
+      staff_id: session.id,
+      action: "UPDATE",
+      entity_type: "Staff",
+      entity_id: staffId,
+      details: { role, updated_password: !!password }
+    });
+
     revalidatePath(`/${session.tenant_slug}/dashboard/master-data/staff`);
     return { success: true };
   } catch (error) {
@@ -134,6 +152,15 @@ export async function deleteStaffAction(staffId: string) {
     await prisma.staff.update({
       where: { id: staffId },
       data: { deleted_at: new Date() }
+    });
+
+    await createAuditLog({
+      academy_id: session.academy_id,
+      staff_id: session.id,
+      action: "DELETE",
+      entity_type: "Staff",
+      entity_id: staffId,
+      details: { email: existing.email }
     });
 
     revalidatePath(`/${session.tenant_slug}/dashboard/master-data/staff`);

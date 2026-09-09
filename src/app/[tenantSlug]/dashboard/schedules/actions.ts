@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { decrypt } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { createAuditLog } from "@/lib/audit";
 
 export async function createScheduleAction(formData: FormData) {
   const cookieStore = await cookies();
@@ -55,6 +56,14 @@ export async function createScheduleAction(formData: FormData) {
       }
     });
 
+    await createAuditLog({
+      academy_id: session.academy_id,
+      staff_id: session.id,
+      action: "CREATE",
+      entity_type: "Schedule",
+      details: { program_id: programId, tutor_id: tutorId, start_time: startDateTime }
+    });
+
     revalidatePath(`/${session.tenant_slug}/dashboard/schedules`);
     return { success: true };
   } catch (error) {
@@ -93,6 +102,15 @@ export async function cancelScheduleAction(scheduleId: string, reason: string) {
       }
     });
 
+    await createAuditLog({
+      academy_id: session.academy_id,
+      staff_id: session.id,
+      action: "UPDATE",
+      entity_type: "Schedule",
+      entity_id: scheduleId,
+      details: { status: "CANCELLED", cancelled_reason: reason }
+    });
+
     revalidatePath(`/${session.tenant_slug}/dashboard/schedules`);
     return { success: true };
   } catch (error) {
@@ -123,6 +141,15 @@ export async function deleteScheduleAction(scheduleId: string) {
     // namun demi kemudahan MVP, kita ijinkan hard delete
     await prisma.schedule.delete({
       where: { id: scheduleId }
+    });
+
+    await createAuditLog({
+      academy_id: session.academy_id,
+      staff_id: session.id,
+      action: "DELETE",
+      entity_type: "Schedule",
+      entity_id: scheduleId,
+      details: { status: existing.status }
     });
 
     revalidatePath(`/${session.tenant_slug}/dashboard/schedules`);

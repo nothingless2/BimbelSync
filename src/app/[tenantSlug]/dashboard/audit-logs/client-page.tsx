@@ -45,11 +45,31 @@ export default function AuditLogsClientPage({ logs }: Props) {
               <th className="px-6 py-4 font-semibold">AKTOR (STAF)</th>
               <th className="px-6 py-4 font-semibold">AKSI</th>
               <th className="px-6 py-4 font-semibold">ENTITAS</th>
-              <th className="px-6 py-4 font-semibold">DETAIL (JSON)</th>
+              <th className="px-6 py-4 font-semibold">DETAIL</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-            {logs.map((log) => (
+            {logs.map((log) => {
+              // Helper untuk mengubah JSON detail menjadi kalimat yang mudah dibaca
+              const formatDetails = (action: string, entity: string, details: any) => {
+                if (!details || Object.keys(details).length === 0) return "Tidak ada detail.";
+                
+                const entries = Object.entries(details).map(([key, value]) => {
+                  const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                  return `${label}: ${typeof value === 'boolean' ? (value ? 'Ya' : 'Tidak') : value}`;
+                });
+                
+                const detailString = entries.join(', ');
+
+                if (action === "CREATE") return `Menambahkan ${entity} baru (${detailString})`;
+                if (action === "UPDATE") return `Memperbarui ${entity} (${detailString})`;
+                if (action === "DELETE") return `Menghapus ${entity} (${detailString})`;
+                if (action === "VERIFY") return `Memverifikasi ${entity} (${detailString})`;
+                
+                return `Melakukan ${action} pada ${entity} (${detailString})`;
+              };
+
+              return (
               <tr key={log.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-slate-900 dark:text-slate-200 font-medium">
@@ -86,12 +106,12 @@ export default function AuditLogsClientPage({ logs }: Props) {
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <pre className="text-xs font-mono bg-slate-50 dark:bg-slate-950 p-2 rounded border border-slate-200 dark:border-slate-800 max-w-xs overflow-x-auto text-slate-600 dark:text-slate-400">
-                    {log.details ? JSON.stringify(log.details, null, 2) : 'No details'}
-                  </pre>
+                  <div className="text-sm text-slate-700 dark:text-slate-300 max-w-sm leading-relaxed">
+                    {formatDetails(log.action, log.entity_type, log.details)}
+                  </div>
                 </td>
               </tr>
-            ))}
+            )})}
           </tbody>
         </table>
       </div>

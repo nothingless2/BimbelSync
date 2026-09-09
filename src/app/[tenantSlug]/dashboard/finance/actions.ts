@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { decrypt } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { createAuditLog } from "@/lib/audit";
 
 export async function createInvoiceAction(formData: FormData) {
   const cookieStore = await cookies();
@@ -66,6 +67,14 @@ export async function createInvoiceAction(formData: FormData) {
       });
     });
 
+    await createAuditLog({
+      academy_id: session.academy_id,
+      staff_id: session.id,
+      action: "CREATE",
+      entity_type: "Invoice",
+      details: { total_amount: totalAmount, items: itemsData.length }
+    });
+
     revalidatePath(`/${session.tenant_slug}/dashboard/finance`);
     return { success: true };
   } catch (error) {
@@ -113,6 +122,15 @@ export async function verifyPaymentAction(invoiceId: string, paymentMethod: stri
       }
     });
 
+    await createAuditLog({
+      academy_id: session.academy_id,
+      staff_id: session.id,
+      action: "VERIFY",
+      entity_type: "Invoice",
+      entity_id: invoiceId,
+      details: { payment_method: paymentMethod }
+    });
+
     revalidatePath(`/${session.tenant_slug}/dashboard/finance`);
     return { success: true };
   } catch (error) {
@@ -150,6 +168,15 @@ export async function deleteInvoiceAction(invoiceId: string) {
       await tx.invoice.delete({
         where: { id: invoiceId }
       });
+    });
+
+    await createAuditLog({
+      academy_id: session.academy_id,
+      staff_id: session.id,
+      action: "DELETE",
+      entity_type: "Invoice",
+      entity_id: invoiceId,
+      details: { total_amount: existing.total_amount }
     });
 
     revalidatePath(`/${session.tenant_slug}/dashboard/finance`);

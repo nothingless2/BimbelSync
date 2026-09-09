@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { decrypt } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { createAuditLog } from "@/lib/audit";
 
 export async function createRoomAction(formData: FormData) {
   const cookieStore = await cookies();
@@ -51,6 +52,14 @@ export async function createRoomAction(formData: FormData) {
       }
     });
 
+    await createAuditLog({
+      academy_id: session.academy_id,
+      staff_id: session.id,
+      action: "CREATE",
+      entity_type: "Room",
+      details: { name, capacity }
+    });
+
     revalidatePath(`/${session.tenant_slug}/dashboard/master-data/rooms`);
     return { success: true };
   } catch (error) {
@@ -90,6 +99,15 @@ export async function updateRoomAction(roomId: string, formData: FormData) {
       }
     });
 
+    await createAuditLog({
+      academy_id: session.academy_id,
+      staff_id: session.id,
+      action: "UPDATE",
+      entity_type: "Room",
+      entity_id: roomId,
+      details: { name, capacity }
+    });
+
     revalidatePath(`/${session.tenant_slug}/dashboard/master-data/rooms`);
     return { success: true };
   } catch (error) {
@@ -116,6 +134,15 @@ export async function deleteRoomAction(roomId: string) {
     await prisma.room.update({
       where: { id: roomId },
       data: { deleted_at: new Date() }
+    });
+
+    await createAuditLog({
+      academy_id: session.academy_id,
+      staff_id: session.id,
+      action: "DELETE",
+      entity_type: "Room",
+      entity_id: roomId,
+      details: { name: existing.name }
     });
 
     revalidatePath(`/${session.tenant_slug}/dashboard/master-data/rooms`);

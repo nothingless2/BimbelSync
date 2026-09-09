@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { decrypt } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { createAuditLog } from "@/lib/audit";
 
 export async function createProgramAction(formData: FormData) {
   const cookieStore = await cookies();
@@ -33,6 +34,14 @@ export async function createProgramAction(formData: FormData) {
         monthly_fee: monthlyFee,
         duration_months: durationMonths,
       }
+    });
+
+    await createAuditLog({
+      academy_id: session.academy_id,
+      staff_id: session.id,
+      action: "CREATE",
+      entity_type: "Program",
+      details: { name, max_capacity: maxCapacity, monthly_fee: monthlyFee }
     });
 
     revalidatePath(`/${session.tenant_slug}/dashboard/master-data/programs`);
@@ -79,6 +88,15 @@ export async function updateProgramAction(programId: string, formData: FormData)
       }
     });
 
+    await createAuditLog({
+      academy_id: session.academy_id,
+      staff_id: session.id,
+      action: "UPDATE",
+      entity_type: "Program",
+      entity_id: programId,
+      details: { name, max_capacity: maxCapacity, monthly_fee: monthlyFee }
+    });
+
     revalidatePath(`/${session.tenant_slug}/dashboard/master-data/programs`);
     return { success: true };
   } catch (error) {
@@ -105,6 +123,15 @@ export async function deleteProgramAction(programId: string) {
     await prisma.program.update({
       where: { id: programId },
       data: { deleted_at: new Date() }
+    });
+
+    await createAuditLog({
+      academy_id: session.academy_id,
+      staff_id: session.id,
+      action: "DELETE",
+      entity_type: "Program",
+      entity_id: programId,
+      details: { name: existing.name }
     });
 
     revalidatePath(`/${session.tenant_slug}/dashboard/master-data/programs`);
