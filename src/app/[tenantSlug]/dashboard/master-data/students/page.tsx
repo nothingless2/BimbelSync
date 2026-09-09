@@ -21,37 +21,37 @@ export default async function StudentsPage({ params }: { params: Promise<{ tenan
     redirect(`/${tenantSlug}/login`);
   }
 
-  // Fetch all students for this academy with their active and inactive enrollments
-  const students = await prisma.student.findMany({
-    where: {
-      academy_id: session.academy_id,
-      deleted_at: null
-    },
-    include: {
-      enrollments: {
-        include: {
-          program: true
-        },
-        orderBy: {
-          enrolled_date: 'desc'
+  // Fetch students and programs concurrently for better performance
+  const [students, programs] = await Promise.all([
+    prisma.student.findMany({
+      where: {
+        academy_id: session.academy_id,
+        deleted_at: null
+      },
+      include: {
+        enrollments: {
+          include: {
+            program: true
+          },
+          orderBy: {
+            enrolled_date: 'desc'
+          }
         }
+      },
+      orderBy: {
+        full_name: 'asc'
       }
-    },
-    orderBy: {
-      full_name: 'asc'
-    }
-  });
-
-  // Fetch programs for the enrollment dropdowns
-  const programs = await prisma.program.findMany({
-    where: {
-      academy_id: session.academy_id,
-      deleted_at: null
-    },
-    orderBy: {
-      name: 'asc'
-    }
-  });
+    }),
+    prisma.program.findMany({
+      where: {
+        academy_id: session.academy_id,
+        deleted_at: null
+      },
+      orderBy: {
+        name: 'asc'
+      }
+    })
+  ]);
 
   return (
     <div className="space-y-6">

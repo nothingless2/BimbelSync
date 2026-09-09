@@ -62,10 +62,10 @@ export function TenantNav({ tenantSlug }: { tenantSlug: string }) {
           </p>
         </div>
         <NavItem 
-          href={`/${tenantSlug}/dashboard/schedule`} 
+          href={`/${tenantSlug}/dashboard/schedules`} 
           icon={<Calendar size={18} />} 
           label="Jadwal & Presensi" 
-          active={isRouteActive(`/${tenantSlug}/dashboard/schedule`)} 
+          active={isRouteActive(`/${tenantSlug}/dashboard/schedules`)} 
         />
         <NavItem 
           href={`/${tenantSlug}/dashboard/finance`} 
