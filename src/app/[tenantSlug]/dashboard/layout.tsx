@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { UserCog } from "lucide-react";
 import { TenantNav } from "@/components/tenant-nav";
+import { UserAvatar } from "@/components/user-avatar";
+import { cookies } from "next/headers";
+import { decrypt } from "@/lib/auth";
+import prisma from "@/lib/prisma";
+import { redirect } from "next/navigation";
 
 export default async function DashboardLayout({
   children,
@@ -13,15 +17,27 @@ export default async function DashboardLayout({
   const resolvedParams = await params;
   const tenantSlug = resolvedParams.tenantSlug || "Bimbel";
 
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get('bimbelsync_session')?.value;
+  const session = sessionCookie ? await decrypt(sessionCookie) : null;
+
+  if (!session || !session.academy_id) {
+    redirect(`/${tenantSlug}/login`);
+  }
+
+  // Find the staff user (or superadmin if impersonating, but standard is staff)
+  const dbUser = await prisma.staff.findUnique({
+    where: { id: session.id },
+    select: { id: true, email: true }
+  });
+
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 font-sans">
       {/* Sidebar */}
       <aside className="w-64 flex flex-col h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-20 transition-colors">
         <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-800 transition-colors">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold shadow-sm">
-              {tenantSlug.charAt(0).toUpperCase()}
-            </div>
+            <img src="/logo.png" alt="BimbelSync Logo" className="w-7 h-7 object-contain rounded-md" />
             <span className="text-xl font-bold text-slate-800 dark:text-white capitalize tracking-tight">
               BimbelSync
             </span>
@@ -42,9 +58,11 @@ export default async function DashboardLayout({
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 border-2 border-white dark:border-slate-800 shadow-sm overflow-hidden flex items-center justify-center">
-               <UserCog className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            </div>
+            {dbUser && (
+              <Link href={`/${tenantSlug}/dashboard/profile`} className="block hover:opacity-80 transition cursor-pointer" title="Edit Profile">
+                <UserAvatar id={dbUser.id} email={dbUser.email} avatarUrl={null} size={32} />
+              </Link>
+            )}
           </div>
         </header>
 

@@ -80,7 +80,7 @@ export async function verifyPaymentAction(invoiceId: string, paymentMethod: stri
   if (!sessionToken) return { error: "Autentikasi diperlukan." };
 
   const session = await decrypt(sessionToken);
-  if (!session || !session.academy_id || !session.user_id) return { error: "Sesi tidak valid." };
+  if (!session || !session.academy_id || !session.id) return { error: "Sesi tidak valid." };
 
   try {
     const existing = await prisma.invoice.findUnique({
@@ -97,19 +97,19 @@ export async function verifyPaymentAction(invoiceId: string, paymentMethod: stri
 
     // PENTING: Untuk sementara role auth di MVP belum dipisah ketat di token (bisa superadmin/staff).
     // Karena session mengindikasikan user_id yang bisa berupa Staff ID atau Superadmin ID (tergantung JWT yang digenerate di login).
-    // Asumsi di sini session.user_id adalah staff id.
+    // Asumsi di sini session.id adalah staff id.
     
     // Namun `verified_by_staff_id` mengharapkan referensi ke Staff.
     // Jika Superadmin yg verifikasi sbg tenant, ini bisa FK error.
     // Untuk amannya (MVP), kita kosongkan verified_by jika dia Superadmin, atau tembak id staff yang valid.
-    const isStaff = await prisma.staff.findUnique({ where: { id: session.user_id } });
+    const isStaff = await prisma.staff.findUnique({ where: { id: session.id } });
 
     await prisma.invoice.update({
       where: { id: invoiceId },
       data: {
         payment_status: "PAID",
         payment_method: paymentMethod as any, // "CASH" atau "MANUAL_TRANSFER"
-        verified_by_staff_id: isStaff ? session.user_id : null
+        verified_by_staff_id: isStaff ? session.id : null
       }
     });
 

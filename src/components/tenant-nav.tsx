@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, UserCog, Calendar, CreditCard, Box, Settings } from "lucide-react";
+import { LayoutDashboard, Users, UserCog, Calendar, CreditCard, Box, HelpCircle, LogOut } from "lucide-react";
 
 export function TenantNav({ tenantSlug }: { tenantSlug: string }) {
   const pathname = usePathname();
@@ -28,25 +28,25 @@ export function TenantNav({ tenantSlug }: { tenantSlug: string }) {
         
         <div className="pt-6 pb-2">
           <p className="px-3 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Data Master
+            Master Data
           </p>
         </div>
         <NavItem 
           href={`/${tenantSlug}/dashboard/master-data/rooms`} 
           icon={<Box size={18} />} 
-          label="Ruangan" 
+          label="Rooms" 
           active={isRouteActive(`/${tenantSlug}/dashboard/master-data/rooms`)} 
         />
         <NavItem 
           href={`/${tenantSlug}/dashboard/master-data/programs`} 
           icon={<Box size={18} />} 
-          label="Program" 
+          label="Programs" 
           active={isRouteActive(`/${tenantSlug}/dashboard/master-data/programs`)} 
         />
         <NavItem 
           href={`/${tenantSlug}/dashboard/master-data/students`} 
           icon={<Users size={18} />} 
-          label="Siswa" 
+          label="Students" 
           active={isRouteActive(`/${tenantSlug}/dashboard/master-data/students`)} 
         />
         <NavItem 
@@ -58,30 +58,38 @@ export function TenantNav({ tenantSlug }: { tenantSlug: string }) {
 
         <div className="pt-6 pb-2">
           <p className="px-3 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Operasional
+            Operational
           </p>
         </div>
         <NavItem 
           href={`/${tenantSlug}/dashboard/schedules`} 
           icon={<Calendar size={18} />} 
-          label="Jadwal & Presensi" 
+          label="Schedules & Attendance" 
           active={isRouteActive(`/${tenantSlug}/dashboard/schedules`)} 
         />
         <NavItem 
           href={`/${tenantSlug}/dashboard/finance`} 
           icon={<CreditCard size={18} />} 
-          label="Keuangan" 
+          label="Finance" 
           active={isRouteActive(`/${tenantSlug}/dashboard/finance`)} 
         />
       </nav>
 
-      <div className="p-4 border-t border-slate-200 dark:border-slate-800 transition-colors">
-        <NavItem 
-          href={`/${tenantSlug}/dashboard/settings`} 
-          icon={<Settings size={18} />} 
-          label="Pengaturan" 
-          active={isRouteActive(`/${tenantSlug}/dashboard/settings`)} 
-        />
+      <div className="p-4 border-t border-slate-200 dark:border-slate-800 space-y-1">
+        <Link
+          href={`/${tenantSlug}/dashboard/support`}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-medium text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+        >
+          <HelpCircle size={18} />
+          Support
+        </Link>
+        <a 
+          href={`/${tenantSlug}/logout`} 
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-medium text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+        >
+          <LogOut size={18} />
+          Logout
+        </a>
       </div>
     </>
   );
