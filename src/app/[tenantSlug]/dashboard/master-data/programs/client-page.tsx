@@ -73,7 +73,7 @@ export default function ProgramsClientPage({ programs, tenantSlug }: { programs:
                       </div>
                     </td>
                     <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-200">
-                      {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(program.monthly_fee)}
+                      {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(program.monthly_fee)}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-3">

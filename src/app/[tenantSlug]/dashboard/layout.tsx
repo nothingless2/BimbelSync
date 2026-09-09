@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { LayoutDashboard, Users, UserCog, Calendar, CreditCard, Box, Settings } from "lucide-react";
+import { UserCog } from "lucide-react";
+import { TenantNav } from "@/components/tenant-nav";
 
 export default async function DashboardLayout({
   children,
@@ -27,31 +28,7 @@ export default async function DashboardLayout({
           </div>
         </div>
 
-        <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto custom-scrollbar">
-          <NavItem href={`/${tenantSlug}/dashboard`} icon={<LayoutDashboard size={18} />} label="Dashboard" active />
-          
-          <div className="pt-6 pb-2">
-            <p className="px-3 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Data Master
-            </p>
-          </div>
-          <NavItem href={`/${tenantSlug}/dashboard/master-data/rooms`} icon={<Box size={18} />} label="Ruangan" />
-          <NavItem href={`/${tenantSlug}/dashboard/master-data/programs`} icon={<Box size={18} />} label="Program" />
-          <NavItem href={`/${tenantSlug}/dashboard/master-data/students`} icon={<Users size={18} />} label="Siswa" />
-          <NavItem href={`/${tenantSlug}/dashboard/master-data/staff`} icon={<UserCog size={18} />} label="Staff" />
-
-          <div className="pt-6 pb-2">
-            <p className="px-3 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Operasional
-            </p>
-          </div>
-          <NavItem href={`/${tenantSlug}/dashboard/schedule`} icon={<Calendar size={18} />} label="Jadwal & Presensi" />
-          <NavItem href={`/${tenantSlug}/dashboard/finance`} icon={<CreditCard size={18} />} label="Keuangan" />
-        </nav>
-
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800 transition-colors">
-          <NavItem href={`/${tenantSlug}/dashboard/settings`} icon={<Settings size={18} />} label="Pengaturan" />
-        </div>
+        <TenantNav tenantSlug={tenantSlug} />
       </aside>
 
       {/* Main Content */}
@@ -82,18 +59,3 @@ export default async function DashboardLayout({
   );
 }
 
-function NavItem({ href, icon, label, active = false }: { href: string; icon: React.ReactNode; label: string; active?: boolean }) {
-  return (
-    <Link
-      href={href}
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-medium text-sm ${
-        active 
-          ? "bg-blue-600 text-white shadow-md shadow-blue-500/20" 
-          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
-      }`}
-    >
-      {icon}
-      {label}
-    </Link>
-  );
-}
