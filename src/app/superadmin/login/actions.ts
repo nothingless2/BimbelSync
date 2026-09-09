@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import { encrypt } from "@/lib/auth";
 import { cookies } from "next/headers";
 

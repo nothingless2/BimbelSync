@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { decrypt } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import { WithdrawnReason } from "@prisma/client";
 
 export async function createStudentAction(formData: FormData) {

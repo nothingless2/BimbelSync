@@ -1,7 +1,7 @@
 'use server';
 
 import prisma from '@/lib/prisma';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import { encrypt } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
@@ -10,28 +10,32 @@ export async function loginStaffAction(tenantSlug: string, formData: FormData) {
   const password = formData.get('password') as string;
 
   try {
-    // 1. Cari bimbel (academy) berdasarkan slug di URL
-    const academy = await prisma.academy.findUnique({
-      where: { path_url: tenantSlug },
-    });
-
-    if (!academy) {
-      return { error: 'Bimbel tidak ditemukan di sistem kami.' };
-    }
-
-    // 2. Cari Staff berdasarkan email DAN id bimbel tersebut
-    const staff = await prisma.staff.findUnique({
+    // 1 & 2. Cari Staff dan Bimbel secara bersamaan
+    const staff = await prisma.staff.findFirst({
       where: {
-        academy_id_email: {
-          academy_id: academy.id,
-          email: email,
+        email: email,
+        academy: {
+          path_url: tenantSlug
         }
       },
+      include: {
+        academy: true
+      }
     });
 
     if (!staff) {
+      // Cek apakah bimbelnya yang tidak ada atau emailnya yang salah
+      const academyExists = await prisma.academy.count({
+        where: { path_url: tenantSlug }
+      });
+      
+      if (academyExists === 0) {
+        return { error: 'Bimbel tidak ditemukan di sistem kami.' };
+      }
       return { error: 'Email atau kata sandi salah.' };
     }
+    
+    const academy = staff.academy;
 
     // 3. Cocokkan kata sandi
     const isPasswordValid = await bcrypt.compare(password, staff.password_hash);

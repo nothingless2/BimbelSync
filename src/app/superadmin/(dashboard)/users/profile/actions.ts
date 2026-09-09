@@ -3,7 +3,7 @@
 import prisma from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { decrypt, encrypt } from "@/lib/auth";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import { revalidatePath } from "next/cache";
 
 async function getSession() {

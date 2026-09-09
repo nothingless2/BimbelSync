@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 
 // ==================== PLAN (PAKET BERLANGGANAN) ====================
 
