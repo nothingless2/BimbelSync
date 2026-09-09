@@ -98,6 +98,7 @@ model Staff {
   academy_id    String    @db.Uuid
   email         String
   name          String?
+  avatar_url    String?
   password_hash String
   role          StaffRole
   deleted_at    DateTime?
