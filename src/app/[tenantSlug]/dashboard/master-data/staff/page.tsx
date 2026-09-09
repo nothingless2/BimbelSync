@@ -1,11 +1,11 @@
 import { cookies } from "next/headers";
 import { decrypt } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { AddRoomModal } from "@/components/modals/add-room-modal";
+import { AddStaffModal } from "@/components/modals/add-staff-modal";
 import { redirect } from "next/navigation";
-import RoomsClientPage from "./client-page";
+import StaffClientPage from "./client-page";
 
-export default async function RoomsPage({ params }: { params: Promise<{ tenantSlug: string }> }) {
+export default async function StaffPage({ params }: { params: Promise<{ tenantSlug: string }> }) {
   const resolvedParams = await params;
   const tenantSlug = resolvedParams.tenantSlug;
 
@@ -21,13 +21,14 @@ export default async function RoomsPage({ params }: { params: Promise<{ tenantSl
     redirect(`/${tenantSlug}/login`);
   }
 
-  const rooms = await prisma.room.findMany({
+  // Fetch staff for this academy
+  const staffList = await prisma.staff.findMany({
     where: {
       academy_id: session.academy_id,
       deleted_at: null
     },
     orderBy: {
-      name: 'asc'
+      email: 'asc'
     }
   });
 
@@ -35,18 +36,18 @@ export default async function RoomsPage({ params }: { params: Promise<{ tenantSl
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Manajemen Ruangan</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Manajemen Staf & Tutor</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Kelola daftar ruang kelas fisik atau virtual untuk penjadwalan.
+            Kelola akses Admin pengelola dan Tutor pengajar.
           </p>
         </div>
         
-        {/* Modal untuk tambah ruangan */}
-        <AddRoomModal tenantSlug={tenantSlug} />
+        {/* Modal untuk tambah staf */}
+        <AddStaffModal tenantSlug={tenantSlug} />
       </div>
 
       {/* Tabel Data - Client Component */}
-      <RoomsClientPage rooms={rooms} tenantSlug={tenantSlug} />
+      <StaffClientPage staffList={staffList} tenantSlug={tenantSlug} />
     </div>
   );
 }

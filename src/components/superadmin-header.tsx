@@ -30,7 +30,7 @@ export function SuperadminHeader({ user }: SuperadminHeaderProps) {
   return (
     <header className="h-16 flex items-center justify-between px-8 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-10 sticky top-0 border-b border-slate-200 dark:border-slate-800">
       <div className="flex items-center gap-2 text-sm">
-        <span className="text-slate-400">Admin</span>
+        <span className="text-slate-400">Superadmin</span>
         <span className="text-slate-300">/</span>
         <span className="font-semibold text-slate-700 dark:text-slate-200">{pageTitle}</span>
       </div>

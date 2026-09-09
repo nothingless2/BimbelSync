@@ -79,17 +79,25 @@ export default async function AuditLogsPage({
       prisma.academy.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } })
     ]);
 
-    // Enrich logs with academy names if entity_id matches an academy
+    // Enrich logs with academy names if entity_id matches an academy, or if academy_id is in details
     const enrichedLogs = logs.map(log => {
       let tenantName = null;
       let tenantId = null;
 
-      if (log.entity_id) {
-        const match = academies.find(a => a.id === log.entity_id);
-        if (match) {
-          tenantName = match.name;
-          tenantId = match.id;
+      // Cek apakah entity_id adalah academy
+      let match = academies.find(a => a.id === log.entity_id);
+      
+      // Jika bukan, cek apakah ada academy_id di dalam details JSON
+      if (!match && log.details && typeof log.details === 'object' && !Array.isArray(log.details)) {
+        const detailsObj = log.details as Record<string, any>;
+        if (detailsObj.academy_id) {
+          match = academies.find(a => a.id === detailsObj.academy_id);
         }
+      }
+
+      if (match) {
+        tenantName = match.name;
+        tenantId = match.id;
       }
 
       return {
