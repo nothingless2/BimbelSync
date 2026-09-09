@@ -7,6 +7,7 @@ import { deleteScheduleAction } from "./actions";
 import { CancelScheduleModal } from "@/components/modals/cancel-schedule-modal";
 import { Schedule, Program, Staff, Room } from "@prisma/client";
 import { useRouter } from "next/navigation";
+import { Pagination } from "@/components/ui/pagination";
 
 type ScheduleWithRelations = Schedule & {
   program: Program;
@@ -25,6 +26,12 @@ export default function SchedulesClientPage({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [cancellingSchedule, setCancellingSchedule] = useState<ScheduleWithRelations | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(schedules.length / itemsPerPage);
+  const currentData = schedules.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const toggleDropdown = (id: string) => {
     if (openDropdownId === id) setOpenDropdownId(null);
@@ -76,6 +83,7 @@ export default function SchedulesClientPage({
           <table className="w-full text-sm text-left text-slate-600 dark:text-slate-400">
             <thead className="text-xs text-slate-500 uppercase bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
               <tr>
+                <th scope="col" className="px-6 py-4 font-semibold w-16">No.</th>
                 <th scope="col" className="px-6 py-4 font-semibold">Waktu Pelaksanaan</th>
                 <th scope="col" className="px-6 py-4 font-semibold">Detail Kelas</th>
                 <th scope="col" className="px-6 py-4 font-semibold">Status</th>
@@ -83,19 +91,22 @@ export default function SchedulesClientPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {schedules.length === 0 ? (
+              {currentData.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
+                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
                     <CalendarIcon className="mx-auto h-12 w-12 text-slate-300 dark:text-slate-700 mb-3" />
                     Belum ada jadwal kelas.<br/>Klik "Buat Jadwal" untuk mengatur pertemuan kelas.
                   </td>
                 </tr>
               ) : (
-                schedules.map((schedule) => {
+                currentData.map((schedule, index) => {
                   const isCancelled = schedule.status === 'CANCELLED';
                   
                   return (
                     <tr key={schedule.id} className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${deletingId === schedule.id ? 'opacity-50' : ''} ${isCancelled ? 'bg-red-50/30 dark:bg-red-900/5' : ''}`}>
+                      <td className="px-6 py-4 font-medium text-slate-500">
+                        {(currentPage - 1) * itemsPerPage + index + 1}
+                      </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col gap-1.5">
                           <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-slate-100">
@@ -193,6 +204,13 @@ export default function SchedulesClientPage({
             </tbody>
           </table>
         </div>
+        <Pagination 
+          currentPage={currentPage} 
+          totalPages={totalPages} 
+          onPageChange={setCurrentPage} 
+          totalItems={schedules.length} 
+          itemsPerPage={itemsPerPage} 
+        />
       </div>
 
       {cancellingSchedule && (

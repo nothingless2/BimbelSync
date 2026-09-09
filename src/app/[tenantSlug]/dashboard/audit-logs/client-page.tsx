@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { Pagination } from "@/components/ui/pagination";
 
 interface Log {
   id: string;
@@ -21,6 +23,10 @@ interface Props {
 }
 
 export default function AuditLogsClientPage({ logs }: Props) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(logs.length / itemsPerPage);
+  const currentData = logs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   if (logs.length === 0) {
     return (
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center shadow-sm">
@@ -41,6 +47,7 @@ export default function AuditLogsClientPage({ logs }: Props) {
         <table className="w-full text-sm text-left">
           <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
             <tr>
+              <th className="px-6 py-4 font-semibold w-16">No.</th>
               <th className="px-6 py-4 font-semibold">TANGGAL & WAKTU</th>
               <th className="px-6 py-4 font-semibold">AKTOR (STAF)</th>
               <th className="px-6 py-4 font-semibold">AKSI</th>
@@ -49,7 +56,7 @@ export default function AuditLogsClientPage({ logs }: Props) {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-            {logs.map((log) => {
+            {currentData.map((log, index) => {
               // Helper untuk mengubah JSON detail menjadi kalimat yang mudah dibaca
               const formatDetails = (action: string, entity: string, details: any) => {
                 if (!details || Object.keys(details).length === 0) return "Tidak ada detail.";
@@ -71,6 +78,9 @@ export default function AuditLogsClientPage({ logs }: Props) {
 
               return (
               <tr key={log.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                <td className="px-6 py-4 font-medium text-slate-500">
+                  {(currentPage - 1) * itemsPerPage + index + 1}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-slate-900 dark:text-slate-200 font-medium">
                     {format(new Date(log.created_at), 'dd MMM yyyy', { locale: id })}
@@ -115,6 +125,13 @@ export default function AuditLogsClientPage({ logs }: Props) {
           </tbody>
         </table>
       </div>
+      <Pagination 
+        currentPage={currentPage} 
+        totalPages={totalPages} 
+        onPageChange={setCurrentPage} 
+        totalItems={logs.length} 
+        itemsPerPage={itemsPerPage} 
+      />
     </div>
   );
 }

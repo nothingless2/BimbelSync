@@ -6,6 +6,7 @@ import { toast } from "@/components/ui/sonner";
 import { deleteInvoiceAction } from "./actions";
 import { VerifyPaymentModal } from "@/components/modals/verify-payment-modal";
 import { Invoice, Student, InvoiceItem, Staff } from "@prisma/client";
+import { Pagination } from "@/components/ui/pagination";
 
 type InvoiceWithRelations = Invoice & {
   student: Student;
@@ -21,6 +22,12 @@ export default function FinanceClientPage({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [verifyingInvoice, setVerifyingInvoice] = useState<InvoiceWithRelations | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(invoices.length / itemsPerPage);
+  const currentData = invoices.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const toggleDropdown = (id: string) => {
     if (openDropdownId === id) setOpenDropdownId(null);
@@ -60,6 +67,7 @@ export default function FinanceClientPage({
           <table className="w-full text-sm text-left text-slate-600 dark:text-slate-400">
             <thead className="text-xs text-slate-500 uppercase bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
               <tr>
+                <th scope="col" className="px-6 py-4 font-semibold w-16">No.</th>
                 <th scope="col" className="px-6 py-4 font-semibold">ID Tagihan</th>
                 <th scope="col" className="px-6 py-4 font-semibold">Siswa</th>
                 <th scope="col" className="px-6 py-4 font-semibold">Total Tagihan</th>
@@ -68,19 +76,22 @@ export default function FinanceClientPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {invoices.length === 0 ? (
+              {currentData.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
+                  <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
                     <Receipt className="mx-auto h-12 w-12 text-slate-300 dark:text-slate-700 mb-3" />
                     Belum ada riwayat tagihan.<br/>Klik "Buat Tagihan" untuk menerbitkan tagihan pertama.
                   </td>
                 </tr>
               ) : (
-                invoices.map((invoice) => {
+                currentData.map((invoice, index) => {
                   const isPaid = invoice.payment_status === 'PAID';
                   
                   return (
                     <tr key={invoice.id} className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${deletingId === invoice.id ? 'opacity-50' : ''} ${isPaid ? 'bg-emerald-50/20 dark:bg-emerald-900/5' : ''}`}>
+                      <td className="px-6 py-4 font-medium text-slate-500">
+                        {(currentPage - 1) * itemsPerPage + index + 1}
+                      </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col gap-1">
                           <span className="font-mono font-semibold text-slate-900 dark:text-slate-100 text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded w-fit border border-slate-200 dark:border-slate-700">
@@ -170,6 +181,13 @@ export default function FinanceClientPage({
             </tbody>
           </table>
         </div>
+        <Pagination 
+          currentPage={currentPage} 
+          totalPages={totalPages} 
+          onPageChange={setCurrentPage} 
+          totalItems={invoices.length} 
+          itemsPerPage={itemsPerPage} 
+        />
       </div>
 
       {verifyingInvoice && (

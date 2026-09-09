@@ -6,12 +6,19 @@ import { AddSuperadminModal } from "@/components/modals/add-superadmin-modal";
 import { EditSuperadminModal } from "@/components/modals/edit-superadmin-modal";
 import { DeleteSuperadminModal } from "@/components/modals/delete-superadmin-modal";
 import { UserAvatar } from "@/components/user-avatar";
+import { Pagination } from "@/components/ui/pagination";
 
 export default function SystemUsersClient({ users }: { users: any[] }) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(users.length / itemsPerPage);
+  const currentData = users.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const openEditModal = (user: any) => {
     setSelectedUser(user);
@@ -44,6 +51,7 @@ export default function SystemUsersClient({ users }: { users: any[] }) {
           <table className="w-full text-sm text-left">
             <thead className="text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
               <tr>
+                <th className="px-6 py-4 w-16">No.</th>
                 <th className="px-6 py-4">User</th>
                 <th className="px-6 py-4">Role</th>
                 <th className="px-6 py-4">Status</th>
@@ -52,8 +60,11 @@ export default function SystemUsersClient({ users }: { users: any[] }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
-              {users.map((user) => (
+              {currentData.map((user, index) => (
                 <tr key={user.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                  <td className="px-6 py-4 font-medium text-slate-500">
+                    {(currentPage - 1) * itemsPerPage + index + 1}
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <UserAvatar id={user.id} email={user.email} avatarUrl={user.avatar_url} size={32} />
@@ -93,9 +104,13 @@ export default function SystemUsersClient({ users }: { users: any[] }) {
             </tbody>
           </table>
         </div>
-        <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
-          <p className="text-xs font-medium text-slate-500">Menampilkan {users.length} superadmin terdaftar</p>
-        </div>
+        <Pagination 
+          currentPage={currentPage} 
+          totalPages={totalPages} 
+          onPageChange={setCurrentPage} 
+          totalItems={users.length} 
+          itemsPerPage={itemsPerPage} 
+        />
       </div>
 
       <AddSuperadminModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />

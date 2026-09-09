@@ -85,25 +85,25 @@ export default async function FinancePage({
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm flex flex-col gap-1">
-          <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Tagihan (Semua)</p>
+        <div className="bg-gradient-to-br from-slate-600 to-slate-800 rounded-2xl border border-slate-700 p-5 shadow-lg flex flex-col gap-1">
+          <p className="text-sm font-semibold text-slate-200 uppercase tracking-wider">Total Tagihan (Semua)</p>
           <div className="flex items-end gap-3 mt-1">
-            <span className="text-3xl font-bold text-slate-900 dark:text-white">{totalInvoices}</span>
-            <span className="text-sm font-medium text-slate-400 mb-1">Invoices</span>
+            <span className="text-3xl font-bold text-white">{totalInvoices}</span>
+            <span className="text-sm font-medium text-slate-300 mb-1">Invoices</span>
           </div>
         </div>
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm flex flex-col gap-1">
-          <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-500 uppercase tracking-wider">Pendapatan Diterima (Lunas)</p>
+        <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl border border-emerald-600 p-5 shadow-lg flex flex-col gap-1">
+          <p className="text-sm font-semibold text-emerald-100 uppercase tracking-wider">Pendapatan Diterima (Lunas)</p>
           <div className="flex items-end gap-3 mt-1">
-            <span className="text-3xl font-bold text-slate-900 dark:text-white">{formatRupiah(totalRevenue)}</span>
-            <span className="text-sm font-medium text-slate-400 mb-1">dari {paidInvoices.length} inv</span>
+            <span className="text-3xl font-bold text-white">{formatRupiah(totalRevenue)}</span>
+            <span className="text-sm font-medium text-emerald-200 mb-1">dari {paidInvoices.length} inv</span>
           </div>
         </div>
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm flex flex-col gap-1">
-          <p className="text-sm font-semibold text-amber-600 dark:text-amber-500 uppercase tracking-wider">Potensi Pendapatan (Belum Bayar)</p>
+        <div className="bg-gradient-to-br from-amber-500 to-amber-700 rounded-2xl border border-amber-600 p-5 shadow-lg flex flex-col gap-1">
+          <p className="text-sm font-semibold text-amber-100 uppercase tracking-wider">Potensi Pendapatan (Belum Bayar)</p>
           <div className="flex items-end gap-3 mt-1">
-            <span className="text-3xl font-bold text-slate-900 dark:text-white">{formatRupiah(potentialRevenue)}</span>
-            <span className="text-sm font-medium text-slate-400 mb-1">dari {unpaidInvoices.length} inv</span>
+            <span className="text-3xl font-bold text-white">{formatRupiah(potentialRevenue)}</span>
+            <span className="text-sm font-medium text-amber-200 mb-1">dari {unpaidInvoices.length} inv</span>
           </div>
         </div>
       </div>

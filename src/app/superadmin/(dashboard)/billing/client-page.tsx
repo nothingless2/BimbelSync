@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { verifyInvoiceAction, markOverdueAction, voidInvoiceAction, createInvoiceAction, deleteInvoiceAction } from "./actions";
+import { Pagination } from "@/components/ui/pagination";
 
 const IDR = (n: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
@@ -186,6 +187,12 @@ export default function BillingClientPage({ invoices, academies }: Props) {
   const [form, setForm] = useState({ academyId: "", billingPeriod: "", dueDate: "", amount: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(invoices.length / itemsPerPage);
+  const currentData = invoices.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   const totalUnpaid = invoices.filter(i => i.payment_status === "UNPAID").length;
   const totalPaid = invoices.filter(i => i.payment_status === "PAID").length;
   const totalOverdue = invoices.filter(i => i.payment_status === "OVERDUE").length;
@@ -272,6 +279,7 @@ export default function BillingClientPage({ invoices, academies }: Props) {
           <table className="w-full text-sm text-left">
             <thead className="text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">
               <tr>
+                <th className="px-6 py-4 w-16">No.</th>
                 <th className="px-6 py-4">Akademi</th>
                 <th className="px-6 py-4">Paket</th>
                 <th className="px-6 py-4">Periode</th>
@@ -283,18 +291,21 @@ export default function BillingClientPage({ invoices, academies }: Props) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
-              {invoices.length === 0 ? (
+              {currentData.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-16 text-center text-slate-500">
+                  <td colSpan={9} className="px-6 py-16 text-center text-slate-500">
                     <FileText className="mx-auto h-12 w-12 text-slate-300 dark:text-slate-700 mb-3" />
                     Belum ada tagihan platform.
                   </td>
                 </tr>
-              ) : invoices.map((invoice) => {
+              ) : currentData.map((invoice, index) => {
                 const status = statusConfig[invoice.payment_status];
                 const isOverdue = invoice.payment_status === "OVERDUE";
                 return (
                   <tr key={invoice.id} className={`transition-colors ${isOverdue ? "bg-red-50/30 dark:bg-red-900/10 hover:bg-red-50/80" : "hover:bg-slate-50/50 dark:hover:bg-slate-800/20"}`}>
+                    <td className="px-6 py-4 font-medium text-slate-500">
+                      {(currentPage - 1) * itemsPerPage + index + 1}
+                    </td>
                     <td className="px-6 py-4">
                       <p className="font-semibold text-slate-900 dark:text-slate-100">{invoice.academy.name}</p>
                       <p className="text-xs text-slate-500 font-mono">/{invoice.academy.path_url}</p>
@@ -334,11 +345,13 @@ export default function BillingClientPage({ invoices, academies }: Props) {
             </tbody>
           </table>
         </div>
-        {invoices.length > 0 && (
-          <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800">
-            <p className="text-xs font-medium text-slate-500">Menampilkan {invoices.length} tagihan</p>
-          </div>
-        )}
+        <Pagination 
+          currentPage={currentPage} 
+          totalPages={totalPages} 
+          onPageChange={setCurrentPage} 
+          totalItems={invoices.length} 
+          itemsPerPage={itemsPerPage} 
+        />
       </div>
 
       {/* Create Invoice Modal */}

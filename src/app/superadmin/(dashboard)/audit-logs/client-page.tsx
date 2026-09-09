@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ShieldAlert, Filter, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, User, Building2 } from "lucide-react";
 import Link from "next/link";
 import { UserAvatar } from "@/components/user-avatar";
+import { Pagination } from "@/components/ui/pagination";
 
 const COMMON_ACTIONS = [
   "SEARCH_TENANT",
@@ -138,6 +139,7 @@ export default function AuditLogsClientPage({
           <table className="w-full text-sm text-left border-collapse">
             <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-500 uppercase tracking-wider">
               <tr>
+                <th className="px-6 py-4 w-16">No.</th>
                 <th className="px-6 py-4">Waktu</th>
                 <th className="px-6 py-4">Superadmin</th>
                 <th className="px-6 py-4">Jenis Aksi</th>
@@ -152,9 +154,12 @@ export default function AuditLogsClientPage({
                     Tidak ada log aktivitas yang cocok dengan filter pencarian.
                   </td>
                 </tr>
-              ) : logs.map((log) => (
+              ) : logs.map((log, index) => (
                 <React.Fragment key={log.id}>
                   <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors group cursor-pointer" onClick={() => toggleExpand(log.id)}>
+                    <td className="px-6 py-4 font-medium text-slate-500 text-xs">
+                      {(currentPage - 1) * 15 + index + 1}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-slate-500 dark:text-slate-400 text-xs">
                       {new Date(log.created_at).toLocaleString('id-ID', {
                         day: '2-digit', month: 'short', year: 'numeric',
@@ -193,7 +198,7 @@ export default function AuditLogsClientPage({
                   {/* Expanded Payload Row */}
                   {expandedLogId === log.id && (
                     <tr className="bg-slate-50 dark:bg-slate-900/50">
-                      <td colSpan={5} className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                      <td colSpan={6} className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
                         <div className="bg-slate-900 dark:bg-black text-slate-300 p-4 rounded-xl font-mono text-xs overflow-x-auto shadow-inner border border-slate-800">
                           <div className="text-slate-500 mb-2">// Payload Details</div>
                           <pre>{log.details ? JSON.stringify(log.details, null, 2) : "{}"}</pre>
@@ -208,28 +213,14 @@ export default function AuditLogsClientPage({
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="px-6 py-4 flex items-center justify-between border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-            <p className="text-xs text-slate-500 font-medium">
-              Menampilkan halaman {currentPage} dari {totalPages} (Total {total} log)
-            </p>
-            <div className="flex gap-2">
-              <button 
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage <= 1}
-                className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 disabled:opacity-50 transition"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <button 
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage >= totalPages}
-                className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 disabled:opacity-50 transition"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
+        {totalPages > 0 && (
+          <Pagination 
+            currentPage={currentPage} 
+            totalPages={totalPages} 
+            onPageChange={handlePageChange} 
+            totalItems={total} 
+            itemsPerPage={15} 
+          />
         )}
       </div>
     </div>

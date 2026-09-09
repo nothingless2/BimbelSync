@@ -7,6 +7,7 @@ import { deleteStudentAction, withdrawEnrollmentAction } from "./actions";
 import { EditStudentModal } from "@/components/modals/edit-student-modal";
 import { EnrollStudentModal } from "@/components/modals/enroll-student-modal";
 import { Student, Program, Enrollment } from "@prisma/client";
+import { Pagination } from "@/components/ui/pagination";
 
 type StudentWithEnrollments = Student & {
   enrollments: (Enrollment & { program: Program })[];
@@ -26,6 +27,12 @@ export default function StudentsClientPage({
   const [enrollingStudent, setEnrollingStudent] = useState<Student | null>(null);
   
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(students.length / itemsPerPage);
+  const currentData = students.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const toggleDropdown = (id: string) => {
     if (openDropdownId === id) setOpenDropdownId(null);
@@ -82,6 +89,7 @@ export default function StudentsClientPage({
           <table className="w-full text-sm text-left text-slate-600 dark:text-slate-400">
             <thead className="text-xs text-slate-500 uppercase bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
               <tr>
+                <th scope="col" className="px-6 py-4 font-semibold w-16">No.</th>
                 <th scope="col" className="px-6 py-4 font-semibold">Nama Siswa</th>
                 <th scope="col" className="px-6 py-4 font-semibold">Kontak Wali</th>
                 <th scope="col" className="px-6 py-4 font-semibold">Program Aktif</th>
@@ -89,19 +97,22 @@ export default function StudentsClientPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {students.length === 0 ? (
+              {currentData.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
+                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
                     <Users className="mx-auto h-12 w-12 text-slate-300 dark:text-slate-700 mb-3" />
                     Belum ada data siswa.<br/>Klik "Tambah Siswa" untuk memulai.
                   </td>
                 </tr>
               ) : (
-                students.map((student) => {
+                currentData.map((student, index) => {
                   const activeEnrollments = student.enrollments.filter(e => e.status === 'ACTIVE');
                   
                   return (
                     <tr key={student.id} className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${deletingId === student.id ? 'opacity-50' : ''}`}>
+                      <td className="px-6 py-4 font-medium text-slate-500">
+                        {(currentPage - 1) * itemsPerPage + index + 1}
+                      </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
                           <span className="font-bold text-slate-900 dark:text-slate-100">{student.full_name}</span>
@@ -192,6 +203,13 @@ export default function StudentsClientPage({
             </tbody>
           </table>
         </div>
+        <Pagination 
+          currentPage={currentPage} 
+          totalPages={totalPages} 
+          onPageChange={setCurrentPage} 
+          totalItems={students.length} 
+          itemsPerPage={itemsPerPage} 
+        />
       </div>
 
       {editingStudent && (
