@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { AddScheduleModal } from "@/components/modals/add-schedule-modal";
 import { redirect } from "next/navigation";
 import SchedulesClientPage from "./client-page";
-import { startOfWeek, addDays, parseISO, isValid } from "date-fns";
+import { startOfWeek, addDays, parseISO, isValid, startOfMonth, addMonths } from "date-fns";
 
 export default async function SchedulesPage({ 
   params,
@@ -16,18 +16,27 @@ export default async function SchedulesPage({
   const resolvedParams = await params;
   const tenantSlug = resolvedParams.tenantSlug;
   const resolvedSearchParams = await searchParams;
-  const weekStartParam = resolvedSearchParams?.weekStart as string | undefined;
+  const view = resolvedSearchParams?.view as string || "weekly";
+  const dateParam = resolvedSearchParams?.date as string || resolvedSearchParams?.weekStart as string | undefined;
 
-  let startDate = new Date();
-  if (weekStartParam) {
-    const parsedDate = parseISO(weekStartParam);
+  let refDate = new Date();
+  if (dateParam) {
+    const parsedDate = parseISO(dateParam);
     if (isValid(parsedDate)) {
-      startDate = parsedDate;
+      refDate = parsedDate;
     }
   }
-  // Dapatkan hari Senin dari minggu tersebut
-  const startOfCurrentWeek = startOfWeek(startDate, { weekStartsOn: 1 });
-  const endOfCurrentWeek = addDays(startOfCurrentWeek, 7); // Hari Senin minggu berikutnya (batas eksklusif)
+  
+  let queryStart: Date;
+  let queryEnd: Date;
+
+  if (view === "monthly") {
+    queryStart = startOfMonth(refDate);
+    queryEnd = addMonths(queryStart, 1); // Awal bulan depannya
+  } else {
+    queryStart = startOfWeek(refDate, { weekStartsOn: 1 });
+    queryEnd = addDays(queryStart, 7); // Hari Senin minggu berikutnya
+  }
 
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("bimbelsync_session")?.value;
@@ -48,8 +57,8 @@ export default async function SchedulesPage({
       where: {
         program: { academy_id: session.academy_id },
         start_time: {
-          gte: startOfCurrentWeek,
-          lt: endOfCurrentWeek
+          gte: queryStart,
+          lt: queryEnd
         }
       },
       include: {
@@ -96,7 +105,8 @@ export default async function SchedulesPage({
         schedules={schedules} 
         rooms={rooms}
         tenantSlug={tenantSlug} 
-        currentWeekStart={startOfCurrentWeek.toISOString()}
+        currentDateStr={queryStart.toISOString()}
+        viewMode={view}
       />
     </div>
   );
