@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import Image from 'next/image';
 import { Menu, X } from 'lucide-react';
 
 const WA_URL = "https://wa.me/6281234567890?text=Halo%20tim%20BimbelSync,%20saya%20tertarik%20menggunakan%20platform%20ini.";
@@ -12,7 +13,7 @@ export function LandingHeader() {
     <header className="sticky top-0 z-50 bg-[#F8FAFC]/90 backdrop-blur-md border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
         <div className="flex items-center gap-2">
-          <img src="/logo.png" alt="BimbelSync Logo" className="object-contain rounded-[20%] w-8 h-8" />
+          <Image src="/logo.png" alt="BimbelSync Logo" width={32} height={32} className="object-contain rounded-[20%]" />
           <span className="text-xl font-bold tracking-tight text-slate-900">BimbelSync</span>
         </div>
         

@@ -1,7 +1,8 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { TenantNav } from "@/components/tenant-nav";
-import { TenantSearch } from "@/components/tenant-search";
+import { SearchBar } from "@/components/search-bar";
 import { UserAvatar } from "@/components/user-avatar";
 import { cookies } from "next/headers";
 import { decrypt } from "@/lib/auth";
@@ -38,7 +39,7 @@ export default async function DashboardLayout({
       <aside className="w-64 flex flex-col h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-20 transition-colors">
         <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-800 transition-colors">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="BimbelSync Logo" className="w-7 h-7 object-contain rounded-md" />
+            <Image src="/logo.png" alt="BimbelSync Logo" width={28} height={28} className="object-contain rounded-md" />
             <span className="text-xl font-bold text-slate-800 dark:text-white capitalize tracking-tight">
               BimbelSync
             </span>
@@ -58,7 +59,18 @@ export default async function DashboardLayout({
             <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 capitalize">{tenantSlug}</span>
           </div>
           <div className="flex items-center gap-5">
-            <TenantSearch />
+            <SearchBar
+              searchablePaths={["/master-data/", "/schedules", "/finance", "/audit-logs"]}
+              placeholderMap={{
+                "/master-data/students": "Cari nama atau username siswa...",
+                "/master-data/rooms": "Cari nama ruangan...",
+                "/master-data/programs": "Cari nama program...",
+                "/master-data/staff": "Cari nama atau email staf...",
+                "/schedules": "Cari program, ruangan, atau tutor...",
+                "/finance": "Cari nama siswa di tagihan...",
+                "/audit-logs": "Cari entitas atau aksi...",
+              }}
+            />
             <ThemeToggle />
             {dbUser && (
               <Link href={`/${tenantSlug}/dashboard/profile`} className="block hover:opacity-80 transition cursor-pointer" title="Edit Profile">
