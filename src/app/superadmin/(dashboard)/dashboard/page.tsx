@@ -37,6 +37,7 @@ export default async function SuperadminDashboard() {
       }),
       prisma.superadmin.count({ where: { deleted_at: null } }),
       prisma.auditLog.findMany({
+        where: { superadmin_id: { not: null } },
         orderBy: { created_at: "desc" },
         take: 5,
         include: { superadmin: { select: { name: true, email: true } } },
