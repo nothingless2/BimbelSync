@@ -2,8 +2,27 @@ import React from 'react';
 import { CheckCircle2, Check, Calendar, QrCode, MessageSquare, CreditCard, ArrowRight, Globe, Mail, X } from 'lucide-react';
 import { LandingHeader } from '@/components/landing-header';
 import prisma from '@/lib/prisma';
+import { Metadata } from 'next';
 
 const WA_URL = "https://wa.me/6281234567890?text=Halo%20tim%20BimbelSync,%20saya%20tertarik%20menggunakan%20platform%20ini.";
+
+export const metadata: Metadata = {
+  title: "BimbelSync | Software Manajemen & Operasional Bimbel Terbaik",
+  description: "BimbelSync adalah platform orkestrasi untuk bimbingan belajar. Kelola jadwal tutor, presensi QR cerdas, dan tagihan invoice otomatis dengan payment gateway. Coba sekarang!",
+  keywords: ["software bimbel", "aplikasi manajemen bimbel", "sistem informasi bimbel", "jadwal bimbel", "presensi siswa", "invoice otomatis"],
+  openGraph: {
+    title: "BimbelSync | Software Manajemen Bimbel Modern",
+    description: "Solusi lengkap kelola operasional, jadwal, dan tagihan bimbingan belajar.",
+    url: "https://bimbelsync.com",
+    siteName: "BimbelSync",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BimbelSync | Software Manajemen Bimbel Modern",
+    description: "Solusi lengkap kelola operasional, jadwal, dan tagihan bimbingan belajar.",
+  }
+};
 
 export default async function LandingPage() {
   const plans = await prisma.plan.findMany({
