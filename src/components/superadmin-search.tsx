@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Search } from "lucide-react";
 
 export function SuperadminSearch() {
@@ -17,10 +17,13 @@ export function SuperadminSearch() {
   const isSearchable = isAcademies || isUsers || isAuditLogs;
 
   const [query, setQuery] = useState(searchParams.get("q") || "");
+  const isTyping = useRef(false);
 
-  // Update local state if URL changes externally
+  // Update local state if URL changes externally, tapi JANGAN timpa jika user sedang mengetik
   useEffect(() => {
-    setQuery(searchParams.get("q") || "");
+    if (!isTyping.current) {
+      setQuery(searchParams.get("q") || "");
+    }
   }, [searchParams]);
 
   // Debounced search effect
@@ -44,8 +47,11 @@ export function SuperadminSearch() {
       if (currentQuery !== newQuery) {
         // Reset to page 1 if search changes
         if (params.has("page")) params.set("page", "1");
-        router.push(`${pathname}?${params.toString()}`);
+        router.replace(`${pathname}?${params.toString()}`);
       }
+      
+      // Setelah routing selesai diproses (kira-kira), izinkan sinkronisasi URL lagi
+      setTimeout(() => { isTyping.current = false; }, 100);
     }, 300); // 300ms debounce
 
     return () => clearTimeout(handler);
@@ -62,7 +68,10 @@ export function SuperadminSearch() {
         type="text" 
         placeholder={placeholder}
         value={isSearchable ? query : ""}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={(e) => {
+          isTyping.current = true;
+          setQuery(e.target.value);
+        }}
         disabled={!isSearchable}
         maxLength={100}
         className={`pl-9 pr-4 py-1.5 border-none rounded-lg text-sm outline-none transition-all ${

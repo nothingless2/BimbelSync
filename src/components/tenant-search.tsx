@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Search } from "lucide-react";
 
 export function TenantSearch() {
@@ -16,10 +16,13 @@ export function TenantSearch() {
                        pathname.includes("/audit-logs");
 
   const [query, setQuery] = useState(searchParams.get("q") || "");
+  const isTyping = useRef(false);
 
-  // Update local state if URL changes externally
+  // Update local state if URL changes externally (misal back/forward)
   useEffect(() => {
-    setQuery(searchParams.get("q") || "");
+    if (!isTyping.current) {
+      setQuery(searchParams.get("q") || "");
+    }
   }, [searchParams]);
 
   // Debounced search effect
@@ -41,8 +44,11 @@ export function TenantSearch() {
       
       if (currentQuery !== newQuery) {
         if (params.has("page")) params.set("page", "1");
-        router.push(`${pathname}?${params.toString()}`);
+        router.replace(`${pathname}?${params.toString()}`);
       }
+      
+      // Selesai ngetik dan routing
+      setTimeout(() => { isTyping.current = false; }, 100);
     }, 300); // 300ms debounce
 
     return () => clearTimeout(handler);
@@ -63,7 +69,10 @@ export function TenantSearch() {
         type="text" 
         placeholder={placeholder}
         value={isSearchable ? query : ""}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={(e) => {
+          isTyping.current = true;
+          setQuery(e.target.value);
+        }}
         disabled={!isSearchable}
         maxLength={100}
         className={`pl-9 pr-4 py-1.5 border-none rounded-lg text-sm outline-none transition-all ${
