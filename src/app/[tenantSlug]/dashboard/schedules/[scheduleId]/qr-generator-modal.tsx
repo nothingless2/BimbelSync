@@ -37,11 +37,9 @@ export function QrGeneratorModal({
   if (!isOpen) return null;
 
   // Data that will be embedded in the QR Code
-  const qrData = JSON.stringify({
-    scheduleId,
-    timestamp,
-    tenantSlug
-  });
+  // Create a direct URL for scanning so students can use native camera apps
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://bimbelsync.com';
+  const qrData = `${baseUrl}/${tenantSlug}/student/scan/${scheduleId}?t=${timestamp}`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">

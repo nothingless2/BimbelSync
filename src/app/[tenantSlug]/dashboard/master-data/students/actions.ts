@@ -66,7 +66,13 @@ export async function createStudentAction(formData: FormData) {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Create Student and Enrollment in a transaction
+    const program = await prisma.program.findUnique({
+      where: { id: programId }
+    });
+    
+    if (!program) return { error: "Program tidak ditemukan." };
+
+    // Create Student, Enrollment, and Invoice in a transaction
     await prisma.$transaction(async (tx) => {
       const student = await tx.student.create({
         data: {
@@ -82,6 +88,23 @@ export async function createStudentAction(formData: FormData) {
         data: {
           student_id: student.id,
           program_id: programId,
+        }
+      });
+
+      // Auto-generate invoice for the program fee
+      await tx.invoice.create({
+        data: {
+          academy_id: session.academy_id as string,
+          student_id: student.id,
+          total_amount: program.monthly_fee,
+          payment_option: "FULL",
+          payment_status: "UNPAID",
+          items: {
+            create: {
+              description: `Pendaftaran ${program.name}`,
+              amount: program.monthly_fee
+            }
+          }
         }
       });
     });
