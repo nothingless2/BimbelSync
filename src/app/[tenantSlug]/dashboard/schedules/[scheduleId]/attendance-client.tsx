@@ -68,7 +68,11 @@ export function AttendanceClient({
     if (result.error) {
       toast.error(result.error);
     } else {
-      toast.success("Berhasil menyimpan absensi!");
+      if (result.message) {
+        toast.info(result.message); // Gunakan info
+      } else {
+        toast.success("Berhasil menyimpan absensi!");
+      }
       router.push(`/${tenantSlug}/dashboard/schedules`);
     }
 

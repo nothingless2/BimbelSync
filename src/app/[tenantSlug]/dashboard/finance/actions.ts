@@ -50,7 +50,7 @@ export async function createInvoiceAction(formData: FormData) {
     await prisma.$transaction(async (tx) => {
       const invoice = await tx.invoice.create({
         data: {
-          academy_id: session.academy_id,
+          academy_id: session.academy_id as string,
           student_id: studentId,
           total_amount: totalAmount,
           payment_option: "FULL",
@@ -68,7 +68,7 @@ export async function createInvoiceAction(formData: FormData) {
     });
 
     await createAuditLog({
-      academy_id: session.academy_id,
+      academy_id: session.academy_id as string,
       staff_id: session.id,
       action: "CREATE",
       entity_type: "Invoice",
@@ -184,5 +184,80 @@ export async function deleteInvoiceAction(invoiceId: string) {
   } catch (error) {
     console.error("Error deleting invoice:", error);
     return { error: "Terjadi kesalahan internal saat menghapus tagihan." };
+  }
+}
+
+export async function splitInstallmentsAction(
+  invoiceId: string, 
+  installmentsData: { amount: number; due_date: string }[]
+) {
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
+  if (!sessionToken) return { error: "Autentikasi diperlukan." };
+
+  const session = await decrypt(sessionToken);
+  if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
+
+  try {
+    const invoice = await prisma.invoice.findUnique({
+      where: { id: invoiceId },
+      include: { academy: { include: { plan: true } } }
+    });
+
+    if (!invoice || invoice.academy_id !== session.academy_id) {
+      return { error: "Tagihan tidak ditemukan." };
+    }
+
+    if (invoice.payment_status === "PAID") {
+      return { error: "Tagihan sudah lunas, tidak bisa dipecah." };
+    }
+
+    if (!invoice.academy.plan?.allows_installment) {
+      return { error: "Fitur cicilan tidak tersedia untuk paket Anda." };
+    }
+
+    const totalAssigned = installmentsData.reduce((acc, curr) => acc + curr.amount, 0);
+    if (totalAssigned !== invoice.total_amount) {
+      return { error: "Total cicilan tidak sesuai dengan total tagihan." };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // 1. Ubah tipe pembayaran invoice
+      await tx.invoice.update({
+        where: { id: invoiceId },
+        data: { payment_option: "INSTALLMENT" }
+      });
+
+      // 2. Hapus installment lama (jika ada)
+      await tx.installment.deleteMany({
+        where: { invoice_id: invoiceId }
+      });
+
+      // 3. Buat installment baru
+      await tx.installment.createMany({
+        data: installmentsData.map((inst, idx) => ({
+          invoice_id: invoiceId,
+          installment_number: idx + 1,
+          due_date: new Date(inst.due_date),
+          amount: inst.amount,
+          status: "UNPAID"
+        }))
+      });
+    });
+
+    await createAuditLog({
+      academy_id: session.academy_id as string,
+      staff_id: session.id,
+      action: "UPDATE",
+      entity_type: "Invoice",
+      entity_id: invoiceId,
+      details: { action: "SPLIT_INSTALLMENT", terms: installmentsData.length }
+    });
+
+    revalidatePath(`/${session.tenant_slug}/dashboard/finance/${invoiceId}`);
+    return { success: true };
+  } catch (error) {
+    console.error("Error splitting installments:", error);
+    return { error: "Terjadi kesalahan internal saat memecah cicilan." };
   }
 }

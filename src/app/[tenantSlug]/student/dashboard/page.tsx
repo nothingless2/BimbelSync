@@ -105,7 +105,7 @@ export default async function StudentDashboardPage({
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="font-bold text-slate-900 dark:text-white text-lg">{schedule.program.name}</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Tutor: {schedule.tutor.full_name}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Tutor: {schedule.tutor.name}</p>
                 </div>
                 <div className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 py-1 rounded-lg text-sm font-bold flex items-center gap-1.5">
                   <Clock size={14} />

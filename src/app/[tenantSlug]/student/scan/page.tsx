@@ -61,7 +61,6 @@ export default function StudentScanPage() {
               <Scanner 
                 onScan={handleScan}
                 components={{
-                  audio: true,
                   onOff: true,
                   torch: true,
                   zoom: true,

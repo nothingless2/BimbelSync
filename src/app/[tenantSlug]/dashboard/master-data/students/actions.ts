@@ -70,7 +70,7 @@ export async function createStudentAction(formData: FormData) {
     await prisma.$transaction(async (tx) => {
       const student = await tx.student.create({
         data: {
-          academy_id: session.academy_id,
+          academy_id: session.academy_id as string,
           full_name: fullName,
           username,
           password_hash: passwordHash,
