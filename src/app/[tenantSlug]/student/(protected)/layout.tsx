@@ -1,9 +1,8 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { decrypt } from '@/lib/auth';
-import Link from 'next/link';
-import { Home, QrCode, User, CreditCard } from 'lucide-react';
 import { StudentMobileNav } from './mobile-nav';
+import { StudentDesktopNav } from './desktop-nav';
 
 export default async function StudentDashboardLayout({
   children,
@@ -37,12 +36,7 @@ export default async function StudentDashboardLayout({
           <span className="font-bold text-lg text-slate-900 dark:text-white">Portal Siswa</span>
         </div>
         
-        <nav className="flex-1 p-4 space-y-2">
-          <DesktopNavLink href={`/${tenantSlug}/student/dashboard`} icon={<Home size={20} />} label="Beranda" />
-          <DesktopNavLink href={`/${tenantSlug}/student/scan`} icon={<QrCode size={20} />} label="Scan Absen" />
-          <DesktopNavLink href={`/${tenantSlug}/student/invoices`} icon={<CreditCard size={20} />} label="Tagihan" />
-          <DesktopNavLink href={`/${tenantSlug}/student/profile`} icon={<User size={20} />} label="Profil" />
-        </nav>
+        <StudentDesktopNav tenantSlug={tenantSlug} />
       </aside>
 
       {/* Main Content */}
@@ -58,17 +52,7 @@ export default async function StudentDashboardLayout({
   );
 }
 
-function DesktopNavLink({ href, icon, label }: { href: string; icon: React.ReactNode; label: string }) {
-  return (
-    <Link 
-      href={href}
-      className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-400 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-xl transition-all font-medium"
-    >
-      {icon}
-      <span>{label}</span>
-    </Link>
-  );
-}
+
 
 // Temporary BookOpen icon just for desktop sidebar
 function BookOpen(props: any) {

@@ -76,8 +76,8 @@ export default function StudentLoginPage() {
 
         <div className="w-full max-w-md bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 sm:p-10 border border-slate-100">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-slate-900">Selamat Datang 👋</h2>
-            <p className="text-slate-500 text-sm mt-2">Silakan masuk menggunakan username yang diberikan oleh admin bimbelmu.</p>
+            <h2 className="text-2xl font-bold text-slate-900">Selamat Datang</h2>
+            <p className="text-slate-500 text-sm mt-2">Silakan masuk dengan menggunakan username.</p>
           </div>
 
           {errorMsg && (
