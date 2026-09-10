@@ -44,14 +44,11 @@ export default async function StudentDashboardPage({
     redirect(`/${tenantSlug}/student/login`);
   }
 
-  // Cari jadwal hari ini (yang belum selesai)
+  // Cari jadwal mendatang (mulai dari hari ini)
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
 
-  const todaySchedules = await prisma.schedule.findMany({
+  const upcomingSchedules = await prisma.schedule.findMany({
     where: {
       program: {
         academy_id: session.academy_id,
@@ -59,11 +56,8 @@ export default async function StudentDashboardPage({
           some: { student_id: session.id, status: 'ACTIVE' }
         }
       },
-      // Note: we don't have day_of_week in Schedule model, it has start_time and end_time.
-      // So we should filter by start_time between today and tomorrow.
       start_time: {
-        gte: today,
-        lt: tomorrow
+        gte: today
       },
       status: 'SCHEDULED'
     },
@@ -74,7 +68,8 @@ export default async function StudentDashboardPage({
     },
     orderBy: {
       start_time: 'asc'
-    }
+    },
+    take: 10 // Ambil 10 jadwal terdekat
   });
 
   return (
@@ -95,21 +90,27 @@ export default async function StudentDashboardPage({
         </div>
       </div>
 
-      {/* Today's Classes */}
-      <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Jadwal Hari Ini</h2>
+      {/* Upcoming Classes */}
+      <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Jadwal Mendatang</h2>
       
-      {todaySchedules.length > 0 ? (
+      {upcomingSchedules.length > 0 ? (
         <div className="space-y-4 mb-10">
-          {todaySchedules.map(schedule => (
+          {upcomingSchedules.map(schedule => (
             <div key={schedule.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="font-bold text-slate-900 dark:text-white text-lg">{schedule.program.name}</h3>
                   <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Tutor: {schedule.tutor.name}</p>
                 </div>
-                <div className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 py-1 rounded-lg text-sm font-bold flex items-center gap-1.5">
-                  <Clock size={14} />
-                  {format(new Date(schedule.start_time), 'HH:mm')} - {format(new Date(schedule.end_time), 'HH:mm')}
+                <div className="flex flex-col items-end gap-1">
+                  <div className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5">
+                    <Calendar size={12} />
+                    {format(new Date(schedule.start_time), 'EEEE, d MMM yyyy', { locale: id })}
+                  </div>
+                  <div className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 py-1 rounded-lg text-sm font-bold flex items-center gap-1.5">
+                    <Clock size={14} />
+                    {format(new Date(schedule.start_time), 'HH:mm')} - {format(new Date(schedule.end_time), 'HH:mm')}
+                  </div>
                 </div>
               </div>
               
@@ -125,8 +126,8 @@ export default async function StudentDashboardPage({
           <div className="bg-white dark:bg-slate-800 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
             <Calendar size={24} className="text-slate-400" />
           </div>
-          <h3 className="font-semibold text-slate-900 dark:text-white">Tidak ada jadwal hari ini</h3>
-          <p className="text-sm text-slate-500 mt-1">Waktunya istirahat atau belajar mandiri!</p>
+          <h3 className="font-semibold text-slate-900 dark:text-white">Tidak ada jadwal mendatang</h3>
+          <p className="text-sm text-slate-500 mt-1">Belum ada kelas yang dijadwalkan untuk Anda.</p>
         </div>
       )}
 

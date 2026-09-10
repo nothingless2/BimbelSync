@@ -216,23 +216,23 @@ export default function SchedulesClientPage({
                         );
 
                         return (
-                          <div key={dayIdx} className="p-2 min-h-[120px] bg-white dark:bg-[#111827]">
-                            <div className="space-y-2">
+                          <div key={dayIdx} className="p-1.5 min-h-[100px] max-h-[200px] overflow-y-auto bg-white dark:bg-[#111827] custom-scrollbar">
+                            <div className="space-y-1.5">
                               {daySchedules.map((sch) => {
                                 const isCancelled = sch.status === 'CANCELLED';
                                 return (
                                   <div 
                                     key={sch.id} 
-                                    className={`relative group p-3 rounded-xl border text-left cursor-pointer hover:opacity-90 ${
+                                    className={`relative group p-2 rounded-lg border text-left cursor-pointer hover:opacity-90 ${
                                       isCancelled 
                                         ? 'bg-red-50 border-red-100 dark:bg-red-900/10 dark:border-red-900/30' 
                                         : 'bg-blue-50 border-blue-100 dark:bg-blue-900/10 dark:border-blue-900/30'
                                     }`}
                                     onClick={() => router.push(`/${tenantSlug}/dashboard/schedules/${sch.id}`)}
                                   >
-                                    <div className="flex items-start justify-between mb-1.5">
-                                      <div className={`text-[11px] font-bold flex items-center gap-1 ${isCancelled ? 'text-red-600 dark:text-red-400' : 'text-blue-700 dark:text-blue-400'}`}>
-                                        <Clock size={12} />
+                                    <div className="flex items-start justify-between mb-1">
+                                      <div className={`text-[10px] font-bold flex items-center gap-1 ${isCancelled ? 'text-red-600 dark:text-red-400' : 'text-blue-700 dark:text-blue-400'}`}>
+                                        <Clock size={10} />
                                         {formatTime(sch.start_time)} - {formatTime(sch.end_time)}
                                       </div>
 
@@ -257,13 +257,13 @@ export default function SchedulesClientPage({
                                       )}
                                     </div>
                                     
-                                    <div className={`font-bold text-sm leading-tight mb-2 ${isCancelled ? 'text-slate-500 line-through' : 'text-slate-900 dark:text-white'}`}>
+                                    <div className={`font-bold text-[12px] leading-tight mb-1 ${isCancelled ? 'text-slate-500 line-through' : 'text-slate-900 dark:text-white'}`}>
                                       {sch.program.name}
                                     </div>
                                     
-                                    <div className={`text-[11px] font-medium flex flex-wrap gap-x-2 gap-y-1 ${isCancelled ? 'text-red-500/70' : 'text-blue-600/70 dark:text-blue-400/70'}`}>
+                                    <div className={`text-[10px] font-medium flex flex-wrap gap-x-2 gap-y-1 ${isCancelled ? 'text-red-500/70' : 'text-blue-600/70 dark:text-blue-400/70'}`}>
                                       <div className="flex items-center gap-1">
-                                        <User size={12} />
+                                        <User size={10} />
                                         <span className="truncate max-w-[80px]">{sch.tutor.name || sch.tutor.email}</span>
                                       </div>
                                     </div>

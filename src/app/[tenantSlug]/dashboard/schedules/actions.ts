@@ -45,6 +45,50 @@ export async function createScheduleAction(formData: FormData) {
       return { error: "Data program, tutor, atau ruangan tidak valid atau sudah dihapus." };
     }
 
+    // ----------------------------------------------------
+    // ANTI-COLLISION / BENTROK LOGIC
+    // ----------------------------------------------------
+    // Cek apakah ada jadwal aktif yang beririsan waktu pada ruang atau tutor yang sama
+    const overlappingSchedule = await prisma.schedule.findFirst({
+      where: {
+        status: "SCHEDULED", // Hanya pedulikan jadwal yang belum dibatalkan
+        program: {
+          academy_id: session.academy_id
+        },
+        OR: [
+          { room_id: roomId },
+          { tutor_id: tutorId }
+        ],
+        AND: [
+          { start_time: { lt: endDateTime } },
+          { end_time: { gt: startDateTime } }
+        ]
+      },
+      include: {
+        room: true,
+        tutor: true,
+        program: true
+      }
+    });
+
+    if (overlappingSchedule) {
+      const isRoomClash = overlappingSchedule.room_id === roomId;
+      const isTutorClash = overlappingSchedule.tutor_id === tutorId;
+      
+      const timeStr = `${overlappingSchedule.start_time.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'})} - ${overlappingSchedule.end_time.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'})}`;
+      
+      if (isRoomClash && isTutorClash) {
+        return { error: `BENTROK! Ruangan ${overlappingSchedule.room.name} dan Tutor ${overlappingSchedule.tutor.name} sedang dipakai untuk ${overlappingSchedule.program.name} pada jam ${timeStr}.` };
+      }
+      if (isRoomClash) {
+        return { error: `BENTROK RUANGAN! Ruang ${overlappingSchedule.room.name} sedang dipakai untuk program ${overlappingSchedule.program.name} pada jam ${timeStr}.` };
+      }
+      if (isTutorClash) {
+        return { error: `BENTROK TUTOR! Tutor ${overlappingSchedule.tutor.name || overlappingSchedule.tutor.email} sedang mengajar program ${overlappingSchedule.program.name} di ruang ${overlappingSchedule.room.name} pada jam ${timeStr}.` };
+      }
+    }
+    // ----------------------------------------------------
+
     await prisma.schedule.create({
       data: {
         program_id: programId,
