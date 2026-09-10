@@ -7,6 +7,7 @@ type Theme = "dark" | "light" | "system";
 type ThemeProviderProps = {
   children: React.ReactNode;
   defaultTheme?: Theme;
+  forcedTheme?: Theme;
   enableSystem?: boolean;
   disableTransitionOnChange?: boolean;
   attribute?: string;
@@ -24,19 +25,25 @@ const ThemeProviderContext = React.createContext<ThemeProviderState | undefined>
 export function ThemeProvider({
   children,
   defaultTheme = "system",
+  forcedTheme,
   enableSystem = true,
   disableTransitionOnChange = false,
   attribute = "class",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = React.useState<Theme>(defaultTheme);
+  const [theme, setTheme] = React.useState<Theme>(forcedTheme ?? defaultTheme);
 
   React.useEffect(() => {
+    // Jika forcedTheme diset, abaikan localStorage dan paksa tema tersebut
+    if (forcedTheme) {
+      setTheme(forcedTheme);
+      return;
+    }
     const savedTheme = localStorage.getItem("theme") as Theme | null;
     if (savedTheme) {
       setTheme(savedTheme);
     }
-  }, []);
+  }, [forcedTheme]);
 
   React.useEffect(() => {
     const root = window.document.documentElement;
