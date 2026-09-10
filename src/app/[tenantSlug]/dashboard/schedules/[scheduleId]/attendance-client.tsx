@@ -6,8 +6,8 @@ import { toast } from "@/components/ui/sonner";
 import { saveAttendancesAction, AttendancePayload } from "./actions";
 import { AttendanceStatus, Student, Attendance } from "@prisma/client";
 import { useRouter } from "next/navigation";
-import { QrCode } from "lucide-react";
-import { QrGeneratorModal } from "./qr-generator-modal";
+import { QrCode, MonitorPlay } from "lucide-react";
+import Link from "next/link";
 
 type StudentWithAttendance = {
   student: Student;
@@ -25,7 +25,6 @@ export function AttendanceClient({
 }) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
-  const [isQrMode, setIsQrMode] = useState(false);
   
   // State untuk menyimpan nilai absensi lokal sebelum disimpan ke server
   const [attendanceState, setAttendanceState] = useState<Record<string, AttendanceStatus>>(
@@ -89,13 +88,14 @@ export function AttendanceClient({
         </div>
         
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setIsQrMode(true)}
+          <Link
+            href={`/${tenantSlug}/present/${scheduleId}`}
+            target="_blank"
             className="flex items-center gap-2 px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-semibold text-sm hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors shadow-sm"
           >
-            <QrCode size={18} />
-            Mode QR Scanner
-          </button>
+            <MonitorPlay size={18} />
+            Tampilkan di TV / Layar
+          </Link>
           
           <div className="flex items-center gap-2 text-sm bg-white dark:bg-slate-900 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800">
             <span className="font-semibold text-slate-700 dark:text-slate-300">Statistik:</span>
@@ -184,13 +184,6 @@ export function AttendanceClient({
           {isSaving ? "Menyimpan..." : "Simpan Absensi"}
         </button>
       </div>
-
-      <QrGeneratorModal 
-        isOpen={isQrMode} 
-        onClose={() => setIsQrMode(false)} 
-        scheduleId={scheduleId}
-        tenantSlug={tenantSlug}
-      />
     </div>
   );
 }

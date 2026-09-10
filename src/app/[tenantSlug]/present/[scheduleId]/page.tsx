@@ -13,10 +13,13 @@ export default async function PresentSchedulePage({
   const schedule = await prisma.schedule.findUnique({
     where: { id: scheduleId },
     include: {
-      program: true,
+      program: {
+        include: {
+          academy: true
+        }
+      },
       room: true,
-      tutor: true,
-      academy: true
+      tutor: true
     }
   });
 
@@ -25,7 +28,7 @@ export default async function PresentSchedulePage({
   }
 
   // Ensure the URL tenant matches the schedule's academy path_url
-  if (schedule.academy.path_url !== tenantSlug) {
+  if (schedule.program.academy.path_url !== tenantSlug) {
     notFound();
   }
 
