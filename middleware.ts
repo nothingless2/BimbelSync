@@ -46,7 +46,6 @@ export async function middleware(req: NextRequest) {
   if (pathParts.length > 0) {
     const tenantSlug = pathParts[0];
     
-    // Abaikan sistem file Next.js
     if (!['api', '_next', 'favicon.ico', 'internal'].includes(tenantSlug)) {
       
       // Jika user mencoba mengakses /student/... tanpa menyebutkan slug bimbel di depannya
