@@ -49,10 +49,15 @@ export async function middleware(req: NextRequest) {
     // Abaikan sistem file Next.js
     if (!['api', '_next', 'favicon.ico', 'internal'].includes(tenantSlug)) {
       
+      // Jika user mencoba mengakses /student/... tanpa menyebutkan slug bimbel di depannya
+      if (tenantSlug === 'student') {
+        return NextResponse.rewrite(new URL('/404', req.url));
+      }
+      
       const isDashboard = pathParts[1] === 'dashboard';
-      const isSiswa = pathParts[1] === 'siswa';
+      const isSiswa = pathParts[1] === 'student';
       const isLoginStaff = pathParts[1] === 'login';
-      const isLoginSiswa = pathParts[1] === 'siswa' && pathParts[2] === 'login';
+      const isLoginSiswa = pathParts[1] === 'student' && pathParts[2] === 'login';
 
       // Proteksi /dashboard (Hanya untuk Admin / Tutor)
       if (isDashboard) {
@@ -69,14 +74,19 @@ export async function middleware(req: NextRequest) {
         }
       }
       
-      // Proteksi /siswa (Hanya untuk Student)
+      // Proteksi /student (Hanya untuk Student)
       if (isSiswa && !isLoginSiswa) {
         if (!session || session.role !== 'STUDENT') {
-          return NextResponse.redirect(new URL(`/${tenantSlug}/siswa/login`, req.url));
+          return NextResponse.redirect(new URL(`/${tenantSlug}/student/login`, req.url));
         }
         // Cegah Siswa lompat ke bimbel orang lain
         if (session.tenant_slug !== tenantSlug){
-            return NextResponse.redirect(new URL(`/${session.tenant_slug}/siswa`, req.url));
+            return NextResponse.redirect(new URL(`/${session.tenant_slug}/student/dashboard`, req.url));
+        }
+        
+        // Proteksi jika mengakses /student langsung tanpa sub-path
+        if (pathParts.length === 2) { // just /[tenantSlug]/student
+          return NextResponse.redirect(new URL(`/${tenantSlug}/student/dashboard`, req.url));
         }
       }
     }

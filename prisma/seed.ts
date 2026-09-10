@@ -94,7 +94,31 @@ async function main() {
       password_hash: superadminPassword,
     },
   });
-  console.log(' Seeder selesai!');
+
+  // 5. Buat Akun Siswa Dummy
+  const studentPassword = await bcrypt.hash('siswa123', 10);
+  await prisma.student.upsert({
+    where: {
+      academy_id_username: {
+        academy_id: academy.id,
+        username: 'andibudi123',
+      },
+    },
+    update: {
+      password_hash: studentPassword,
+      must_change_password: true
+    },
+    create: {
+      academy_id: academy.id,
+      full_name: 'Andi Budianto',
+      username: 'andibudi123',
+      password_hash: studentPassword,
+      must_change_password: true,
+      parent_whatsapp: '081234567890'
+    },
+  });
+
+  console.log('Seed berhasil ditambahkan!');
 
 }
 

@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@prisma/client": "^6.12.0",
+    "@yudiel/react-qr-scanner": "^2.6.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "date-fns": "^4.4.0",
@@ -20,6 +21,7 @@
     "lucide-react": "^1.39.0",
     "next": "16.3.3",
     "next-themes": "^0.4.6",
+    "qrcode.react": "^4.2.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "recharts": "^3.10.1",

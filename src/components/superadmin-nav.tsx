@@ -16,8 +16,11 @@ const navItems = [
 export function SuperadminNav() {
   const pathname = usePathname();
 
-  const isActive = (href: string, exact?: boolean) =>
-    exact ? pathname === href : pathname.startsWith(href);
+  const isActive = (href: string, exact?: boolean) => {
+    if (exact) return pathname === href;
+    if (href === "/superadmin/users" && pathname.startsWith("/superadmin/users/profile")) return false;
+    return pathname.startsWith(href);
+  };
 
   return (
     <>
