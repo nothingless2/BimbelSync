@@ -6,7 +6,6 @@ import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { CreditCard, ArrowRight, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import Link from "next/link";
-import { StudentMobileNav } from "../dashboard/mobile-nav";
 
 export default async function StudentInvoicesPage({
   params
@@ -119,8 +118,6 @@ export default async function StudentInvoicesPage({
           })
         )}
       </div>
-
-      <StudentMobileNav tenantSlug={tenantSlug} />
     </div>
   );
 }
