@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Clock, MapPin, User, MoreVertical, Trash2, Calendar as CalendarIcon, Grid } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, MapPin, User, MoreVertical, Trash2, Calendar as CalendarIcon, Grid, ArrowRight } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { deleteScheduleAction } from "./actions";
 import { CancelScheduleModal } from "@/components/modals/cancel-schedule-modal";
@@ -246,19 +246,7 @@ export default function SchedulesClientPage({
                                         <MoreVertical size={14} />
                                       </button>
 
-                                      {openDropdownId === sch.id && (
-                                        <div className="absolute top-8 right-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden">
-                                          <button type="button" onClick={(e) => { e.stopPropagation(); router.push(`/${tenantSlug}/dashboard/schedules/${sch.id}`); setOpenDropdownId(null); }} className="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 font-medium text-slate-700 dark:text-slate-300">Lihat Detail & Absensi</button>
-                                          {!isCancelled && !isTutor && (
-                                            <button type="button" onClick={(e) => { e.stopPropagation(); setCancellingSchedule(sch); setOpenDropdownId(null); }} className="w-full text-left px-4 py-3 text-sm hover:bg-amber-50 dark:hover:bg-amber-900/20 font-medium text-amber-600 dark:text-amber-500">Batalkan Jadwal</button>
-                                          )}
-                                          {!isTutor && (
-                                            <button type="button" onClick={(e) => { e.stopPropagation(); handleDelete(sch); }} className="w-full text-left px-4 py-3 text-sm hover:bg-red-50 dark:hover:bg-red-900/20 font-medium text-red-600 dark:text-red-500 flex items-center justify-between group-hover:text-red-700">
-                                              Hapus Permanen <Trash2 size={14} />
-                                            </button>
-                                          )}
-                                        </div>
-                                      )}
+
                                     </div>
                                     
                                     <div className={`font-bold text-[12px] leading-tight mb-1 ${isCancelled ? 'text-slate-500 line-through' : 'text-slate-900 dark:text-white'}`}>
@@ -375,12 +363,70 @@ export default function SchedulesClientPage({
         />
       )}
 
-      {/* Close dropdowns when clicking outside */}
+      {/* Action Menu Modal (replaces inline dropdown to prevent clipping) */}
       {openDropdownId && (
-        <div 
-          className="fixed inset-0 z-40" 
-          onClick={() => setOpenDropdownId(null)}
-        />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" 
+            onClick={() => setOpenDropdownId(null)}
+          />
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 w-full max-w-sm overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200 relative">
+            <div className="p-4 border-b border-slate-100 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
+              <h3 className="font-bold text-slate-900 dark:text-white">Opsi Jadwal</h3>
+              <button onClick={() => setOpenDropdownId(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                &times;
+              </button>
+            </div>
+            
+            {(() => {
+              const activeSch = schedules.find(s => s.id === openDropdownId);
+              if (!activeSch) return null;
+              
+              const isCancelled = activeSch.status === 'CANCELLED';
+              
+              return (
+                <div className="flex flex-col">
+                  <button 
+                    type="button" 
+                    onClick={() => { router.push(`/${tenantSlug}/dashboard/schedules/${activeSch.id}`); setOpenDropdownId(null); }} 
+                    className="w-full text-left px-5 py-4 text-sm hover:bg-slate-50 dark:hover:bg-slate-700/50 font-medium text-slate-700 dark:text-slate-200 flex items-center gap-3 transition-colors"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                      <ArrowRight size={16} />
+                    </div>
+                    Lihat Detail & Absensi
+                  </button>
+                  
+                  {!isCancelled && !isTutor && (
+                    <button 
+                      type="button" 
+                      onClick={() => { setCancellingSchedule(activeSch); setOpenDropdownId(null); }} 
+                      className="w-full text-left px-5 py-4 text-sm hover:bg-amber-50 dark:hover:bg-amber-900/20 font-medium text-amber-600 dark:text-amber-500 flex items-center gap-3 transition-colors border-t border-slate-100 dark:border-slate-700/50"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                        <MoreVertical size={16} />
+                      </div>
+                      Batalkan Jadwal
+                    </button>
+                  )}
+                  
+                  {!isTutor && (
+                    <button 
+                      type="button" 
+                      onClick={() => { handleDelete(activeSch); }} 
+                      className="w-full text-left px-5 py-4 text-sm hover:bg-red-50 dark:hover:bg-red-900/20 font-medium text-red-600 dark:text-red-500 flex items-center gap-3 transition-colors group border-t border-slate-100 dark:border-slate-700/50"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center group-hover:bg-red-200 dark:group-hover:bg-red-900/50 transition-colors">
+                        <Trash2 size={16} />
+                      </div>
+                      Hapus Permanen
+                    </button>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+        </div>
       )}
     </>
   );
