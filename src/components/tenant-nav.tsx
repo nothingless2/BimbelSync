@@ -26,35 +26,39 @@ export function TenantNav({ tenantSlug, userRole }: { tenantSlug: string, userRo
           active={pathname === `/${tenantSlug}/dashboard`} 
         />
         
-        <div className="pt-6 pb-2">
-          <p className="px-3 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Master Data
-          </p>
-        </div>
-        <NavItem 
-          href={`/${tenantSlug}/dashboard/master-data/rooms`} 
-          icon={<Box size={18} />} 
-          label="Rooms" 
-          active={isRouteActive(`/${tenantSlug}/dashboard/master-data/rooms`)} 
-        />
-        <NavItem 
-          href={`/${tenantSlug}/dashboard/master-data/programs`} 
-          icon={<BookOpen size={18} />} 
-          label="Programs" 
-          active={isRouteActive(`/${tenantSlug}/dashboard/master-data/programs`)} 
-        />
-        <NavItem 
-          href={`/${tenantSlug}/dashboard/master-data/students`} 
-          icon={<Users size={18} />} 
-          label="Students" 
-          active={isRouteActive(`/${tenantSlug}/dashboard/master-data/students`)} 
-        />
-        <NavItem 
-          href={`/${tenantSlug}/dashboard/master-data/staff`} 
-          icon={<UserCog size={18} />} 
-          label="Staff" 
-          active={isRouteActive(`/${tenantSlug}/dashboard/master-data/staff`)} 
-        />
+        {userRole !== 'TUTOR' && (
+          <>
+            <div className="pt-6 pb-2">
+              <p className="px-3 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Master Data
+              </p>
+            </div>
+            <NavItem 
+              href={`/${tenantSlug}/dashboard/master-data/rooms`} 
+              icon={<Box size={18} />} 
+              label="Rooms" 
+              active={isRouteActive(`/${tenantSlug}/dashboard/master-data/rooms`)} 
+            />
+            <NavItem 
+              href={`/${tenantSlug}/dashboard/master-data/programs`} 
+              icon={<BookOpen size={18} />} 
+              label="Programs" 
+              active={isRouteActive(`/${tenantSlug}/dashboard/master-data/programs`)} 
+            />
+            <NavItem 
+              href={`/${tenantSlug}/dashboard/master-data/students`} 
+              icon={<Users size={18} />} 
+              label="Students" 
+              active={isRouteActive(`/${tenantSlug}/dashboard/master-data/students`)} 
+            />
+            <NavItem 
+              href={`/${tenantSlug}/dashboard/master-data/staff`} 
+              icon={<UserCog size={18} />} 
+              label="Staff" 
+              active={isRouteActive(`/${tenantSlug}/dashboard/master-data/staff`)} 
+            />
+          </>
+        )}
 
         <div className="pt-6 pb-2">
           <p className="px-3 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
@@ -67,12 +71,14 @@ export function TenantNav({ tenantSlug, userRole }: { tenantSlug: string, userRo
           label="Schedules & Attendance" 
           active={isRouteActive(`/${tenantSlug}/dashboard/schedules`)} 
         />
-        <NavItem 
-          href={`/${tenantSlug}/dashboard/finance`} 
-          icon={<CreditCard size={18} />} 
-          label="Finance" 
-          active={isRouteActive(`/${tenantSlug}/dashboard/finance`)} 
-        />
+        {userRole !== 'TUTOR' && (
+          <NavItem 
+            href={`/${tenantSlug}/dashboard/finance`} 
+            icon={<CreditCard size={18} />} 
+            label="Finance" 
+            active={isRouteActive(`/${tenantSlug}/dashboard/finance`)} 
+          />
+        )}
         
         {userRole === 'ADMIN' && (
           <>

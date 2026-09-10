@@ -7,6 +7,7 @@ import { id } from "date-fns/locale";
 
 interface DashboardClientProps {
   tenantSlug: string;
+  userRole: string;
   totalStudents: number;
   todayClassesCount: number;
   totalUnpaid: number;
@@ -16,6 +17,7 @@ interface DashboardClientProps {
 
 export default function DashboardClientPage({
   tenantSlug,
+  userRole,
   totalStudents,
   todayClassesCount,
   totalUnpaid,
@@ -36,54 +38,58 @@ export default function DashboardClientPage({
         </p>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="p-6 rounded-3xl bg-gradient-to-br from-blue-600 to-blue-800 border border-blue-700 shadow-lg relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110">
-            <Users size={120} />
-          </div>
-          <div className="relative z-10">
-            <h3 className="text-sm font-bold text-blue-100 uppercase tracking-wider mb-2">Total Siswa Aktif</h3>
-            <p className="text-4xl font-black text-white">{totalStudents}</p>
-          </div>
-        </div>
-        
-        <div className="p-6 rounded-3xl bg-gradient-to-br from-emerald-500 to-emerald-700 border border-emerald-600 shadow-lg relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110">
-            <BookOpen size={120} />
-          </div>
-          <div className="relative z-10">
-            <h3 className="text-sm font-bold text-emerald-100 uppercase tracking-wider mb-2">Kelas Hari Ini</h3>
-            <p className="text-4xl font-black text-white">{todayClassesCount}</p>
-          </div>
-        </div>
+      {userRole !== 'TUTOR' && (
+        <>
+          {/* KPI Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-blue-600 to-blue-800 border border-blue-700 shadow-lg relative overflow-hidden group">
+              <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110">
+                <Users size={120} />
+              </div>
+              <div className="relative z-10">
+                <h3 className="text-sm font-bold text-blue-100 uppercase tracking-wider mb-2">Total Siswa Aktif</h3>
+                <p className="text-4xl font-black text-white">{totalStudents}</p>
+              </div>
+            </div>
+            
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-emerald-500 to-emerald-700 border border-emerald-600 shadow-lg relative overflow-hidden group">
+              <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110">
+                <BookOpen size={120} />
+              </div>
+              <div className="relative z-10">
+                <h3 className="text-sm font-bold text-emerald-100 uppercase tracking-wider mb-2">Kelas Hari Ini</h3>
+                <p className="text-4xl font-black text-white">{todayClassesCount}</p>
+              </div>
+            </div>
 
-        <div className="p-6 rounded-3xl bg-gradient-to-br from-rose-500 to-rose-700 border border-rose-600 shadow-lg relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110">
-            <Receipt size={120} />
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-rose-500 to-rose-700 border border-rose-600 shadow-lg relative overflow-hidden group">
+              <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110">
+                <Receipt size={120} />
+              </div>
+              <div className="relative z-10">
+                <h3 className="text-sm font-bold text-rose-100 uppercase tracking-wider mb-2">Tunggakan (Piutang)</h3>
+                <p className="text-4xl font-black text-white">{formatRupiah(totalUnpaid)}</p>
+              </div>
+            </div>
           </div>
-          <div className="relative z-10">
-            <h3 className="text-sm font-bold text-rose-100 uppercase tracking-wider mb-2">Tunggakan (Piutang)</h3>
-            <p className="text-4xl font-black text-white">{formatRupiah(totalUnpaid)}</p>
-          </div>
-        </div>
-      </div>
 
-      {/* Quick Actions */}
-      <div className="flex flex-wrap gap-4">
-        <Link href={`/${tenantSlug}/dashboard/master-data/students`} className="flex items-center gap-2 px-5 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-blue-500 hover:text-blue-600 dark:hover:border-blue-500 transition-colors shadow-sm text-sm font-semibold text-slate-700 dark:text-slate-200">
-          <UserPlus size={18} />
-          Tambah Siswa Baru
-        </Link>
-        <Link href={`/${tenantSlug}/dashboard/schedules`} className="flex items-center gap-2 px-5 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-emerald-500 hover:text-emerald-600 dark:hover:border-emerald-500 transition-colors shadow-sm text-sm font-semibold text-slate-700 dark:text-slate-200">
-          <CalendarPlus size={18} />
-          Kelola Jadwal
-        </Link>
-        <Link href={`/${tenantSlug}/dashboard/finance`} className="flex items-center gap-2 px-5 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-amber-500 hover:text-amber-600 dark:hover:border-amber-500 transition-colors shadow-sm text-sm font-semibold text-slate-700 dark:text-slate-200">
-          <FileText size={18} />
-          Lihat Tagihan
-        </Link>
-      </div>
+          {/* Quick Actions */}
+          <div className="flex flex-wrap gap-4">
+            <Link href={`/${tenantSlug}/dashboard/master-data/students`} className="flex items-center gap-2 px-5 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-blue-500 hover:text-blue-600 dark:hover:border-blue-500 transition-colors shadow-sm text-sm font-semibold text-slate-700 dark:text-slate-200">
+              <UserPlus size={18} />
+              Tambah Siswa Baru
+            </Link>
+            <Link href={`/${tenantSlug}/dashboard/schedules`} className="flex items-center gap-2 px-5 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-emerald-500 hover:text-emerald-600 dark:hover:border-emerald-500 transition-colors shadow-sm text-sm font-semibold text-slate-700 dark:text-slate-200">
+              <CalendarPlus size={18} />
+              Kelola Jadwal
+            </Link>
+            <Link href={`/${tenantSlug}/dashboard/finance`} className="flex items-center gap-2 px-5 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-amber-500 hover:text-amber-600 dark:hover:border-amber-500 transition-colors shadow-sm text-sm font-semibold text-slate-700 dark:text-slate-200">
+              <FileText size={18} />
+              Lihat Tagihan
+            </Link>
+          </div>
+        </>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
@@ -131,40 +137,42 @@ export default function DashboardClientPage({
           </div>
         </div>
 
-        {/* Kolom Kanan (Lebar: 1): Pembayaran Terakhir */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <CheckCircle2 className="text-emerald-500" size={20} />
-              Pembayaran Terakhir
-            </h3>
-          </div>
+        {/* Kolom Kanan (Lebar: 1): Pembayaran Terakhir (Hanya Admin) */}
+        {userRole !== 'TUTOR' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <CheckCircle2 className="text-emerald-500" size={20} />
+                Pembayaran Terakhir
+              </h3>
+            </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-            {recentPayments.length === 0 ? (
-              <div className="p-8 text-center">
-                <p className="text-sm text-slate-500">Belum ada data pembayaran lunas.</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                {recentPayments.map((payment) => (
-                  <div key={payment.id} className="p-5 flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
-                      <CheckCircle2 size={18} />
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+              {recentPayments.length === 0 ? (
+                <div className="p-8 text-center">
+                  <p className="text-sm text-slate-500">Belum ada data pembayaran lunas.</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {recentPayments.map((payment) => (
+                    <div key={payment.id} className="p-5 flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                        <CheckCircle2 size={18} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{payment.student?.full_name}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Lunas</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-bold text-emerald-600 dark:text-emerald-500">+{formatRupiah(payment.total_amount)}</p>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{payment.student?.full_name}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Lunas</p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-sm font-bold text-emerald-600 dark:text-emerald-500">+{formatRupiah(payment.total_amount)}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
       </div>
     </div>

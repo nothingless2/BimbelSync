@@ -50,12 +50,20 @@ export default async function SchedulesPage({
     redirect(`/${tenantSlug}/login`);
   }
 
+  const dbUser = await prisma.staff.findUnique({
+    where: { id: session.id },
+    select: { role: true }
+  });
+
+  const isTutor = dbUser?.role === 'TUTOR';
+
   // Fetch all schedules for this academy with their relations
   // Concurrent fetch for optimum performance
   const [schedules, programs, rooms, tutors] = await Promise.all([
     prisma.schedule.findMany({
       where: {
         program: { academy_id: session.academy_id },
+        ...(isTutor ? { tutor_id: session.id } : {}),
         start_time: {
           gte: queryStart,
           lt: queryEnd
@@ -90,15 +98,19 @@ export default async function SchedulesPage({
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Jadwal Kelas</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Kelola perencanaan kelas reguler maupun pertemuan intensif di bimbel Anda.
+            {isTutor 
+              ? "Lihat jadwal mengajar Anda."
+              : "Kelola perencanaan kelas reguler maupun pertemuan intensif di bimbel Anda."}
           </p>
         </div>
         
-        <AddScheduleModal 
-          programs={programs} 
-          rooms={rooms} 
-          tutors={tutors} 
-        />
+        {!isTutor && (
+          <AddScheduleModal 
+            programs={programs} 
+            rooms={rooms} 
+            tutors={tutors} 
+          />
+        )}
       </div>
 
       <SchedulesClientPage 
@@ -107,6 +119,7 @@ export default async function SchedulesPage({
         tenantSlug={tenantSlug} 
         currentDateStr={queryStart.toISOString()}
         viewMode={view}
+        isTutor={isTutor}
       />
     </div>
   );

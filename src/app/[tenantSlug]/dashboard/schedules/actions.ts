@@ -14,6 +14,9 @@ export async function createScheduleAction(formData: FormData) {
   const session = await decrypt(sessionToken);
   if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
 
+  const staff = await prisma.staff.findUnique({ where: { id: session.id }, select: { role: true } });
+  if (staff?.role === 'TUTOR') return { error: "Akses ditolak untuk peran Tutor." };
+
   const programId = formData.get("program_id") as string;
   const tutorId = formData.get("tutor_id") as string;
   const roomId = formData.get("room_id") as string;
@@ -124,6 +127,9 @@ export async function cancelScheduleAction(scheduleId: string, reason: string) {
   const session = await decrypt(sessionToken);
   if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
 
+  const staff = await prisma.staff.findUnique({ where: { id: session.id }, select: { role: true } });
+  if (staff?.role === 'TUTOR') return { error: "Akses ditolak untuk peran Tutor." };
+
   if (!reason || reason.trim() === "") {
     return { error: "Alasan pembatalan wajib diisi." };
   }
@@ -170,6 +176,9 @@ export async function deleteScheduleAction(scheduleId: string) {
 
   const session = await decrypt(sessionToken);
   if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
+
+  const staff = await prisma.staff.findUnique({ where: { id: session.id }, select: { role: true } });
+  if (staff?.role === 'TUTOR') return { error: "Akses ditolak untuk peran Tutor." };
 
   try {
     const existing = await prisma.schedule.findUnique({

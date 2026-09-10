@@ -20,6 +20,13 @@ export default async function DashboardHome({ params }: { params: Promise<{ tena
     redirect(`/${tenantSlug}/login`);
   }
 
+  const dbUser = await prisma.staff.findUnique({
+    where: { id: session.id },
+    select: { role: true }
+  });
+
+  const isTutor = dbUser?.role === 'TUTOR';
+
   const academyId = session.academy_id as string;
   const today = new Date();
   
@@ -28,13 +35,13 @@ export default async function DashboardHome({ params }: { params: Promise<{ tena
 
   // Menarik semua data yang dibutuhkan secara paralel
   const [totalStudents, todaySchedules, invoices] = await Promise.all([
-    // 1. Total Siswa Aktif
-    prisma.student.count({
+    // 1. Total Siswa Aktif (Hanya ADMIN)
+    !isTutor ? prisma.student.count({
       where: {
         academy_id: academyId,
         deleted_at: null
       }
-    }),
+    }) : Promise.resolve(0),
     
     // 2. Kelas Hari Ini
     prisma.schedule.findMany({
@@ -42,6 +49,7 @@ export default async function DashboardHome({ params }: { params: Promise<{ tena
         program: {
           academy_id: academyId
         },
+        ...(isTutor ? { tutor_id: session.id } : {}),
         start_time: {
           gte: startOfDay,
           lte: endOfDay
@@ -58,8 +66,8 @@ export default async function DashboardHome({ params }: { params: Promise<{ tena
       }
     }),
 
-    // 3. Invoice untuk menghitung piutang & mencari pembayaran terakhir
-    prisma.invoice.findMany({
+    // 3. Invoice untuk menghitung piutang (Hanya ADMIN)
+    !isTutor ? prisma.invoice.findMany({
       where: {
         academy_id: academyId,
       },
@@ -69,7 +77,7 @@ export default async function DashboardHome({ params }: { params: Promise<{ tena
       orderBy: {
         id: 'desc'
       }
-    })
+    }) : Promise.resolve([])
   ]);
 
   // Kalkulasi Tunggakan (UNPAID / OVERDUE)
@@ -85,6 +93,7 @@ export default async function DashboardHome({ params }: { params: Promise<{ tena
   return (
     <DashboardClientPage 
       tenantSlug={tenantSlug}
+      userRole={dbUser?.role || 'ADMIN'}
       totalStudents={totalStudents}
       todayClassesCount={todaySchedules.length}
       totalUnpaid={totalUnpaid}

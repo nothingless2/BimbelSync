@@ -22,13 +22,15 @@ export default function SchedulesClientPage({
   rooms,
   tenantSlug,
   currentDateStr,
-  viewMode
+  viewMode,
+  isTutor
 }: { 
   schedules: ScheduleWithRelations[], 
   rooms: Room[],
   tenantSlug: string,
   currentDateStr: string,
-  viewMode: string
+  viewMode: string,
+  isTutor?: boolean
 }) {
   const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -247,12 +249,14 @@ export default function SchedulesClientPage({
                                       {openDropdownId === sch.id && (
                                         <div className="absolute top-8 right-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden">
                                           <button type="button" onClick={(e) => { e.stopPropagation(); router.push(`/${tenantSlug}/dashboard/schedules/${sch.id}`); setOpenDropdownId(null); }} className="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 font-medium text-slate-700 dark:text-slate-300">Lihat Detail & Absensi</button>
-                                          {!isCancelled && (
+                                          {!isCancelled && !isTutor && (
                                             <button type="button" onClick={(e) => { e.stopPropagation(); setCancellingSchedule(sch); setOpenDropdownId(null); }} className="w-full text-left px-4 py-3 text-sm hover:bg-amber-50 dark:hover:bg-amber-900/20 font-medium text-amber-600 dark:text-amber-500">Batalkan Jadwal</button>
                                           )}
-                                          <button type="button" onClick={(e) => { e.stopPropagation(); handleDelete(sch); }} className="w-full text-left px-4 py-3 text-sm hover:bg-red-50 dark:hover:bg-red-900/20 font-medium text-red-600 dark:text-red-500 flex items-center justify-between group-hover:text-red-700">
-                                            Hapus Permanen <Trash2 size={14} />
-                                          </button>
+                                          {!isTutor && (
+                                            <button type="button" onClick={(e) => { e.stopPropagation(); handleDelete(sch); }} className="w-full text-left px-4 py-3 text-sm hover:bg-red-50 dark:hover:bg-red-900/20 font-medium text-red-600 dark:text-red-500 flex items-center justify-between group-hover:text-red-700">
+                                              Hapus Permanen <Trash2 size={14} />
+                                            </button>
+                                          )}
                                         </div>
                                       )}
                                     </div>
