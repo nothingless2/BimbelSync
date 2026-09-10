@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar as CalendarIcon, Clock, MapPin, User, MoreVertical, Trash2, XCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, MapPin, User, MoreVertical, Trash2, XCircle, AlertCircle } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { deleteScheduleAction } from "./actions";
 import { CancelScheduleModal } from "@/components/modals/cancel-schedule-modal";
 import { Schedule, Program, Staff, Room } from "@prisma/client";
 import { useRouter } from "next/navigation";
-import { Pagination } from "@/components/ui/pagination";
+import { format, addDays, subWeeks, addWeeks, isSameDay, parseISO } from "date-fns";
+import { id as localeId } from "date-fns/locale";
 
 type ScheduleWithRelations = Schedule & {
   program: Program;
@@ -17,23 +18,35 @@ type ScheduleWithRelations = Schedule & {
 
 export default function SchedulesClientPage({ 
   schedules, 
-  tenantSlug 
+  rooms,
+  tenantSlug,
+  currentWeekStart
 }: { 
   schedules: ScheduleWithRelations[], 
-  tenantSlug: string 
+  rooms: Room[],
+  tenantSlug: string,
+  currentWeekStart: string
 }) {
   const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [cancellingSchedule, setCancellingSchedule] = useState<ScheduleWithRelations | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-  
-  // Pagination State
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-  const totalPages = Math.ceil(schedules.length / itemsPerPage);
-  const currentData = schedules.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  const toggleDropdown = (id: string) => {
+  const weekStart = parseISO(currentWeekStart);
+  const weekEnd = addDays(weekStart, 6);
+
+  const goToPreviousWeek = () => {
+    const prev = subWeeks(weekStart, 1);
+    router.push(`/${tenantSlug}/dashboard/schedules?weekStart=${prev.toISOString()}`);
+  };
+
+  const goToNextWeek = () => {
+    const next = addWeeks(weekStart, 1);
+    router.push(`/${tenantSlug}/dashboard/schedules?weekStart=${next.toISOString()}`);
+  };
+
+  const toggleDropdown = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     if (openDropdownId === id) setOpenDropdownId(null);
     else setOpenDropdownId(id);
   };
@@ -60,14 +73,8 @@ export default function SchedulesClientPage({
     });
   };
 
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('id-ID', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    }).format(new Date(date));
-  };
+  // Generate 7 days array starting from weekStart
+  const days = Array.from({ length: 7 }).map((_, i) => addDays(weekStart, i));
 
   const formatTime = (date: Date) => {
     return new Intl.DateTimeFormat('id-ID', { 
@@ -78,146 +85,197 @@ export default function SchedulesClientPage({
 
   return (
     <>
-      <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto min-h-[300px]">
-          <table className="w-full text-sm text-left text-slate-600 dark:text-slate-400">
-            <thead className="text-xs text-slate-500 uppercase bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
-              <tr>
-                <th scope="col" className="px-6 py-4 font-semibold w-16">No.</th>
-                <th scope="col" className="px-6 py-4 font-semibold">Waktu Pelaksanaan</th>
-                <th scope="col" className="px-6 py-4 font-semibold">Detail Kelas</th>
-                <th scope="col" className="px-6 py-4 font-semibold">Status</th>
-                <th scope="col" className="px-6 py-4 font-semibold text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {currentData.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
-                    <CalendarIcon className="mx-auto h-12 w-12 text-slate-300 dark:text-slate-700 mb-3" />
-                    Belum ada jadwal kelas.<br/>Klik "Buat Jadwal" untuk mengatur pertemuan kelas.
-                  </td>
-                </tr>
-              ) : (
-                currentData.map((schedule, index) => {
-                  const isCancelled = schedule.status === 'CANCELLED';
-                  
-                  return (
-                    <tr key={schedule.id} className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${deletingId === schedule.id ? 'opacity-50' : ''} ${isCancelled ? 'bg-red-50/30 dark:bg-red-900/5' : ''}`}>
-                      <td className="px-6 py-4 font-medium text-slate-500">
-                        {(currentPage - 1) * itemsPerPage + index + 1}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col gap-1.5">
-                          <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-slate-100">
-                            <CalendarIcon size={14} className="text-blue-500" />
-                            {formatDate(schedule.start_time)}
-                          </div>
-                          <div className="flex items-center gap-2 text-xs text-slate-500">
-                            <Clock size={14} className="text-slate-400" />
-                            {formatTime(schedule.start_time)} - {formatTime(schedule.end_time)}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col gap-1.5">
-                          <span className="font-bold text-slate-800 dark:text-slate-200">{schedule.program.name}</span>
-                          <div className="flex items-center gap-3 text-xs text-slate-500">
-                            <span className="flex items-center gap-1"><User size={12} /> {schedule.tutor.email.split('@')[0]}</span>
-                            <span className="flex items-center gap-1"><MapPin size={12} /> {schedule.room.name}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        {isCancelled ? (
-                          <div className="flex flex-col gap-1">
-                            <span className="inline-flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800/50">
-                              Dibatalkan
-                            </span>
-                            <span className="text-xs text-red-500 italic max-w-[200px] truncate" title={schedule.cancelled_reason || ""}>
-                              {schedule.cancelled_reason}
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="inline-flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
-                            Terjadwal
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="relative inline-block text-left">
-                          <button 
-                            onClick={() => toggleDropdown(schedule.id)}
-                            className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                          >
-                            <MoreVertical size={18} />
-                          </button>
+      <div className="bg-white dark:bg-[#111827] rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
+        
+        {/* Toolbar & Legend */}
+        <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-1">
+            <button 
+              onClick={goToPreviousWeek}
+              className="p-2 hover:bg-white dark:hover:bg-slate-800 rounded-lg text-slate-500 transition-colors"
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <span className="px-4 font-semibold text-sm text-slate-700 dark:text-slate-300">
+              {format(weekStart, "d MMM yyyy", { locale: localeId })} - {format(weekEnd, "d MMM yyyy", { locale: localeId })}
+            </span>
+            <button 
+              onClick={goToNextWeek}
+              className="p-2 hover:bg-white dark:hover:bg-slate-800 rounded-lg text-slate-500 transition-colors"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
 
-                          {openDropdownId === schedule.id && (
-                            <>
-                              <div className="fixed inset-0 z-10" onClick={() => setOpenDropdownId(null)}></div>
-                              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 z-20 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                                <div className="py-1">
-                                  {!isCancelled && (
-                                    <>
-                                      <button
-                                        onClick={() => {
-                                          setOpenDropdownId(null);
-                                          router.push(`/${tenantSlug}/dashboard/schedules/${schedule.id}`);
-                                        }}
-                                        className="w-full text-left px-4 py-2.5 text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center gap-2 font-medium"
-                                      >
-                                        <User size={16} />
-                                        Presensi Kelas
-                                      </button>
-                                      <div className="border-t border-slate-100 dark:border-slate-800 my-1"></div>
-                                      <button
-                                        onClick={() => { setCancellingSchedule(schedule); setOpenDropdownId(null); }}
-                                        className="w-full text-left px-4 py-2.5 text-sm text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 flex items-center gap-2"
-                                      >
-                                        <XCircle size={16} />
-                                        Batalkan Kelas
-                                      </button>
-                                    </>
+          <div className="flex items-center gap-4 text-xs font-semibold">
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+              <span className="text-slate-600 dark:text-slate-400">Terjadwal</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-red-500"></span>
+              <span className="text-slate-600 dark:text-slate-400">Dibatalkan</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Matrix Grid Wrapper - Allows horizontal scrolling on small screens */}
+        <div className="overflow-x-auto">
+          <div className="min-w-[1000px]">
+            {/* Header Row */}
+            <div className="grid grid-cols-[200px_repeat(7,1fr)] bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 text-center divide-x divide-slate-200 dark:divide-slate-800">
+              <div className="p-4 text-left font-bold text-xs text-slate-500 uppercase tracking-wider flex items-center">
+                RUANGAN
+              </div>
+              {days.map((day, idx) => (
+                <div key={idx} className="p-4">
+                  <div className="font-bold text-slate-700 dark:text-slate-300 text-sm uppercase">
+                    {format(day, "EEEE", { locale: localeId })}
+                  </div>
+                  <div className="text-xs text-slate-500 mt-1">
+                    {format(day, "d MMM")}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Room Rows */}
+            <div className="divide-y divide-slate-200 dark:divide-slate-800">
+              {rooms.length === 0 ? (
+                <div className="p-8 text-center text-slate-500 text-sm">
+                  Belum ada ruangan yang ditambahkan.
+                </div>
+              ) : (
+                rooms.map((room) => (
+                  <div key={room.id} className="grid grid-cols-[200px_repeat(7,1fr)] divide-x divide-slate-100 dark:divide-slate-800/60">
+                    
+                    {/* Room Info Cell */}
+                    <div className="p-4 flex flex-col justify-center">
+                      <span className="font-bold text-slate-900 dark:text-white">{room.name}</span>
+                      <span className="text-xs text-slate-500 mt-1">Kapasitas: {room.capacity}</span>
+                    </div>
+
+                    {/* Days Cells */}
+                    {days.map((day, dayIdx) => {
+                      // Find schedules for this room on this specific day
+                      const daySchedules = schedules.filter(sch => 
+                        sch.room_id === room.id && isSameDay(new Date(sch.start_time), day)
+                      );
+
+                      return (
+                        <div key={dayIdx} className="p-2 min-h-[120px] bg-white dark:bg-[#111827]">
+                          <div className="space-y-2">
+                            {daySchedules.map((sch) => {
+                              const isCancelled = sch.status === 'CANCELLED';
+                              
+                              return (
+                                <div 
+                                  key={sch.id} 
+                                  className={`relative group p-3 rounded-xl border text-left ${
+                                    isCancelled 
+                                      ? 'bg-red-50 border-red-100 dark:bg-red-900/10 dark:border-red-900/30' 
+                                      : 'bg-blue-50 border-blue-100 dark:bg-blue-900/10 dark:border-blue-900/30'
+                                  }`}
+                                  onClick={() => router.push(`/${tenantSlug}/dashboard/schedules/${sch.id}`)}
+                                >
+                                  {deletingId === sch.id && (
+                                    <div className="absolute inset-0 bg-white/50 dark:bg-slate-900/50 flex items-center justify-center rounded-xl z-10 backdrop-blur-[1px]">
+                                      <span className="text-xs font-bold animate-pulse">Menghapus...</span>
+                                    </div>
                                   )}
                                   
-                                  {isCancelled && <div className="border-t border-slate-100 dark:border-slate-800 my-1"></div>}
+                                  <div className="flex items-start justify-between mb-1.5">
+                                    <div className={`text-[11px] font-bold flex items-center gap-1 ${isCancelled ? 'text-red-600 dark:text-red-400' : 'text-blue-700 dark:text-blue-400'}`}>
+                                      <Clock size={12} />
+                                      {formatTime(sch.start_time)} - {formatTime(sch.end_time)}
+                                    </div>
+
+                                    {/* Action Dropdown Toggle */}
+                                    <button 
+                                      type="button"
+                                      onClick={(e) => toggleDropdown(sch.id, e)}
+                                      className="text-slate-400 hover:text-slate-700 -mr-1 -mt-1 p-1 rounded hover:bg-slate-200/50 dark:hover:bg-slate-700/50"
+                                    >
+                                      <MoreVertical size={14} />
+                                    </button>
+
+                                    {/* Action Dropdown Menu */}
+                                    {openDropdownId === sch.id && (
+                                      <div className="absolute top-8 right-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden">
+                                        <button
+                                          type="button"
+                                          onClick={(e) => { e.stopPropagation(); router.push(`/${tenantSlug}/dashboard/schedules/${sch.id}`); setOpenDropdownId(null); }}
+                                          className="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 font-medium text-slate-700 dark:text-slate-300"
+                                        >
+                                          Lihat Detail & Absensi
+                                        </button>
+                                        {!isCancelled && (
+                                          <button
+                                            type="button"
+                                            onClick={(e) => { e.stopPropagation(); setCancellingSchedule(sch); setOpenDropdownId(null); }}
+                                            className="w-full text-left px-4 py-3 text-sm hover:bg-amber-50 dark:hover:bg-amber-900/20 font-medium text-amber-600 dark:text-amber-500"
+                                          >
+                                            Batalkan Jadwal
+                                          </button>
+                                        )}
+                                        <button
+                                          type="button"
+                                          onClick={(e) => { e.stopPropagation(); handleDelete(sch); }}
+                                          className="w-full text-left px-4 py-3 text-sm hover:bg-red-50 dark:hover:bg-red-900/20 font-medium text-red-600 dark:text-red-500 flex items-center justify-between group-hover:text-red-700"
+                                        >
+                                          Hapus Permanen
+                                          <Trash2 size={14} />
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
                                   
-                                  <button
-                                    onClick={() => handleDelete(schedule)}
-                                    disabled={deletingId === schedule.id}
-                                    className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 disabled:opacity-50"
-                                  >
-                                    <Trash2 size={16} />
-                                    Hapus Permanen
-                                  </button>
+                                  <div className={`font-bold text-sm leading-tight mb-2 ${isCancelled ? 'text-slate-500 line-through' : 'text-slate-900 dark:text-white'}`}>
+                                    {sch.program.name}
+                                  </div>
+                                  
+                                  <div className={`text-[11px] font-medium flex flex-wrap gap-x-2 gap-y-1 ${isCancelled ? 'text-red-500/70' : 'text-blue-600/70 dark:text-blue-400/70'}`}>
+                                    <div className="flex items-center gap-1">
+                                      <User size={12} />
+                                      <span className="truncate max-w-[80px]">{sch.tutor.name || sch.tutor.email}</span>
+                                    </div>
+                                  </div>
+
+                                  {isCancelled && (
+                                    <div className="mt-2 text-[10px] font-bold bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 px-2 py-0.5 rounded w-max">
+                                      DIBATALKAN
+                                    </div>
+                                  )}
+
                                 </div>
-                              </div>
-                            </>
-                          )}
+                              );
+                            })}
+                          </div>
                         </div>
-                      </td>
-                    </tr>
-                  );
-                })
+                      );
+                    })}
+                  </div>
+                ))
               )}
-            </tbody>
-          </table>
+            </div>
+          </div>
         </div>
-        <Pagination 
-          currentPage={currentPage} 
-          totalPages={totalPages} 
-          onPageChange={setCurrentPage} 
-          totalItems={schedules.length} 
-          itemsPerPage={itemsPerPage} 
-        />
+
       </div>
 
       {cancellingSchedule && (
         <CancelScheduleModal 
-          schedule={cancellingSchedule} 
-          tenantSlug={tenantSlug} 
-          onClose={() => setCancellingSchedule(null)} 
+          schedule={cancellingSchedule}
+          tenantSlug={tenantSlug}
+          onClose={() => setCancellingSchedule(null)}
+        />
+      )}
+
+      {/* Close dropdowns when clicking outside */}
+      {openDropdownId && (
+        <div 
+          className="fixed inset-0 z-40" 
+          onClick={() => setOpenDropdownId(null)}
         />
       )}
     </>

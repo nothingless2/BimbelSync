@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { AddScheduleModal } from "@/components/modals/add-schedule-modal";
 import { redirect } from "next/navigation";
 import SchedulesClientPage from "./client-page";
+import { startOfWeek, addDays, parseISO, isValid } from "date-fns";
 
 export default async function SchedulesPage({ 
   params,
@@ -15,7 +16,18 @@ export default async function SchedulesPage({
   const resolvedParams = await params;
   const tenantSlug = resolvedParams.tenantSlug;
   const resolvedSearchParams = await searchParams;
-  const q = resolvedSearchParams?.q as string || "";
+  const weekStartParam = resolvedSearchParams?.weekStart as string | undefined;
+
+  let startDate = new Date();
+  if (weekStartParam) {
+    const parsedDate = parseISO(weekStartParam);
+    if (isValid(parsedDate)) {
+      startDate = parsedDate;
+    }
+  }
+  // Dapatkan hari Senin dari minggu tersebut
+  const startOfCurrentWeek = startOfWeek(startDate, { weekStartsOn: 1 });
+  const endOfCurrentWeek = addDays(startOfCurrentWeek, 7); // Hari Senin minggu berikutnya (batas eksklusif)
 
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("bimbelsync_session")?.value;
@@ -34,16 +46,11 @@ export default async function SchedulesPage({
   const [schedules, programs, rooms, tutors] = await Promise.all([
     prisma.schedule.findMany({
       where: {
-        program: {
-          academy_id: session.academy_id,
-        },
-        ...(q ? {
-          OR: [
-            { program: { name: { contains: q, mode: 'insensitive' } } },
-            { room: { name: { contains: q, mode: 'insensitive' } } },
-            { tutor: { name: { contains: q, mode: 'insensitive' } } },
-          ]
-        } : {})
+        program: { academy_id: session.academy_id },
+        start_time: {
+          gte: startOfCurrentWeek,
+          lt: endOfCurrentWeek
+        }
       },
       include: {
         program: true,
@@ -87,7 +94,9 @@ export default async function SchedulesPage({
 
       <SchedulesClientPage 
         schedules={schedules} 
+        rooms={rooms}
         tenantSlug={tenantSlug} 
+        currentWeekStart={startOfCurrentWeek.toISOString()}
       />
     </div>
   );
