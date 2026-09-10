@@ -22,7 +22,14 @@ export async function middleware(req: NextRequest) {
   if (path.startsWith('/superadmin')) {
     if (path === '/superadmin/login') return NextResponse.next();
     if (!session || session.role !== 'SUPERADMIN') {
-      return NextResponse.redirect(new URL('/superadmin/login', req.url));
+      const loginRes = NextResponse.redirect(new URL('/superadmin/login', req.url));
+      loginRes.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+      return loginRes;
+    }
+    if (path === '/superadmin' || path === '/superadmin/') {
+      const dashRes = NextResponse.redirect(new URL('/superadmin/dashboard', req.url));
+      dashRes.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+      return dashRes;
     }
     const res = NextResponse.next();
     // Mencegah browser cache agar tidak bisa back ke dashboard setelah logout
@@ -50,11 +57,15 @@ export async function middleware(req: NextRequest) {
       // Proteksi /dashboard (Hanya untuk Admin / Tutor)
       if (isDashboard) {
         if (!session || (session.role !== 'ADMIN' && session.role !== 'TUTOR')) {
-          return NextResponse.redirect(new URL(`/${tenantSlug}/login`, req.url));
+          const res = NextResponse.redirect(new URL(`/${tenantSlug}/login`, req.url));
+          res.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+          return res;
         }
         // Cegah Admin lompat ke bimbel orang lain
         if (session.tenant_slug !== tenantSlug) {
-            return NextResponse.redirect(new URL(`/${session.tenant_slug}/dashboard`,req.url));
+            const res = NextResponse.redirect(new URL(`/${session.tenant_slug}/dashboard`,req.url));
+            res.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+            return res;
         }
       }
       

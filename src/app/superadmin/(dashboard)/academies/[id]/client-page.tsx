@@ -400,11 +400,33 @@ export default function TenantDetailClientPage({ academy, plans, invoices, audit
                         
                         {/* Expanded Payload Row */}
                         {expandedLogId === log.id && (
-                          <tr className="bg-slate-50 dark:bg-slate-900/50">
-                            <td colSpan={5} className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
-                              <div className="bg-slate-900 dark:bg-black text-slate-300 p-4 rounded-xl font-mono text-xs overflow-x-auto shadow-inner border border-slate-800">
-                                <div className="text-slate-500 mb-2">// Payload Details</div>
-                                <pre>{log.details ? JSON.stringify(log.details, null, 2) : "{}"}</pre>
+                          <tr className="bg-slate-50/50 dark:bg-slate-900/30">
+                            <td colSpan={5} className="px-6 py-5 border-b border-slate-100 dark:border-slate-800">
+                              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm">
+                                <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
+                                  <ShieldAlert size={16} className="text-blue-500" /> 
+                                  Detail Informasi Aksi
+                                </h4>
+                                {log.details && Object.keys(log.details).length > 0 ? (
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                                    {Object.entries(log.details).map(([key, value]) => (
+                                      <div key={key} className="flex flex-col bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800/50">
+                                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                                          {key.replace(/_/g, ' ')}
+                                        </span>
+                                        <span className="text-sm font-medium text-slate-900 dark:text-slate-100 break-words">
+                                          {typeof value === 'object' && value !== null 
+                                            ? JSON.stringify(value) 
+                                            : String(value)}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <p className="text-sm text-slate-500 italic flex items-center gap-2">
+                                    <AlertCircle size={14} /> Tidak ada data payload atau parameter tambahan pada aksi ini.
+                                  </p>
+                                )}
                               </div>
                             </td>
                           </tr>

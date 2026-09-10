@@ -32,7 +32,7 @@ export async function superadminLoginAction(formData: FormData) {
     const token = await encrypt({
       id: superadmin.id,
       role: "SUPERADMIN",
-      session_version: superadmin.session_version, // utk membandingkan session jwt dgn session database
+      session_version: superadmin.session_version,
     });
 
     // Simpan di HTTP-only cookie

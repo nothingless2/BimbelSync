@@ -16,17 +16,17 @@ export default async function SuperadminLayout({
   const sessionCookie = cookieStore.get('bimbelsync_session')?.value;
   const session = sessionCookie ? await decrypt(sessionCookie) : null;
 
-  let dbUser = null;
-  if (session && session.role === 'SUPERADMIN') {
-    dbUser = await prisma.superadmin.findUnique({ 
-      where: { id: session.id }, 
-      select: { id: true, email: true, name: true, avatar_url: true, session_version: true } 
-    });
-    
-    // Invalidate session if session_version changed (e.g. password changed)
-    if (!dbUser || dbUser.session_version !== session.session_version) {
-      redirect('/superadmin/logout');
-    }
+  if (!session || session.role !== 'SUPERADMIN') {
+    redirect('/superadmin/login');
+  }
+
+  let dbUser = await prisma.superadmin.findUnique({ 
+    where: { id: session.id }, 
+    select: { id: true, email: true, name: true, avatar_url: true, session_version: true } 
+  });
+  
+  if (!dbUser || dbUser.session_version !== session.session_version) {
+    redirect('/superadmin/logout');
   }
 
   return (
