@@ -6,6 +6,8 @@ import { toast } from "@/components/ui/sonner";
 import { saveAttendancesAction, AttendancePayload } from "./actions";
 import { AttendanceStatus, Student, Attendance } from "@prisma/client";
 import { useRouter } from "next/navigation";
+import { QrCode } from "lucide-react";
+import { QrGeneratorModal } from "./qr-generator-modal";
 
 type StudentWithAttendance = {
   student: Student;
@@ -23,6 +25,7 @@ export function AttendanceClient({
 }) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
+  const [isQrMode, setIsQrMode] = useState(false);
   
   // State untuk menyimpan nilai absensi lokal sebelum disimpan ke server
   const [attendanceState, setAttendanceState] = useState<Record<string, AttendanceStatus>>(
@@ -81,15 +84,25 @@ export function AttendanceClient({
           <p className="text-sm text-slate-500 mt-1">Pilih status absensi untuk masing-masing siswa, lalu klik Simpan.</p>
         </div>
         
-        <div className="flex items-center gap-2 text-sm bg-white dark:bg-slate-900 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800">
-          <span className="font-semibold text-slate-700 dark:text-slate-300">Statistik:</span>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setIsQrMode(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-semibold text-sm hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors shadow-sm"
+          >
+            <QrCode size={18} />
+            Mode QR Scanner
+          </button>
+          
+          <div className="flex items-center gap-2 text-sm bg-white dark:bg-slate-900 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800">
+            <span className="font-semibold text-slate-700 dark:text-slate-300">Statistik:</span>
           <span className="text-emerald-600 font-bold ml-2">Hadir: {Object.values(attendanceState).filter(v => v === 'PRESENT').length}</span>
           <span className="text-amber-600 font-bold ml-2">Izin: {Object.values(attendanceState).filter(v => v === 'EXCUSED').length}</span>
           <span className="text-red-600 font-bold ml-2">Alpa: {Object.values(attendanceState).filter(v => v === 'ABSENT').length}</span>
         </div>
       </div>
+    </div>
 
-      <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
+    <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
         {studentsData.length === 0 ? (
           <div className="p-12 text-center text-slate-500">
             <User className="mx-auto h-12 w-12 text-slate-300 dark:text-slate-700 mb-3" />
@@ -167,6 +180,13 @@ export function AttendanceClient({
           {isSaving ? "Menyimpan..." : "Simpan Absensi"}
         </button>
       </div>
+
+      <QrGeneratorModal 
+        isOpen={isQrMode} 
+        onClose={() => setIsQrMode(false)} 
+        scheduleId={scheduleId}
+        tenantSlug={tenantSlug}
+      />
     </div>
   );
 }
