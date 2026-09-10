@@ -3,10 +3,12 @@
 import { useState } from "react";
 import {
   Building2, Users, CreditCard, Activity, ArrowLeft, Mail, RefreshCw,
-  Trash2, CheckCircle2, ShieldAlert, Key, Edit2, X, Loader2, AlertCircle, Check, Ban
+  Trash2, CheckCircle2, ShieldAlert, Key, Edit2, X, Loader2, AlertCircle, Check, Ban, ChevronDown, ChevronUp
 } from "lucide-react";
 import Link from "next/link";
+import React from "react";
 import { UserAvatar } from "@/components/user-avatar";
+import { Pagination } from "@/components/ui/pagination";
 import { toast } from "@/components/ui/sonner";
 import {
   deactivateAdminAction, reactivateAdminAction,
@@ -41,10 +43,11 @@ interface Props {
   academy: any;
   plans: Plan[];
   invoices: InvoiceItem[];
+  auditLogs: any[];
 }
 
-export default function TenantDetailClientPage({ academy, plans, invoices }: Props) {
-  const [activeTab, setActiveTab] = useState<"overview" | "admins" | "billing">("overview");
+export default function TenantDetailClientPage({ academy, plans, invoices, auditLogs }: Props) {
+  const [activeTab, setActiveTab] = useState<"overview" | "admins" | "billing" | "logs">("overview");
   
   // Invite modal state
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
@@ -60,6 +63,17 @@ export default function TenantDetailClientPage({ academy, plans, invoices }: Pro
     subscriptionDueDate: academy.subscription_due_date ? new Date(academy.subscription_due_date).toISOString().slice(0, 10) : "",
   });
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
+
+  // Pagination & Logs State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil((auditLogs || []).length / itemsPerPage);
+  const currentLogs = (auditLogs || []).slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
+
+  const toggleExpandLog = (id: string) => {
+    setExpandedLogId(expandedLogId === id ? null : id);
+  };
 
   const handleInviteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,6 +174,7 @@ export default function TenantDetailClientPage({ academy, plans, invoices }: Pro
           { id: "overview", label: "Overview", icon: Activity },
           { id: "admins", label: "Admin Bimbel", icon: Users },
           { id: "billing", label: "Billing & Tagihan", icon: CreditCard },
+          { id: "logs", label: "Log Aktivitas", icon: ShieldAlert },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -183,9 +198,9 @@ export default function TenantDetailClientPage({ academy, plans, invoices }: Pro
             <Activity className="mx-auto mb-4 opacity-50" size={48} />
             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Ikhtisar Platform (Segera Hadir)</h3>
             <p className="mb-6">Statistik pendaftaran murid dan penggunaan fitur akan ditampilkan di sini.</p>
-            <Link href={`/superadmin/audit-logs?tenant=${academy.id}`} className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/30 px-4 py-2 rounded-xl transition">
-              <ShieldAlert size={16} /> Lihat semua log aktivitas tenant ini
-            </Link>
+            <button onClick={() => setActiveTab("logs")} className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/30 px-4 py-2 rounded-xl transition">
+              <ShieldAlert size={16} /> Lihat 100 aktivitas terakhir
+            </button>
           </div>
         )}
 
@@ -318,6 +333,97 @@ export default function TenantDetailClientPage({ academy, plans, invoices }: Pro
                   </tbody>
                 </table>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB LOGS */}
+        {activeTab === "logs" && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white">Log Aktivitas Tenant</h2>
+                <p className="text-sm text-slate-500">Menampilkan hingga 100 aktivitas terbaru yang dilakukan oleh admin atau tutor di tenant ini.</p>
+              </div>
+            </div>
+            
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left border-collapse">
+                  <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    <tr>
+                      <th className="px-6 py-4 w-16">No.</th>
+                      <th className="px-6 py-4">Waktu</th>
+                      <th className="px-6 py-4">Pelaku (Admin/Staff)</th>
+                      <th className="px-6 py-4">Jenis Aksi</th>
+                      <th className="px-6 py-4"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
+                    {currentLogs.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
+                          Belum ada catatan aktivitas dari tenant ini.
+                        </td>
+                      </tr>
+                    ) : currentLogs.map((log: any, index: number) => (
+                      <React.Fragment key={log.id}>
+                        <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors group cursor-pointer" onClick={() => toggleExpandLog(log.id)}>
+                          <td className="px-6 py-4 font-medium text-slate-500 text-xs">
+                            {(currentPage - 1) * itemsPerPage + index + 1}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-slate-500 dark:text-slate-400 text-xs">
+                            {new Date(log.created_at).toLocaleString('id-ID', {
+                              day: '2-digit', month: 'short', year: 'numeric',
+                              hour: '2-digit', minute: '2-digit', second: '2-digit'
+                            })}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <UserAvatar id={log.staff_id} email={log.staff?.email} avatarUrl={log.staff?.avatar_url} size={28} />
+                              <div>
+                                <p className="font-medium text-slate-900 dark:text-slate-100">{log.staff?.name || log.staff?.email || "Unknown"}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="inline-flex items-center px-2 py-1 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                              {log.action}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1">
+                              {expandedLogId === log.id ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                            </button>
+                          </td>
+                        </tr>
+                        
+                        {/* Expanded Payload Row */}
+                        {expandedLogId === log.id && (
+                          <tr className="bg-slate-50 dark:bg-slate-900/50">
+                            <td colSpan={5} className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                              <div className="bg-slate-900 dark:bg-black text-slate-300 p-4 rounded-xl font-mono text-xs overflow-x-auto shadow-inner border border-slate-800">
+                                <div className="text-slate-500 mb-2">// Payload Details</div>
+                                <pre>{log.details ? JSON.stringify(log.details, null, 2) : "{}"}</pre>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {totalPages > 0 && (
+                <Pagination 
+                  currentPage={currentPage} 
+                  totalPages={totalPages} 
+                  onPageChange={setCurrentPage} 
+                  totalItems={auditLogs.length} 
+                  itemsPerPage={itemsPerPage} 
+                />
+              )}
             </div>
           </div>
         )}

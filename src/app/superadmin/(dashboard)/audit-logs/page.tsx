@@ -30,6 +30,8 @@ export default async function AuditLogsPage({
 
   if (superadmin) {
     where.superadmin_id = superadmin;
+  } else {
+    where.superadmin_id = { not: null };
   }
   
   if (action) {

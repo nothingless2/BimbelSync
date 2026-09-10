@@ -15,7 +15,7 @@ export default async function TenantDetailPage({ params }: { params: { id: strin
 
   const { id } = await params;
 
-  const [academy, plans, invoices] = await Promise.all([
+  const [academy, plans, invoices, auditLogs] = await Promise.all([
     prisma.academy.findUnique({
       where: { id },
       include: {
@@ -35,6 +35,21 @@ export default async function TenantDetailPage({ params }: { params: { id: strin
       include: { plan: true, verified_by: { select: { name: true, email: true } } },
       orderBy: { billing_period: "desc" },
     }),
+    prisma.auditLog.findMany({
+      where: {
+        OR: [
+          { academy_id: id },
+          { entity_id: id },
+          { details: { path: ["academy_id"], equals: id } }
+        ],
+        staff_id: { not: null }
+      },
+      include: {
+        staff: { select: { name: true, email: true, avatar_url: true } }
+      },
+      orderBy: { created_at: "desc" },
+      take: 100
+    }),
   ]);
 
   if (!academy) {
@@ -52,5 +67,5 @@ export default async function TenantDetailPage({ params }: { params: { id: strin
     verified_by: inv.verified_by,
   }));
 
-  return <TenantDetailClientPage academy={academy} plans={plans} invoices={serializedInvoices} />;
+  return <TenantDetailClientPage academy={academy} plans={plans} invoices={serializedInvoices} auditLogs={auditLogs} />;
 }
