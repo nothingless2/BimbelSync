@@ -22,7 +22,9 @@ export function ManageEnrollmentsModal({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [selectedProgramId, setSelectedProgramId] = useState("");
-  const [localEnrollments, setLocalEnrollments] = useState<any[]>(student.enrollments);
+  const [localEnrollments, setLocalEnrollments] = useState<any[]>(
+    student.enrollments.filter((e: any) => e.status === 'ACTIVE')
+  );
 
   const handleEnroll = async () => {
     if (!selectedProgramId) return;
@@ -49,8 +51,8 @@ export function ManageEnrollmentsModal({
     setIsLoading(true);
     setErrorMsg(null);
 
-    // Using "OTHER" reason by default for simplicity from this UI
-    const result = await withdrawEnrollmentAction(enrollmentId, "OTHER", "Diberhentikan via kelola program");
+    // Using "LAINNYA" reason by default for simplicity from this UI
+    const result = await withdrawEnrollmentAction(enrollmentId, "LAINNYA", "Diberhentikan via kelola program");
 
     if (result?.error) {
       setErrorMsg(result.error);
