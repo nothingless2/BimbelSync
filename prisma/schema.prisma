@@ -234,6 +234,9 @@ model Invoice {
   proof_of_payment_url String?
   payment_method       PaymentMethod?
   payment_status       PaymentStatus @default(UNPAID)
+  created_at           DateTime      @default(now())
+  due_date             DateTime?     @db.Date
+  billing_period       String?
 
   academy      Academy       @relation(fields: [academy_id], references: [id])
   student      Student       @relation(fields: [student_id], references: [id])
@@ -266,7 +269,7 @@ model InvoiceItem {
   description String
   amount      Int
 
-  invoice Invoice @relation(fields: [invoice_id], references: [id])
+  invoice Invoice @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
 }
 
 model Installment {
@@ -282,7 +285,7 @@ model Installment {
   proof_of_payment_url String?
   verified_by_staff_id String?       @db.Uuid
 
-  invoice     Invoice @relation(fields: [invoice_id], references: [id])
+  invoice     Invoice @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
   verified_by Staff?  @relation("StaffVerifiesInstallment", fields: [verified_by_staff_id], references: [id])
 
   @@unique([invoice_id, installment_number])

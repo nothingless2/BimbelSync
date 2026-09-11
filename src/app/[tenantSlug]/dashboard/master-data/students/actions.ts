@@ -91,6 +91,8 @@ export async function createStudentAction(formData: FormData) {
         }
       });
 
+      const currentMonthPeriod = new Date().toISOString().substring(0, 7); // e.g. "2026-09"
+
       // Auto-generate invoice for the program fee
       await tx.invoice.create({
         data: {
@@ -99,6 +101,7 @@ export async function createStudentAction(formData: FormData) {
           total_amount: program.monthly_fee,
           payment_option: "FULL",
           payment_status: "UNPAID",
+          billing_period: currentMonthPeriod,
           items: {
             create: {
               description: `Pendaftaran ${program.name}`,

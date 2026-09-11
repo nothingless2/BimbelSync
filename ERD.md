@@ -148,6 +148,9 @@ erDiagram
         string proof_of_payment_url "nullable - only used when payment_option = FULL and manual"
         enum payment_method "GATEWAY, MANUAL_TRANSFER, CASH - only meaningful when payment_option = FULL"
         enum payment_status "VOID, UNPAID, PAID, OVERDUE - derived/aggregate from INSTALLMENTS when payment_option = INSTALLMENT"
+        datetime created_at "timestamp generation dari cron job"
+        date due_date "nullable - deadline pembayaran"
+        string billing_period "nullable - e.g. 2026-09 untuk mencegah double billing per bulan"
     }
 
     INVOICE_ITEMS {

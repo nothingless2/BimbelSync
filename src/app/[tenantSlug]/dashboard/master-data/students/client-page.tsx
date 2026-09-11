@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Users, Pencil, Trash2, Phone, BookOpen, MoreVertical, LogOut, CheckCircle2 } from "lucide-react";
+import { Users, Pencil, Trash2, Phone, BookOpen, MoreVertical, LogOut, CheckCircle2, Search } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { deleteStudentAction, withdrawEnrollmentAction } from "./actions";
 import { EditStudentModal } from "@/components/modals/edit-student-modal";
@@ -28,11 +28,19 @@ export default function StudentsClientPage({
   
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filtering
+  const filteredStudents = students.filter(student => 
+    student.full_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    student.username.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const totalPages = Math.ceil(students.length / itemsPerPage);
-  const currentData = students.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredStudents.length / itemsPerPage));
+  const currentData = filteredStudents.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const toggleDropdown = (id: string) => {
     if (openDropdownId === id) setOpenDropdownId(null);
@@ -85,6 +93,26 @@ export default function StudentsClientPage({
   return (
     <>
       <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        
+        {/* Toolbar Filter */}
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20">
+          <div className="relative max-w-sm">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search size={16} className="text-slate-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Cari nama atau username..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200"
+            />
+          </div>
+        </div>
+
         <div className="overflow-x-auto min-h-[300px]">
           <table className="w-full text-sm text-left text-slate-600 dark:text-slate-400">
             <thead className="text-xs text-slate-500 uppercase bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
@@ -207,7 +235,7 @@ export default function StudentsClientPage({
           currentPage={currentPage} 
           totalPages={totalPages} 
           onPageChange={setCurrentPage} 
-          totalItems={students.length} 
+          totalItems={filteredStudents.length} 
           itemsPerPage={itemsPerPage} 
         />
       </div>

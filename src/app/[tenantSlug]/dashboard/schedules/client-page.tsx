@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Clock, MapPin, User, MoreVertical, Trash2, Calendar as CalendarIcon, Grid, ArrowRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, MapPin, User, MoreVertical, Trash2, Calendar as CalendarIcon, Grid, ArrowRight, Search, Filter } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { deleteScheduleAction } from "./actions";
 import { CancelScheduleModal } from "@/components/modals/cancel-schedule-modal";
@@ -40,6 +40,17 @@ export default function SchedulesClientPage({
 
   const currentDate = parseISO(currentDateStr);
   const isMonthly = viewMode === "monthly";
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState<"ALL" | "SCHEDULED" | "CANCELLED">("ALL");
+
+  // Filtering
+  const filteredSchedules = schedules.filter(schedule => {
+    const matchSearch = schedule.tutor.full_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                        schedule.program.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchStatus = filterStatus === "ALL" || schedule.status === filterStatus;
+    return matchSearch && matchStatus;
+  });
 
   // Navigation handlers
   const goToPrevious = () => {
@@ -159,15 +170,47 @@ export default function SchedulesClientPage({
             </div>
           </div>
 
-          {/* Legend */}
-          <div className="flex items-center gap-4 text-xs font-semibold shrink-0">
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-blue-500"></span>
-              <span className="text-slate-600 dark:text-slate-400">Terjadwal</span>
+          {/* Legend & Filter Toolbar */}
+          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-4 text-xs font-semibold shrink-0">
+            {/* Search Input */}
+            <div className="relative max-w-[200px]">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search size={14} className="text-slate-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Cari tutor / program..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="block w-full pl-8 pr-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded-lg text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200"
+              />
             </div>
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-red-500"></span>
-              <span className="text-slate-600 dark:text-slate-400">Dibatalkan</span>
+            
+            {/* Status Filter */}
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Filter size={12} className="text-slate-400" />
+              </div>
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value as any)}
+                className="block w-full pl-8 pr-6 py-1.5 border border-slate-200 dark:border-slate-700 rounded-lg text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200 appearance-none bg-white"
+              >
+                <option value="ALL">Semua Status</option>
+                <option value="SCHEDULED">Terjadwal</option>
+                <option value="CANCELLED">Dibatalkan</option>
+              </select>
+            </div>
+
+            <div className="hidden md:flex items-center gap-4 ml-2 border-l border-slate-200 dark:border-slate-700 pl-4">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+                <span className="text-slate-600 dark:text-slate-400">Terjadwal</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-red-500"></span>
+                <span className="text-slate-600 dark:text-slate-400">Dibatalkan</span>
+              </div>
             </div>
           </div>
         </div>
@@ -213,7 +256,7 @@ export default function SchedulesClientPage({
 
                       {/* Days Cells */}
                       {weekDays.map((day, dayIdx) => {
-                        const daySchedules = schedules.filter(sch => 
+                        const daySchedules = filteredSchedules.filter(sch => 
                           sch.room_id === room.id && isSameDay(new Date(sch.start_time), day)
                         );
 
@@ -291,8 +334,8 @@ export default function SchedulesClientPage({
             {/* Calendar Grid */}
             <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800">
               {monthDays.map((day, idx) => {
-                const daySchedules = schedules.filter(sch => isSameDay(new Date(sch.start_time), day));
-                const inCurrentMonth = isSameMonth(day, monthStart);
+                const daySchedules = filteredSchedules.filter(sch => isSameDay(new Date(sch.start_time), day));
+                const inCurrentMonth = isSameMonth(day, currentDate);
                 const hasSchedules = daySchedules.length > 0;
                 const activeCount = daySchedules.filter(s => s.status !== 'CANCELLED').length;
                 

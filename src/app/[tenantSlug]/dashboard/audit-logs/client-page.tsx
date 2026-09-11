@@ -4,6 +4,7 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { Pagination } from "@/components/ui/pagination";
+import { Filter } from "lucide-react";
 
 interface Log {
   id: string;
@@ -23,10 +24,14 @@ interface Props {
 }
 
 export default function AuditLogsClientPage({ logs }: Props) {
+  const [filterAction, setFilterAction] = useState<string>("ALL");
+
+  const filteredLogs = logs.filter(log => filterAction === "ALL" || log.action === filterAction);
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const totalPages = Math.ceil(logs.length / itemsPerPage);
-  const currentData = logs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / itemsPerPage));
+  const currentData = filteredLogs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   if (logs.length === 0) {
     return (
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center shadow-sm">
@@ -42,7 +47,32 @@ export default function AuditLogsClientPage({ logs }: Props) {
   }
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+      
+      {/* Toolbar Filter */}
+      <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 flex justify-end">
+        <div className="relative w-full sm:w-64">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Filter size={14} className="text-slate-400" />
+          </div>
+          <select
+            value={filterAction}
+            onChange={(e) => {
+              setFilterAction(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="block w-full pl-9 pr-8 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200 appearance-none bg-white"
+          >
+            <option value="ALL">Semua Aksi</option>
+            <option value="CREATE">CREATE (Membuat)</option>
+            <option value="UPDATE">UPDATE (Memperbarui)</option>
+            <option value="DELETE">DELETE (Menghapus)</option>
+            <option value="VERIFY">VERIFY (Verifikasi)</option>
+            <option value="LOGIN">LOGIN (Masuk Sistem)</option>
+          </select>
+        </div>
+      </div>
+
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-left">
           <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
@@ -129,7 +159,7 @@ export default function AuditLogsClientPage({ logs }: Props) {
         currentPage={currentPage} 
         totalPages={totalPages} 
         onPageChange={setCurrentPage} 
-        totalItems={logs.length} 
+        totalItems={filteredLogs.length} 
         itemsPerPage={itemsPerPage} 
       />
     </div>

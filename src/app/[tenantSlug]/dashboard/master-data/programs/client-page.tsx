@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, Users2, CalendarDays, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { BookOpen, Users2, CalendarDays, Pencil, Trash2, Search, Filter } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { deleteProgramAction } from "./actions";
 import { EditProgramModal } from "@/components/modals/edit-program-modal";
@@ -12,11 +12,22 @@ export default function ProgramsClientPage({ programs, tenantSlug }: { programs:
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState<"ALL" | "REGULER" | "INTENSIF">("ALL");
+
+  // Filtering
+  const filteredPrograms = programs.filter(program => {
+    const matchSearch = program.name.toLowerCase().includes(searchQuery.toLowerCase());
+    if (filterType === "REGULER") return matchSearch && program.duration_months === null;
+    if (filterType === "INTENSIF") return matchSearch && program.duration_months !== null;
+    return matchSearch;
+  });
+
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const totalPages = Math.ceil(programs.length / itemsPerPage);
-  const currentData = programs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredPrograms.length / itemsPerPage));
+  const currentData = filteredPrograms.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handleDelete = (program: Program) => {
     toast(`Hapus Program "${program.name}"?`, {
@@ -42,6 +53,43 @@ export default function ProgramsClientPage({ programs, tenantSlug }: { programs:
   return (
     <>
       <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        
+        {/* Toolbar Filter */}
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1 max-w-sm">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search size={16} className="text-slate-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Cari nama program..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200"
+            />
+          </div>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Filter size={14} className="text-slate-400" />
+            </div>
+            <select
+              value={filterType}
+              onChange={(e) => {
+                setFilterType(e.target.value as any);
+                setCurrentPage(1);
+              }}
+              className="block w-full sm:w-48 pl-9 pr-8 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200 appearance-none bg-white"
+            >
+              <option value="ALL">Semua Tipe</option>
+              <option value="REGULER">Program Reguler</option>
+              <option value="INTENSIF">Paket Intensif</option>
+            </select>
+          </div>
+        </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left text-slate-600 dark:text-slate-400">
             <thead className="text-xs text-slate-500 uppercase bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
@@ -115,7 +163,7 @@ export default function ProgramsClientPage({ programs, tenantSlug }: { programs:
           currentPage={currentPage} 
           totalPages={totalPages} 
           onPageChange={setCurrentPage} 
-          totalItems={programs.length} 
+          totalItems={filteredPrograms.length} 
           itemsPerPage={itemsPerPage} 
         />
       </div>

@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Receipt, User, MoreVertical, Trash2, CheckCircle2, DollarSign, Clock } from "lucide-react";
+import { Receipt, User, MoreVertical, Trash2, CheckCircle2, DollarSign, Clock, Search, Filter } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { deleteInvoiceAction } from "./actions";
 import { VerifyPaymentModal } from "@/components/modals/verify-payment-modal";
 import { Invoice, Student, InvoiceItem, Staff } from "@prisma/client";
 import { Pagination } from "@/components/ui/pagination";
+import Link from "next/link";
 
 type InvoiceWithRelations = Invoice & {
   student: Student;
@@ -22,12 +23,27 @@ export default function FinanceClientPage({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [verifyingInvoice, setVerifyingInvoice] = useState<InvoiceWithRelations | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const tenantSlug = invoices.length > 0 ? invoices[0].academy_id : ""; // We can extract this or just use window.location
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState<"ALL" | "UNPAID" | "PAID">("ALL");
+
+  // Filtering
+  const filteredInvoices = invoices.filter(invoice => {
+    const invIdSearch = `INV-${invoice.id.substring(0, 6).toUpperCase()}`;
+    const matchSearch = invIdSearch.includes(searchQuery.toUpperCase()) || 
+                        invoice.student.full_name.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchStatus = filterStatus === "ALL" || invoice.payment_status === filterStatus;
+    
+    return matchSearch && matchStatus;
+  });
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const totalPages = Math.ceil(invoices.length / itemsPerPage);
-  const currentData = invoices.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredInvoices.length / itemsPerPage));
+  const currentData = filteredInvoices.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const toggleDropdown = (id: string) => {
     if (openDropdownId === id) setOpenDropdownId(null);
@@ -63,6 +79,47 @@ export default function FinanceClientPage({
   return (
     <>
       <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        
+        {/* Toolbar Filter */}
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1 max-w-sm">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search size={16} className="text-slate-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Cari ID tagihan atau siswa..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200"
+            />
+          </div>
+          
+          <div className="flex bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-1 shrink-0 overflow-hidden">
+            <button 
+              onClick={() => { setFilterStatus("ALL"); setCurrentPage(1); }}
+              className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${filterStatus === "ALL" ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            >
+              Semua
+            </button>
+            <button 
+              onClick={() => { setFilterStatus("UNPAID"); setCurrentPage(1); }}
+              className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${filterStatus === "UNPAID" ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-500 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            >
+              Belum Dibayar
+            </button>
+            <button 
+              onClick={() => { setFilterStatus("PAID"); setCurrentPage(1); }}
+              className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${filterStatus === "PAID" ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-500 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            >
+              Lunas
+            </button>
+          </div>
+        </div>
+
         <div className="overflow-x-auto min-h-[300px]">
           <table className="w-full text-sm text-left text-slate-600 dark:text-slate-400">
             <thead className="text-xs text-slate-500 uppercase bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
@@ -93,11 +150,18 @@ export default function FinanceClientPage({
                         {(currentPage - 1) * itemsPerPage + index + 1}
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-1.5">
                           <span className="font-mono font-semibold text-slate-900 dark:text-slate-100 text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded w-fit border border-slate-200 dark:border-slate-700">
                             INV-{invoice.id.substring(0, 6).toUpperCase()}
                           </span>
-                          <span className="text-xs text-slate-500">{invoice.items.length} Item(s)</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-slate-500">{invoice.items.length} Item(s)</span>
+                            {invoice.billing_period && (
+                              <span className="text-[10px] font-medium bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 px-1.5 py-0.5 rounded border border-blue-100 dark:border-blue-800">
+                                {invoice.billing_period}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -112,8 +176,15 @@ export default function FinanceClientPage({
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="font-bold text-slate-900 dark:text-slate-100">
-                          {formatRupiah(invoice.total_amount)}
+                        <div className="flex flex-col gap-1">
+                          <span className="font-bold text-slate-900 dark:text-slate-100">
+                            {formatRupiah(invoice.total_amount)}
+                          </span>
+                          {invoice.payment_option === 'INSTALLMENT' ? (
+                            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded w-fit">CICILAN</span>
+                          ) : (
+                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded w-fit">FULL (BAYAR DIMUKA)</span>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -144,6 +215,14 @@ export default function FinanceClientPage({
                               <div className="fixed inset-0 z-10" onClick={() => setOpenDropdownId(null)}></div>
                               <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 z-20 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                                 <div className="py-1">
+                                  <Link 
+                                    href={`./finance/${invoice.id}`}
+                                    className="w-full text-left px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2 font-medium"
+                                  >
+                                    <Receipt size={16} />
+                                    Lihat Detail Tagihan
+                                  </Link>
+                                  <div className="border-t border-slate-100 dark:border-slate-800 my-1"></div>
                                   {!isPaid ? (
                                     <>
                                       <button
@@ -185,7 +264,7 @@ export default function FinanceClientPage({
           currentPage={currentPage} 
           totalPages={totalPages} 
           onPageChange={setCurrentPage} 
-          totalItems={invoices.length} 
+          totalItems={filteredInvoices.length} 
           itemsPerPage={itemsPerPage} 
         />
       </div>

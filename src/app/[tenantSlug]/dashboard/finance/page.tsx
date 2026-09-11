@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import FinanceClientPage from "./client-page";
 import { AddInvoiceModal } from "@/components/modals/add-invoice-modal";
+import { GenerateInvoicesButton } from "./generate-button";
 
 export default async function FinancePage({ 
   params,
@@ -80,7 +81,10 @@ export default async function FinancePage({
           </p>
         </div>
         
-        <AddInvoiceModal students={students} />
+        <div className="flex items-center gap-2">
+          <GenerateInvoicesButton academyId={session.academy_id} />
+          <AddInvoiceModal students={students} />
+        </div>
       </div>
 
       {/* Stats Cards */}

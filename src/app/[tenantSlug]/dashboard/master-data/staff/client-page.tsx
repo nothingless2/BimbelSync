@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { UserCog, Pencil, Trash2, Mail, ShieldAlert } from "lucide-react";
+import { UserCog, Pencil, Trash2, Mail, ShieldAlert, Search, Filter } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { deleteStaffAction } from "./actions";
 import { EditStaffModal } from "@/components/modals/edit-staff-modal";
@@ -12,11 +12,21 @@ export default function StaffClientPage({ staffList, tenantSlug }: { staffList: 
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterRole, setFilterRole] = useState<"ALL" | "ADMIN" | "TUTOR">("ALL");
+
+  // Filtering
+  const filteredStaff = staffList.filter(staff => {
+    const matchSearch = staff.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchRole = filterRole === "ALL" || staff.role === filterRole;
+    return matchSearch && matchRole;
+  });
+
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const totalPages = Math.ceil(staffList.length / itemsPerPage);
-  const currentData = staffList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredStaff.length / itemsPerPage));
+  const currentData = filteredStaff.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handleDelete = (staff: Staff) => {
     toast(`Hapus Staf "${staff.email}"?`, {
@@ -42,6 +52,43 @@ export default function StaffClientPage({ staffList, tenantSlug }: { staffList: 
   return (
     <>
       <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        
+        {/* Toolbar Filter */}
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1 max-w-sm">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search size={16} className="text-slate-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Cari email staf..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200"
+            />
+          </div>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Filter size={14} className="text-slate-400" />
+            </div>
+            <select
+              value={filterRole}
+              onChange={(e) => {
+                setFilterRole(e.target.value as any);
+                setCurrentPage(1);
+              }}
+              className="block w-full sm:w-48 pl-9 pr-8 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200 appearance-none bg-white"
+            >
+              <option value="ALL">Semua Peran</option>
+              <option value="ADMIN">Admin</option>
+              <option value="TUTOR">Tutor</option>
+            </select>
+          </div>
+        </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left text-slate-600 dark:text-slate-400">
             <thead className="text-xs text-slate-500 uppercase bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
@@ -113,7 +160,7 @@ export default function StaffClientPage({ staffList, tenantSlug }: { staffList: 
           currentPage={currentPage} 
           totalPages={totalPages} 
           onPageChange={setCurrentPage} 
-          totalItems={staffList.length} 
+          totalItems={filteredStaff.length} 
           itemsPerPage={itemsPerPage} 
         />
       </div>

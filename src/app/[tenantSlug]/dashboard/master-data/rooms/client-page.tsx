@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { DoorOpen, Users, Pencil, Trash2 } from "lucide-react";
+import { DoorOpen, Users, Pencil, Trash2, Search } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { deleteRoomAction } from "./actions";
 import { EditRoomModal } from "@/components/modals/edit-room-modal";
@@ -13,11 +13,18 @@ export default function RoomsClientPage({ rooms, tenantSlug }: { rooms: Room[], 
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
 
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filtering
+  const filteredRooms = rooms.filter(room => 
+    room.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const totalPages = Math.ceil(rooms.length / itemsPerPage);
-  const currentData = rooms.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredRooms.length / itemsPerPage));
+  const currentData = filteredRooms.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handleDelete = (room: Room) => {
     toast(`Hapus Ruangan "${room.name}"?`, {
@@ -43,6 +50,26 @@ export default function RoomsClientPage({ rooms, tenantSlug }: { rooms: Room[], 
   return (
     <>
       <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        
+        {/* Toolbar Filter */}
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20">
+          <div className="relative max-w-sm">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search size={16} className="text-slate-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Cari nama ruangan..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1); // Reset page on search
+              }}
+              className="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200"
+            />
+          </div>
+        </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left text-slate-600 dark:text-slate-400">
             <thead className="text-xs text-slate-500 uppercase bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
@@ -105,7 +132,7 @@ export default function RoomsClientPage({ rooms, tenantSlug }: { rooms: Room[], 
           currentPage={currentPage} 
           totalPages={totalPages} 
           onPageChange={setCurrentPage} 
-          totalItems={rooms.length} 
+          totalItems={filteredRooms.length} 
           itemsPerPage={itemsPerPage} 
         />
       </div>
