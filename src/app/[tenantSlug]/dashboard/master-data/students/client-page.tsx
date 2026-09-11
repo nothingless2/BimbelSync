@@ -5,7 +5,7 @@ import { Users, Pencil, Trash2, Phone, BookOpen, MoreVertical, LogOut, CheckCirc
 import { toast } from "@/components/ui/sonner";
 import { deleteStudentAction, withdrawEnrollmentAction } from "./actions";
 import { EditStudentModal } from "@/components/modals/edit-student-modal";
-import { EnrollStudentModal } from "@/components/modals/enroll-student-modal";
+import { ManageEnrollmentsModal } from "@/components/modals/manage-enrollments-modal";
 import { Student, Program, Enrollment } from "@prisma/client";
 import { Pagination } from "@/components/ui/pagination";
 
@@ -193,14 +193,18 @@ export default function StudentsClientPage({
                           {openDropdownId === student.id && (
                             <>
                               <div className="fixed inset-0 z-10" onClick={() => setOpenDropdownId(null)}></div>
-                              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 z-20 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                              <div className={`absolute right-0 w-48 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 z-50 overflow-hidden animate-in fade-in duration-200 ${
+                                index >= currentData.length - 2 && currentData.length > 2 
+                                  ? 'bottom-full mb-2 slide-in-from-bottom-2' 
+                                  : 'top-full mt-2 slide-in-from-top-2'
+                              }`}>
                                 <div className="py-1">
                                   <button
                                     onClick={() => { setEnrollingStudent(student); setOpenDropdownId(null); }}
                                     className="w-full text-left px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2"
                                   >
                                     <BookOpen size={16} className="text-blue-500" />
-                                    Daftarkan Program
+                                    Kelola Program
                                   </button>
                                   <button
                                     onClick={() => { setEditingStudent(student); setOpenDropdownId(null); }}
@@ -249,9 +253,9 @@ export default function StudentsClientPage({
       )}
 
       {enrollingStudent && (
-        <EnrollStudentModal 
+        <ManageEnrollmentsModal 
           student={enrollingStudent} 
-          programs={programs}
+          programs={programs} 
           tenantSlug={tenantSlug} 
           onClose={() => setEnrollingStudent(null)} 
         />

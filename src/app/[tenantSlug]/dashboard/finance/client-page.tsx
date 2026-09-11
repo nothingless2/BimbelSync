@@ -213,7 +213,11 @@ export default function FinanceClientPage({
                           {openDropdownId === invoice.id && (
                             <>
                               <div className="fixed inset-0 z-10" onClick={() => setOpenDropdownId(null)}></div>
-                              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 z-20 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                              <div className={`absolute right-0 w-48 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 z-50 overflow-hidden animate-in fade-in duration-200 ${
+                                index >= currentData.length - 2 && currentData.length > 2 
+                                  ? 'bottom-full mb-2 slide-in-from-bottom-2' 
+                                  : 'top-full mt-2 slide-in-from-top-2'
+                              }`}>
                                 <div className="py-1">
                                   <Link 
                                     href={`./finance/${invoice.id}`}

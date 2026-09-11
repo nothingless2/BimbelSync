@@ -51,11 +51,22 @@ export default async function AttendancePage({
     );
   }
 
-  // Fetch all students actively enrolled in this program
-  const activeEnrollments = await prisma.enrollment.findMany({
+  // Ambil semua siswa yang terdaftar SAAT jadwal ini berlangsung (Historical Check)
+  const relevantEnrollments = await prisma.enrollment.findMany({
     where: {
       program_id: schedule.program_id,
-      status: 'ACTIVE',
+      enrolled_date: {
+        lte: schedule.start_time // Hanya siswa yang masuk sebelum atau saat kelas dimulai
+      },
+      OR: [
+        { status: 'ACTIVE' },
+        { 
+          status: 'WITHDRAWN',
+          withdrawn_at: {
+            gte: schedule.start_time // Jika sudah keluar, pastikan keluarnya setelah kelas ini selesai/dimulai
+          }
+        }
+      ],
       student: {
         deleted_at: null
       }
@@ -71,11 +82,12 @@ export default async function AttendancePage({
   });
 
   // Map students with their existing attendance status if any
-  const studentsData = activeEnrollments.map(enrollment => {
+  const studentsData = relevantEnrollments.map(enrollment => {
     const existingRecord = schedule.attendances.find(a => a.student_id === enrollment.student_id);
     return {
       student: enrollment.student,
-      currentStatus: existingRecord ? existingRecord.attendance_status : null
+      currentStatus: existingRecord ? existingRecord.attendance_status : null,
+      isWithdrawn: enrollment.status === 'WITHDRAWN' // Tambahan marker visual jika diperlukan
     };
   });
 

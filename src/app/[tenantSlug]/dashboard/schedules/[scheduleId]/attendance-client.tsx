@@ -12,6 +12,7 @@ import Link from "next/link";
 type StudentWithAttendance = {
   student: Student;
   currentStatus: AttendanceStatus | null; // null jika belum diabsen
+  isWithdrawn?: boolean; // Marker jika siswa sudah keluar (tapi masih muncul karena kelas ini ada di masa lalu)
 };
 
 export function AttendanceClient({
@@ -113,7 +114,8 @@ export function AttendanceClient({
             Tidak ada siswa aktif yang terdaftar di program ini.
           </div>
         ) : (
-          studentsData.map(({ student }) => {
+          studentsData.map((studentData) => {
+            const { student } = studentData;
             const currentVal = attendanceState[student.id];
 
             return (
@@ -123,7 +125,14 @@ export function AttendanceClient({
                     {student.full_name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <h4 className="font-bold text-slate-900 dark:text-slate-100">{student.full_name}</h4>
+                    <h4 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                      {student.full_name}
+                      {studentData.isWithdrawn && (
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                          (Diberhentikan)
+                        </span>
+                      )}
+                    </h4>
                     <p className="text-xs text-slate-500">@{student.username}</p>
                   </div>
                 </div>
