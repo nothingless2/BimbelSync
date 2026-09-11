@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { decrypt } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { startOfMonth, endOfMonth } from "date-fns";
 import DashboardClientPage from "./client-page";
 
 export default async function DashboardHome({ params }: { params: Promise<{ tenantSlug: string }> }) {
@@ -34,7 +35,7 @@ export default async function DashboardHome({ params }: { params: Promise<{ tena
   const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
   // Menarik semua data yang dibutuhkan secara paralel
-  const [totalStudents, todaySchedules, invoices] = await Promise.all([
+  const [totalStudents, todaySchedules, invoices, thisMonthClassesCount, pendingAttendanceCount] = await Promise.all([
     // 1. Total Siswa Aktif (Hanya ADMIN)
     !isTutor ? prisma.student.count({
       where: {
@@ -77,7 +78,29 @@ export default async function DashboardHome({ params }: { params: Promise<{ tena
       orderBy: {
         id: 'desc'
       }
-    }) : Promise.resolve([])
+    }) : Promise.resolve([]),
+
+    // 4. Total Kelas Bulan Ini (Hanya TUTOR)
+    isTutor ? prisma.schedule.count({
+      where: {
+        tutor_id: session.id,
+        start_time: {
+          gte: startOfMonth(today),
+          lte: endOfMonth(today)
+        },
+        status: 'SCHEDULED'
+      }
+    }) : Promise.resolve(0),
+
+    // 5. Absensi Tertunda (Hanya TUTOR)
+    isTutor ? prisma.schedule.count({
+      where: {
+        tutor_id: session.id,
+        end_time: { lt: today },
+        status: 'SCHEDULED',
+        attendances: { none: {} }
+      }
+    }) : Promise.resolve(0)
   ]);
 
   // Kalkulasi Tunggakan (UNPAID / OVERDUE)
@@ -99,6 +122,8 @@ export default async function DashboardHome({ params }: { params: Promise<{ tena
       totalUnpaid={totalUnpaid}
       todaySchedules={todaySchedules}
       recentPayments={recentPayments}
+      thisMonthClassesCount={thisMonthClassesCount}
+      pendingAttendanceCount={pendingAttendanceCount}
     />
   );
 }

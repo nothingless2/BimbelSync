@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, UserCog, Calendar, CreditCard, Box, BookOpen, HelpCircle, LogOut, FileText, Library } from "lucide-react";
+import { LayoutDashboard, Users, UserCog, Calendar, CreditCard, Box, BookOpen, HelpCircle, LogOut, FileText, Library, BarChart } from "lucide-react";
 
 export function TenantNav({ tenantSlug, userRole }: { tenantSlug: string, userRole?: string }) {
   const pathname = usePathname();
@@ -76,6 +76,12 @@ export function TenantNav({ tenantSlug, userRole }: { tenantSlug: string, userRo
           icon={<Library size={18} />} 
           label="Learning Materials" 
           active={isRouteActive(`/${tenantSlug}/dashboard/materials`)} 
+        />
+        <NavItem 
+          href={`/${tenantSlug}/dashboard/evaluations`} 
+          icon={<BarChart size={18} />} 
+          label="Evaluations" 
+          active={isRouteActive(`/${tenantSlug}/dashboard/evaluations`)} 
         />
         {userRole !== 'TUTOR' && (
           <NavItem 

@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Search, FileText, Youtube, Link as LinkIcon, Trash2, ExternalLink } from "lucide-react";
+import { Plus, Search, FileText, Video, Link as LinkIcon, Trash2, ExternalLink } from "lucide-react";
 import { AddMaterialModal } from "@/components/modals/add-material-modal";
 import { UserAvatar } from "@/components/user-avatar";
 import { deleteMaterialAction } from "./actions";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/sonner";
 
 export default function MaterialsClientPage({ materials, programs, tenantSlug, academyId }: any) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -35,7 +35,7 @@ export default function MaterialsClientPage({ materials, programs, tenantSlug, a
   };
 
   const getIcon = (type: string) => {
-    if (type === "VIDEO_LINK") return <Youtube size={24} className="text-red-500" />;
+    if (type === "VIDEO_LINK") return <Video size={24} className="text-red-500" />;
     if (type === "DOCUMENT_LINK") return <FileText size={24} className="text-blue-500" />;
     return <LinkIcon size={24} className="text-emerald-500" />;
   };

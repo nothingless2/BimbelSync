@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, QrCode, User, CreditCard } from 'lucide-react';
+import { Home, QrCode, User, CreditCard, BarChart } from 'lucide-react';
 
 export function StudentMobileNav({ tenantSlug }: { tenantSlug: string }) {
   const pathname = usePathname();
@@ -11,6 +11,7 @@ export function StudentMobileNav({ tenantSlug }: { tenantSlug: string }) {
     { href: `/${tenantSlug}/student/dashboard`, icon: Home, label: 'Beranda', exact: true },
     { href: `/${tenantSlug}/student/scan`, icon: QrCode, label: 'Scan' },
     { href: `/${tenantSlug}/student/invoices`, icon: CreditCard, label: 'Tagihan' },
+    { href: `/${tenantSlug}/student/evaluations`, icon: BarChart, label: 'Evaluasi' },
     { href: `/${tenantSlug}/student/profile`, icon: User, label: 'Profil' },
   ];
 

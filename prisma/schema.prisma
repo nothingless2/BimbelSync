@@ -80,6 +80,7 @@ model Academy {
   platform_invoices PlatformInvoice[]
   audit_logs        AuditLog[]
   materials         LearningMaterial[]
+  evaluations       StudentEvaluation[]
 }
 
 enum SubscriptionStatus {
@@ -115,6 +116,7 @@ model Staff {
   verified_installments Installment[] @relation("StaffVerifiesInstallment")
   audit_logs            AuditLog[]
   materials_created     LearningMaterial[] @relation("StaffCreatesMaterial")
+  evaluations_given     StudentEvaluation[] @relation("StaffEvaluatesStudent")
 
   @@unique([academy_id, email])
 }
@@ -138,6 +140,7 @@ model Student {
   enrollments Enrollment[]
   attendances Attendance[]
   invoices    Invoice[]
+  evaluations StudentEvaluation[]
 
   @@unique([academy_id, username])
 }
@@ -155,6 +158,7 @@ model Program {
   schedules   Schedule[]
   enrollments Enrollment[]
   materials   LearningMaterial[]
+  evaluations StudentEvaluation[]
 }
 
 model Schedule {
@@ -332,4 +336,29 @@ enum MaterialType {
   DOCUMENT_LINK
   VIDEO_LINK
   OTHER_LINK
+}
+
+model StudentEvaluation {
+  id               String         @id @default(uuid()) @db.Uuid
+  academy_id       String         @db.Uuid
+  student_id       String         @db.Uuid
+  program_id       String         @db.Uuid
+  evaluator_id     String         @db.Uuid
+  title            String
+  evaluation_type  EvaluationType
+  score            Decimal?       @db.Decimal(5, 2)
+  notes            String?
+  created_at       DateTime       @default(now())
+  updated_at       DateTime       @updatedAt
+
+  academy    Academy @relation(fields: [academy_id], references: [id])
+  student    Student @relation(fields: [student_id], references: [id])
+  program    Program @relation(fields: [program_id], references: [id])
+  evaluator  Staff   @relation("StaffEvaluatesStudent", fields: [evaluator_id], references: [id])
+}
+
+enum EvaluationType {
+  EXAM
+  HOMEWORK
+  MONTHLY_REPORT
 }

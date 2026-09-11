@@ -13,6 +13,8 @@ interface DashboardClientProps {
   totalUnpaid: number;
   recentPayments: any[];
   todaySchedules: any[];
+  thisMonthClassesCount?: number;
+  pendingAttendanceCount?: number;
 }
 
 export default function DashboardClientPage({
@@ -23,6 +25,8 @@ export default function DashboardClientPage({
   totalUnpaid,
   recentPayments,
   todaySchedules,
+  thisMonthClassesCount = 0,
+  pendingAttendanceCount = 0,
 }: DashboardClientProps) {
 
   const formatRupiah = (num: number) => {
@@ -34,7 +38,7 @@ export default function DashboardClientPage({
       <div>
         <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Dashboard</h2>
         <p className="text-slate-500 dark:text-slate-400 mt-1">
-          Selamat datang di panel admin {tenantSlug}. Berikut ringkasan operasional hari ini.
+          Selamat datang di panel {userRole === 'TUTOR' ? 'tutor' : 'admin'} {tenantSlug}. Berikut ringkasan operasional Anda.
         </p>
       </div>
 
@@ -89,6 +93,51 @@ export default function DashboardClientPage({
             </Link>
           </div>
         </>
+      )}
+
+      {userRole === 'TUTOR' && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="p-6 rounded-3xl bg-gradient-to-br from-emerald-500 to-emerald-700 border border-emerald-600 shadow-lg relative overflow-hidden group">
+            <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110">
+              <BookOpen size={120} />
+            </div>
+            <div className="relative z-10">
+              <h3 className="text-sm font-bold text-emerald-100 uppercase tracking-wider mb-2">Kelas Hari Ini</h3>
+              <p className="text-4xl font-black text-white">{todayClassesCount}</p>
+            </div>
+          </div>
+          
+          <div className="p-6 rounded-3xl bg-gradient-to-br from-blue-600 to-blue-800 border border-blue-700 shadow-lg relative overflow-hidden group">
+            <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110">
+              <CalendarPlus size={120} />
+            </div>
+            <div className="relative z-10">
+              <h3 className="text-sm font-bold text-blue-100 uppercase tracking-wider mb-2">Total Kelas Bulan Ini</h3>
+              <p className="text-4xl font-black text-white">{thisMonthClassesCount}</p>
+            </div>
+          </div>
+
+          <div className={`p-6 rounded-3xl bg-gradient-to-br shadow-lg relative overflow-hidden group ${
+            pendingAttendanceCount > 0 
+              ? "from-rose-500 to-rose-700 border-rose-600 animate-pulse-soft" 
+              : "from-slate-500 to-slate-700 border-slate-600"
+          }`}>
+            <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110">
+              <CheckCircle2 size={120} />
+            </div>
+            <div className="relative z-10">
+              <h3 className="text-sm font-bold text-white/80 uppercase tracking-wider mb-2">Absensi Tertunda</h3>
+              <div className="flex items-end gap-3">
+                <p className="text-4xl font-black text-white">{pendingAttendanceCount}</p>
+                {pendingAttendanceCount > 0 && (
+                  <span className="text-xs font-semibold text-rose-100 bg-rose-900/40 px-2 py-1 rounded-md mb-1.5">
+                    Perlu diisi!
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
