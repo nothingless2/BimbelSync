@@ -79,6 +79,7 @@ model Academy {
   invoices          Invoice[]
   platform_invoices PlatformInvoice[]
   audit_logs        AuditLog[]
+  materials         LearningMaterial[]
 }
 
 enum SubscriptionStatus {
@@ -113,6 +114,7 @@ model Staff {
   verified_invoices     Invoice[]     @relation("StaffVerifiesInvoice")
   verified_installments Installment[] @relation("StaffVerifiesInstallment")
   audit_logs            AuditLog[]
+  materials_created     LearningMaterial[] @relation("StaffCreatesMaterial")
 
   @@unique([academy_id, email])
 }
@@ -152,6 +154,7 @@ model Program {
   academy     Academy      @relation(fields: [academy_id], references: [id])
   schedules   Schedule[]
   enrollments Enrollment[]
+  materials   LearningMaterial[]
 }
 
 model Schedule {
@@ -306,4 +309,27 @@ model PlatformInvoice {
   academy     Academy     @relation(fields: [academy_id], references: [id])
   plan        Plan        @relation(fields: [plan_id], references: [id])
   verified_by Superadmin? @relation("SuperadminVerifies", fields: [verified_by_superadmin_id], references: [id])
+}
+
+model LearningMaterial {
+  id                  String       @id @default(uuid()) @db.Uuid
+  academy_id          String       @db.Uuid
+  program_id          String       @db.Uuid
+  title               String
+  description         String?
+  material_type       MaterialType
+  url                 String
+  created_by_staff_id String?      @db.Uuid
+  created_at          DateTime     @default(now())
+  deleted_at          DateTime?
+
+  academy  Academy @relation(fields: [academy_id], references: [id])
+  program  Program @relation(fields: [program_id], references: [id])
+  creator  Staff?  @relation("StaffCreatesMaterial", fields: [created_by_staff_id], references: [id])
+}
+
+enum MaterialType {
+  DOCUMENT_LINK
+  VIDEO_LINK
+  OTHER_LINK
 }

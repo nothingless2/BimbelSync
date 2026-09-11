@@ -2,7 +2,6 @@
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserAvatar } from "@/components/user-avatar";
-import { SearchBar } from "@/components/search-bar";
 import Link from "next/link";
 
 interface SuperadminHeaderProps {
@@ -36,15 +35,6 @@ export function SuperadminHeader({ user }: SuperadminHeaderProps) {
       </div>
       
       <div className="flex items-center gap-5">
-        <SearchBar
-          searchablePaths={["/superadmin/academies", "/superadmin/users", "/superadmin/audit-logs"]}
-          placeholderMap={{
-            "/superadmin/academies": "Cari nama atau URL akademi...",
-            "/superadmin/users": "Cari email superadmin...",
-            "/superadmin/audit-logs": "Cari aksi atau email...",
-          }}
-          defaultPlaceholder="Pencarian tidak tersedia di halaman ini"
-        />
         <ThemeToggle />
         <Link href="/superadmin/users/profile" className="block hover:opacity-80 transition cursor-pointer" title="Edit Profile">
           <UserAvatar id={user.id} email={user.email} avatarUrl={user.avatar_url} size={32} />

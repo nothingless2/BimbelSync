@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { UserPlus, Shield, CheckCircle2, Key, Trash2 } from "lucide-react";
+import { UserPlus, Shield, CheckCircle2, Key, Trash2, Search } from "lucide-react";
 import { AddSuperadminModal } from "@/components/modals/add-superadmin-modal";
 import { EditSuperadminModal } from "@/components/modals/edit-superadmin-modal";
 import { DeleteSuperadminModal } from "@/components/modals/delete-superadmin-modal";
@@ -14,11 +14,20 @@ export default function SystemUsersClient({ users }: { users: any[] }) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
 
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredUsers = users.filter(user => {
+    const searchString = searchQuery.toLowerCase();
+    const nameMatch = (user.name || "").toLowerCase().includes(searchString);
+    const emailMatch = (user.email || "").toLowerCase().includes(searchString);
+    return nameMatch || emailMatch;
+  });
+
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const totalPages = Math.ceil(users.length / itemsPerPage);
-  const currentData = users.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / itemsPerPage));
+  const currentData = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const openEditModal = (user: any) => {
     setSelectedUser(user);
@@ -46,7 +55,26 @@ export default function SystemUsersClient({ users }: { users: any[] }) {
         </button>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+        {/* Toolbar Filter */}
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20">
+          <div className="relative max-w-md">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search size={16} className="text-slate-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Cari nama atau email superadmin..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200"
+            />
+          </div>
+        </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
@@ -108,7 +136,7 @@ export default function SystemUsersClient({ users }: { users: any[] }) {
           currentPage={currentPage} 
           totalPages={totalPages} 
           onPageChange={setCurrentPage} 
-          totalItems={users.length} 
+          totalItems={filteredUsers.length} 
           itemsPerPage={itemsPerPage} 
         />
       </div>

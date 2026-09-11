@@ -53,7 +53,9 @@ export default async function DashboardLayout({
         {/* Header */}
         <header className="h-16 border-b border-slate-200 dark:border-slate-800/60 flex items-center justify-between px-8 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-10 sticky top-0 transition-colors">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-slate-500">Admin Portal</span>
+            <span className="text-sm font-medium text-slate-500">
+              {dbUser?.role === 'TUTOR' ? 'Tutor Portal' : 'Admin Portal'}
+            </span>
             <span className="text-slate-300 dark:text-slate-600">/</span>
             <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 capitalize">{tenantSlug}</span>
           </div>

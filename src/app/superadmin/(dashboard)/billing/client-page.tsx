@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
   FileText, CheckCircle2, Clock, AlertTriangle, Check, Ban, ChevronDown,
-  Plus, Building2, Loader2, AlertCircle, X, Trash2
+  Plus, Building2, Loader2, AlertCircle, X, Trash2, Search, Filter
 } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { verifyInvoiceAction, markOverdueAction, voidInvoiceAction, createInvoiceAction, deleteInvoiceAction } from "./actions";
@@ -187,11 +187,21 @@ export default function BillingClientPage({ invoices, academies }: Props) {
   const [form, setForm] = useState({ academyId: "", billingPeriod: "", dueDate: "", amount: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState<"ALL" | "UNPAID" | "PAID" | "OVERDUE" | "VOID">("ALL");
+
+  const filteredInvoices = invoices.filter(invoice => {
+    const matchSearch = invoice.academy.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                        invoice.academy.path_url.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchStatus = filterStatus === "ALL" || invoice.payment_status === filterStatus;
+    return matchSearch && matchStatus;
+  });
+
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const totalPages = Math.ceil(invoices.length / itemsPerPage);
-  const currentData = invoices.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredInvoices.length / itemsPerPage));
+  const currentData = filteredInvoices.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const totalUnpaid = invoices.filter(i => i.payment_status === "UNPAID").length;
   const totalPaid = invoices.filter(i => i.payment_status === "PAID").length;
@@ -273,8 +283,55 @@ export default function BillingClientPage({ invoices, academies }: Props) {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
+      {/* Table & Filters */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+        
+        {/* Toolbar Filter */}
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1 max-w-md">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search size={16} className="text-slate-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Cari nama atau URL akademi..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200"
+            />
+          </div>
+          
+          <div className="flex bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-1 shrink-0 overflow-hidden">
+            <button 
+              onClick={() => { setFilterStatus("ALL"); setCurrentPage(1); }}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${filterStatus === "ALL" ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            >
+              Semua
+            </button>
+            <button 
+              onClick={() => { setFilterStatus("UNPAID"); setCurrentPage(1); }}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${filterStatus === "UNPAID" ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-500 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            >
+              Belum Bayar
+            </button>
+            <button 
+              onClick={() => { setFilterStatus("PAID"); setCurrentPage(1); }}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${filterStatus === "PAID" ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-500 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            >
+              Lunas
+            </button>
+            <button 
+              onClick={() => { setFilterStatus("OVERDUE"); setCurrentPage(1); }}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${filterStatus === "OVERDUE" ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-500 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            >
+              Terlambat
+            </button>
+          </div>
+        </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">
@@ -349,7 +406,7 @@ export default function BillingClientPage({ invoices, academies }: Props) {
           currentPage={currentPage} 
           totalPages={totalPages} 
           onPageChange={setCurrentPage} 
-          totalItems={invoices.length} 
+          totalItems={filteredInvoices.length} 
           itemsPerPage={itemsPerPage} 
         />
       </div>

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ShieldAlert, Filter, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, User, Building2, AlertCircle } from "lucide-react";
+import { ShieldAlert, Filter, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, User, Building2, AlertCircle, Search } from "lucide-react";
 import Link from "next/link";
 import { UserAvatar } from "@/components/user-avatar";
 import { Pagination } from "@/components/ui/pagination";
@@ -40,6 +40,17 @@ export default function AuditLogsClientPage({
     tenant: currentFilters.tenant || "",
     superadmin: currentFilters.superadmin || "",
     action: currentFilters.action || "",
+  });
+  
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredLogs = logs.filter(log => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    const actionMatch = log.action.toLowerCase().includes(q);
+    const emailMatch = (log.superadmin?.email || "").toLowerCase().includes(q);
+    const nameMatch = (log.superadmin?.name || "").toLowerCase().includes(q);
+    return actionMatch || emailMatch || nameMatch;
   });
 
   const handleFilterChange = (key: string, value: string) => {
@@ -79,7 +90,20 @@ export default function AuditLogsClientPage({
         <div className="flex items-center gap-2 mb-4 text-sm font-semibold text-slate-700 dark:text-slate-300">
           <Filter size={16} /> Filter Pencarian
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-500">Pencarian Teks</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <input
+                type="text"
+                placeholder="Cari aksi atau email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-sm"
+              />
+            </div>
+          </div>
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-500">Berdasarkan Tenant</label>
             <div className="relative">
@@ -148,13 +172,13 @@ export default function AuditLogsClientPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
-              {logs.length === 0 ? (
+              {filteredLogs.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
+                  <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
                     Tidak ada log aktivitas yang cocok dengan filter pencarian.
                   </td>
                 </tr>
-              ) : logs.map((log, index) => (
+              ) : filteredLogs.map((log, index) => (
                 <React.Fragment key={log.id}>
                   <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors group cursor-pointer" onClick={() => toggleExpand(log.id)}>
                     <td className="px-6 py-4 font-medium text-slate-500 text-xs">
