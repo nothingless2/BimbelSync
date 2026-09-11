@@ -51,6 +51,7 @@ export default async function MaterialsPage({ params }: { params: { tenantSlug: 
         programs={programs} 
         tenantSlug={tenantSlug} 
         academyId={dbUser.academy_id} 
+        userRole={dbUser.role}
       />
     </div>
   );

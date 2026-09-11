@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, QrCode, User, CreditCard, BarChart } from "lucide-react";
+import { Home, QrCode, User, CreditCard, BarChart, BookOpen } from "lucide-react";
 
 export function StudentDesktopNav({ tenantSlug }: { tenantSlug: string }) {
   const pathname = usePathname();
@@ -10,6 +10,7 @@ export function StudentDesktopNav({ tenantSlug }: { tenantSlug: string }) {
   const navItems = [
     { href: `/${tenantSlug}/student/dashboard`, icon: Home, label: "Beranda", exact: true },
     { href: `/${tenantSlug}/student/scan`, icon: QrCode, label: "Scan Absen" },
+    { href: `/${tenantSlug}/student/materials`, icon: BookOpen, label: "Materi Belajar" },
     { href: `/${tenantSlug}/student/invoices`, icon: CreditCard, label: "Tagihan" },
     { href: `/${tenantSlug}/student/evaluations`, icon: BarChart, label: "Evaluasi" },
     { href: `/${tenantSlug}/student/profile`, icon: User, label: "Profil" },

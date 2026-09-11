@@ -9,7 +9,7 @@ import { AddEvaluationModal } from "@/components/modals/add-evaluation-modal";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 
-export default function EvaluationsClientPage({ evaluations, students, programs, tenantSlug, academyId }: any) {
+export default function EvaluationsClientPage({ evaluations, students, programs, tenantSlug, academyId, userRole }: any) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("ALL");
@@ -56,13 +56,15 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Student Progress</h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">Kelola nilai, PR, dan rapor evaluasi bulanan siswa.</p>
         </div>
-        <button 
-          onClick={() => setIsAddModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition shadow-sm flex items-center gap-2"
-        >
-          <Plus size={18} />
-          Input Nilai
-        </button>
+        {userRole === 'TUTOR' && (
+          <button 
+            onClick={() => setIsAddModalOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition shadow-sm flex items-center gap-2"
+          >
+            <Plus size={18} />
+            Input Nilai
+          </button>
+        )}
       </div>
 
       {/* Toolbar Filter */}
@@ -118,13 +120,15 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
                     </p>
                   </div>
                 </div>
-                <button 
-                  onClick={() => handleDelete(evaluation.id)}
-                  disabled={deletingId === evaluation.id}
-                  className="text-slate-400 hover:text-red-500 p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition shrink-0"
-                >
-                  <Trash2 size={16} />
-                </button>
+                {userRole === 'TUTOR' && (
+                  <button 
+                    onClick={() => handleDelete(evaluation.id)}
+                    disabled={deletingId === evaluation.id}
+                    className="text-slate-400 hover:text-red-500 p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition shrink-0"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
               </div>
               
               <div className="flex-1 bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 mb-4">

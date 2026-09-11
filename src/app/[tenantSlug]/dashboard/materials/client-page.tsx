@@ -7,7 +7,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { deleteMaterialAction } from "./actions";
 import { toast } from "@/components/ui/sonner";
 
-export default function MaterialsClientPage({ materials, programs, tenantSlug, academyId }: any) {
+export default function MaterialsClientPage({ materials, programs, tenantSlug, academyId, userRole }: any) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterProgram, setFilterProgram] = useState("ALL");
@@ -47,13 +47,15 @@ export default function MaterialsClientPage({ materials, programs, tenantSlug, a
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Learning Materials</h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">Bank soal, modul, dan materi pembelajaran untuk tutor.</p>
         </div>
-        <button 
-          onClick={() => setIsAddModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition shadow-sm flex items-center gap-2"
-        >
-          <Plus size={18} />
-          Tambah Materi
-        </button>
+        {userRole === 'TUTOR' && (
+          <button 
+            onClick={() => setIsAddModalOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition shadow-sm flex items-center gap-2"
+          >
+            <Plus size={18} />
+            Tambah Materi
+          </button>
+        )}
       </div>
 
       {/* Toolbar Filter */}
@@ -103,13 +105,15 @@ export default function MaterialsClientPage({ materials, programs, tenantSlug, a
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md">
                     {material.program.name}
                   </span>
-                  <button 
-                    onClick={() => handleDelete(material.id)}
-                    disabled={deletingId === material.id}
-                    className="text-slate-400 hover:text-red-500 p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  {userRole === 'TUTOR' && (
+                    <button 
+                      onClick={() => handleDelete(material.id)}
+                      disabled={deletingId === material.id}
+                      className="text-slate-400 hover:text-red-500 p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition shrink-0"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
                 </div>
               </div>
               

@@ -198,14 +198,27 @@ export async function deleteStudentAction(studentId: string) {
 
     if (!existing) return { error: "Siswa tidak ditemukan." };
 
-    await prisma.student.update({
-      where: { id: studentId },
-      data: { 
-        deleted_at: new Date(),
-        // Membebaskan username agar bisa digunakan lagi oleh pendaftar baru
-        username: `${existing.username}_del_${Date.now()}`
-      }
-    });
+    await prisma.$transaction([
+      prisma.student.update({
+        where: { id: studentId },
+        data: { 
+          deleted_at: new Date(),
+          username: `${existing.username}_del_${Date.now()}`
+        }
+      }),
+      // Otomatis batalkan semua tagihan yang belum lunas
+      prisma.invoice.updateMany({
+        where: {
+          student_id: studentId,
+          payment_status: {
+            in: ['UNPAID', 'OVERDUE']
+          }
+        },
+        data: {
+          payment_status: 'VOID'
+        }
+      })
+    ]);
 
     await createAuditLog({
       academy_id: session.academy_id,

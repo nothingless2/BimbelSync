@@ -70,6 +70,7 @@ export default async function EvaluationsPage({ params }: { params: { tenantSlug
         programs={programs} 
         tenantSlug={tenantSlug} 
         academyId={dbUser.academy_id} 
+        userRole={dbUser.role}
       />
     </div>
   );
