@@ -2,7 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { TenantNav } from "@/components/tenant-nav";
-import { SearchBar } from "@/components/search-bar";
 import { UserAvatar } from "@/components/user-avatar";
 import { cookies } from "next/headers";
 import { decrypt } from "@/lib/auth";
@@ -59,18 +58,6 @@ export default async function DashboardLayout({
             <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 capitalize">{tenantSlug}</span>
           </div>
           <div className="flex items-center gap-5">
-            <SearchBar
-              searchablePaths={["/master-data/", "/schedules", "/finance", "/audit-logs"]}
-              placeholderMap={{
-                "/master-data/students": "Cari nama atau username siswa...",
-                "/master-data/rooms": "Cari nama ruangan...",
-                "/master-data/programs": "Cari nama program...",
-                "/master-data/staff": "Cari nama atau email staf...",
-                "/schedules": "Cari program, ruangan, atau tutor...",
-                "/finance": "Cari nama siswa di tagihan...",
-                "/audit-logs": "Cari entitas atau aksi...",
-              }}
-            />
             <ThemeToggle />
             {dbUser && (
               <Link href={`/${tenantSlug}/dashboard/profile`} className="block hover:opacity-80 transition cursor-pointer" title="Edit Profile">

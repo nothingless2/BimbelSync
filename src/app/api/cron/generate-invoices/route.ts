@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { format, startOfMonth, addMonths, addDays } from "date-fns";
+import { createAuditLog } from "@/lib/audit";
 
 // This endpoint is meant to be called by a Cron Service (like Vercel Cron)
 // In production, you would add an Authorization header check to prevent public abuse.
@@ -48,6 +49,7 @@ export async function POST(request: Request) {
     const billedStudentIds = new Set(existingInvoices.map(inv => inv.student_id));
 
     const createPromises = [];
+    const generatedCountPerAcademy = new Map<string, number>();
 
     // 4. Siapkan Data Tagihan di Memory (RAM)
     for (const academy of academies) {
@@ -87,6 +89,7 @@ export async function POST(request: Request) {
         });
 
         createPromises.push(createInvoiceTask);
+        generatedCountPerAcademy.set(academy.id, (generatedCountPerAcademy.get(academy.id) || 0) + 1);
       }
     }
 
@@ -99,6 +102,26 @@ export async function POST(request: Request) {
         await Promise.all(chunk);
       }
       totalInvoicesCreated = createPromises.length;
+      
+      // Catat ke Audit Log untuk academy yang terkena dampak
+      if (academy_id) {
+        await createAuditLog({
+          academy_id: academy_id,
+          action: "CREATE",
+          entity_type: "Invoice (System Cron)",
+          details: { total_invoices_generated: totalInvoicesCreated, billing_period: currentMonthPeriod }
+        });
+      } else {
+        // Jika global, catat untuk setiap academy
+        for (const [acadId, count] of generatedCountPerAcademy.entries()) {
+          await createAuditLog({
+            academy_id: acadId,
+            action: "CREATE",
+            entity_type: "Invoice (System Cron)",
+            details: { total_invoices_generated: count, billing_period: currentMonthPeriod }
+          });
+        }
+      }
     }
 
     return NextResponse.json({ 

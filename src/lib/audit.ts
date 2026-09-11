@@ -4,7 +4,7 @@ type AuditAction = "CREATE" | "UPDATE" | "DELETE" | "VERIFY" | "LOGIN";
 
 interface CreateAuditLogParams {
   academy_id: string;
-  staff_id: string;
+  staff_id?: string;
   action: AuditAction;
   entity_type: string;
   entity_id?: string;

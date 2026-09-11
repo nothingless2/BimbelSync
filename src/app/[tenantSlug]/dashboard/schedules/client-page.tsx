@@ -46,7 +46,7 @@ export default function SchedulesClientPage({
 
   // Filtering
   const filteredSchedules = schedules.filter(schedule => {
-    const matchSearch = schedule.tutor.full_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    const matchSearch = (schedule.tutor.name || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
                         schedule.program.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchStatus = filterStatus === "ALL" || schedule.status === filterStatus;
     return matchSearch && matchStatus;
