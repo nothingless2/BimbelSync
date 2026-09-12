@@ -56,7 +56,6 @@ export async function middleware(req: NextRequest) {
       const isDashboard = pathParts[1] === 'dashboard';
       const isSiswa = pathParts[1] === 'student';
       const isLoginStaff = pathParts[1] === 'login';
-      const isLoginSiswa = pathParts[1] === 'student' && pathParts[2] === 'login';
 
       // Proteksi /dashboard (Hanya untuk Admin / Tutor)
       if (isDashboard) {
@@ -74,9 +73,9 @@ export async function middleware(req: NextRequest) {
       }
       
       // Proteksi /student (Hanya untuk Student)
-      if (isSiswa && !isLoginSiswa) {
+      if (isSiswa) {
         if (!session || session.role !== 'STUDENT') {
-          return NextResponse.redirect(new URL(`/${tenantSlug}/student/login`, req.url));
+          return NextResponse.redirect(new URL(`/${tenantSlug}/login`, req.url));
         }
         // Cegah Siswa lompat ke bimbel orang lain
         if (session.tenant_slug !== tenantSlug){

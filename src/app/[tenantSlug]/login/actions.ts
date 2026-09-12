@@ -5,64 +5,78 @@ import bcrypt from 'bcrypt';
 import { encrypt } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
-export async function loginStaffAction(tenantSlug: string, formData: FormData) {
-  const email = formData.get('email') as string;
+export async function loginTenantAction(tenantSlug: string, formData: FormData) {
+  const identifier = formData.get('email') as string; // bisa email atau username
   const password = formData.get('password') as string;
 
   try {
-    // 1 & 2. Cari Staff dan Bimbel secara bersamaan
+    // 1. Cek apakah Akademi ada
+    const academy = await prisma.academy.findUnique({
+      where: { path_url: tenantSlug }
+    });
+
+    if (!academy) {
+      return { error: 'Bimbel tidak ditemukan di sistem kami.' };
+    }
+
+    // 2. Coba cari sebagai Staff (menggunakan email)
     const staff = await prisma.staff.findFirst({
       where: {
-        email: email,
-        academy: {
-          path_url: tenantSlug
-        }
-      },
-      include: {
-        academy: true
+        email: identifier,
+        academy_id: academy.id
       }
     });
 
-    if (!staff) {
-      // Cek apakah bimbelnya yang tidak ada atau emailnya yang salah
-      const academyExists = await prisma.academy.count({
-        where: { path_url: tenantSlug }
-      });
-      
-      if (academyExists === 0) {
-        return { error: 'Bimbel tidak ditemukan di sistem kami.' };
+    if (staff) {
+      const isPasswordValid = await bcrypt.compare(password, staff.password_hash);
+      if (isPasswordValid) {
+        const sessionToken = await encrypt({
+          id: staff.id,
+          role: staff.role,
+          academy_id: academy.id,
+          tenant_slug: academy.path_url
+        });
+        
+        const cookieStore = await cookies();
+        cookieStore.set('bimbelsync_session', sessionToken, {
+          httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 60 * 60 * 8,
+        });
+
+        return { success: true, redirectUrl: `/${tenantSlug}/dashboard` };
       }
-      return { error: 'Email atau kata sandi salah.' };
-    }
-    
-    const academy = staff.academy;
-
-    // 3. Cocokkan kata sandi
-    const isPasswordValid = await bcrypt.compare(password, staff.password_hash);
-    
-    if (!isPasswordValid) {
-      return { error: 'Email atau kata sandi salah.' };
     }
 
-    // 4. Jika sukses, buat Tiket Sesi (JWT)
-    const sessionToken = await encrypt({
-      id: staff.id,
-      role: staff.role, // Bawaan DB (ADMIN atau TUTOR)
-      academy_id: academy.id,
-      tenant_slug: academy.path_url
+    // 3. Jika bukan Staff, coba cari sebagai Student (menggunakan username)
+    const student = await prisma.student.findFirst({
+      where: {
+        username: identifier,
+        academy_id: academy.id
+      }
     });
 
-    // 5. Simpan JWT ke dalam HttpOnly Cookie agar aman dari pencurian
-    const cookieStore = await cookies();
-    cookieStore.set('bimbelsync_session', sessionToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 8, // 8 Jam
-    });
+    if (student) {
+      const isPasswordValid = await bcrypt.compare(password, student.password_hash);
+      if (isPasswordValid) {
+        const sessionToken = await encrypt({
+          id: student.id,
+          role: 'STUDENT',
+          academy_id: academy.id,
+          tenant_slug: academy.path_url
+        });
+        
+        const cookieStore = await cookies();
+        cookieStore.set('bimbelsync_session', sessionToken, {
+          httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 60 * 60 * 8,
+        });
 
-    return { success: true };
+        return { success: true, redirectUrl: `/${tenantSlug}/student/dashboard` };
+      }
+    }
+
+    // 4. Jika keduanya gagal
+    return { error: 'Email/Username atau kata sandi salah.' };
+
+    // Kode ini sudah digantikan di blok if di atas
 
   } catch (error) {
     console.error("Login Error:", error);

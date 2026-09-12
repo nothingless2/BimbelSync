@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { loginStaffAction } from './actions';
+import { loginTenantAction } from './actions';
 import { User, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 
-export default function StaffLoginPage() {
+export default function TenantLoginPage() {
   const pathname = usePathname();
   const router = useRouter();
   const tenantSlug = pathname.split('/')[1] || 'Bimbel';
@@ -21,13 +21,13 @@ export default function StaffLoginPage() {
     setErrorMsg('');
     
     const formData = new FormData(e.currentTarget);
-    const result = await loginStaffAction(tenantSlug, formData);
+    const result = await loginTenantAction(tenantSlug, formData);
 
     if (result.error) {
       setErrorMsg(result.error);
       setIsLoading(false);
-    } else if (result.success) {
-      router.push(`/${tenantSlug}/dashboard`);
+    } else if (result.success && result.redirectUrl) {
+      router.push(result.redirectUrl);
     }
   };
 
