@@ -57,6 +57,8 @@ export function TenantNav({ tenantSlug, userRole }: { tenantSlug: string, userRo
               label="Staff" 
               active={isRouteActive(`/${tenantSlug}/dashboard/master-data/staff`)} 
             />
+
+
           </>
         )}
 
@@ -104,6 +106,12 @@ export function TenantNav({ tenantSlug, userRole }: { tenantSlug: string, userRo
               icon={<FileText size={18} />} 
               label="Audit Logs" 
               active={isRouteActive(`/${tenantSlug}/dashboard/audit-logs`)} 
+            />
+            <NavItem 
+              href={`/${tenantSlug}/dashboard/subscription`} 
+              icon={<CreditCard size={18} />} 
+              label="Langganan Sistem" 
+              active={isRouteActive(`/${tenantSlug}/dashboard/subscription`)} 
             />
           </>
         )}
