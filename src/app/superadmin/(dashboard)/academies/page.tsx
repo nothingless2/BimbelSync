@@ -31,7 +31,7 @@ export default async function AcademiesPage({
       ];
     }
 
-    const [academies, plans] = await Promise.all([
+    let [academies, plans] = await Promise.all([
       prisma.academy.findMany({
         where: whereClause,
         include: {
@@ -45,6 +45,31 @@ export default async function AcademiesPage({
         orderBy: { price: "asc" },
       }),
     ]);
+
+    // Lazy Evaluation: Auto-suspend akademi yang melewati batas waktu
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    const overdueAcademyIds: string[] = [];
+    academies = academies.map(a => {
+      if (a.subscription_status !== "SUSPENDED" && a.subscription_due_date) {
+        const dueDate = new Date(a.subscription_due_date);
+        dueDate.setHours(0,0,0,0);
+        if (dueDate < today) {
+          a.subscription_status = "SUSPENDED";
+          overdueAcademyIds.push(a.id);
+        }
+      }
+      return a;
+    });
+
+    // Update database di background jika ada yang jatuh tempo
+    if (overdueAcademyIds.length > 0) {
+      await prisma.academy.updateMany({
+        where: { id: { in: overdueAcademyIds } },
+        data: { subscription_status: "SUSPENDED" }
+      });
+    }
 
     return <AcademiesClientPage academies={academies} plans={plans} />;
   } catch (error) {

@@ -110,14 +110,31 @@ export async function updateAcademyAction(formData: FormData) {
   const id = formData.get("id") as string;
   const name = formData.get("name") as string;
   const planId = formData.get("plan_id") as string;
-  const status = formData.get("status") as "TRIAL" | "ACTIVE" | "SUSPENDED";
+  let status = formData.get("status") as "TRIAL" | "ACTIVE" | "SUSPENDED";
+  const dueDate = formData.get("subscription_due_date") as string | null;
 
   if (!id || !name || !planId || !status) return { error: "Semua field wajib diisi." };
+
+  const parsedDueDate = dueDate ? new Date(dueDate) : null;
+  if (parsedDueDate) {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    parsedDueDate.setHours(0,0,0,0);
+    // Auto suspend jika tanggal lewat
+    if (parsedDueDate < today) {
+      status = "SUSPENDED";
+    }
+  }
 
   try {
     await prisma.academy.update({
       where: { id },
-      data: { name, plan_id: planId, subscription_status: status },
+      data: { 
+        name, 
+        plan_id: planId, 
+        subscription_status: status,
+        subscription_due_date: parsedDueDate
+      },
     });
     revalidatePath("/superadmin/academies");
     revalidatePath("/superadmin/dashboard");

@@ -32,6 +32,41 @@ export default async function DashboardLayout({
     select: { id: true, email: true, avatar_url: true, role: true }
   });
 
+  const academy = await prisma.academy.findUnique({
+    where: { id: session.academy_id },
+    select: { subscription_status: true, subscription_due_date: true }
+  });
+
+  if (academy) {
+    const isSuspended = academy.subscription_status === 'SUSPENDED';
+    // Gunakan setHours(0,0,0,0) agar membandingkan harinya, bukan jam saat ini persis.
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dueDate = academy.subscription_due_date ? new Date(academy.subscription_due_date) : null;
+    if (dueDate) dueDate.setHours(0,0,0,0);
+    
+    const isPastDue = dueDate && dueDate < today;
+    
+    if (isSuspended || isPastDue) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950 px-4 font-sans transition-colors duration-300">
+          <div className="bg-white dark:bg-slate-900 p-8 md:p-10 rounded-3xl shadow-2xl border border-red-100 dark:border-red-900/30 max-w-md w-full text-center">
+             <div className="w-20 h-20 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+             </div>
+             <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Akses Ditangguhkan</h1>
+             <p className="text-slate-600 dark:text-slate-400 mb-8 text-sm leading-relaxed">
+               Masa berlangganan Bimbel Anda telah berakhir atau sistem sedang ditangguhkan. Silakan lunasi tagihan atau hubungi Superadmin untuk memulihkan akses.
+             </p>
+             <Link href={`/${tenantSlug}/logout`} className="inline-flex items-center justify-center px-6 py-3.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 transition rounded-xl w-full shadow-lg shadow-red-600/20">
+                Keluar dari Sistem
+             </Link>
+          </div>
+        </div>
+      );
+    }
+  }
+
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 font-sans">
       {/* Sidebar */}

@@ -101,6 +101,17 @@ export function EditAcademyModal({ isOpen, onClose, academy, plans }: EditAcadem
               </select>
             </div>
 
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Tanggal Jatuh Tempo</label>
+              <input 
+                type="date" 
+                name="subscription_due_date"
+                defaultValue={academy.subscription_due_date ? new Date(academy.subscription_due_date).toISOString().split('T')[0] : ""}
+                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-900 dark:text-white text-sm"
+              />
+              <p className="text-[11px] text-slate-500">Kosongkan jika tidak ada tenggat waktu khusus.</p>
+            </div>
+
             <div className="pt-4 flex gap-3">
               <button 
                 type="button" 
