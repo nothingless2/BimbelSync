@@ -61,14 +61,33 @@ export async function verifyInvoiceAction(invoiceId: string) {
     if (invoice.payment_status === "PAID") return { error: "Invoice ini sudah berstatus Lunas." };
     if (invoice.payment_status === "VOID") return { error: "Invoice ini sudah di-void." };
 
-    await prisma.platformInvoice.update({
-      where: { id: invoiceId },
-      data: {
-        payment_status: "PAID",
-        paid_at: new Date(),
-        verified_by_superadmin_id: superadminId,
-      },
-    });
+    const academy = await prisma.academy.findUnique({ where: { id: invoice.academy_id } });
+    if (!academy) return { error: "Akademi tidak ditemukan." };
+
+    // Kalkulasi jatuh tempo baru: jika sudah punya jatuh tempo, tambah 1 bulan. Jika belum, tambah 1 bulan dari hari ini.
+    let newDueDate = new Date();
+    if (academy.subscription_due_date) {
+      newDueDate = new Date(academy.subscription_due_date);
+    }
+    newDueDate.setMonth(newDueDate.getMonth() + 1);
+
+    await prisma.$transaction([
+      prisma.platformInvoice.update({
+        where: { id: invoiceId },
+        data: {
+          payment_status: "PAID",
+          paid_at: new Date(),
+          verified_by_superadmin_id: superadminId,
+        },
+      }),
+      prisma.academy.update({
+        where: { id: invoice.academy_id },
+        data: {
+          subscription_status: "ACTIVE",
+          subscription_due_date: newDueDate
+        }
+      })
+    ]);
 
     await logAction(superadminId, "VERIFY_PLATFORM_INVOICE", invoiceId, {
       invoice_id: invoiceId,

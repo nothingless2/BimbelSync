@@ -32,6 +32,7 @@ export default async function SuperadminDashboard() {
         include: { plan: true },
       }),
       prisma.platformInvoice.findMany({
+        where: { academy: { deleted_at: null } },
         include: { academy: true, plan: true },
         orderBy: { due_date: "desc" },
       }),

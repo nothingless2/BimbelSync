@@ -13,6 +13,7 @@ export default async function BillingPage() {
   try {
     const [invoices, academies] = await Promise.all([
       prisma.platformInvoice.findMany({
+        where: { academy: { deleted_at: null } },
         include: {
           academy: { include: { plan: true } },
           verified_by: { select: { name: true, email: true } },
