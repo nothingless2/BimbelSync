@@ -142,7 +142,7 @@ export async function voidInvoiceAction(invoiceId: string) {
   }
 }
 
-export async function createInvoiceAction(academyId: string, planId: string, amount: number, billingPeriod: string, dueDate: string) {
+export async function createInvoiceAction(academyId: string, planId: string, amount: number, billingPeriod: string, dueDate: string, accessValidUntil: string) {
   const superadminId = await getSuperadminId();
   if (!superadminId) return { error: "Tidak terautentikasi." };
 
@@ -162,6 +162,15 @@ export async function createInvoiceAction(academyId: string, planId: string, amo
       academy_id: academyId,
       amount,
       billing_period: billingPeriod,
+    });
+
+    // Otomatisasi Sinkronisasi Akses
+    await prisma.academy.update({
+      where: { id: academyId },
+      data: {
+        subscription_due_date: new Date(accessValidUntil),
+        subscription_status: "ACTIVE",
+      }
     });
 
     revalidatePath("/superadmin/billing");

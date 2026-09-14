@@ -87,6 +87,7 @@ enum SubscriptionStatus {
   TRIAL
   ACTIVE
   SUSPENDED
+  EXPIRED_TRIAL
 }
 
 model Room {

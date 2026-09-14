@@ -14,7 +14,7 @@ export default function AcademiesClientPage({ academies, plans }: { academies: a
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState<"ALL" | "ACTIVE" | "TRIAL" | "SUSPENDED">("ALL");
+  const [filterStatus, setFilterStatus] = useState<"ALL" | "ACTIVE" | "TRIAL" | "SUSPENDED" | "EXPIRED_TRIAL">("ALL");
 
   const filteredAcademies = academies.filter(a => {
     const matchSearch = a.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -34,9 +34,10 @@ export default function AcademiesClientPage({ academies, plans }: { academies: a
   const totalSuspended = academies.filter(a => a.subscription_status === "SUSPENDED").length;
 
   const statusConfig: Record<string, { label: string; class: string; dot: string }> = {
-    ACTIVE:    { label: "Aktif",     class: "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500" },
-    TRIAL:     { label: "Trial",     class: "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400",             dot: "bg-blue-500" },
-    SUSPENDED: { label: "Suspended", class: "bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400",               dot: "bg-red-500" },
+    ACTIVE:        { label: "Aktif",         class: "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500" },
+    TRIAL:         { label: "Trial",         class: "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400",             dot: "bg-blue-500" },
+    SUSPENDED:     { label: "Suspended",     class: "bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400",               dot: "bg-red-500" },
+    EXPIRED_TRIAL: { label: "Expired Trial", class: "bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400",   dot: "bg-orange-500" },
   };
 
   const openEditModal = (academy: any) => {
@@ -151,6 +152,12 @@ export default function AcademiesClientPage({ academies, plans }: { academies: a
               className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${filterStatus === "SUSPENDED" ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-500 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
             >
               Suspended
+            </button>
+            <button 
+              onClick={() => { setFilterStatus("EXPIRED_TRIAL"); setCurrentPage(1); }}
+              className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${filterStatus === "EXPIRED_TRIAL" ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-500 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            >
+              Expired Trial
             </button>
           </div>
         </div>

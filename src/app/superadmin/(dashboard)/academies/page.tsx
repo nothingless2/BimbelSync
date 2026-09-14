@@ -50,24 +50,37 @@ export default async function AcademiesPage({
     const today = new Date();
     today.setHours(0,0,0,0);
     
-    const overdueAcademyIds: string[] = [];
+    const overdueAcademyIdsSuspended: string[] = [];
+    const overdueAcademyIdsExpiredTrial: string[] = [];
+    
     academies = academies.map(a => {
-      if (a.subscription_status !== "SUSPENDED" && a.subscription_due_date) {
+      if (a.subscription_status !== "SUSPENDED" && a.subscription_status !== "EXPIRED_TRIAL" && a.subscription_due_date) {
         const dueDate = new Date(a.subscription_due_date);
         dueDate.setHours(0,0,0,0);
         if (dueDate < today) {
-          a.subscription_status = "SUSPENDED";
-          overdueAcademyIds.push(a.id);
+          if (a.subscription_status === "TRIAL") {
+            a.subscription_status = "EXPIRED_TRIAL";
+            overdueAcademyIdsExpiredTrial.push(a.id);
+          } else if (a.subscription_status === "ACTIVE") {
+            a.subscription_status = "SUSPENDED";
+            overdueAcademyIdsSuspended.push(a.id);
+          }
         }
       }
       return a;
     });
 
     // Update database di background jika ada yang jatuh tempo
-    if (overdueAcademyIds.length > 0) {
+    if (overdueAcademyIdsSuspended.length > 0) {
       await prisma.academy.updateMany({
-        where: { id: { in: overdueAcademyIds } },
+        where: { id: { in: overdueAcademyIdsSuspended } },
         data: { subscription_status: "SUSPENDED" }
+      });
+    }
+    if (overdueAcademyIdsExpiredTrial.length > 0) {
+      await prisma.academy.updateMany({
+        where: { id: { in: overdueAcademyIdsExpiredTrial } },
+        data: { subscription_status: "EXPIRED_TRIAL" }
       });
     }
 

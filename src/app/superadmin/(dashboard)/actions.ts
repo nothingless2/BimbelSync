@@ -97,6 +97,29 @@ export async function createAcademyAction(formData: FormData) {
         staff: { create: { email: adminEmail, password_hash: hashedPassword, role: "ADMIN" } },
       },
     });
+
+    // Otomatisasi: Jika status langsung diset ACTIVE, buatkan Invoice bulan pertama
+    if (status === "ACTIVE") {
+      const plan = await prisma.plan.findUnique({ where: { id: planId } });
+      if (plan) {
+        const today = new Date();
+        // Jadikan tanggal awal bulan ini sebagai billing period
+        const billingPeriod = new Date(today.getFullYear(), today.getMonth(), 1); 
+        
+        await prisma.platformInvoice.create({
+          data: {
+            academy_id: academy.id,
+            plan_id: plan.id,
+            amount: plan.price,
+            billing_period: billingPeriod,
+            due_date: dueDate ? new Date(dueDate) : today,
+            payment_status: "PAID",
+            paid_at: new Date()
+          }
+        });
+      }
+    }
+
     revalidatePath("/superadmin/academies");
     revalidatePath("/superadmin/dashboard");
     return { success: true, academyId: academy.id };
@@ -110,7 +133,7 @@ export async function updateAcademyAction(formData: FormData) {
   const id = formData.get("id") as string;
   const name = formData.get("name") as string;
   const planId = formData.get("plan_id") as string;
-  let status = formData.get("status") as "TRIAL" | "ACTIVE" | "SUSPENDED";
+  let status = formData.get("status") as "TRIAL" | "ACTIVE" | "SUSPENDED" | "EXPIRED_TRIAL";
   const dueDate = formData.get("subscription_due_date") as string | null;
 
   if (!id || !name || !planId || !status) return { error: "Semua field wajib diisi." };
@@ -122,7 +145,11 @@ export async function updateAcademyAction(formData: FormData) {
     parsedDueDate.setHours(0,0,0,0);
     // Auto suspend jika tanggal lewat
     if (parsedDueDate < today) {
-      status = "SUSPENDED";
+      if (status === "TRIAL") {
+        status = "EXPIRED_TRIAL";
+      } else if (status === "ACTIVE") {
+        status = "SUSPENDED";
+      }
     }
   }
 

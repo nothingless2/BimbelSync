@@ -98,6 +98,7 @@ export function EditAcademyModal({ isOpen, onClose, academy, plans }: EditAcadem
                 <option value="TRIAL">TRIAL</option>
                 <option value="ACTIVE">ACTIVE</option>
                 <option value="SUSPENDED">SUSPENDED</option>
+                <option value="EXPIRED_TRIAL">EXPIRED TRIAL</option>
               </select>
             </div>
 

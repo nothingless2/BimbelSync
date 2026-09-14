@@ -184,7 +184,7 @@ interface Props {
 
 export default function BillingClientPage({ invoices, academies }: Props) {
   const [createModal, setCreateModal] = useState(false);
-  const [form, setForm] = useState({ academyId: "", billingPeriod: "", dueDate: "", amount: "" });
+  const [form, setForm] = useState({ academyId: "", billingPeriod: "", dueDate: "", amount: "", accessValidUntil: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -220,14 +220,15 @@ export default function BillingClientPage({ invoices, academies }: Props) {
       selectedAcademy!.plan.id,
       parseInt(form.amount),
       form.billingPeriod,
-      form.dueDate
+      form.dueDate,
+      form.accessValidUntil
     );
 
     if (res.error) toast.error(res.error);
     else {
       toast.success("Invoice berhasil dibuat!");
       setCreateModal(false);
-      setForm({ academyId: "", billingPeriod: "", dueDate: "", amount: "" });
+      setForm({ academyId: "", billingPeriod: "", dueDate: "", amount: "", accessValidUntil: "" });
     }
     setIsSubmitting(false);
   };
@@ -460,6 +461,17 @@ export default function BillingClientPage({ invoices, academies }: Props) {
                   placeholder={selectedAcademy ? `Default: ${IDR(selectedAcademy.plan.price)}` : "0"}
                   className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none" />
                 {selectedAcademy && <p className="text-xs text-slate-400">Harga paket {selectedAcademy.plan.name}: {IDR(selectedAcademy.plan.price)}/bulan</p>}
+              </div>
+
+              <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <label className="text-sm font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
+                   Otomatisasi Akses <span className="px-1.5 py-0.5 rounded text-[10px] bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">BARU</span>
+                </label>
+                <p className="text-[11px] text-slate-500 mb-2">Pilih tanggal di bawah ini jika Anda ingin langsung memperpanjang akses akademi ke tanggal tertentu.</p>
+                <div className="relative">
+                  <input type="date" required value={form.accessValidUntil} onChange={(e) => setForm({ ...form, accessValidUntil: e.target.value })}
+                    className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-blue-200 dark:border-blue-900/50 focus:border-blue-500 rounded-xl text-sm outline-none" />
+                </div>
               </div>
 
               <div className="flex gap-3 pt-2">
