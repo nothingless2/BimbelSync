@@ -73,6 +73,18 @@ export function EditAcademyModal({ isOpen, onClose, academy, plans }: EditAcadem
             </div>
 
             <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Path URL (Slug)</label>
+              <input 
+                type="text" 
+                name="path_url"
+                defaultValue={academy.path_url}
+                required
+                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-900 dark:text-white text-sm"
+              />
+              <p className="text-[11px] text-slate-500">Contoh: nusantara, bimbel-bintang. Digunakan untuk link login.</p>
+            </div>
+
+            <div className="space-y-1.5">
               <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Paket Berlangganan (Plan)</label>
               <select 
                 name="plan_id" 

@@ -58,7 +58,12 @@ export default function AcademiesClientPage({ academies, plans }: { academies: a
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Daftar Akademi Berlangganan</h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">Tampilan semua pusat bimbingan belajar yang aktif dan status langganan.</p>
         </div>
-        <AddAcademyModal plans={plans} />
+        <div className="flex gap-3">
+          <Link href="/superadmin/academies/archived" className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition font-medium text-sm">
+            <Trash2 size={16} /> Arsip
+          </Link>
+          <AddAcademyModal plans={plans} />
+        </div>
       </div>
 
       {/* KPI Cards */}

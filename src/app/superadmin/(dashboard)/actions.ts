@@ -132,11 +132,17 @@ export async function createAcademyAction(formData: FormData) {
 export async function updateAcademyAction(formData: FormData) {
   const id = formData.get("id") as string;
   const name = formData.get("name") as string;
+  const pathUrl = formData.get("path_url") as string;
   const planId = formData.get("plan_id") as string;
   let status = formData.get("status") as "TRIAL" | "ACTIVE" | "SUSPENDED" | "EXPIRED_TRIAL";
   const dueDate = formData.get("subscription_due_date") as string | null;
 
-  if (!id || !name || !planId || !status) return { error: "Semua field wajib diisi." };
+  if (!id || !name || !planId || !status || !pathUrl) return { error: "Semua field wajib diisi." };
+
+  // Validasi URL (Hanya huruf, angka, dan strip)
+  if (!/^[a-z0-9-]+$/.test(pathUrl)) {
+    return { error: "Path URL hanya boleh berisi huruf kecil, angka, dan strip (-)." };
+  }
 
   const parsedDueDate = dueDate ? new Date(dueDate) : null;
   if (parsedDueDate) {
@@ -157,7 +163,8 @@ export async function updateAcademyAction(formData: FormData) {
     await prisma.academy.update({
       where: { id },
       data: { 
-        name, 
+        name,
+        path_url: pathUrl, 
         plan_id: planId, 
         subscription_status: status,
         subscription_due_date: parsedDueDate
@@ -166,8 +173,9 @@ export async function updateAcademyAction(formData: FormData) {
     revalidatePath("/superadmin/academies");
     revalidatePath("/superadmin/dashboard");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
+    if (error?.code === "P2002") return { error: `Path URL "${pathUrl}" sudah digunakan oleh orang lain.` };
     return { error: "Gagal memperbarui akademi." };
   }
 }
@@ -190,6 +198,57 @@ export async function deleteAcademyAction(id: string) {
   } catch (error) {
     console.error(error);
     return { error: "Gagal menghapus akademi." };
+  }
+}
+
+export async function restoreAcademyAction(id: string) {
+  try {
+    const academy = await prisma.academy.findUnique({ where: { id } });
+    if (!academy) return { error: "Akademi tidak ditemukan." };
+    if (!academy.deleted_at) return { error: "Akademi ini tidak berada di tempat sampah." };
+
+    // Ekstrak original slug
+    const originalSlug = academy.path_url.replace(/-deleted-\d+$/, "");
+    
+    // Cek apakah originalSlug sudah dipakai orang lain
+    const existing = await prisma.academy.findUnique({
+      where: { path_url: originalSlug }
+    });
+
+    let newSlug = originalSlug;
+    if (existing && existing.id !== id) {
+      newSlug = `${originalSlug}-recovered-${Math.floor(Math.random() * 10000)}`;
+    }
+
+    await prisma.academy.update({
+      where: { id },
+      data: { 
+        deleted_at: null,
+        path_url: newSlug
+      },
+    });
+    revalidatePath("/superadmin/academies");
+    revalidatePath("/superadmin/dashboard");
+    return { success: true, restoredSlug: newSlug, collision: newSlug !== originalSlug };
+  } catch (error) {
+    console.error(error);
+    return { error: "Gagal memulihkan akademi." };
+  }
+}
+
+export async function hardDeleteAcademyAction(id: string) {
+  try {
+    // Karena onDelete: Cascade di schema Prisma, menghapus Academy 
+    // akan menghapus semua Student, Staff, Invoice, Material, dll terkait.
+    await prisma.academy.delete({
+      where: { id }
+    });
+    revalidatePath("/superadmin/academies");
+    revalidatePath("/superadmin/dashboard");
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { error: "Gagal menghapus permanen akademi." };
   }
 }
 
