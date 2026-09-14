@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { X, Loader2, Star, BookOpen, BarChart } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
-import { createEvaluationAction } from "@/app/[tenantSlug]/dashboard/evaluations/actions";
+import { bulkCreateEvaluationsAction } from "@/app/[tenantSlug]/dashboard/evaluations/actions";
 
 interface AddEvaluationModalProps {
   isOpen: boolean;
@@ -16,54 +16,57 @@ interface AddEvaluationModalProps {
 
 export function AddEvaluationModal({ isOpen, onClose, tenantSlug, academyId, students, programs }: AddEvaluationModalProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    studentId: "",
     programId: "",
     title: "",
     evaluationType: "EXAM" as "EXAM" | "HOMEWORK" | "MONTHLY_REPORT",
-    score: "",
-    notes: ""
   });
+  
+  const [studentEvaluations, setStudentEvaluations] = useState<Record<string, { score: string, notes: string }>>({});
 
   if (!isOpen) return null;
 
-  // Filter programs based on the selected student's active enrollments
-  const selectedStudent = students.find(s => s.id === formData.studentId);
-  const availablePrograms = selectedStudent 
-    ? selectedStudent.enrollments.map((e: any) => e.program)
+  // Filter students based on the selected program
+  const availableStudents = formData.programId
+    ? students.filter(s => s.enrollments.some((e: any) => e.program_id === formData.programId))
     : [];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.studentId || !formData.programId) {
-      toast.error("Silakan lengkapi kolom yang wajib diisi!");
+    if (!formData.title || !formData.programId) {
+      toast.error("Silakan lengkapi Program dan Judul Penilaian!");
       return;
     }
 
+    // Convert state to array of data
+    const evaluationsData = availableStudents.map(s => {
+      const input = studentEvaluations[s.id] || { score: "", notes: "" };
+      return {
+        studentId: s.id,
+        score: input.score ? parseFloat(input.score) : undefined,
+        notes: input.notes
+      };
+    });
+
     try {
       setIsLoading(true);
-      const res = await createEvaluationAction({
+      const res = await bulkCreateEvaluationsAction({
         academyId,
-        studentId: formData.studentId,
         programId: formData.programId,
         title: formData.title,
         evaluationType: formData.evaluationType,
-        score: formData.score ? parseFloat(formData.score) : undefined,
-        notes: formData.notes,
+        evaluations: evaluationsData,
         tenantSlug,
       });
 
       if (res.error) throw new Error(res.error);
 
-      toast.success("Penilaian berhasil ditambahkan!");
+      toast.success("Penilaian kolektif berhasil disimpan!");
       setFormData({
-        studentId: "",
         programId: "",
         title: "",
         evaluationType: "EXAM",
-        score: "",
-        notes: ""
       });
+      setStudentEvaluations({});
       onClose();
     } catch (error: any) {
       toast.error(error.message || "Terjadi kesalahan");
@@ -85,40 +88,22 @@ export function AddEvaluationModal({ isOpen, onClose, tenantSlug, academyId, stu
         <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-              Siswa <span className="text-red-500">*</span>
-            </label>
-            <select
-              required
-              value={formData.studentId}
-              onChange={e => setFormData({ ...formData, studentId: e.target.value, programId: "" })}
-              className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm"
-            >
-              <option value="">-- Pilih Siswa --</option>
-              {students.map(s => (
-                <option key={s.id} value={s.id}>{s.full_name}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
               Program Kursus <span className="text-red-500">*</span>
             </label>
             <select
               required
-              disabled={!formData.studentId}
               value={formData.programId}
-              onChange={e => setFormData({ ...formData, programId: e.target.value })}
-              className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm disabled:opacity-50"
+              onChange={e => {
+                setFormData({ ...formData, programId: e.target.value });
+                setStudentEvaluations({});
+              }}
+              className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm"
             >
               <option value="">-- Pilih Program --</option>
-              {availablePrograms.map((p: any) => (
+              {programs.map((p: any) => (
                 <option key={p.id} value={p.id}>{p.name}</option>
               ))}
             </select>
-            {formData.studentId && availablePrograms.length === 0 && (
-              <p className="text-xs text-amber-500 mt-1">Siswa ini tidak memiliki program aktif.</p>
-            )}
           </div>
 
           <div className="space-y-1.5">
@@ -162,34 +147,68 @@ export function AddEvaluationModal({ isOpen, onClose, tenantSlug, academyId, stu
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-              Nilai / Skor (Opsional)
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              max="100"
-              value={formData.score}
-              onChange={e => setFormData({ ...formData, score: e.target.value })}
-              className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm"
-              placeholder="0 - 100"
-            />
-          </div>
+          {formData.programId && availableStudents.length > 0 && (
+            <div className="space-y-2 mt-4 border-t border-slate-200 dark:border-slate-700 pt-4">
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Daftar Siswa (Input Kolektif)</h3>
+              
+              <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+                <table className="w-full text-sm text-left text-slate-600 dark:text-slate-400">
+                  <thead className="text-xs text-slate-500 uppercase bg-slate-50 dark:bg-slate-800/50">
+                    <tr>
+                      <th className="px-4 py-3 font-semibold">Nama Siswa</th>
+                      <th className="px-4 py-3 font-semibold w-24">Nilai</th>
+                      <th className="px-4 py-3 font-semibold">Catatan (Opsional)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
+                    {availableStudents.map(s => {
+                      const currentInput = studentEvaluations[s.id] || { score: "", notes: "" };
+                      return (
+                        <tr key={s.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30">
+                          <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-200">
+                            {s.full_name}
+                          </td>
+                          <td className="px-4 py-2">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              max="100"
+                              value={currentInput.score}
+                              onChange={(e) => setStudentEvaluations({
+                                ...studentEvaluations,
+                                [s.id]: { ...currentInput, score: e.target.value }
+                              })}
+                              className="w-full px-2 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition text-sm"
+                              placeholder="0-100"
+                            />
+                          </td>
+                          <td className="px-4 py-2">
+                            <input
+                              type="text"
+                              value={currentInput.notes}
+                              onChange={(e) => setStudentEvaluations({
+                                ...studentEvaluations,
+                                [s.id]: { ...currentInput, notes: e.target.value }
+                              })}
+                              className="w-full px-2 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition text-sm"
+                              placeholder="Catatan siswa..."
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
-          <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-              Catatan Evaluasi (Opsional)
-            </label>
-            <textarea
-              rows={3}
-              value={formData.notes}
-              onChange={e => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm resize-none"
-              placeholder="Catatan perkembangan atau evaluasi untuk siswa..."
-            />
-          </div>
+          {formData.programId && availableStudents.length === 0 && (
+            <div className="p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-xl text-amber-700 dark:text-amber-400 text-sm">
+              Tidak ada siswa aktif yang terdaftar di program ini.
+            </div>
+          )}
 
           <div className="pt-4 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-800">
             <button

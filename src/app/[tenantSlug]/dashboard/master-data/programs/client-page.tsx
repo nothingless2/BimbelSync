@@ -8,9 +8,22 @@ import { EditProgramModal } from "@/components/modals/edit-program-modal";
 import { Program } from "@prisma/client";
 import { Pagination } from "@/components/ui/pagination";
 
-export default function ProgramsClientPage({ programs, tenantSlug }: { programs: Program[], tenantSlug: string }) {
+import { AutoSchedulerModal } from "@/components/modals/auto-scheduler-modal";
+
+export default function ProgramsClientPage({ 
+  programs, 
+  staffs,
+  rooms,
+  tenantSlug 
+}: { 
+  programs: Program[], 
+  staffs: any[],
+  rooms: any[],
+  tenantSlug: string 
+}) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
+  const [schedulingProgram, setSchedulingProgram] = useState<Program | null>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<"ALL" | "REGULER" | "INTENSIF">("ALL");
@@ -98,6 +111,7 @@ export default function ProgramsClientPage({ programs, tenantSlug }: { programs:
                 <th scope="col" className="px-6 py-4 font-semibold">Nama Program</th>
                 <th scope="col" className="px-6 py-4 font-semibold">Kapasitas Maks.</th>
                 <th scope="col" className="px-6 py-4 font-semibold">Durasi</th>
+                <th scope="col" className="px-6 py-4 font-semibold">Total Pertemuan</th>
                 <th scope="col" className="px-6 py-4 font-semibold">Biaya per Bulan</th>
                 <th scope="col" className="px-6 py-4 font-semibold text-right">Aksi</th>
               </tr>
@@ -131,6 +145,13 @@ export default function ProgramsClientPage({ programs, tenantSlug }: { programs:
                         <span>{program.duration_months ? `${program.duration_months} Bulan` : "Reguler (Aktif)"}</span>
                       </div>
                     </td>
+                    <td className="px-6 py-4">
+                      {program.total_meetings ? (
+                        <span className="font-semibold text-blue-600 dark:text-blue-400">{program.total_meetings} Pertemuan</span>
+                      ) : (
+                        <span className="text-slate-400 italic">Tak terbatas</span>
+                      )}
+                    </td>
                     <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-200">
                       {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(program.monthly_fee)}
                     </td>
@@ -142,6 +163,19 @@ export default function ProgramsClientPage({ programs, tenantSlug }: { programs:
                           title="Edit"
                         >
                           <Pencil size={16} />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            if (!program.total_meetings) {
+                              toast.error("Program ini tidak memiliki batas Total Pertemuan. Silakan edit program ini dan tetapkan Total Pertemuan terlebih dahulu.");
+                              return;
+                            }
+                            setSchedulingProgram(program);
+                          }}
+                          className="p-1.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
+                          title="Generate Jadwal Otomatis"
+                        >
+                          <CalendarDays size={16} />
                         </button>
                         <button 
                           onClick={() => handleDelete(program)}
@@ -173,6 +207,15 @@ export default function ProgramsClientPage({ programs, tenantSlug }: { programs:
           program={editingProgram} 
           tenantSlug={tenantSlug} 
           onClose={() => setEditingProgram(null)} 
+        />
+      )}
+
+      {schedulingProgram && (
+        <AutoSchedulerModal
+          program={schedulingProgram}
+          staffs={staffs}
+          rooms={rooms}
+          onClose={() => setSchedulingProgram(null)}
         />
       )}
     </>

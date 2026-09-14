@@ -64,12 +64,14 @@ export async function verifyInvoiceAction(invoiceId: string) {
     const academy = await prisma.academy.findUnique({ where: { id: invoice.academy_id } });
     if (!academy) return { error: "Akademi tidak ditemukan." };
 
-    // Kalkulasi jatuh tempo baru: jika sudah punya jatuh tempo, tambah 1 bulan. Jika belum, tambah 1 bulan dari hari ini.
+    // Kalkulasi jatuh tempo baru: jika sudah punya jatuh tempo, tambah X bulan (sesuai durasi tagihan). Jika belum, tambah X bulan dari hari ini.
     let newDueDate = new Date();
     if (academy.subscription_due_date) {
       newDueDate = new Date(academy.subscription_due_date);
     }
-    newDueDate.setMonth(newDueDate.getMonth() + 1);
+    // Tambahkan sesuai durasi yang dibayar, dengan fallback jika Prisma Client belum ter-refresh
+    const duration = invoice.duration_months || 1;
+    newDueDate.setMonth(newDueDate.getMonth() + duration);
 
     await prisma.$transaction([
       prisma.platformInvoice.update({
@@ -161,7 +163,7 @@ export async function voidInvoiceAction(invoiceId: string) {
   }
 }
 
-export async function createInvoiceAction(academyId: string, planId: string, amount: number, billingPeriod: string, dueDate: string, accessValidUntil: string) {
+export async function createInvoiceAction(academyId: string, planId: string, amount: number, billingPeriod: string, dueDate: string, durationMonths: number = 1) {
   const superadminId = await getSuperadminId();
   if (!superadminId) return { error: "Tidak terautentikasi." };
 
@@ -174,6 +176,7 @@ export async function createInvoiceAction(academyId: string, planId: string, amo
         billing_period: new Date(billingPeriod),
         due_date: new Date(dueDate),
         payment_status: "UNPAID",
+        duration_months: durationMonths,
       },
     });
 
@@ -183,14 +186,7 @@ export async function createInvoiceAction(academyId: string, planId: string, amo
       billing_period: billingPeriod,
     });
 
-    // Otomatisasi Sinkronisasi Akses
-    await prisma.academy.update({
-      where: { id: academyId },
-      data: {
-        subscription_due_date: new Date(accessValidUntil),
-        subscription_status: "ACTIVE",
-      }
-    });
+
 
     revalidatePath("/superadmin/billing");
     revalidatePath(`/superadmin/academies/${academyId}`);

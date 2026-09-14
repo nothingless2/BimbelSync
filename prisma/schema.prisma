@@ -153,6 +153,7 @@ model Program {
   max_capacity    Int
   monthly_fee     Int
   duration_months Int?
+  total_meetings  Int?
   deleted_at      DateTime?
 
   academy     Academy      @relation(fields: [academy_id], references: [id])
@@ -307,6 +308,7 @@ model PlatformInvoice {
   amount                    Int
   due_date                  DateTime      @db.Date
   payment_status            PaymentStatus @default(UNPAID)
+  duration_months           Int           @default(1)
   paid_at                   DateTime?
   verified_by_superadmin_id String?       @db.Uuid
   proof_of_payment_url      String?

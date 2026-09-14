@@ -37,6 +37,7 @@ export default async function BillingPage() {
     const serializedAcademies = academies.map(a => ({
       id: a.id,
       name: a.name,
+      subscription_due_date: a.subscription_due_date?.toISOString() ?? null,
       plan: { id: a.plan.id, name: a.plan.name, price: a.plan.price },
     }));
 

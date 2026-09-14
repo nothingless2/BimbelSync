@@ -71,10 +71,10 @@ export function AddProgramModal({ tenantSlug }: { tenantSlug: string }) {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <label htmlFor="max_capacity" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                    Maks. Kapasitas (Siswa)
+                    Kapasitas (Siswa)
                   </label>
                   <input
                     type="number"
@@ -82,21 +82,35 @@ export function AddProgramModal({ tenantSlug }: { tenantSlug: string }) {
                     name="max_capacity"
                     required
                     min="1"
-                    placeholder="Contoh: 15"
+                    placeholder="Misal: 15"
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                   />
                 </div>
                 
                 <div className="space-y-2">
                   <label htmlFor="duration_months" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                    Durasi Program (Bulan)
+                    Durasi (Bulan)
                   </label>
                   <input
                     type="number"
                     id="duration_months"
                     name="duration_months"
                     min="1"
-                    placeholder="Kosongkan jika reguler"
+                    placeholder="Reguler"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="total_meetings" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    Total Pertemuan
+                  </label>
+                  <input
+                    type="number"
+                    id="total_meetings"
+                    name="total_meetings"
+                    min="1"
+                    placeholder="Kosongkan = Tak Terbatas"
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                   />
                 </div>

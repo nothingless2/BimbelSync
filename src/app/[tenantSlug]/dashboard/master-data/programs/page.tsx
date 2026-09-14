@@ -29,17 +29,26 @@ export default async function ProgramsPage({
     redirect(`/${tenantSlug}/login`);
   }
 
-  // Fetch programs for this academy
-  const programs = await prisma.program.findMany({
-    where: {
-      academy_id: session.academy_id,
-      deleted_at: null,
-      ...(q ? { name: { contains: q, mode: 'insensitive' } } : {})
-    },
-    orderBy: {
-      name: 'asc'
-    }
-  });
+  const [programs, staffs, rooms] = await Promise.all([
+    prisma.program.findMany({
+      where: {
+        academy_id: session.academy_id,
+        deleted_at: null,
+        ...(q ? { name: { contains: q, mode: 'insensitive' } } : {})
+      },
+      orderBy: {
+        name: 'asc'
+      }
+    }),
+    prisma.staff.findMany({
+      where: { academy_id: session.academy_id, deleted_at: null },
+      select: { id: true, name: true, email: true }
+    }),
+    prisma.room.findMany({
+      where: { academy_id: session.academy_id, deleted_at: null },
+      select: { id: true, name: true, capacity: true }
+    })
+  ]);
 
   return (
     <div className="space-y-6">
@@ -56,7 +65,7 @@ export default async function ProgramsPage({
       </div>
 
       {/* Tabel Data - Diubah menjadi Client Component agar interaktif */}
-      <ProgramsClientPage programs={programs} tenantSlug={tenantSlug} />
+      <ProgramsClientPage programs={programs} staffs={staffs} rooms={rooms} tenantSlug={tenantSlug} />
     </div>
   );
 }

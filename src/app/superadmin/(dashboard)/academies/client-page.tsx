@@ -177,7 +177,7 @@ export default function AcademiesClientPage({ academies, plans }: { academies: a
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4">Siswa</th>
                 <th className="px-6 py-4">Staff</th>
-                <th className="px-6 py-4">Jatuh Tempo</th>
+                <th className="px-6 py-4">Aktif Sampai</th>
                 <th className="px-6 py-4 text-right">Aksi</th>
               </tr>
             </thead>

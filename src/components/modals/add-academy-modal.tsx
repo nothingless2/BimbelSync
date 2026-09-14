@@ -12,6 +12,7 @@ export function AddAcademyModal({ plans }: { plans: Plan[] }) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [slugPreview, setSlugPreview] = useState("");
+  const [status, setStatus] = useState("TRIAL");
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const slug = e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
@@ -29,6 +30,7 @@ export function AddAcademyModal({ plans }: { plans: Plan[] }) {
     } else {
       setIsOpen(false);
       setSlugPreview("");
+      setStatus("TRIAL");
       (e.target as HTMLFormElement).reset();
     }
     setIsLoading(false);
@@ -93,7 +95,7 @@ export function AddAcademyModal({ plans }: { plans: Plan[] }) {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Status Awal</label>
-                  <select name="status" className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                  <select name="status" value={status} onChange={(e) => setStatus(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm">
                     <option value="TRIAL">Trial</option>
                     <option value="ACTIVE">Active</option>
                     <option value="SUSPENDED">Suspended</option>
@@ -105,6 +107,22 @@ export function AddAcademyModal({ plans }: { plans: Plan[] }) {
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                 </div>
               </div>
+
+              {status === "ACTIVE" && (
+                <div className="p-4 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800/50 rounded-xl space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-400">Pengaturan Tagihan Awal (Invoice Pertama)</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-sm text-emerald-700 dark:text-emerald-500">Durasi (Bulan)</label>
+                      <input type="number" name="duration_months" defaultValue="1" min="1" className="w-full px-3 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800/50 bg-white dark:bg-slate-950 outline-none focus:ring-2 focus:ring-emerald-500 text-sm" />
+                    </div>
+                  </div>
+                  <label className="flex items-center gap-2 mt-2 cursor-pointer">
+                    <input type="checkbox" name="is_paid" value="true" className="rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500" />
+                    <span className="text-sm text-emerald-700 dark:text-emerald-400">Langsung tandai Lunas (Klien sudah transfer)</span>
+                  </label>
+                </div>
+              )}
 
               {/* Akun Admin */}
               <div className="pt-2 space-y-4 border-t border-slate-100 dark:border-slate-800">

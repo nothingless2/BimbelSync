@@ -184,7 +184,7 @@ interface Props {
 
 export default function BillingClientPage({ invoices, academies }: Props) {
   const [createModal, setCreateModal] = useState(false);
-  const [form, setForm] = useState({ academyId: "", billingPeriod: "", dueDate: "", amount: "", accessValidUntil: "" });
+  const [form, setForm] = useState({ academyId: "", billingPeriod: "", dueDate: "", amount: "", durationMonths: "1" });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -221,16 +221,43 @@ export default function BillingClientPage({ invoices, academies }: Props) {
       parseInt(form.amount),
       form.billingPeriod,
       form.dueDate,
-      form.accessValidUntil
+      parseInt(form.durationMonths) || 1
     );
 
     if (res.error) toast.error(res.error);
     else {
       toast.success("Invoice berhasil dibuat!");
       setCreateModal(false);
-      setForm({ academyId: "", billingPeriod: "", dueDate: "", amount: "", accessValidUntil: "" });
+      setForm({ academyId: "", billingPeriod: "", dueDate: "", amount: "", durationMonths: "1" });
     }
     setIsSubmitting(false);
+  };
+
+  const exportToCSV = () => {
+    // Header CSV
+    let csv = "Invoice ID,Akademi,Paket,Periode Billing,Jatuh Tempo,Durasi (Bulan),Nominal (Rp),Status,Tanggal Dibayar\n";
+    
+    invoices.forEach(inv => {
+      const academy = `"${inv.academy.name}"`;
+      const plan = `"${inv.academy.plan.name}"`;
+      const period = `"${new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(new Date(inv.billing_period))}"`;
+      const due = `"${new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric" }).format(new Date(inv.due_date))}"`;
+      const amount = inv.amount;
+      const duration = inv.duration_months;
+      const status = `"${inv.payment_status}"`;
+      const paid = inv.paid_at ? `"${new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric" }).format(new Date(inv.paid_at))}"` : `"-"`;
+      
+      csv += `${inv.id},${academy},${plan},${period},${due},${duration},${amount},${status},${paid}\n`;
+    });
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `Laporan_Pendapatan_BimbelSync_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -240,12 +267,20 @@ export default function BillingClientPage({ invoices, academies }: Props) {
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Platform Billing</h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">Tagihan langganan bulanan dari seluruh akademi ke BimbelSync.</p>
         </div>
-        <button
-          onClick={() => setCreateModal(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-sm transition shadow-sm shadow-blue-500/20"
-        >
-          <Plus size={16} /> Buat Invoice Baru
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={exportToCSV}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-semibold text-sm transition"
+          >
+            Export Laporan
+          </button>
+          <button
+            onClick={() => setCreateModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-sm transition shadow-sm shadow-blue-500/20"
+          >
+            <Plus size={16} /> Buat Invoice Baru
+          </button>
+        </div>
       </div>
 
       {/* KPI */}
@@ -343,6 +378,7 @@ export default function BillingClientPage({ invoices, academies }: Props) {
                 <th className="px-6 py-4">Periode</th>
                 <th className="px-6 py-4">Nominal</th>
                 <th className="px-6 py-4">Jatuh Tempo</th>
+                <th className="px-6 py-4">Tgl Lunas</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4">Diverifikasi</th>
                 <th className="px-6 py-4 text-right">Aksi</th>
@@ -381,6 +417,9 @@ export default function BillingClientPage({ invoices, academies }: Props) {
                     </td>
                     <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
                       {new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric" }).format(new Date(invoice.due_date))}
+                    </td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
+                      {invoice.paid_at ? new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric" }).format(new Date(invoice.paid_at)) : "-"}
                     </td>
                     <td className="px-6 py-4">
                       <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${status.class}`}>
@@ -432,7 +471,25 @@ export default function BillingClientPage({ invoices, academies }: Props) {
                     value={form.academyId}
                     onChange={(e) => {
                       const acad = academies.find(a => a.id === e.target.value);
-                      setForm({ ...form, academyId: e.target.value, amount: acad ? acad.plan.price.toString() : "" });
+                      let autoDueDate = "";
+                      let autoBillingPeriod = "";
+                      
+                      if (acad && acad.subscription_due_date) {
+                        const dateObj = new Date(acad.subscription_due_date);
+                        autoDueDate = dateObj.toISOString().split("T")[0];
+                        autoBillingPeriod = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-01`;
+                      } else {
+                        const today = new Date();
+                        autoBillingPeriod = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
+                      }
+                      
+                      setForm({ 
+                        ...form, 
+                        academyId: e.target.value, 
+                        amount: acad ? (acad.plan.price * (parseInt(form.durationMonths) || 1)).toString() : "",
+                        dueDate: autoDueDate,
+                        billingPeriod: autoBillingPeriod
+                      });
                     }}
                     className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none appearance-none"
                   >
@@ -463,15 +520,27 @@ export default function BillingClientPage({ invoices, academies }: Props) {
                 {selectedAcademy && <p className="text-xs text-slate-400">Harga paket {selectedAcademy.plan.name}: {IDR(selectedAcademy.plan.price)}/bulan</p>}
               </div>
 
-              <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
-                <label className="text-sm font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
-                   Otomatisasi Akses <span className="px-1.5 py-0.5 rounded text-[10px] bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">BARU</span>
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">
+                  Durasi Langganan (Bulan)
                 </label>
-                <p className="text-[11px] text-slate-500 mb-2">Pilih tanggal di bawah ini jika Anda ingin langsung memperpanjang akses akademi ke tanggal tertentu.</p>
-                <div className="relative">
-                  <input type="date" required value={form.accessValidUntil} onChange={(e) => setForm({ ...form, accessValidUntil: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-blue-200 dark:border-blue-900/50 focus:border-blue-500 rounded-xl text-sm outline-none" />
-                </div>
+                <p className="text-[11px] text-slate-500 mb-3">Tentukan berapa bulan akses yang akan diberikan jika tagihan ini dilunasi.</p>
+                <input
+                  type="number"
+                  min="1"
+                  required
+                  value={form.durationMonths}
+                  onChange={(e) => {
+                    const newDuration = parseInt(e.target.value) || 1;
+                    const acad = academies.find(a => a.id === form.academyId);
+                    setForm({ 
+                      ...form, 
+                      durationMonths: e.target.value,
+                      amount: acad ? (acad.plan.price * newDuration).toString() : form.amount
+                    });
+                  }}
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                />
               </div>
 
               <div className="flex gap-3 pt-2">

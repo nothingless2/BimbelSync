@@ -50,6 +50,48 @@ export async function createEvaluationAction(data: {
   }
 }
 
+export async function bulkCreateEvaluationsAction(data: {
+  academyId: string;
+  programId: string;
+  title: string;
+  evaluationType: "EXAM" | "HOMEWORK" | "MONTHLY_REPORT";
+  evaluations: { studentId: string, score?: number, notes?: string }[];
+  tenantSlug: string;
+}) {
+  const session = await getSession();
+  if (!session || !session.id || session.academy_id !== data.academyId) {
+    return { error: "Unauthorized" };
+  }
+
+  if (data.evaluations.length === 0) {
+    return { error: "Tidak ada siswa untuk dinilai." };
+  }
+
+  try {
+    const records = data.evaluations.map(ev => ({
+      academy_id: data.academyId,
+      student_id: ev.studentId,
+      program_id: data.programId,
+      evaluator_id: session.id,
+      title: data.title,
+      evaluation_type: data.evaluationType,
+      score: ev.score,
+      notes: ev.notes || null,
+    }));
+
+    await prisma.studentEvaluation.createMany({
+      data: records
+    });
+
+    revalidatePath(`/${data.tenantSlug}/dashboard/evaluations`);
+    revalidatePath(`/${data.tenantSlug}/student/(protected)/evaluations`);
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to bulk create evaluations:", error);
+    return { error: error.message || "Failed to create evaluations" };
+  }
+}
+
 export async function deleteEvaluationAction(id: string, tenantSlug: string) {
   const session = await getSession();
   if (!session || !session.id) return { error: "Unauthorized" };

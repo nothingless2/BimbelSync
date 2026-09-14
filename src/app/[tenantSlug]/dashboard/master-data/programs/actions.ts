@@ -20,6 +20,9 @@ export async function createProgramAction(formData: FormData) {
   
   const rawDuration = formData.get("duration_months") as string;
   const durationMonths = rawDuration ? parseInt(rawDuration, 10) : null;
+  
+  const rawMeetings = formData.get("total_meetings") as string;
+  const totalMeetings = rawMeetings ? parseInt(rawMeetings, 10) : null;
 
   if (!name || isNaN(maxCapacity) || maxCapacity < 1 || isNaN(monthlyFee) || monthlyFee < 0) {
     return { error: "Data program tidak valid. Harap periksa kembali isian form Anda." };
@@ -33,6 +36,7 @@ export async function createProgramAction(formData: FormData) {
         max_capacity: maxCapacity,
         monthly_fee: monthlyFee,
         duration_months: durationMonths,
+        total_meetings: totalMeetings,
       }
     });
 
@@ -67,6 +71,9 @@ export async function updateProgramAction(programId: string, formData: FormData)
   const rawDuration = formData.get("duration_months") as string;
   const durationMonths = rawDuration ? parseInt(rawDuration, 10) : null;
 
+  const rawMeetings = formData.get("total_meetings") as string;
+  const totalMeetings = rawMeetings ? parseInt(rawMeetings, 10) : null;
+
   if (!name || isNaN(maxCapacity) || maxCapacity < 1 || isNaN(monthlyFee) || monthlyFee < 0) {
     return { error: "Data program tidak valid. Harap periksa kembali isian form Anda." };
   }
@@ -85,6 +92,7 @@ export async function updateProgramAction(programId: string, formData: FormData)
         max_capacity: maxCapacity,
         monthly_fee: monthlyFee,
         duration_months: durationMonths,
+        total_meetings: totalMeetings,
       }
     });
 

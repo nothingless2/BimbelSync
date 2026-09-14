@@ -81,9 +81,18 @@ export async function createAcademyAction(formData: FormData) {
   const adminPassword = formData.get("admin_password") as string;
   const status = (formData.get("status") as string || "TRIAL") as "TRIAL" | "ACTIVE" | "SUSPENDED";
   const dueDate = formData.get("subscription_due_date") as string | null;
+  const durationMonths = parseInt(formData.get("duration_months") as string || "1", 10);
+  const isPaid = formData.get("is_paid") === "true";
 
   if (!name || !pathUrl || !planId || !adminEmail || !adminPassword) return { error: "Semua field wajib diisi." };
   if (!/^[a-z0-9-]+$/.test(pathUrl)) return { error: "Slug hanya boleh berisi huruf kecil, angka, dan tanda (-) tanpa spasi." };
+
+  let calculatedDueDate = dueDate ? new Date(dueDate) : null;
+
+  if (!calculatedDueDate && status === "ACTIVE" && isPaid) {
+    calculatedDueDate = new Date();
+    calculatedDueDate.setMonth(calculatedDueDate.getMonth() + durationMonths);
+  }
 
   try {
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
@@ -93,7 +102,7 @@ export async function createAcademyAction(formData: FormData) {
         name,
         path_url: pathUrl,
         subscription_status: status,
-        subscription_due_date: dueDate ? new Date(dueDate) : null,
+        subscription_due_date: calculatedDueDate,
         staff: { create: { email: adminEmail, password_hash: hashedPassword, role: "ADMIN" } },
       },
     });
@@ -110,11 +119,12 @@ export async function createAcademyAction(formData: FormData) {
           data: {
             academy_id: academy.id,
             plan_id: plan.id,
-            amount: plan.price,
+            amount: plan.price * durationMonths,
             billing_period: billingPeriod,
-            due_date: dueDate ? new Date(dueDate) : today,
-            payment_status: "PAID",
-            paid_at: new Date()
+            due_date: calculatedDueDate || today,
+            duration_months: durationMonths,
+            payment_status: isPaid ? "PAID" : "UNPAID",
+            paid_at: isPaid ? new Date() : null,
           }
         });
       }

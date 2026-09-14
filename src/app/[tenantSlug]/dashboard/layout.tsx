@@ -7,6 +7,7 @@ import { cookies } from "next/headers";
 import { decrypt } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { BillingBanner } from "@/components/billing-banner";
 
 export default async function DashboardLayout({
   children,
@@ -41,6 +42,16 @@ export default async function DashboardLayout({
   if (!academy || academy.deleted_at !== null) {
     redirect(`/${tenantSlug}/login`);
   }
+
+  const unpaidInvoices = await prisma.platformInvoice.findMany({
+    where: { 
+      academy_id: session.academy_id,
+      payment_status: { in: ['UNPAID', 'OVERDUE'] }
+    }
+  });
+  
+  const hasUnpaid = unpaidInvoices.length > 0;
+  const totalDebt = unpaidInvoices.reduce((sum, inv) => sum + inv.amount, 0);
 
   // academy pasti ada di sini
   const isSuspended = academy.subscription_status === 'SUSPENDED';
@@ -120,6 +131,16 @@ export default async function DashboardLayout({
         {/* Page Content */}
         <div className="flex-1 overflow-y-auto p-8 text-slate-900 dark:text-slate-100 transition-colors">
           <div className="max-w-7xl mx-auto">
+            {/* Banner Masa Aktif & Tagihan */}
+            {(academy.subscription_status === 'ACTIVE' || academy.subscription_status === 'TRIAL') && (
+              <BillingBanner 
+                status={academy.subscription_status} 
+                dueDate={academy.subscription_due_date} 
+                hasUnpaid={hasUnpaid} 
+                totalDebt={totalDebt} 
+              />
+            )}
+
             {children}
           </div>
         </div>
