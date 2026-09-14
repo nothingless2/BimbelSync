@@ -69,6 +69,7 @@ export default async function SuperadminDashboard() {
     const activeAcademies = allAcademies.filter((a) => a.subscription_status === "ACTIVE");
     const trialAcademies = allAcademies.filter((a) => a.subscription_status === "TRIAL");
     const suspendedAcademies = allAcademies.filter((a) => a.subscription_status === "SUSPENDED");
+    const expiredTrialAcademies = allAcademies.filter((a) => a.subscription_status === "EXPIRED_TRIAL");
 
     const currentMRR = activeAcademies.reduce((acc, a) => acc + a.plan.price, 0);
 
@@ -161,6 +162,7 @@ export default async function SuperadminDashboard() {
           activeAcademies: activeAcademies.length,
           trialAcademies: trialAcademies.length,
           suspendedAcademies: suspendedAcademies.length,
+          expiredTrialAcademies: expiredTrialAcademies.length,
           totalSuperadmins: superadminCount,
           currentMRR,
           totalRevenue,

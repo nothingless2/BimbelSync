@@ -51,6 +51,7 @@ interface Props {
     activeAcademies: number;
     trialAcademies: number;
     suspendedAcademies: number;
+    expiredTrialAcademies: number;
     totalSuperadmins: number;
     currentMRR: number;
     totalRevenue: number;
@@ -141,6 +142,7 @@ export default function DashboardClientPage({ stats, growthData, planDistributio
             <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded">{stats.activeAcademies} Aktif</span>
             <span className="text-[10px] font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded">{stats.trialAcademies} Trial</span>
             <span className="text-[10px] font-bold text-red-600 bg-red-50 dark:bg-red-900/20 px-1.5 py-0.5 rounded">{stats.suspendedAcademies} Suspended</span>
+            <span className="text-[10px] font-bold text-orange-600 bg-orange-50 dark:bg-orange-900/20 px-1.5 py-0.5 rounded">{stats.expiredTrialAcademies} Expired Trial</span>
           </div>
         </div>
       </div>

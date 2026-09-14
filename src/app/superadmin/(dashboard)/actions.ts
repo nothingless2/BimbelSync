@@ -174,9 +174,15 @@ export async function updateAcademyAction(formData: FormData) {
 
 export async function deleteAcademyAction(id: string) {
   try {
+    const academy = await prisma.academy.findUnique({ where: { id } });
+    if (!academy) return { error: "Akademi tidak ditemukan." };
+
     await prisma.academy.update({
       where: { id },
-      data: { deleted_at: new Date() },
+      data: { 
+        deleted_at: new Date(),
+        path_url: `${academy.path_url}-deleted-${Date.now()}`
+      },
     });
     revalidatePath("/superadmin/academies");
     revalidatePath("/superadmin/dashboard");

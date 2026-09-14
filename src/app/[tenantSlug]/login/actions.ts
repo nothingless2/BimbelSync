@@ -10,13 +10,13 @@ export async function loginTenantAction(tenantSlug: string, formData: FormData) 
   const password = formData.get('password') as string;
 
   try {
-    // 1. Cek apakah Akademi ada
-    const academy = await prisma.academy.findUnique({
-      where: { path_url: tenantSlug }
+    // 1. Cek apakah Akademi ada dan belum dihapus
+    const academy = await prisma.academy.findFirst({
+      where: { path_url: tenantSlug, deleted_at: null }
     });
 
     if (!academy) {
-      return { error: 'Bimbel tidak ditemukan di sistem kami.' };
+      return { error: 'Bimbel tidak ditemukan atau telah ditutup.' };
     }
 
     // 2. Coba cari sebagai Staff (menggunakan email)
