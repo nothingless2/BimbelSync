@@ -7,6 +7,7 @@ erDiagram
     %% ================= SAAS LEVEL =================
     SUPERADMIN ||--o{ ACADEMY : "manages"
     SUPERADMIN ||--o{ PLATFORM_INVOICES : "verifies"
+    SUPERADMIN ||--o{ AUDIT_LOGS : "acts"
     PLANS ||--o{ ACADEMY : "subscribed_to"
     PLANS ||--o{ PLATFORM_INVOICES : "priced_by"
     ACADEMY ||--o{ PLATFORM_INVOICES : "billed_for_subscription"
@@ -15,17 +16,28 @@ erDiagram
     ACADEMY ||--o{ PROGRAMS : "offers"
     ACADEMY ||--o{ ROOMS : "owns"
     ACADEMY ||--o{ INVOICES : "issues"
+    ACADEMY ||--o{ AUDIT_LOGS : "logs"
+    ACADEMY ||--o{ LEARNING_MATERIALS : "has_materials"
+    ACADEMY ||--o{ STUDENT_EVALUATIONS : "conducts"
 
     %% ================= OPERATIONAL =================
     STAFF ||--o{ SCHEDULES : "teaches"
     ROOMS ||--o{ SCHEDULES : "hosts"
     PROGRAMS ||--o{ SCHEDULES : "has_sessions"
+    STAFF ||--o{ AUDIT_LOGS : "acts"
 
     STUDENTS ||--o{ ENROLLMENTS : "registers_in"
     PROGRAMS ||--o{ ENROLLMENTS : "includes"
 
     STUDENTS ||--o{ ATTENDANCES : "records"
     SCHEDULES ||--o{ ATTENDANCES : "logged_in"
+
+    PROGRAMS ||--o{ LEARNING_MATERIALS : "contains"
+    STAFF ||--o{ LEARNING_MATERIALS : "creates"
+
+    PROGRAMS ||--o{ STUDENT_EVALUATIONS : "evaluates_in"
+    STUDENTS ||--o{ STUDENT_EVALUATIONS : "receives"
+    STAFF ||--o{ STUDENT_EVALUATIONS : "assesses"
 
     %% ================= FINANCIAL (TENANT: SISWA -> BIMBEL) =================
     STUDENTS ||--o{ INVOICES : "billed_to"
@@ -38,6 +50,9 @@ erDiagram
     SUPERADMIN {
         uuid id PK
         string email UK
+        string name "nullable"
+        string avatar_url "nullable"
+        int session_version
         string password_hash
         datetime last_login
         datetime deleted_at
@@ -63,7 +78,7 @@ erDiagram
         string path_url UK "subdomain / tenant slug"
         string encrypted_payment_server_key "BYOK Midtrans/Xendit, encrypted at rest"
         int max_leave_per_month "configurable per tenant, not global"
-        enum subscription_status "TRIAL, ACTIVE, SUSPENDED"
+        enum subscription_status "TRIAL, ACTIVE, SUSPENDED, EXPIRED_TRIAL"
         date subscription_due_date
         datetime deleted_at
     }
@@ -79,7 +94,9 @@ erDiagram
     STAFF {
         uuid id PK
         uuid academy_id FK
-        string email "unique per academy_id, partial index WHERE deleted_at IS NULL"
+        string email "unique per academy_id"
+        string name "nullable"
+        string avatar_url "nullable"
         string password_hash
         enum role "ADMIN, TUTOR"
         datetime deleted_at
@@ -89,7 +106,7 @@ erDiagram
         uuid id PK
         uuid academy_id FK
         string full_name
-        string username "unique per academy_id, partial index WHERE deleted_at IS NULL"
+        string username "unique per academy_id"
         string password_hash
         boolean must_change_password "default true, forces reset on first login after (re)generation"
         string parent_whatsapp "for billing/notification + password delivery"
@@ -103,6 +120,7 @@ erDiagram
         int max_capacity
         int monthly_fee
         int duration_months "nullable - null means ongoing/regular class, filled means fixed-term intensive package"
+        int total_meetings "nullable"
         datetime deleted_at
     }
 
@@ -129,7 +147,7 @@ erDiagram
     ENROLLMENTS {
         uuid id PK
         uuid student_id FK
-        uuid program_id FK "unique (student_id, program_id) WHERE status = 'ACTIVE' - allows re-enroll after withdrawal"
+        uuid program_id FK "unique (student_id, program_id) WHERE status = 'ACTIVE'"
         datetime enrolled_date
         enum status "ACTIVE, WITHDRAWN"
         datetime withdrawn_at "nullable, filled only when status = WITHDRAWN"
@@ -183,8 +201,49 @@ erDiagram
         int amount "snapshot of plan price at billing time"
         date due_date
         enum payment_status "VOID, UNPAID, PAID, OVERDUE"
+        int duration_months "default 1"
         datetime paid_at "nullable"
         uuid verified_by_superadmin_id FK "nullable"
         string proof_of_payment_url "nullable"
+    }
+
+    %% ================= NEW ENTITIES (AUDIT & LEARNING) =================
+    AUDIT_LOGS {
+        uuid id PK
+        uuid superadmin_id FK "nullable"
+        uuid academy_id FK "nullable"
+        uuid staff_id FK "nullable"
+        string action
+        string entity_type
+        uuid entity_id "nullable"
+        jsonb details "nullable"
+        datetime created_at
+    }
+
+    LEARNING_MATERIALS {
+        uuid id PK
+        uuid academy_id FK
+        uuid program_id FK
+        string title
+        string description "nullable"
+        enum material_type "DOCUMENT_LINK, VIDEO_LINK, OTHER_LINK"
+        string url
+        uuid created_by_staff_id FK "nullable"
+        datetime created_at
+        datetime deleted_at "nullable"
+    }
+
+    STUDENT_EVALUATIONS {
+        uuid id PK
+        uuid academy_id FK
+        uuid student_id FK
+        uuid program_id FK
+        uuid evaluator_id FK
+        string title
+        enum evaluation_type "EXAM, HOMEWORK, MONTHLY_REPORT"
+        decimal score "nullable"
+        string notes "nullable"
+        datetime created_at
+        datetime updated_at
     }
 ```
