@@ -16,6 +16,7 @@ interface AddEvaluationModalProps {
 
 export function AddEvaluationModal({ isOpen, onClose, tenantSlug, academyId, students, programs }: AddEvaluationModalProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
     programId: "",
     title: "",
     evaluationType: "EXAM" as "EXAM" | "HOMEWORK" | "MONTHLY_REPORT",

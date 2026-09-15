@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 import { decrypt } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { BillingBanner } from "@/components/billing-banner";
+import { BillingBannerWrapper } from "@/components/billing-banner-wrapper";
 
 export default async function DashboardLayout({
   children,
@@ -132,8 +132,8 @@ export default async function DashboardLayout({
         <div className="flex-1 overflow-y-auto p-8 text-slate-900 dark:text-slate-100 transition-colors">
           <div className="max-w-7xl mx-auto">
             {/* Banner Masa Aktif & Tagihan */}
-            {(academy.subscription_status === 'ACTIVE' || academy.subscription_status === 'TRIAL') && (
-              <BillingBanner 
+            {dbUser?.role !== 'TUTOR' && (academy.subscription_status === 'ACTIVE' || academy.subscription_status === 'TRIAL') && (
+              <BillingBannerWrapper 
                 status={academy.subscription_status} 
                 dueDate={academy.subscription_due_date} 
                 hasUnpaid={hasUnpaid} 

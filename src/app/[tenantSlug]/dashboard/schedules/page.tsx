@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { decrypt } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { AddScheduleModal } from "@/components/modals/add-schedule-modal";
+import { AutoSchedulerModal } from "@/components/modals/auto-scheduler-modal";
 import { redirect } from "next/navigation";
 import SchedulesClientPage from "./client-page";
 import { startOfWeek, addDays, parseISO, isValid, startOfMonth, addMonths } from "date-fns";
@@ -105,11 +106,18 @@ export default async function SchedulesPage({
         </div>
         
         {!isTutor && (
-          <AddScheduleModal 
-            programs={programs} 
-            rooms={rooms} 
-            tutors={tutors} 
-          />
+          <div className="flex gap-2">
+            <AutoSchedulerModal 
+              programs={programs} 
+              rooms={rooms} 
+              staffs={tutors} 
+            />
+            <AddScheduleModal 
+              programs={programs} 
+              rooms={rooms} 
+              tutors={tutors} 
+            />
+          </div>
         )}
       </div>
 

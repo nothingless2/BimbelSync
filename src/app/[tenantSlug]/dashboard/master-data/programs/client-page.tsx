@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, Users2, CalendarDays, Pencil, Trash2, Search, Filter } from "lucide-react";
+import { BookOpen, Users2, CalendarDays, Pencil, Trash2, Search, Filter, CalendarClock } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { deleteProgramAction } from "./actions";
 import { EditProgramModal } from "@/components/modals/edit-program-modal";
@@ -23,7 +23,6 @@ export default function ProgramsClientPage({
 }) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
-  const [schedulingProgram, setSchedulingProgram] = useState<Program | null>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<"ALL" | "REGULER" | "INTENSIF">("ALL");
@@ -165,19 +164,6 @@ export default function ProgramsClientPage({
                           <Pencil size={16} />
                         </button>
                         <button 
-                          onClick={() => {
-                            if (!program.total_meetings) {
-                              toast.error("Program ini tidak memiliki batas Total Pertemuan. Silakan edit program ini dan tetapkan Total Pertemuan terlebih dahulu.");
-                              return;
-                            }
-                            setSchedulingProgram(program);
-                          }}
-                          className="p-1.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
-                          title="Generate Jadwal Otomatis"
-                        >
-                          <CalendarDays size={16} />
-                        </button>
-                        <button 
                           onClick={() => handleDelete(program)}
                           disabled={deletingId === program.id}
                           className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50"
@@ -207,15 +193,6 @@ export default function ProgramsClientPage({
           program={editingProgram} 
           tenantSlug={tenantSlug} 
           onClose={() => setEditingProgram(null)} 
-        />
-      )}
-
-      {schedulingProgram && (
-        <AutoSchedulerModal
-          program={schedulingProgram}
-          staffs={staffs}
-          rooms={rooms}
-          onClose={() => setSchedulingProgram(null)}
         />
       )}
     </>
