@@ -227,11 +227,11 @@ export default function SchedulesClientPage({
                   RUANGAN
                 </div>
                 {weekDays.map((day, idx) => (
-                  <div key={idx} className="p-4">
-                    <div className="font-bold text-slate-700 dark:text-slate-300 text-sm uppercase">
+                  <div key={idx} className="p-2 sm:p-4">
+                    <div className="font-bold text-slate-700 dark:text-slate-300 text-xs sm:text-sm uppercase">
                       {format(day, "EEEE", { locale: localeId })}
                     </div>
-                    <div className="text-xs text-slate-500 mt-1">
+                    <div className="text-[10px] sm:text-xs text-slate-500 mt-0.5 sm:mt-1">
                       {format(day, "d MMM")}
                     </div>
                   </div>
@@ -249,9 +249,9 @@ export default function SchedulesClientPage({
                     <div key={room.id} className="grid grid-cols-[200px_repeat(7,1fr)] divide-x divide-slate-100 dark:divide-slate-800/60">
                       
                       {/* Room Info Cell */}
-                      <div className="p-4 flex flex-col justify-center">
-                        <span className="font-bold text-slate-900 dark:text-white">{room.name}</span>
-                        <span className="text-xs text-slate-500 mt-1">Kapasitas: {room.capacity}</span>
+                      <div className="p-3 sm:p-4 flex flex-col justify-center">
+                        <span className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">{room.name}</span>
+                        <span className="text-[10px] sm:text-xs text-slate-500 mt-1">Kapasitas: {room.capacity}</span>
                       </div>
 
                       {/* Days Cells */}
@@ -261,8 +261,8 @@ export default function SchedulesClientPage({
                         );
 
                         return (
-                          <div key={dayIdx} className="p-1.5 min-h-[100px] max-h-[200px] overflow-y-auto bg-white dark:bg-[#111827] custom-scrollbar">
-                            <div className="space-y-1.5">
+                          <div key={dayIdx} className="p-1 sm:p-1.5 min-h-[80px] sm:min-h-[100px] max-h-[200px] overflow-y-auto bg-white dark:bg-[#111827] custom-scrollbar">
+                            <div className="space-y-1 sm:space-y-1.5">
                               {daySchedules.map((sch) => {
                                 const isCancelled = sch.status === 'CANCELLED';
                                 return (
@@ -322,14 +322,16 @@ export default function SchedulesClientPage({
         ========================================= */}
         {isMonthly && (
           <div className="bg-slate-50/50 dark:bg-[#111827] overflow-hidden">
-            {/* Days Header */}
-            <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
-              {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'].map((day) => (
-                <div key={day} className="py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 dark:border-slate-800 last:border-r-0">
-                  {day}
-                </div>
-              ))}
-            </div>
+            {/* Month Calendar Grid */}
+            <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 shadow-sm text-xs sm:text-sm">
+              {/* Header Days */}
+              <div className="grid grid-cols-7 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
+                {['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'].map(d => (
+                  <div key={d} className="p-2 sm:p-3 text-center font-bold text-slate-500 dark:text-slate-400">
+                    {d}
+                  </div>
+                ))}
+              </div>
 
             {/* Calendar Grid */}
             <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800">
@@ -375,6 +377,7 @@ export default function SchedulesClientPage({
                   </div>
                 );
               })}
+            </div>
             </div>
           </div>
         )}

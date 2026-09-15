@@ -63,16 +63,16 @@ export function AddMaterialModal({ isOpen, onClose, tenantSlug, academyId, progr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 max-h-[95vh] flex flex-col">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 shrink-0">
           <h2 className="text-lg font-bold text-slate-800 dark:text-white">Tambah Materi Baru</h2>
           <button onClick={onClose} className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition">
             <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4 overflow-y-auto custom-scrollbar">
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
               Judul Materi <span className="text-red-500">*</span>
@@ -82,7 +82,7 @@ export function AddMaterialModal({ isOpen, onClose, tenantSlug, academyId, progr
               required
               value={formData.title}
               onChange={e => setFormData({ ...formData, title: e.target.value })}
-              className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm"
+              className="w-full px-3 py-2 sm:px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm"
               placeholder="Contoh: Modul Matematika Bab 1"
             />
           </div>
@@ -95,7 +95,7 @@ export function AddMaterialModal({ isOpen, onClose, tenantSlug, academyId, progr
               required
               value={formData.programId}
               onChange={e => setFormData({ ...formData, programId: e.target.value })}
-              className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm"
+              className="w-full px-3 py-2 sm:px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm"
             >
               <option value="">-- Pilih Program --</option>
               {programs.map(p => (
@@ -118,7 +118,7 @@ export function AddMaterialModal({ isOpen, onClose, tenantSlug, academyId, progr
                   key={type.id}
                   type="button"
                   onClick={() => setFormData({ ...formData, materialType: type.id as any })}
-                  className={`flex flex-col items-center justify-center gap-1.5 py-3 border rounded-xl text-xs font-semibold transition ${
+                  className={`flex flex-col items-center justify-center gap-1 py-2 sm:py-3 border rounded-xl text-[11px] sm:text-xs font-semibold transition ${
                     formData.materialType === type.id 
                       ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400" 
                       : "border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800"
@@ -140,7 +140,7 @@ export function AddMaterialModal({ isOpen, onClose, tenantSlug, academyId, progr
               required
               value={formData.url}
               onChange={e => setFormData({ ...formData, url: e.target.value })}
-              className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm"
+              className="w-full px-3 py-2 sm:px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm"
               placeholder="https://..."
             />
           </div>
@@ -153,7 +153,7 @@ export function AddMaterialModal({ isOpen, onClose, tenantSlug, academyId, progr
               rows={2}
               value={formData.description}
               onChange={e => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm resize-none"
+              className="w-full px-3 py-2 sm:px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm resize-none"
               placeholder="Catatan tambahan untuk materi ini..."
             />
           </div>
@@ -163,14 +163,14 @@ export function AddMaterialModal({ isOpen, onClose, tenantSlug, academyId, progr
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 rounded-xl transition"
+              className="px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 rounded-xl transition"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-xl transition flex items-center gap-2"
+              className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-xl transition flex items-center gap-2"
             >
               {isLoading ? <Loader2 size={16} className="animate-spin" /> : null}
               Simpan Materi

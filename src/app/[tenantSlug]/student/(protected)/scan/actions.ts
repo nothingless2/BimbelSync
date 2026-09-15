@@ -3,6 +3,7 @@
 import prisma from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { decrypt } from '@/lib/auth';
+import { decryptQrData } from '@/lib/qr-crypto';
 
 export async function processQrScanAction(tenantSlug: string, qrDataRaw: string) {
   try {
@@ -19,12 +20,11 @@ export async function processQrScanAction(tenantSlug: string, qrDataRaw: string)
       return { error: 'Akses ditolak.' };
     }
 
-    // 1. Parse QR Data
-    let qrData;
-    try {
-      qrData = JSON.parse(qrDataRaw);
-    } catch (e) {
-      return { error: 'QR Code tidak valid.' };
+    // 1. Parse & Decrypt QR Data
+    const qrData = decryptQrData(qrDataRaw);
+    
+    if (!qrData) {
+      return { error: 'QR Code tidak valid atau bukan berasal dari sistem ini.' };
     }
 
     if (!qrData.scheduleId || !qrData.timestamp || !qrData.tenantSlug) {

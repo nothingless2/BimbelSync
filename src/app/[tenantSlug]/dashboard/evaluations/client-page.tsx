@@ -145,15 +145,18 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-20">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500 pb-20">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Gradebook</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Sistem rekapitulasi nilai siswa.</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Gradebook</h1>
+          <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-1">Sistem rekapitulasi nilai siswa.</p>
         </div>
-        
-        <div className="flex items-center gap-4 bg-white dark:bg-slate-900 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm min-w-[250px]">
-          <div className="text-sm font-semibold text-slate-500 whitespace-nowrap">Program:</div>
+      </div>
+
+      {/* Toolbar Filter */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-3 sm:p-4 flex flex-col sm:flex-row gap-4">
+        <div className="sm:w-80 flex items-center gap-3">
+          <label className="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap">Program:</label>
           <select
             value={selectedProgramId}
             onChange={e => setSelectedProgramId(e.target.value)}
@@ -170,13 +173,13 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
       {selectedProgramId ? (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col">
           {/* Toolbar */}
-          <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex justify-between items-center flex-wrap gap-4">
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                Total: <strong className="text-slate-900 dark:text-white">{availableStudents.length} Siswa</strong>
-              </span>
-              <span className="text-slate-300 dark:text-slate-700">|</span>
-              <div className="flex items-center gap-2 text-sm font-medium">
+          <div className="p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
+                Total: <span className="font-bold text-slate-900 dark:text-white">{availableStudents.length} Siswa</span>
+              </div>
+              <div className="w-px h-4 bg-slate-300 dark:bg-slate-700 hidden sm:block"></div>
+              <div className="flex items-center gap-2 text-xs sm:text-sm font-medium">
                 {savingStatus === "SAVING" && (
                   <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
                     <Loader2 size={14} className="animate-spin" /> Auto-Saving...
@@ -193,7 +196,7 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
             {userRole === "TUTOR" && (
               <button
                 onClick={() => setIsAddModalOpen(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 shadow-sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 shadow-sm w-full sm:w-auto justify-center"
               >
                 <Plus size={16} /> Tambah Tugas Baru
               </button>
@@ -202,19 +205,19 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
 
           {/* Matrix Table */}
           {availableStudents.length === 0 ? (
-            <div className="p-12 text-center text-slate-500">
+            <div className="p-8 sm:p-12 text-center text-slate-500 text-sm sm:text-base">
               Belum ada siswa yang terdaftar di kelas ini.
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm border-collapse">
+              <table className="w-full text-left text-xs sm:text-sm border-collapse">
                 <thead className="bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400">
                   <tr>
-                    <th className="px-4 py-4 font-semibold border-b border-r border-slate-200 dark:border-slate-800 min-w-[200px] sticky left-0 z-10 bg-slate-50 dark:bg-slate-900 shadow-[1px_0_0_0_#e2e8f0] dark:shadow-[1px_0_0_0_#1e293b]">
+                    <th className="px-3 py-3 sm:px-4 sm:py-4 font-semibold border-b border-r border-slate-200 dark:border-slate-800 min-w-[150px] sm:min-w-[200px] sticky left-0 z-10 bg-slate-50 dark:bg-slate-900 shadow-[1px_0_0_0_#e2e8f0] dark:shadow-[1px_0_0_0_#1e293b]">
                       Nama Siswa
                     </th>
                     {columns.length === 0 && (
-                      <th className="px-4 py-4 font-normal text-slate-400 border-b border-slate-200 dark:border-slate-800 text-center italic">
+                      <th className="px-3 py-3 sm:px-4 sm:py-4 font-normal text-slate-400 border-b border-slate-200 dark:border-slate-800 text-center italic text-xs">
                         Belum ada tugas/evaluasi. Klik "Tambah Tugas Baru".
                       </th>
                     )}
@@ -246,9 +249,9 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
                 </thead>
                 <tbody className="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-950">
                   {availableStudents.map((student: any) => (
-                    <tr key={student.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
-                      <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-200 border-r border-slate-200 dark:border-slate-800 sticky left-0 z-10 bg-inherit shadow-[1px_0_0_0_#e2e8f0] dark:shadow-[1px_0_0_0_#1e293b]">
-                        <div className="truncate max-w-[200px]" title={student.full_name}>
+                    <tr key={student.id} className="group hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
+                      <td className="px-3 py-2.5 sm:px-4 sm:py-3 font-medium text-slate-900 dark:text-slate-200 border-r border-slate-200 dark:border-slate-800 sticky left-0 z-10 bg-white dark:bg-slate-950 group-hover:bg-slate-50 dark:group-hover:bg-slate-900/50 transition-colors shadow-[1px_0_0_0_#e2e8f0] dark:shadow-[1px_0_0_0_#1e293b]">
+                        <div className="truncate max-w-[140px] sm:max-w-[200px]" title={student.full_name}>
                           {student.full_name}
                         </div>
                       </td>
@@ -269,17 +272,18 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
                         }
 
                         const inputValue = localScores[ev.id] ?? "";
+                        const hasNote = !!ev.notes;
 
                         return (
-                          <td key={idx} className="px-2 py-2">
-                            <div className="relative flex justify-center items-center gap-1.5 group/cell">
+                          <td key={idx} className="px-1.5 py-1.5 sm:px-2 sm:py-2">
+                            <div className="relative flex justify-center items-center gap-1 sm:gap-1.5 group/cell">
                               <input
                                 type="number"
                                 placeholder="--"
                                 value={inputValue}
                                 onChange={(e) => setLocalScores(prev => ({ ...prev, [ev.id]: e.target.value }))}
                                 onBlur={(e) => handleScoreBlur(ev.id, ev.score, e.target.value)}
-                                className={`w-16 text-center px-1.5 py-1.5 text-sm font-semibold rounded-lg border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                                className={`w-12 sm:w-16 h-8 text-center text-xs sm:text-sm font-semibold rounded-lg border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                                   inputValue !== "" 
                                     ? "bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-900/20 dark:border-emerald-800/50 dark:text-emerald-400" 
                                     : "bg-white border-slate-200 text-slate-900 dark:bg-slate-900 dark:border-slate-700 dark:text-white"
@@ -288,13 +292,13 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
                               <button
                                 onClick={() => setNoteModal({ id: ev.id, title: col.title, studentName: student.full_name, notes: ev.notes || "" })}
                                 className={`p-1.5 rounded-lg transition-colors ${
-                                  ev.notes 
+                                  hasNote 
                                     ? "text-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100" 
                                     : "text-slate-300 hover:text-slate-500 hover:bg-slate-100 dark:text-slate-600 dark:hover:text-slate-400 dark:hover:bg-slate-800 opacity-0 group-hover/cell:opacity-100"
                                 }`}
-                                title={ev.notes ? "Edit Catatan" : "Tambah Catatan"}
+                                title={hasNote ? "Edit Catatan" : "Tambah Catatan"}
                               >
-                                <MessageSquare size={14} />
+                                <MessageSquare size={12} />
                               </button>
                             </div>
                           </td>

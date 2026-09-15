@@ -8,6 +8,7 @@ import { decrypt } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { BillingBannerWrapper } from "@/components/billing-banner-wrapper";
+import { MobileSidebar } from "@/components/mobile-sidebar";
 
 export default async function DashboardLayout({
   children,
@@ -93,8 +94,8 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 font-sans">
-      {/* Sidebar */}
-      <aside className="w-64 flex flex-col h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-20 transition-colors">
+      {/* Sidebar Desktop */}
+      <aside className="hidden md:flex w-64 flex-col h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-20 transition-colors">
         <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-800 transition-colors">
           <div className="flex items-center gap-3">
             <Image src="/logo.png" alt="BimbelSync Logo" width={28} height={28} className="object-contain rounded-md" />
@@ -110,9 +111,10 @@ export default async function DashboardLayout({
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         {/* Header */}
-        <header className="h-16 border-b border-slate-200 dark:border-slate-800/60 flex items-center justify-between px-8 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-10 sticky top-0 transition-colors">
+        <header className="h-16 border-b border-slate-200 dark:border-slate-800/60 flex items-center justify-between px-4 md:px-8 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-10 sticky top-0 transition-colors">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-slate-500">
+            <MobileSidebar tenantSlug={tenantSlug} userRole={dbUser?.role} />
+            <span className="text-xs md:text-sm font-medium text-slate-500">
               {dbUser?.role === 'TUTOR' ? 'Tutor Portal' : 'Admin Portal'}
             </span>
             <span className="text-slate-300 dark:text-slate-600">/</span>
@@ -129,7 +131,7 @@ export default async function DashboardLayout({
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto p-8 text-slate-900 dark:text-slate-100 transition-colors">
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 text-slate-900 dark:text-slate-100 transition-colors">
           <div className="max-w-7xl mx-auto">
             {/* Banner Masa Aktif & Tagihan */}
             {dbUser?.role !== 'TUTOR' && (academy.subscription_status === 'ACTIVE' || academy.subscription_status === 'TRIAL') && (

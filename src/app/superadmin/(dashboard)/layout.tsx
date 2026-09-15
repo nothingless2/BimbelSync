@@ -36,7 +36,7 @@ export default async function SuperadminLayout({
   return (
     <div className="flex h-screen bg-[#F8FAFC] dark:bg-slate-950 font-sans">
       {/* Sidebar - Clean Light Theme */}
-      <aside className="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full z-20">
+      <aside className="hidden md:flex w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-col h-full z-20">
         <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="BimbelSync Logo" className="w-7 h-7 object-contain rounded-md" />
@@ -54,7 +54,7 @@ export default async function SuperadminLayout({
         {dbUser && <SuperadminHeader user={dbUser} />}
 
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto p-8 text-slate-900 dark:text-slate-100">
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 text-slate-900 dark:text-slate-100">
           <div className="max-w-6xl mx-auto">
             {children}
           </div>

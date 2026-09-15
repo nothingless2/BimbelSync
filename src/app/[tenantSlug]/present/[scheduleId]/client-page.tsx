@@ -13,6 +13,8 @@ type ScheduleWithRelations = Schedule & {
   tutor: Staff;
 };
 
+import { generateSecureQrDataAction } from "./actions";
+
 export default function PresentClientPage({
   schedule,
   tenantSlug
@@ -20,26 +22,35 @@ export default function PresentClientPage({
   schedule: ScheduleWithRelations;
   tenantSlug: string;
 }) {
-  const [timestamp, setTimestamp] = useState<number>(0);
+  const [qrData, setQrData] = useState<string>('');
   const [timeLeft, setTimeLeft] = useState(3); 
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    setTimestamp(Date.now());
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          setTimestamp(Date.now());
-          return 3;
-        }
-        return prev - 1;
-      });
+    
+    const fetchQr = async () => {
+      const secureData = await generateSecureQrDataAction(schedule.id, tenantSlug);
+      setQrData(secureData);
+    };
+    
+    // Initial fetch
+    fetchQr();
+
+    // Fetch new QR every 3 seconds
+    const fetchTimer = setInterval(fetchQr, 3000);
+
+    // UI countdown timer (only updates the number)
+    const countdownTimer = setInterval(() => {
+      setTimeLeft((prev) => (prev <= 1 ? 3 : prev - 1));
     }, 1000);
 
-    return () => clearInterval(timer);
-  }, []);
+    return () => {
+      clearInterval(fetchTimer);
+      clearInterval(countdownTimer);
+    };
+  }, [schedule.id, tenantSlug]);
 
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
@@ -59,8 +70,7 @@ export default function PresentClientPage({
     return new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' }).format(new Date(date));
   };
 
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://bimbelsync.com';
-  const qrData = mounted ? `${baseUrl}/${tenantSlug}/student/scan/${schedule.id}?t=${timestamp}` : '';
+
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
@@ -103,7 +113,7 @@ export default function PresentClientPage({
             </div>
 
             <div className="mt-4 border-8 border-slate-100 rounded-2xl p-2 bg-slate-100">
-              {mounted && (
+              {mounted && qrData ? (
                 <QRCodeSVG 
                   value={qrData} 
                   size={340} 
@@ -118,6 +128,10 @@ export default function PresentClientPage({
                     excavate: true,
                   }}
                 />
+              ) : (
+                <div className="w-[340px] h-[340px] bg-slate-200 animate-pulse rounded-xl flex items-center justify-center">
+                   <p className="text-slate-400 font-medium">Memuat QR...</p>
+                </div>
               )}
             </div>
 
