@@ -171,6 +171,7 @@ interface InvoiceItem {
   academy: { id: string; name: string; path_url: string; plan: { id: string; name: string; price: number } };
   billing_period: string;
   amount: number;
+  duration_months: number;
   due_date: string;
   paid_at: string | null;
   payment_status: string;
@@ -179,7 +180,7 @@ interface InvoiceItem {
 
 interface Props {
   invoices: InvoiceItem[];
-  academies: { id: string; name: string; plan: { id: string; name: string; price: number } }[];
+  academies: { id: string; name: string; subscription_due_date: string | null; plan: { id: string; name: string; price: number } }[];
 }
 
 export default function BillingClientPage({ invoices, academies }: Props) {

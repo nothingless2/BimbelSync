@@ -11,7 +11,7 @@ export function GenerateInvoicesButton({ academyId }: { academyId: string }) {
 
   const handleGenerate = async () => {
     setIsLoading(true);
-    toast.info("Menganalisis data siswa dan program...", { id: "generate-cron" } as any);
+    toast("Menganalisis data siswa dan program...", { id: "generate-cron" } as any);
     
     try {
       const res = await fetch("/api/cron/generate-invoices", {
@@ -28,11 +28,11 @@ export function GenerateInvoicesButton({ academyId }: { academyId: string }) {
         throw new Error(data.error || "Gagal memproses");
       }
       
-      toast.success(data.message || "Berhasil memproses automasi", { id: "generate-cron" });
+      toast(data.message || "Berhasil memproses automasi", { id: "generate-cron" });
       router.refresh();
       
     } catch (error: any) {
-      toast.error(error.message || "Terjadi kesalahan sistem", { id: "generate-cron" });
+      toast(error.message || "Terjadi kesalahan sistem", { id: "generate-cron" });
     } finally {
       setIsLoading(false);
     }
