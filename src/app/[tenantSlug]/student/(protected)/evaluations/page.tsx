@@ -13,11 +13,11 @@ export default async function StudentEvaluationsPage({ params }: { params: { ten
 
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionCookie) redirect(`/${tenantSlug}/student/login`);
+  if (!sessionCookie) redirect(`/${tenantSlug}/login`);
 
   const session = await decrypt(sessionCookie);
   if (!session || !session.id || session.role !== 'STUDENT') {
-    redirect(`/${tenantSlug}/student/login`);
+    redirect(`/${tenantSlug}/login`);
   }
 
   const evaluations = await prisma.studentEvaluation.findMany({
@@ -35,9 +35,14 @@ export default async function StudentEvaluationsPage({ params }: { params: { ten
     orderBy: { created_at: "desc" },
   });
 
+  const serializedEvaluations = evaluations.map(e => ({
+    ...e,
+    score: e.score ? Number(e.score) : null
+  }));
+
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      <StudentEvaluationsClientPage evaluations={evaluations} />
+      <StudentEvaluationsClientPage evaluations={serializedEvaluations} />
     </div>
   );
 }

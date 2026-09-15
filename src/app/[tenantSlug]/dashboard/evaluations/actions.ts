@@ -113,3 +113,54 @@ export async function deleteEvaluationAction(id: string, tenantSlug: string) {
     return { error: error.message || "Failed to delete evaluation" };
   }
 }
+
+export async function updateEvaluationScoreAction(id: string, score: number | null, tenantSlug: string) {
+  const session = await getSession();
+  if (!session || !session.id) return { error: "Unauthorized" };
+
+  try {
+    await prisma.studentEvaluation.update({
+      where: { id },
+      data: { score }
+    });
+    revalidatePath(`/${tenantSlug}/dashboard/evaluations`);
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message || "Failed to update score" };
+  }
+}
+
+export async function deleteEvaluationColumnAction(programId: string, title: string, evaluationType: "EXAM" | "HOMEWORK" | "MONTHLY_REPORT", tenantSlug: string) {
+  const session = await getSession();
+  if (!session || !session.id) return { error: "Unauthorized" };
+
+  try {
+    await prisma.studentEvaluation.deleteMany({
+      where: {
+        program_id: programId,
+        title: title,
+        evaluation_type: evaluationType
+      }
+    });
+    revalidatePath(`/${tenantSlug}/dashboard/evaluations`);
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message || "Failed to delete column" };
+  }
+}
+
+export async function updateEvaluationNotesAction(id: string, notes: string | null, tenantSlug: string) {
+  const session = await getSession();
+  if (!session || !session.id) return { error: "Unauthorized" };
+
+  try {
+    await prisma.studentEvaluation.update({
+      where: { id },
+      data: { notes }
+    });
+    revalidatePath(`/${tenantSlug}/dashboard/evaluations`);
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message || "Failed to update notes" };
+  }
+}

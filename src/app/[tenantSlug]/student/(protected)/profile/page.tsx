@@ -16,11 +16,11 @@ export default async function StudentProfilePage({
 
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) redirect(`/${tenantSlug}/student/login`);
+  if (!sessionToken) redirect(`/${tenantSlug}/login`);
 
   const session = await decrypt(sessionToken);
   if (!session || session.role !== "STUDENT") {
-    redirect(`/${tenantSlug}/student/login`);
+    redirect(`/${tenantSlug}/login`);
   }
 
   const student = await prisma.student.findUnique({
@@ -33,7 +33,7 @@ export default async function StudentProfilePage({
     }
   });
 
-  if (!student) redirect(`/${tenantSlug}/student/login`);
+  if (!student) redirect(`/${tenantSlug}/login`);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">

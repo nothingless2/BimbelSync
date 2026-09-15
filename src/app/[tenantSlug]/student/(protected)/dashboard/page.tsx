@@ -17,13 +17,17 @@ export default async function StudentDashboardPage({
   const { tenantSlug } = await params;
 
   if (!session || session.role !== 'STUDENT') {
-    redirect(`/${tenantSlug}/student/login`);
+    redirect(`/${tenantSlug}/login`);
   }
 
   const student = await prisma.student.findUnique({
     where: { id: session.id },
     include: {
-      enrollments: true,
+      enrollments: {
+        include: {
+          program: true
+        }
+      },
       attendances: {
         orderBy: { scanned_at: 'desc' },
         take: 5,
@@ -41,7 +45,7 @@ export default async function StudentDashboardPage({
   });
 
   if (!student) {
-    redirect(`/${tenantSlug}/student/login`);
+    redirect(`/${tenantSlug}/login`);
   }
 
   // Cari jadwal mendatang (mulai dari hari ini)
@@ -84,8 +88,18 @@ export default async function StudentDashboardPage({
           <p className="text-blue-100 font-medium mb-1">Selamat datang kembali,</p>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-4">{student.full_name}</h1>
           
-          <div className="flex items-center gap-2 bg-white/20 w-max px-3 py-1.5 rounded-lg backdrop-blur-sm text-sm">
-            <span className="font-semibold">Terdaftar di {student.enrollments.length} Program</span>
+          <div className="flex flex-wrap items-center gap-2 mt-2">
+            {student.enrollments.map((enrollment: any) => (
+              <div key={enrollment.id} className="bg-white/20 px-3 py-1.5 rounded-lg backdrop-blur-sm text-sm font-semibold flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-blue-300"></span>
+                {enrollment.program.name}
+              </div>
+            ))}
+            {student.enrollments.length === 0 && (
+              <div className="bg-white/20 px-3 py-1.5 rounded-lg backdrop-blur-sm text-sm font-semibold">
+                Belum terdaftar di program apapun
+              </div>
+            )}
           </div>
         </div>
       </div>
