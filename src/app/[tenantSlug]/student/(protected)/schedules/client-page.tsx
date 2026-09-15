@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Clock, MapPin, Calendar as CalendarIcon, User } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, MapPin, User, Calendar as CalendarIcon } from "lucide-react";
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 
 export default function StudentSchedulesClientPage({ schedules, tenantSlug }: any) {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   // Calendar Grid Generation
   const monthStart = startOfMonth(currentDate);
@@ -17,7 +18,6 @@ export default function StudentSchedulesClientPage({ schedules, tenantSlug }: an
   const dateFormat = "d";
   const days = [];
   let day = startDate;
-  let formattedDate = "";
 
   while (day <= endDate) {
     days.push(day);
@@ -26,118 +26,166 @@ export default function StudentSchedulesClientPage({ schedules, tenantSlug }: an
 
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
-  const today = () => setCurrentDate(new Date());
+  const today = () => {
+    setCurrentDate(new Date());
+    setSelectedDate(new Date());
+  };
+
+  const selectedDaySchedules = schedules.filter((s: any) => isSameDay(new Date(s.start_time), selectedDate));
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col">
-      {/* Calendar Header */}
-      <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex justify-between items-center flex-wrap gap-4">
-        <div className="flex items-center gap-4">
-          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 min-w-[150px]">
-            {format(currentDate, "MMMM yyyy", { locale: localeId })}
-          </h2>
-          <div className="flex bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm p-1">
-            <button onClick={prevMonth} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-md transition text-slate-600 dark:text-slate-300">
-              <ChevronLeft size={18} />
-            </button>
-            <button onClick={today} className="px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-md transition text-sm font-medium text-slate-700 dark:text-slate-200">
-              Hari Ini
-            </button>
-            <button onClick={nextMonth} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-md transition text-slate-600 dark:text-slate-300">
-              <ChevronRight size={18} />
-            </button>
+    <div className="space-y-6">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden flex flex-col">
+        {/* Calendar Header */}
+        <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center gap-4">
+          <div className="flex items-center gap-4">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 min-w-[130px] capitalize">
+              {format(currentDate, "MMMM yyyy", { locale: localeId })}
+            </h2>
+            <div className="flex bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-1">
+              <button onClick={prevMonth} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded-lg shadow-sm transition text-slate-600 dark:text-slate-300">
+                <ChevronLeft size={18} />
+              </button>
+              <button onClick={today} className="px-3 py-1.5 hover:bg-white dark:hover:bg-slate-700 rounded-lg shadow-sm transition text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200">
+                Hari Ini
+              </button>
+              <button onClick={nextMonth} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded-lg shadow-sm transition text-slate-600 dark:text-slate-300">
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+          
+          {/* Desktop Legend */}
+          <div className="hidden sm:flex items-center gap-4 text-xs font-medium">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Aktif
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-slate-300"></span> Batal
+            </div>
           </div>
         </div>
-        
-        <div className="flex items-center gap-4 text-xs font-medium">
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-blue-500"></span> Jadwal Aktif
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-slate-400"></span> Dibatalkan
-          </div>
-        </div>
-      </div>
 
-      {/* Calendar Grid */}
-      <div className="flex-1 overflow-x-auto">
-        <div className="min-w-[800px]">
-          {/* Days Header */}
-          <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
-            {["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"].map((dayName) => (
-              <div key={dayName} className="p-3 text-center text-sm font-semibold text-slate-600 dark:text-slate-400 border-r border-slate-200 dark:border-slate-800 last:border-r-0">
+        {/* Responsive Calendar Grid */}
+        <div className="p-2 sm:p-4 bg-slate-50/30 dark:bg-slate-950/30">
+          <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
+            {["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"].map((dayName) => (
+              <div key={dayName} className="text-center text-xs font-bold text-slate-400 dark:text-slate-500 py-2">
                 {dayName}
               </div>
             ))}
           </div>
 
-          {/* Calendar Cells */}
-          <div className="grid grid-cols-7 auto-rows-fr">
+          <div className="grid grid-cols-7 gap-1 sm:gap-2">
             {days.map((day, idx) => {
-              formattedDate = format(day, dateFormat);
+              const formattedDate = format(day, dateFormat);
               const isCurrentMonth = isSameMonth(day, monthStart);
               const isToday = isSameDay(day, new Date());
+              const isSelected = isSameDay(day, selectedDate);
               
-              // Filter schedules for this day
               const daySchedules = schedules.filter((s: any) => isSameDay(new Date(s.start_time), day));
+              const hasActive = daySchedules.some((s: any) => s.status !== 'CANCELLED');
+              const hasCancelled = daySchedules.some((s: any) => s.status === 'CANCELLED');
 
               return (
-                <div 
+                <button 
                   key={idx} 
-                  className={`min-h-[140px] p-2 border-r border-b border-slate-200 dark:border-slate-800 last:border-r-0 ${
-                    !isCurrentMonth ? "bg-slate-50/50 dark:bg-slate-900/30 text-slate-400" : "bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-200"
+                  onClick={() => setSelectedDate(day)}
+                  className={`relative flex flex-col items-center justify-center p-2 rounded-2xl transition-all aspect-square sm:aspect-auto sm:min-h-[90px] border ${
+                    !isCurrentMonth ? "opacity-40" : "opacity-100"
+                  } ${
+                    isSelected 
+                      ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/30 scale-105 z-10" 
+                      : "bg-white dark:bg-[#111827] border-slate-100 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-slate-800"
                   }`}
                 >
-                  <div className="flex justify-between items-start mb-2">
-                    <span className={`text-sm font-bold flex items-center justify-center w-7 h-7 rounded-full ${
-                      isToday ? "bg-blue-600 text-white shadow-sm" : ""
-                    }`}>
-                      {formattedDate}
-                    </span>
-                    {daySchedules.length > 0 && (
-                      <span className="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded">
-                        {daySchedules.length} Kelas
-                      </span>
+                  <span className={`text-sm sm:text-base font-bold ${isToday && !isSelected ? "text-blue-600 dark:text-blue-400" : ""}`}>
+                    {formattedDate}
+                  </span>
+
+                  {/* Dots for Mobile */}
+                  <div className="flex sm:hidden gap-1 mt-1">
+                    {hasActive && <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-blue-500'}`}></span>}
+                    {hasCancelled && <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-blue-200' : 'bg-slate-300'}`}></span>}
+                  </div>
+
+                  {/* Text for Desktop */}
+                  <div className="hidden sm:flex flex-col gap-1 mt-2 w-full px-1">
+                    {daySchedules.slice(0, 2).map((s: any, i: number) => (
+                      <div key={i} className={`text-[9px] font-bold px-1.5 py-0.5 rounded truncate ${
+                        s.status === 'CANCELLED' 
+                          ? (isSelected ? 'bg-blue-700/50 text-blue-200 line-through' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 line-through') 
+                          : (isSelected ? 'bg-white text-blue-700' : 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300')
+                      }`}>
+                        {format(new Date(s.start_time), 'HH:mm')}
+                      </div>
+                    ))}
+                    {daySchedules.length > 2 && (
+                      <div className={`text-[9px] font-bold px-1.5 py-0.5 rounded text-center ${isSelected ? 'text-blue-200' : 'text-slate-400'}`}>
+                        +{daySchedules.length - 2}
+                      </div>
                     )}
                   </div>
-                  
-                  <div className="space-y-1.5">
-                    {daySchedules.map((schedule: any) => {
-                      const isCancelled = schedule.status === 'CANCELLED';
-                      
-                      return (
-                        <div 
-                          key={schedule.id}
-                          className={`p-2 rounded-lg text-xs border ${
-                            isCancelled 
-                              ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 opacity-60' 
-                              : 'bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800/50'
-                          }`}
-                        >
-                          <div className={`font-bold mb-1 truncate ${isCancelled ? 'text-slate-500 dark:text-slate-400 line-through' : 'text-blue-700 dark:text-blue-400'}`}>
-                            {schedule.program.name}
-                          </div>
-                          <div className={`flex items-center gap-1 mb-0.5 ${isCancelled ? 'text-slate-400' : 'text-blue-600 dark:text-blue-300'}`}>
-                            <Clock size={10} />
-                            {format(new Date(schedule.start_time), 'HH:mm')} - {format(new Date(schedule.end_time), 'HH:mm')}
-                          </div>
-                          <div className={`flex flex-col gap-0.5 ${isCancelled ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'}`}>
-                            <div className="flex items-center gap-1 truncate">
-                              <User size={10} /> {schedule.tutor.name}
-                            </div>
-                            <div className="flex items-center gap-1 truncate">
-                              <MapPin size={10} /> {schedule.room.name}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Selected Day Details (Visible primarily on Mobile, but looks good on Desktop too) */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm">
+        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+          <CalendarIcon size={20} className="text-blue-500" />
+          Jadwal {format(selectedDate, "d MMMM yyyy", { locale: localeId })}
+        </h3>
+
+        {selectedDaySchedules.length > 0 ? (
+          <div className="space-y-3">
+            {selectedDaySchedules.map((schedule: any) => {
+              const isCancelled = schedule.status === 'CANCELLED';
+              return (
+                <div 
+                  key={schedule.id}
+                  className={`p-4 rounded-2xl border flex flex-col sm:flex-row gap-4 sm:items-center ${
+                    isCancelled 
+                      ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700' 
+                      : 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/50'
+                  }`}
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className={`font-bold text-base ${isCancelled ? 'text-slate-500 dark:text-slate-400 line-through' : 'text-slate-900 dark:text-white'}`}>
+                        {schedule.program.name}
+                      </h4>
+                      {isCancelled && <span className="bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300 text-[10px] px-2 py-0.5 rounded-full font-bold">DIBATALKAN</span>}
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-x-4 gap-y-2 mt-2">
+                      <div className={`flex items-center gap-1.5 text-sm font-medium ${isCancelled ? 'text-slate-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                        <Clock size={16} className={isCancelled ? "text-slate-400" : "text-blue-500"} />
+                        {format(new Date(schedule.start_time), 'HH:mm')} - {format(new Date(schedule.end_time), 'HH:mm')}
+                      </div>
+                      <div className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+                        <User size={16} /> {schedule.tutor.name}
+                      </div>
+                      <div className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+                        <MapPin size={16} /> {schedule.room.name}
+                      </div>
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
-        </div>
+        ) : (
+          <div className="text-center py-10">
+            <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
+              <CalendarIcon size={24} className="text-slate-400" />
+            </div>
+            <p className="text-slate-500 font-medium">Tidak ada kelas pada tanggal ini.</p>
+          </div>
+        )}
       </div>
     </div>
   );

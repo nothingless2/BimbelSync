@@ -26,10 +26,7 @@ export default function StudentEvaluationsClientPage({ evaluations }: { evaluati
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Rapor & Nilai</h1>
-        <p className="text-slate-500 dark:text-slate-400 mt-1">Pantau perkembangan belajarmu dari waktu ke waktu.</p>
-      </div>
+
 
       {evaluations.length === 0 ? (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center shadow-sm">
@@ -63,19 +60,20 @@ export default function StudentEvaluationsClientPage({ evaluations }: { evaluati
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <div>
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Catatan Tutor</p>
-                  <p className="text-sm text-slate-700 dark:text-slate-300 italic">
-                    {evaluation.notes ? `"${evaluation.notes}"` : <span className="text-slate-400">Tidak ada catatan</span>}
+                  <p className="text-xs font-semibold text-slate-400 mb-1">Catatan Tutor</p>
+                  <p className="text-sm text-slate-700 dark:text-slate-300">
+                    {evaluation.notes || <span className="text-slate-400 italic">Tidak ada catatan</span>}
                   </p>
                 </div>
                 <div className="sm:text-right">
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Detail Info</p>
-                  <p className="text-sm text-slate-700 dark:text-slate-300">
-                    <span className="font-medium">{evaluation.program?.name}</span>
-                    <br/>
-                    <span className="text-slate-500 text-xs">Oleh: {evaluation.evaluator?.name}</span>
+                  <p className="text-xs font-semibold text-slate-400 mb-1">Program</p>
+                  <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">
+                    {evaluation.program?.name}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Tutor: {evaluation.evaluator?.name}
                   </p>
                 </div>
               </div>

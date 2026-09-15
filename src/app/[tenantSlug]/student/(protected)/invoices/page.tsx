@@ -44,13 +44,21 @@ export default async function StudentInvoicesPage({
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
       
-      {/* Header */}
-      <div className="bg-white dark:bg-[#111827] pt-12 pb-6 px-6 shadow-sm border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">Tagihan Saya</h1>
-        <p className="text-sm text-slate-500">Kelola pembayaran SPP dan biaya lainnya.</p>
+      {/* Header Profile Style */}
+      <div className="bg-gradient-to-b from-blue-600 to-blue-800 pt-16 pb-24 px-6 text-center relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-xl -ml-8 -mb-8"></div>
+        
+        <div className="relative z-10 flex flex-col items-center">
+          <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border-4 border-white/30 shadow-xl mb-4">
+            <CreditCard size={40} className="text-white" />
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-1">Tagihan Saya</h1>
+          <p className="text-blue-100 bg-white/10 px-4 py-1.5 rounded-full text-sm font-medium">Kelola pembayaran SPP dan biaya lainnya</p>
+        </div>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="px-4 sm:px-8 -mt-16 relative z-20 space-y-4 max-w-lg mx-auto">
         {invoices.length === 0 ? (
           <div className="bg-white dark:bg-[#111827] rounded-2xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm mt-4">
             <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
