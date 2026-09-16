@@ -35,7 +35,7 @@ export default async function LandingPage() {
     <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900 selection:bg-blue-200 overflow-x-hidden">
       <LandingHeader />
 
-      <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 text-center">
+      <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 md:pt-20 md:pb-24 text-center">
         
         <div className="hidden lg:block absolute left-10 top-32 bg-white p-4 rounded-2xl shadow-xl border border-slate-100 animate-bounce" style={{animationDuration: '3s'}}>
           <div className="flex items-center gap-3">
@@ -113,7 +113,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <section id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+      <section id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Satu Platform,<br/>Semua Kebutuhan Operasional</h2>
           <p className="text-slate-600">Tingkatkan efisiensi bimbel Anda dengan fitur-fitur yang dirancang khusus untuk mengatasi masalah operasional sehari-hari.</p>
@@ -208,7 +208,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <section id="about" className="bg-slate-200/50 py-24">
+      <section id="about" className="bg-slate-200/50 py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center gap-16">
             <div className="flex-1">
@@ -236,7 +236,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <section id="pricing" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+      <section id="pricing" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Harga Transparan</h2>
           <p className="text-slate-600">Pilih paket yang sesuai dengan ukuran bimbingan belajar Anda. Terintegrasi langsung dengan database platform.</p>
@@ -365,7 +365,7 @@ export default async function LandingPage() {
         )}
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         <div className="relative bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl">
 
                               
@@ -445,7 +445,7 @@ export default async function LandingPage() {
           </div>
 
           <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-slate-700/50 text-sm text-slate-400">
-            <p>© 2024 BimbelSync. All rights reserved.</p>
+            <p>© 2026 BimbelSync. All rights reserved.</p>
             <div className="flex gap-4 mt-4 md:mt-0">
                <Globe className="w-5 h-5 hover:text-white cursor-pointer transition" />
                <Mail className="w-5 h-5 hover:text-white cursor-pointer transition" />
