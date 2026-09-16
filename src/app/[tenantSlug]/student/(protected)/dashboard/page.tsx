@@ -80,9 +80,7 @@ export default async function StudentDashboardPage({
     <div className="p-4 sm:p-8 md:pt-10">
       
       {/* Welcome Card */}
-      <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl p-6 sm:p-8 text-white shadow-lg shadow-blue-500/20 mb-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-xl -ml-8 -mb-8"></div>
+      <div className="bg-blue-700 rounded-3xl p-6 sm:p-8 text-white mb-8">
         
         <div className="relative z-10">
           <p className="text-blue-100 font-medium mb-1">Selamat datang kembali,</p>
@@ -90,13 +88,13 @@ export default async function StudentDashboardPage({
           
           <div className="flex flex-wrap items-center gap-2 mt-2">
             {student.enrollments.map((enrollment: any) => (
-              <div key={enrollment.id} className="bg-white/20 px-3 py-1.5 rounded-lg backdrop-blur-sm text-sm font-semibold flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-blue-300"></span>
+              <div key={enrollment.id} className="bg-blue-800/50 px-3 py-1.5 rounded-md text-sm font-semibold flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded bg-blue-300"></span>
                 {enrollment.program.name}
               </div>
             ))}
             {student.enrollments.length === 0 && (
-              <div className="bg-white/20 px-3 py-1.5 rounded-lg backdrop-blur-sm text-sm font-semibold">
+              <div className="bg-blue-800/50 px-3 py-1.5 rounded-md text-sm font-semibold">
                 Belum terdaftar di program apapun
               </div>
             )}

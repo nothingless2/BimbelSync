@@ -27,7 +27,7 @@ export function LandingHeader() {
           <a href={WA_URL} target="_blank" rel="noreferrer" className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition">
             Konsultasi
           </a>
-          <a href={WA_URL} target="_blank" rel="noreferrer" className="text-sm font-semibold bg-slate-900 text-white px-5 py-2.5 rounded-full hover:bg-slate-800 transition shadow-sm">
+          <a href={WA_URL} target="_blank" rel="noreferrer" className="text-sm font-semibold bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-700 transition shadow-sm">
             Hubungi Sales
           </a>
         </div>

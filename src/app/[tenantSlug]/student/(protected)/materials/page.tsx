@@ -54,17 +54,17 @@ export default async function StudentMaterialsPage({ params }: { params: Promise
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
-      {/* Header Profile Style */}
-      <div className="bg-gradient-to-b from-blue-600 to-blue-800 pt-16 pb-24 px-6 text-center relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-xl -ml-8 -mb-8"></div>
-        
-        <div className="relative z-10 flex flex-col items-center">
-          <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border-4 border-white/30 shadow-xl mb-4">
-            <BookOpen size={40} className="text-white" />
+      <div className="px-4 sm:px-8 pt-6 max-w-4xl mx-auto">
+        {/* Header Profile Style */}
+        <div className="bg-blue-700 rounded-3xl p-6 sm:p-8 text-white mb-8">
+          
+          <div className="relative z-10 flex flex-col items-center">
+            <div className="w-16 h-16 bg-blue-800/50 rounded-lg flex items-center justify-center mb-4">
+              <BookOpen size={40} className="text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-white mb-1">Materi Belajar</h1>
+            <p className="text-blue-100 bg-blue-800/50 px-4 py-1.5 rounded-md text-sm font-medium">Akses modul, latihan soal, dan video dari tutormu</p>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-1">Materi Belajar</h1>
-          <p className="text-blue-100 bg-white/10 px-4 py-1.5 rounded-full text-sm font-medium">Akses modul, latihan soal, dan video dari tutormu</p>
         </div>
       </div>
 

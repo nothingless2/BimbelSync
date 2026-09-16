@@ -75,7 +75,7 @@ export default async function LandingPage() {
         </p>
         
         <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
-          <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-slate-900 text-white font-semibold px-8 py-4 rounded-full hover:bg-slate-800 transition shadow-lg flex items-center justify-center gap-2">
+          <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl hover:bg-slate-800 transition shadow-lg flex items-center justify-center gap-2">
             Mulai Gratis <ArrowRight className="w-4 h-4" />
           </a>
         </div>
@@ -349,22 +349,20 @@ export default async function LandingPage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="relative bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl">
 
-          <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-blue-600/30 blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-blue-500/20 blur-3xl"></div>
-          
+                              
           <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between p-12 md:p-20 gap-16">
             <div className="flex-1 text-center lg:text-left">
               <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6 leading-tight tracking-tight">
-                Siap Transformasi <br/><span className="text-blue-400">Operasional Bimbel</span> Anda?
+                Tingkatkan <br/><span className="text-blue-400">Kapasitas Bimbel</span> Anda
               </h2>
               <p className="text-lg text-slate-300 mb-10 max-w-lg mx-auto lg:mx-0 leading-relaxed">
                 Tinggalkan cara manual. Bergabunglah dengan ratusan pemilik bimbel yang telah menghemat waktu dan meningkatkan omzet bersama BimbelSync.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-8 rounded-full shadow-lg hover:shadow-blue-500/30 transition-all flex items-center justify-center gap-2">
+                <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-blue-500/30 transition-all flex items-center justify-center gap-2">
                   Mulai Gratis Sekarang <ArrowRight className="w-5 h-5" />
                 </a>
-                <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-white/10 hover:bg-white/20 text-white font-semibold py-4 px-8 rounded-full backdrop-blur-sm border border-white/10 transition-all flex items-center justify-center">
+                <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-white/10 hover:bg-white/20 text-white font-semibold py-4 px-8 rounded-xl border border-white/10 transition-all flex items-center justify-center">
                   Jadwalkan Demo
                 </a>
               </div>
