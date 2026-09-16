@@ -1,5 +1,6 @@
 import React from 'react';
 import { CheckCircle2, Check, Calendar, QrCode, MessageSquare, CreditCard, ArrowRight, Globe, Mail, X } from 'lucide-react';
+import { FadeInView } from '@/components/fade-in-view';
 import { LandingHeader } from '@/components/landing-header';
 import prisma from '@/lib/prisma';
 import { Metadata } from 'next';
@@ -62,32 +63,42 @@ export default async function LandingPage() {
            </div>
         </div>
 
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100/50 border border-blue-200 text-blue-700 text-sm font-medium mb-8">
+        <FadeInView direction="up" delay={0.1}>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100/50 border border-blue-200 text-blue-700 text-sm font-medium mb-8">
           Tingkatkan efisiensi bimbel Anda
-        </div>
+          </div>
+        </FadeInView>
         
-        <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-6 max-w-4xl mx-auto">
+        <FadeInView direction="up" delay={0.2}>
+          <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-6 max-w-4xl mx-auto">
           Kelola Bimbel Tanpa Ribet<br className="hidden md:block"/>
         </h1>
+        </FadeInView>
         
-        <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed">
+        <FadeInView direction="up" delay={0.3}>
+          <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed">
           Otomasi jadwal, presensi QR, dan tagihan otomatis dalam satu platform bersih dan profesional. Tingkatkan efisiensi operasional dan fokus pada kualitas pengajaran.
-        </p>
+          </p>
+        </FadeInView>
         
-        <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
+        <FadeInView direction="up" delay={0.4}>
+          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
           <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl hover:bg-slate-800 transition shadow-lg flex items-center justify-center gap-2">
             Mulai Gratis <ArrowRight className="w-4 h-4" />
           </a>
-        </div>
+          </div>
+        </FadeInView>
 
-        <div className="relative max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-2xl border border-slate-200">
+        <FadeInView direction="up" delay={0.6}>
+          <div className="relative max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-2xl border border-slate-200">
            <img 
              src="/photo.avif" 
              alt="Suasana Kelas Bimbel" 
              className="w-full h-auto object-cover"
            />
            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/10 to-transparent"></div>
-        </div>
+          </div>
+        </FadeInView>
       </section>
 
       <section className="border-y border-slate-200 bg-white/50 py-10">
@@ -110,7 +121,8 @@ export default async function LandingPage() {
 
         <div className="flex flex-col gap-24">
           
-          <div className="flex flex-col md:flex-row gap-12 items-center">
+          <FadeInView direction="up" delay={0.2}>
+            <div className="flex flex-col md:flex-row gap-12 items-center">
             <div className="flex-1 w-full flex justify-center">
                <div className="relative">
                   <img src="/features/calendar-bg.png" alt="Mockup Penjadwalan" className="w-full max-w-md h-auto object-contain drop-shadow-2xl" />
@@ -126,10 +138,12 @@ export default async function LandingPage() {
                 <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500"/> Deteksi konflik otomatis</li>
                 <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500"/> Sinkronisasi kalender</li>
               </ul>
+              </div>
             </div>
-          </div>
+          </FadeInView>
 
-          <div className="flex flex-col md:flex-row-reverse gap-12 items-center">
+          <FadeInView direction="up" delay={0.2}>
+            <div className="flex flex-col md:flex-row-reverse gap-12 items-center">
             <div className="flex-1 w-full flex justify-center">
                <div className="relative">
                   <img src="/features/qr-bg.png" alt="Mockup Presensi QR" className="w-full max-w-sm h-auto object-contain drop-shadow-2xl" />
@@ -145,10 +159,12 @@ export default async function LandingPage() {
                 <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500"/> QR code berubah setiap 10 detik</li>
                 <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500"/> Anti-titip absen</li>
               </ul>
+              </div>
             </div>
-          </div>
+          </FadeInView>
 
-          <div className="flex flex-col md:flex-row gap-12 items-center">
+          <FadeInView direction="up" delay={0.2}>
+            <div className="flex flex-col md:flex-row gap-12 items-center">
             <div className="flex-1 w-full flex justify-center">
                <div className="relative">
                   <img src="/features/whatsapp-bg.png" alt="Mockup Tagihan WhatsApp" className="w-full max-w-sm h-auto object-contain drop-shadow-2xl" />
@@ -164,10 +180,12 @@ export default async function LandingPage() {
                 <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500"/> Pengingat otomatis (H-3, H-1)</li>
                 <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500"/> Template pesan kustom</li>
               </ul>
+              </div>
             </div>
-          </div>
+          </FadeInView>
 
-          <div className="flex flex-col md:flex-row-reverse gap-12 items-center">
+          <FadeInView direction="up" delay={0.2}>
+            <div className="flex flex-col md:flex-row-reverse gap-12 items-center">
             <div className="flex-1 w-full flex justify-center">
                <div className="relative">
                   <img src="/features/payment-bg.png" alt="Mockup Payment Gateway" className="w-full max-w-sm h-auto object-contain drop-shadow-2xl" />
@@ -183,8 +201,9 @@ export default async function LandingPage() {
                 <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500"/> Update status seketika</li>
                 <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500"/> Rekonsiliasi instan</li>
               </ul>
+              </div>
             </div>
-          </div>
+          </FadeInView>
 
         </div>
       </section>
