@@ -30,3 +30,5 @@ body {
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
   background-color: #334155;
 }
+html { scroll-behavior: smooth; }
+
