@@ -311,49 +311,49 @@ export default async function LandingPage() {
         {/* Dynamic Comparison Table */}
         {plans.length > 0 && (
           <div className="max-w-5xl mx-auto mt-20 overflow-x-auto">
-            <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 min-w-[700px] p-2">
+            <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 min-w-full md:min-w-[700px] p-2">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-slate-100">
-                    <th className="py-6 px-8 text-xs font-bold text-slate-400 uppercase tracking-widest w-1/4">Fitur</th>
+                    <th className="py-4 px-2 md:py-6 md:px-8 text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest w-1/4">Fitur</th>
                     {plans.map((plan, i) => (
-                      <th key={plan.id} className={`py-6 px-8 text-sm font-bold text-center w-1/4 ${i === 1 || plan.name.toLowerCase() === 'growth' ? "text-blue-600" : "text-slate-700"}`}>
+                      <th key={plan.id} className={`py-4 px-2 md:py-6 md:px-8 text-xs md:text-sm font-bold text-center w-1/4 ${i === 1 || plan.name.toLowerCase() === 'growth' ? "text-blue-600" : "text-slate-700"}`}>
                         {plan.name}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="text-slate-600 text-sm font-medium">
+                <tbody className="text-slate-600 text-xs md:text-sm font-medium">
                   <tr className="border-b border-slate-100">
-                    <td className="py-5 px-8">Kapasitas Siswa</td>
+                    <td className="py-3 px-2 md:py-5 md:px-8">Kapasitas Siswa</td>
                     {plans.map((p) => (
-                      <td key={p.id} className="py-5 px-8 text-center">{p.max_students === null ? '∞' : p.max_students}</td>
+                      <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">{p.max_students === null ? '∞' : p.max_students}</td>
                     ))}
                   </tr>
                   <tr className="border-b border-slate-100">
-                    <td className="py-5 px-8">Kapasitas Staff/Tutor</td>
+                    <td className="py-3 px-2 md:py-5 md:px-8">Kapasitas Staff/Tutor</td>
                     {plans.map((p) => (
-                      <td key={p.id} className="py-5 px-8 text-center">{p.max_staff === null ? '∞' : p.max_staff}</td>
+                      <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">{p.max_staff === null ? '∞' : p.max_staff}</td>
                     ))}
                   </tr>
                   <tr className="border-b border-slate-100">
-                    <td className="py-5 px-8">Kapasitas Ruangan</td>
+                    <td className="py-3 px-2 md:py-5 md:px-8">Kapasitas Ruangan</td>
                     {plans.map((p) => (
-                      <td key={p.id} className="py-5 px-8 text-center">{p.max_rooms === null ? '∞' : p.max_rooms}</td>
+                      <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">{p.max_rooms === null ? '∞' : p.max_rooms}</td>
                     ))}
                   </tr>
                   <tr className="border-b border-slate-100">
-                    <td className="py-5 px-8">Payment Gateway</td>
+                    <td className="py-3 px-2 md:py-5 md:px-8">Payment Gateway</td>
                     {plans.map((p) => (
-                      <td key={p.id} className="py-5 px-8 text-center">
+                      <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
                         {p.allows_payment_gateway ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-slate-300 mx-auto" />}
                       </td>
                     ))}
                   </tr>
                   <tr>
-                    <td className="py-5 px-8">Sistem Pembayaran Cicilan</td>
+                    <td className="py-3 px-2 md:py-5 md:px-8">Sistem Pembayaran Cicilan</td>
                     {plans.map((p) => (
-                      <td key={p.id} className="py-5 px-8 text-center">
+                      <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
                         {p.allows_installment ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-slate-300 mx-auto" />}
                       </td>
                     ))}
