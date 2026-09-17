@@ -86,8 +86,8 @@ export default async function LandingPage() {
           <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
             Mulai Gratis <ArrowRight className="w-4 h-4" />
           </a>
-          <a href="/demo" className="bg-white text-slate-700 font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-xl border border-slate-200 hover:bg-slate-50 transition shadow-sm flex items-center justify-center">
-            Jadwalkan Demo
+          <a href="#demo" className="bg-white text-slate-700 font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-xl border border-slate-200 hover:bg-slate-50 transition shadow-sm flex items-center justify-center">
+            Lihat Video Demo
           </a>
           </div>
         </FadeInView>
@@ -368,7 +368,7 @@ export default async function LandingPage() {
         )}
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+      <section id="demo" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         <div className="relative bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl">
 
                               
@@ -381,26 +381,24 @@ export default async function LandingPage() {
                 Tinggalkan cara manual. Bergabunglah dengan ratusan pemilik bimbel yang telah menghemat waktu dan meningkatkan omzet bersama BimbelSync.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-xl shadow-lg hover:shadow-blue-500/30 transition-all flex items-center justify-center gap-2">
-                  Mulai Gratis Sekarang <ArrowRight className="w-5 h-5" />
-                </a>
-                <a href="/demo" className="bg-white/10 hover:bg-white/20 text-white font-semibold py-3 px-6 sm:py-4 sm:px-8 rounded-xl border border-white/10 transition-all flex items-center justify-center">
-                  Jadwalkan Demo
+                <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-xl shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:shadow-[0_0_50px_rgba(37,99,235,0.6)] hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 w-max">
+                  Konsultasi Gratis via WhatsApp <ArrowRight className="w-5 h-5" />
                 </a>
               </div>
             </div>
             
             <div className="flex-1 w-full relative hidden lg:block">
-               <img src="/photo-2.avif" alt="Guru dan Siswa" className="w-full h-80 object-cover rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-slate-700/50 transform rotate-2 hover:rotate-0 transition duration-500" />
-               
-               <div className="absolute -bottom-8 -left-8 bg-white p-4 rounded-2xl shadow-xl flex items-center gap-4 animate-bounce" style={{ animationDuration: '4s' }}>
-                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                   <CheckCircle2 className="w-6 h-6 text-green-600" />
-                 </div>
-                 <div>
-                   <p className="text-sm font-bold text-slate-900">100% Siap Pakai</p>
-                   <p className="text-xs text-slate-500">Setup selesai dalam 5 menit</p>
-                 </div>
+               <div className="w-full bg-black rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden border border-slate-700 aspect-video relative">
+                 <iframe 
+                   width="100%" 
+                   height="100%" 
+                   src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0&rel=0" 
+                   title="BimbelSync Demo" 
+                   frameBorder="0" 
+                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                   allowFullScreen
+                   className="absolute inset-0"
+                 ></iframe>
                </div>
             </div>
           </div>
