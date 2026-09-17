@@ -37,69 +37,41 @@ export default async function LandingPage() {
 
       <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 md:pt-20 md:pb-24 text-center">
         
-        <div className="hidden lg:block absolute left-10 top-32 bg-white p-4 rounded-2xl shadow-xl border border-slate-100 animate-bounce" style={{animationDuration: '3s'}}>
-          <div className="flex items-center gap-3">
-            <div className="bg-green-100 p-2 rounded-full">
-              <CheckCircle2 className="w-5 h-5 text-green-600" />
-            </div>
-            <div className="text-left">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Jadwal Kelas</p>
-              <p className="text-xl font-bold text-slate-900">327 <span className="text-sm text-green-500 font-medium">+12%</span></p>
-              <p className="text-[10px] text-slate-400">Bulan ini</p>
-            </div>
-          </div>
-        </div>
 
-        <div className="hidden lg:block absolute right-10 top-40 bg-white p-4 rounded-2xl shadow-xl border border-slate-100 animate-bounce" style={{animationDuration: '4s', animationDelay: '1s'}}>
-           <div className="text-left mb-2">
-             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pendapatan Bulan Ini</p>
-           </div>
-           <div className="flex items-end gap-1 h-12">
-             <div className="w-4 bg-blue-200 rounded-t-sm h-6"></div>
-             <div className="w-4 bg-blue-300 rounded-t-sm h-8"></div>
-             <div className="w-4 bg-blue-400 rounded-t-sm h-5"></div>
-             <div className="w-4 bg-blue-600 rounded-t-sm h-10"></div>
-             <div className="w-4 bg-blue-500 rounded-t-sm h-12"></div>
-           </div>
-        </div>
 
-        <FadeInView direction="up" delay={0.1}>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100/50 border border-blue-200 text-blue-700 text-xs sm:text-sm font-medium mb-6 sm:mb-8">
-          Tingkatkan efisiensi bimbel Anda
-          </div>
-        </FadeInView>
+
         
         <FadeInView direction="up" delay={0.2}>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-6 max-w-4xl mx-auto">
-          Kelola Bimbel Tanpa Ribet<br className="hidden md:block"/>
+          Platform Manajemen Bimbingan Belajar.
         </h1>
         </FadeInView>
         
         <FadeInView direction="up" delay={0.3}>
           <p className="text-base md:text-lg lg:text-xl text-slate-600 max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed">
-          Otomasi jadwal, presensi QR, dan tagihan otomatis dalam satu platform bersih dan profesional. Tingkatkan efisiensi operasional dan fokus pada kualitas pengajaran.
+          Satu sistem untuk jadwal, presensi QR, dan tagihan. Fokus mengajar, biarkan sistem yang mengurus administrasi.
           </p>
         </FadeInView>
         
         <FadeInView direction="up" delay={0.4}>
           <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
-          <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
-            Mulai Gratis <ArrowRight className="w-4 h-4" />
+          <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-lg transition flex items-center justify-center gap-2">
+            Mulai Gratis
           </a>
-          <a href="#demo" className="bg-white text-slate-700 font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-xl border border-slate-200 hover:bg-slate-50 transition shadow-sm flex items-center justify-center">
+          <a href="#demo" className="bg-white text-slate-700 font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-lg border border-slate-200 hover:bg-slate-50 transition flex items-center justify-center">
             Lihat Video Demo
           </a>
           </div>
         </FadeInView>
 
         <FadeInView direction="up" delay={0.6}>
-          <div className="relative max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-2xl border border-slate-200">
+          <div className="relative max-w-5xl mx-auto rounded-xl overflow-hidden border border-slate-200">
            <img 
              src="/photo.avif" 
              alt="Suasana Kelas Bimbel" 
              className="w-full h-auto object-cover"
            />
-           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/10 to-transparent"></div>
+           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/5 to-transparent"></div>
           </div>
         </FadeInView>
       </section>
@@ -128,7 +100,7 @@ export default async function LandingPage() {
             <div className="flex flex-col md:flex-row gap-12 items-center">
             <div className="flex-1 w-full flex justify-center">
                <div className="relative">
-                  <img src="/features/calendar-bg.png" alt="Mockup Penjadwalan" className="w-full max-w-md h-auto object-contain drop-shadow-2xl" />
+                  <img src="/features/calendar-bg.png" alt="Mockup Penjadwalan" className="w-full max-w-md h-auto object-contain drop-shadow-md opacity-90" />
                </div>
             </div>
             <div className="flex-1">
@@ -138,8 +110,8 @@ export default async function LandingPage() {
               <h3 className="text-2xl font-bold text-slate-900 mb-4">Penjadwalan Anti-Bentrok</h3>
               <p className="text-slate-600 mb-6 text-lg leading-relaxed">Sistem cerdas kami mendeteksi potensi bentrok jadwal tutor dan ruangan secara real-time. Buat jadwal mingguan hanya dalam beberapa klik.</p>
               <ul className="space-y-3 text-slate-700 font-medium">
-                <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500"/> Deteksi konflik otomatis</li>
-                <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500"/> Sinkronisasi kalender</li>
+                <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Deteksi konflik otomatis</li>
+                <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Sinkronisasi kalender</li>
               </ul>
               </div>
             </div>
@@ -149,7 +121,7 @@ export default async function LandingPage() {
             <div className="flex flex-col md:flex-row-reverse gap-12 items-center">
             <div className="flex-1 w-full flex justify-center">
                <div className="relative">
-                  <img src="/features/qr-bg.png" alt="Mockup Presensi QR" className="w-full max-w-sm h-auto object-contain drop-shadow-2xl" />
+                  <img src="/features/qr-bg.png" alt="Mockup Presensi QR" className="w-full max-w-sm h-auto object-contain drop-shadow-md opacity-90" />
                </div>
             </div>
             <div className="flex-1">
@@ -159,8 +131,8 @@ export default async function LandingPage() {
               <h3 className="text-2xl font-bold text-slate-900 mb-4">Presensi QR Dinamis</h3>
               <p className="text-slate-600 mb-6 text-lg leading-relaxed">Tinggalkan absen kertas. Siswa cukup scan QR code dinamis di layar kelas. Data presensi langsung tercatat dan notifikasi terkirim ke orang tua.</p>
               <ul className="space-y-3 text-slate-700 font-medium">
-                <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500"/> QR code berubah setiap 10 detik</li>
-                <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500"/> Anti-titip absen</li>
+                <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> QR code berubah setiap 10 detik</li>
+                <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Anti-titip absen</li>
               </ul>
               </div>
             </div>
@@ -170,7 +142,7 @@ export default async function LandingPage() {
             <div className="flex flex-col md:flex-row gap-12 items-center">
             <div className="flex-1 w-full flex justify-center">
                <div className="relative">
-                  <img src="/features/whatsapp-bg.png" alt="Mockup Tagihan WhatsApp" className="w-full max-w-sm h-auto object-contain drop-shadow-2xl" />
+                  <img src="/features/whatsapp-bg.png" alt="Mockup Tagihan WhatsApp" className="w-full max-w-sm h-auto object-contain drop-shadow-md opacity-90" />
                </div>
             </div>
             <div className="flex-1">
@@ -180,8 +152,8 @@ export default async function LandingPage() {
               <h3 className="text-2xl font-bold text-slate-900 mb-4">Tagihan via WhatsApp</h3>
               <p className="text-slate-600 mb-6 text-lg leading-relaxed">Kirim invoice, pengingat jatuh tempo, dan bukti pembayaran langsung ke WhatsApp orang tua secara otomatis. Tingkatkan persentase pembayaran tepat waktu.</p>
               <ul className="space-y-3 text-slate-700 font-medium">
-                <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500"/> Pengingat otomatis (H-3, H-1)</li>
-                <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500"/> Template pesan kustom</li>
+                <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Pengingat otomatis (H-3, H-1)</li>
+                <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Template pesan kustom</li>
               </ul>
               </div>
             </div>
@@ -191,7 +163,7 @@ export default async function LandingPage() {
             <div className="flex flex-col md:flex-row-reverse gap-12 items-center">
             <div className="flex-1 w-full flex justify-center">
                <div className="relative">
-                  <img src="/features/payment-bg.png" alt="Mockup Payment Gateway" className="w-full max-w-sm h-auto object-contain drop-shadow-2xl" />
+                  <img src="/features/payment-bg.png" alt="Mockup Payment Gateway" className="w-full max-w-sm h-auto object-contain drop-shadow-md opacity-90" />
                </div>
             </div>
             <div className="flex-1">
@@ -201,8 +173,8 @@ export default async function LandingPage() {
               <h3 className="text-2xl font-bold text-slate-900 mb-4">Payment Gateway Terintegrasi</h3>
               <p className="text-slate-600 mb-6 text-lg leading-relaxed">Terima pembayaran dari berbagai channel: VA, e-Wallet, Kartu Kredit. Status pembayaran otomatis ter-update tanpa perlu cek mutasi bank manual.</p>
               <ul className="space-y-3 text-slate-700 font-medium">
-                <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500"/> Update status seketika</li>
-                <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500"/> Rekonsiliasi instan</li>
+                <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Update status seketika</li>
+                <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Rekonsiliasi instan</li>
               </ul>
               </div>
             </div>
@@ -225,7 +197,7 @@ export default async function LandingPage() {
               </p>
             </div>
             <div className="flex-1 relative">
-              <div className="aspect-video w-full rounded-2xl overflow-hidden shadow-2xl relative">
+              <div className="aspect-video w-full rounded-2xl overflow-hidden border border-slate-200 shadow-sm relative">
                
                 <img 
                   src="/photo-2.avif" 
@@ -233,7 +205,6 @@ export default async function LandingPage() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-blue-600 rounded-full blur-3xl opacity-30 z-[-1]"></div>
             </div>
           </div>
         </div>
