@@ -83,8 +83,11 @@ export default async function LandingPage() {
         
         <FadeInView direction="up" delay={0.4}>
           <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
-          <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-xl hover:bg-slate-800 transition shadow-lg flex items-center justify-center gap-2">
+          <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
             Mulai Gratis <ArrowRight className="w-4 h-4" />
+          </a>
+          <a href="/demo" className="bg-white text-slate-700 font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-xl border border-slate-200 hover:bg-slate-50 transition shadow-sm flex items-center justify-center">
+            Jadwalkan Demo
           </a>
           </div>
         </FadeInView>
@@ -381,7 +384,7 @@ export default async function LandingPage() {
                 <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-xl shadow-lg hover:shadow-blue-500/30 transition-all flex items-center justify-center gap-2">
                   Mulai Gratis Sekarang <ArrowRight className="w-5 h-5" />
                 </a>
-                <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-white/10 hover:bg-white/20 text-white font-semibold py-3 px-6 sm:py-4 sm:px-8 rounded-xl border border-white/10 transition-all flex items-center justify-center">
+                <a href="/demo" className="bg-white/10 hover:bg-white/20 text-white font-semibold py-3 px-6 sm:py-4 sm:px-8 rounded-xl border border-white/10 transition-all flex items-center justify-center">
                   Jadwalkan Demo
                 </a>
               </div>
@@ -430,7 +433,6 @@ export default async function LandingPage() {
               <h4 className="text-white font-bold text-sm tracking-widest mb-6 uppercase">Company</h4>
               <ul className="space-y-4 text-sm text-slate-400">
                 <li><a href="#about" className="hover:text-white transition">About</a></li>
-                <li><a href="#" className="hover:text-white transition">Careers</a></li>
                 <li><a href="#" className="hover:text-white transition">Contact Us</a></li>
               </ul>
             </div>
@@ -438,8 +440,8 @@ export default async function LandingPage() {
             <div>
               <h4 className="text-white font-bold text-sm tracking-widest mb-6 uppercase">Legal</h4>
               <ul className="space-y-4 text-sm text-slate-400">
-                <li><a href="#" className="hover:text-white transition">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition">Terms of Service</a></li>
+                <li><a href="/privacy" className="hover:text-white transition">Privacy Policy</a></li>
+                <li><a href="/terms" className="hover:text-white transition">Terms of Service</a></li>
               </ul>
             </div>
           </div>
