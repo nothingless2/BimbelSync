@@ -18,9 +18,9 @@ export function LandingHeader() {
         </div>
         
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-          <a href="#features" className="hover:text-blue-600 transition">Fitur</a>
-          <a href="#pricing" className="hover:text-blue-600 transition">Harga</a>
-          <a href="#about" className="hover:text-blue-600 transition">Tentang</a>
+          <a href="/#features" className="hover:text-blue-600 transition">Fitur</a>
+          <a href="/#pricing" className="hover:text-blue-600 transition">Harga</a>
+          <a href="/#about" className="hover:text-blue-600 transition">Tentang</a>
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
@@ -40,9 +40,9 @@ export function LandingHeader() {
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-4 space-y-1">
-          <a href="#features" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50">Fitur</a>
-          <a href="#pricing" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50">Harga</a>
-          <a href="#about" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50">Tentang</a>
+          <a href="/#features" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50">Fitur</a>
+          <a href="/#pricing" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50">Harga</a>
+          <a href="/#about" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50">Tentang</a>
         </div>
       )}
     </header>
