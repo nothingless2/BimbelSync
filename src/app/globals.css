@@ -32,3 +32,10 @@ body {
 }
 html { scroll-behavior: smooth; }
 
+/* Menambahkan Bintang Merah Otomatis pada Kolom Required */
+div:has(> input[required]) > label::after,
+div:has(> select[required]) > label::after,
+div:has(> textarea[required]) > label::after {
+  content: " *";
+  color: #ef4444; /* tailwind text-red-500 */
+}

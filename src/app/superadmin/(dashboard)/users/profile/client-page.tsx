@@ -216,6 +216,7 @@ export default function ProfileClientPage({ user }: { user: any }) {
                     className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-slate-900 dark:text-white text-sm"
                   />
                 </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Gunakan huruf besar, kecil, angka, & simbol spesial.</p>
               </div>
 
               <div className="space-y-1.5 mb-2">

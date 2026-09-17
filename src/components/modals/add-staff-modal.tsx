@@ -98,6 +98,7 @@ export function AddStaffModal({ tenantSlug }: { tenantSlug: string }) {
                   placeholder="Masukkan password awal untuk staf ini"
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                 />
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Minimal 8 karakter, mencakup huruf besar, kecil, angka, & simbol spesial.</p>
               </div>
 
               <div className="pt-4 flex gap-3 justify-end border-t border-slate-100 dark:border-slate-800">

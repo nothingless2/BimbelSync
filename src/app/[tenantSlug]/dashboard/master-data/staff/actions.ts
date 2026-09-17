@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { decrypt } from "@/lib/auth";
+import { decrypt, validatePassword } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcrypt";
@@ -22,6 +22,11 @@ export async function createStaffAction(formData: FormData) {
 
   if (!email || !password || !role) {
     return { error: "Semua field (Email, Password, Role) wajib diisi." };
+  }
+
+  const pwValidation = validatePassword(password);
+  if (!pwValidation.isValid) {
+    return { error: pwValidation.errorMsg };
   }
 
   // Feature Gating: Check max_staff from Plan
@@ -109,6 +114,10 @@ export async function updateStaffAction(staffId: string, formData: FormData) {
 
     const updateData: any = { role };
     if (password) {
+      const pwValidation = validatePassword(password);
+      if (!pwValidation.isValid) {
+        return { error: pwValidation.errorMsg };
+      }
       updateData.password_hash = await bcrypt.hash(password, 10);
     }
 

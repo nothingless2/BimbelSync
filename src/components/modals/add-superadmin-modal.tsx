@@ -79,10 +79,11 @@ export function AddSuperadminModal({ isOpen, onClose }: AddSuperadminModalProps)
                   type="password" 
                   name="password"
                   required
-                  placeholder="Minimal 6 karakter"
+                  placeholder="Minimal 8 karakter"
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-900 dark:text-white text-sm"
                 />
               </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Gunakan huruf besar, kecil, angka & simbol khusus.</p>
             </div>
 
             <div className="pt-4 flex gap-3">

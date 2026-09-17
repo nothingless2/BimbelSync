@@ -34,3 +34,23 @@ export async function decrypt(token: string): Promise<SessionPayload | null> {
     return null; // Jika token tidak valid / kadaluarsa
   }
 }
+
+// Fungsi untuk validasi ketentuan password yang ketat
+export function validatePassword(password: string): { isValid: boolean; errorMsg?: string } {
+  if (password.length < 8) {
+    return { isValid: false, errorMsg: "Password minimal 8 karakter." };
+  }
+  if (!/[A-Z]/.test(password)) {
+    return { isValid: false, errorMsg: "Password harus mengandung minimal 1 huruf besar." };
+  }
+  if (!/[a-z]/.test(password)) {
+    return { isValid: false, errorMsg: "Password harus mengandung minimal 1 huruf kecil." };
+  }
+  if (!/[0-9]/.test(password)) {
+    return { isValid: false, errorMsg: "Password harus mengandung minimal 1 angka." };
+  }
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    return { isValid: false, errorMsg: "Password harus mengandung minimal 1 karakter spesial." };
+  }
+  return { isValid: true };
+}

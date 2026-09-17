@@ -78,6 +78,7 @@ export function EditSuperadminModal({ isOpen, onClose, user }: EditSuperadminMod
                 minLength={6}
                 className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-900 dark:text-white text-sm"
               />
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Minimal 8 karakter, mencakup huruf besar, kecil, angka, & simbol spesial.</p>
             </div>
 
             <div className="space-y-1.5 mb-2">

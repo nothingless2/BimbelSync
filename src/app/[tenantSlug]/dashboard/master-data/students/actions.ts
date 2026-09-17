@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { decrypt } from "@/lib/auth";
+import { decrypt, validatePassword } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcrypt";
@@ -24,6 +24,11 @@ export async function createStudentAction(formData: FormData) {
 
   if (!fullName || !username || !password || !programId) {
     return { error: "Semua field wajib (kecuali WhatsApp) harus diisi, dan siswa harus dimasukkan ke dalam sebuah program." };
+  }
+
+  const pwValidation = validatePassword(password);
+  if (!pwValidation.isValid) {
+    return { error: pwValidation.errorMsg };
   }
 
   // Feature Gating: Check max_students from Plan
@@ -157,6 +162,10 @@ export async function updateStudentAction(studentId: string, formData: FormData)
     };
 
     if (password) {
+      const pwValidation = validatePassword(password);
+      if (!pwValidation.isValid) {
+        return { error: pwValidation.errorMsg };
+      }
       updateData.password_hash = await bcrypt.hash(password, 10);
       updateData.must_change_password = true;
     }

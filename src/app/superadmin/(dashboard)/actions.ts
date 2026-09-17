@@ -1,6 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { validatePassword } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcrypt";
 
@@ -311,7 +312,9 @@ export async function createSuperadminAction(formData: FormData) {
   const password = formData.get("password") as string;
 
   if (!email || !password) return { error: "Email dan password wajib diisi." };
-  if (password.length < 6) return { error: "Password minimal 6 karakter." };
+
+  const pwValidation = validatePassword(password);
+  if (!pwValidation.isValid) return { error: pwValidation.errorMsg };
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -331,7 +334,9 @@ export async function updateSuperadminAction(formData: FormData) {
   const password = formData.get("password") as string;
 
   if (!id || !password) return { error: "Password wajib diisi." };
-  if (password.length < 6) return { error: "Password minimal 6 karakter." };
+
+  const pwValidation = validatePassword(password);
+  if (!pwValidation.isValid) return { error: pwValidation.errorMsg };
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);

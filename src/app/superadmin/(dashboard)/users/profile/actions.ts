@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { cookies } from "next/headers";
-import { decrypt, encrypt } from "@/lib/auth";
+import { decrypt, encrypt, validatePassword } from "@/lib/auth";
 import bcrypt from "bcrypt";
 import { revalidatePath } from "next/cache";
 
@@ -67,10 +67,8 @@ export async function changePasswordAction(formData: FormData) {
       return { error: "Konfirmasi password tidak cocok" };
     }
 
-    // Password strength check (min 8 chars, at least one letter and one number)
-    if (newPassword.length < 8 || !/[a-zA-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
-      return { error: "Password minimal 8 karakter, harus mengandung huruf dan angka" };
-    }
+    const pwValidation = validatePassword(newPassword);
+    if (!pwValidation.isValid) return { error: pwValidation.errorMsg };
 
     const user = await prisma.superadmin.findUnique({ where: { id: session.id } });
     if (!user) return { error: "User tidak ditemukan" };

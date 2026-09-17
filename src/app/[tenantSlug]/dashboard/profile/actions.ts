@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { decrypt, encrypt } from "@/lib/auth";
+import { decrypt, encrypt, validatePassword } from "@/lib/auth";
 import { cookies } from "next/headers";
 import bcrypt from "bcrypt";
 import { revalidatePath } from "next/cache";
@@ -51,9 +51,8 @@ export async function changePasswordAction(formData: FormData) {
     return { error: "Konfirmasi password baru tidak cocok." };
   }
   
-  if (password.length < 8) {
-    return { error: "Password minimal 8 karakter." };
-  }
+  const pwValidation = validatePassword(password);
+  if (!pwValidation.isValid) return { error: pwValidation.errorMsg };
 
   try {
     const staff = await prisma.staff.findUnique({ where: { id: session.id } });
