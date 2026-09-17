@@ -348,8 +348,8 @@ export default async function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 items-center">
             
             {/* Left side: Image */}
-            <div className="relative w-full h-full flex justify-center items-end min-h-[300px] md:min-h-[400px] bg-slate-900" style={{ mixBlendMode: 'lighten' }}>
-               <img src="/cs-agent.png" alt="Konsultan Kami" className="absolute bottom-0 w-[90%] max-w-[320px] h-auto object-contain object-bottom pointer-events-none" />
+            <div className="relative w-full h-full flex justify-center items-end min-h-[300px] md:min-h-[400px] bg-slate-900">
+               <img src="/cs-agent-transparent.png" alt="Konsultan Kami" className="absolute bottom-0 w-[100%] max-w-[450px] h-auto object-contain object-bottom pointer-events-none" />
             </div>
 
             {/* Right side: Text and CTA */}
