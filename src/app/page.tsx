@@ -344,16 +344,23 @@ export default async function LandingPage() {
       </section>
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-        <div className="bg-slate-900 rounded-3xl overflow-hidden p-10 sm:p-16 text-center max-w-5xl mx-auto shadow-sm">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight tracking-tight">
-            Tingkatkan Kapasitas Bimbel Anda
-          </h2>
-          <p className="text-lg text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed">
-            Tinggalkan cara manual. Bergabunglah dengan ratusan pemilik bimbel yang telah menghemat waktu dan meningkatkan omzet bersama BimbelSync.
-          </p>
-          <a href={WA_URL} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg transition-colors">
-            Konsultasi Gratis via WhatsApp
-          </a>
+        <div className="bg-slate-900 rounded-3xl overflow-hidden p-10 sm:p-16 text-center max-w-5xl mx-auto shadow-sm relative">
+          <div className="relative z-10">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight tracking-tight">
+              Tingkatkan Kapasitas Bimbel Anda
+            </h2>
+            <p className="text-lg text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed">
+              Tinggalkan cara manual. Bergabunglah dengan ratusan pemilik bimbel yang telah menghemat waktu dan meningkatkan omzet bersama BimbelSync.
+            </p>
+            <div className="flex justify-center relative w-fit mx-auto">
+              <div className="absolute right-full top-1/2 -translate-y-1/2 mr-4 hidden md:block w-32 pointer-events-none" style={{ mixBlendMode: 'lighten' }}>
+                 <img src="/cs-agent.png" alt="Konsultan Kami" className="w-full h-auto object-contain rounded-l-3xl" />
+              </div>
+              <a href={WA_URL} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg transition-colors relative z-20">
+                Konsultasi Gratis via WhatsApp
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
