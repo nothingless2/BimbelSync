@@ -80,14 +80,36 @@ export default async function LandingPage() {
         </FadeInView>
       </section>
 
-      <section className="border-y border-slate-200 bg-white/50 py-10">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Dipercaya oleh ratusan bimbel di Indonesia</p>
-          <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-8 opacity-60 grayscale">
-             <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 bg-slate-800 rounded-md"></div> EduCerdas</div>
-             <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 rounded-full border-4 border-slate-800"></div> SmartLearn</div>
-             <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 bg-slate-800 rotate-45"></div> PintarBangsa</div>
-             <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 border-b-4 border-slate-800 rounded-b-full"></div> JuaraAcademy</div>
+      <section className="border-y border-slate-200 bg-white/50 py-10 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 text-center mb-6">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Dipercaya oleh ratusan bimbel di Indonesia</p>
+        </div>
+        
+        <div className="relative w-full overflow-hidden flex whitespace-nowrap">
+          <style>{`
+            @keyframes scroll {
+              0% { transform: translateX(0); }
+              100% { transform: translateX(-50%); }
+            }
+            .animate-marquee {
+              display: flex;
+              width: max-content;
+              animation: scroll 30s linear infinite;
+            }
+          `}</style>
+          
+          <div className="animate-marquee flex items-center gap-x-16 opacity-60 grayscale px-8">
+            <div className="flex items-center gap-2 font-bold text-xl shrink-0"><div className="w-6 h-6 bg-slate-800 rounded-md"></div> EduCerdas</div>
+            <div className="flex items-center gap-2 font-bold text-xl shrink-0"><div className="w-6 h-6 rounded-full border-4 border-slate-800"></div> SmartLearn</div>
+            <div className="flex items-center gap-2 font-bold text-xl shrink-0"><div className="w-6 h-6 bg-slate-800 rotate-45"></div> PintarBangsa</div>
+            <div className="flex items-center gap-2 font-bold text-xl shrink-0"><div className="w-6 h-6 border-b-4 border-slate-800 rounded-b-full"></div> JuaraAcademy</div>
+            <div className="flex items-center gap-2 font-bold text-xl shrink-0"><div className="w-6 h-6 bg-slate-800 rounded-md"></div> FokusIlmu</div>
+            
+            <div className="flex items-center gap-2 font-bold text-xl shrink-0"><div className="w-6 h-6 bg-slate-800 rounded-md"></div> EduCerdas</div>
+            <div className="flex items-center gap-2 font-bold text-xl shrink-0"><div className="w-6 h-6 rounded-full border-4 border-slate-800"></div> SmartLearn</div>
+            <div className="flex items-center gap-2 font-bold text-xl shrink-0"><div className="w-6 h-6 bg-slate-800 rotate-45"></div> PintarBangsa</div>
+            <div className="flex items-center gap-2 font-bold text-xl shrink-0"><div className="w-6 h-6 border-b-4 border-slate-800 rounded-b-full"></div> JuaraAcademy</div>
+            <div className="flex items-center gap-2 font-bold text-xl shrink-0"><div className="w-6 h-6 bg-slate-800 rounded-md"></div> FokusIlmu</div>
           </div>
         </div>
       </section>
@@ -344,28 +366,28 @@ export default async function LandingPage() {
       </section>
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-        <div className="bg-slate-900 rounded-3xl overflow-hidden shadow-sm relative">
-          <div className="grid grid-cols-1 md:grid-cols-2 items-center">
-            
-            {/* Left side: Image */}
-            <div className="relative w-full h-full flex justify-center items-end min-h-[300px] md:min-h-[400px] bg-slate-900">
-               <img src="/cs-agent-transparent.png" alt="Konsultan Kami" className="absolute bottom-0 w-[100%] max-w-[450px] h-auto object-contain object-bottom pointer-events-none" />
-            </div>
-
-            {/* Right side: Text and CTA */}
-            <div className="p-10 sm:p-12 md:p-16 md:pl-0 text-center md:text-left relative z-10">
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight tracking-tight">
-                Tingkatkan Kapasitas Bimbel Anda
-              </h2>
-              <p className="text-lg text-slate-300 mb-10 max-w-lg leading-relaxed mx-auto md:mx-0">
-                Tinggalkan cara manual. Bergabunglah dengan ratusan pemilik bimbel yang telah menghemat waktu dan meningkatkan omzet bersama BimbelSync.
-              </p>
-              <a href={WA_URL} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg transition-colors">
-                Konsultasi Gratis via WhatsApp
-              </a>
-            </div>
-            
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          
+          {/* Left side: Image */}
+          <div className="w-full flex justify-center lg:justify-end">
+             <div className="rounded-3xl overflow-hidden shadow-2xl border border-slate-200 max-w-[450px] w-full">
+               <img src="/cs-agent.png" alt="Konsultan Kami" className="w-full h-auto object-cover" />
+             </div>
           </div>
+
+          {/* Right side: Text and CTA */}
+          <div className="text-center lg:text-left">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-6 leading-tight tracking-tight">
+              Tingkatkan Kapasitas Bimbel Anda
+            </h2>
+            <p className="text-lg text-slate-600 mb-10 max-w-lg leading-relaxed mx-auto lg:mx-0">
+              Tinggalkan cara manual. Bergabunglah dengan ratusan pemilik bimbel yang telah menghemat waktu dan meningkatkan omzet bersama BimbelSync.
+            </p>
+            <a href={WA_URL} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl transition-colors shadow-sm">
+              Konsultasi Gratis via WhatsApp
+            </a>
+          </div>
+          
         </div>
       </section>
 
