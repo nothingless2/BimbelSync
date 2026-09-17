@@ -58,20 +58,24 @@ export default async function LandingPage() {
           <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-lg transition flex items-center justify-center gap-2">
             Mulai Gratis
           </a>
-          <a href="#demo" className="bg-white text-slate-700 font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-lg border border-slate-200 hover:bg-slate-50 transition flex items-center justify-center">
-            Lihat Video Demo
+          <a href="#features" className="bg-white text-slate-700 font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-lg border border-slate-200 hover:bg-slate-50 transition flex items-center justify-center">
+            Pelajari Fitur
           </a>
           </div>
         </FadeInView>
 
         <FadeInView direction="up" delay={0.6}>
-          <div className="relative max-w-5xl mx-auto rounded-xl overflow-hidden border border-slate-200">
-           <img 
-             src="/photo.avif" 
-             alt="Suasana Kelas Bimbel" 
-             className="w-full h-auto object-cover"
-           />
-           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/5 to-transparent"></div>
+          <div className="relative max-w-5xl mx-auto rounded-xl overflow-hidden border border-slate-200 shadow-sm aspect-video bg-black">
+           <iframe 
+             width="100%" 
+             height="100%" 
+             src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0&rel=0" 
+             title="BimbelSync Demo" 
+             frameBorder="0" 
+             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+             allowFullScreen
+             className="absolute inset-0"
+           ></iframe>
           </div>
         </FadeInView>
       </section>
@@ -339,40 +343,17 @@ export default async function LandingPage() {
         )}
       </section>
 
-      <section id="demo" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-        <div className="relative bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl">
-
-                              
-          <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between p-8 sm:p-12 md:p-20 gap-10 md:gap-16">
-            <div className="flex-1 text-center lg:text-left">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-6 leading-tight tracking-tight">
-                Tingkatkan <br/><span className="text-blue-400">Kapasitas Bimbel</span> Anda
-              </h2>
-              <p className="text-base md:text-lg text-slate-300 mb-8 sm:mb-10 max-w-lg mx-auto lg:mx-0 leading-relaxed">
-                Tinggalkan cara manual. Bergabunglah dengan ratusan pemilik bimbel yang telah menghemat waktu dan meningkatkan omzet bersama BimbelSync.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-xl shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:shadow-[0_0_50px_rgba(37,99,235,0.6)] hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 w-max">
-                  Konsultasi Gratis via WhatsApp <ArrowRight className="w-5 h-5" />
-                </a>
-              </div>
-            </div>
-            
-            <div className="flex-1 w-full relative hidden lg:block">
-               <div className="w-full bg-black rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden border border-slate-700 aspect-video relative">
-                 <iframe 
-                   width="100%" 
-                   height="100%" 
-                   src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0&rel=0" 
-                   title="BimbelSync Demo" 
-                   frameBorder="0" 
-                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                   allowFullScreen
-                   className="absolute inset-0"
-                 ></iframe>
-               </div>
-            </div>
-          </div>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <div className="bg-slate-900 rounded-3xl overflow-hidden p-10 sm:p-16 text-center max-w-5xl mx-auto shadow-sm">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight tracking-tight">
+            Tingkatkan Kapasitas Bimbel Anda
+          </h2>
+          <p className="text-lg text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed">
+            Tinggalkan cara manual. Bergabunglah dengan ratusan pemilik bimbel yang telah menghemat waktu dan meningkatkan omzet bersama BimbelSync.
+          </p>
+          <a href={WA_URL} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg transition-colors">
+            Konsultasi Gratis via WhatsApp
+          </a>
         </div>
       </section>
 
