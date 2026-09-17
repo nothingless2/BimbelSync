@@ -85,7 +85,10 @@ export default async function LandingPage() {
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Dipercaya oleh ratusan bimbel di Indonesia</p>
         </div>
         
-        <div className="relative w-full overflow-hidden flex whitespace-nowrap">
+        <div 
+          className="relative w-full max-w-5xl mx-auto overflow-hidden flex whitespace-nowrap"
+          style={{ maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)' }}
+        >
           <style>{`
             @keyframes scroll {
               0% { transform: translateX(0); }
@@ -98,18 +101,23 @@ export default async function LandingPage() {
             }
           `}</style>
           
-          <div className="animate-marquee flex items-center gap-x-16 opacity-60 grayscale px-8">
-            <div className="flex items-center gap-2 font-bold text-xl shrink-0"><div className="w-6 h-6 bg-slate-800 rounded-md"></div> EduCerdas</div>
-            <div className="flex items-center gap-2 font-bold text-xl shrink-0"><div className="w-6 h-6 rounded-full border-4 border-slate-800"></div> SmartLearn</div>
-            <div className="flex items-center gap-2 font-bold text-xl shrink-0"><div className="w-6 h-6 bg-slate-800 rotate-45"></div> PintarBangsa</div>
-            <div className="flex items-center gap-2 font-bold text-xl shrink-0"><div className="w-6 h-6 border-b-4 border-slate-800 rounded-b-full"></div> JuaraAcademy</div>
-            <div className="flex items-center gap-2 font-bold text-xl shrink-0"><div className="w-6 h-6 bg-slate-800 rounded-md"></div> FokusIlmu</div>
-            
-            <div className="flex items-center gap-2 font-bold text-xl shrink-0"><div className="w-6 h-6 bg-slate-800 rounded-md"></div> EduCerdas</div>
-            <div className="flex items-center gap-2 font-bold text-xl shrink-0"><div className="w-6 h-6 rounded-full border-4 border-slate-800"></div> SmartLearn</div>
-            <div className="flex items-center gap-2 font-bold text-xl shrink-0"><div className="w-6 h-6 bg-slate-800 rotate-45"></div> PintarBangsa</div>
-            <div className="flex items-center gap-2 font-bold text-xl shrink-0"><div className="w-6 h-6 border-b-4 border-slate-800 rounded-b-full"></div> JuaraAcademy</div>
-            <div className="flex items-center gap-2 font-bold text-xl shrink-0"><div className="w-6 h-6 bg-slate-800 rounded-md"></div> FokusIlmu</div>
+          <div className="animate-marquee flex items-center opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500">
+            {/* Set 1 */}
+            <div className="flex items-center gap-x-16 pr-16 shrink-0">
+              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 bg-slate-800 rounded-md"></div> EduCerdas</div>
+              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 rounded-full border-4 border-slate-800"></div> SmartLearn</div>
+              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 bg-slate-800 rotate-45"></div> PintarBangsa</div>
+              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 border-b-4 border-slate-800 rounded-b-full"></div> JuaraAcademy</div>
+              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 bg-slate-800 rounded-md"></div> FokusIlmu</div>
+            </div>
+            {/* Set 2 (Duplicate) */}
+            <div className="flex items-center gap-x-16 pr-16 shrink-0">
+              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 bg-slate-800 rounded-md"></div> EduCerdas</div>
+              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 rounded-full border-4 border-slate-800"></div> SmartLearn</div>
+              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 bg-slate-800 rotate-45"></div> PintarBangsa</div>
+              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 border-b-4 border-slate-800 rounded-b-full"></div> JuaraAcademy</div>
+              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 bg-slate-800 rounded-md"></div> FokusIlmu</div>
+            </div>
           </div>
         </div>
       </section>
