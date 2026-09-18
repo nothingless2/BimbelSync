@@ -8,8 +8,8 @@ export const metadata = {
   title: "Learning Materials | BimbelSync",
 };
 
-export default async function MaterialsPage({ params }: { params: { tenantSlug: string } }) {
-  const { tenantSlug } = params;
+export default async function MaterialsPage({ params }: { params: Promise<{ tenantSlug: string }> }) {
+  const { tenantSlug } = await params;
 
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("bimbelsync_session")?.value;

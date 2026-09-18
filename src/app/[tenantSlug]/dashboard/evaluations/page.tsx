@@ -8,7 +8,7 @@ export const metadata = {
   title: "Evaluations | BimbelSync",
 };
 
-export default async function EvaluationsPage({ params }: { params: { tenantSlug: string } }) {
+export default async function EvaluationsPage({ params }: { params: Promise<{ tenantSlug: string }> }) {
   const { tenantSlug } = await params;
 
   const cookieStore = await cookies();

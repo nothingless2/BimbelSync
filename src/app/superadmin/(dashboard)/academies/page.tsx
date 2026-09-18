@@ -8,7 +8,7 @@ import { validateSearchQuery } from "@/lib/search-validation";
 export default async function AcademiesPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("bimbelsync_session")?.value;

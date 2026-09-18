@@ -10,7 +10,7 @@ export const metadata = {
   title: "Jadwal Kelas | BimbelSync",
 };
 
-export default async function StudentSchedulesPage({ params }: { params: { tenantSlug: string } }) {
+export default async function StudentSchedulesPage({ params }: { params: Promise<{ tenantSlug: string }> }) {
   const { tenantSlug } = await params;
 
   const cookieStore = await cookies();

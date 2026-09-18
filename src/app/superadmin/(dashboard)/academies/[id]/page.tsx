@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import TenantDetailClientPage from "./client-page";
 
-export default async function TenantDetailPage({ params }: { params: { id: string } }) {
+export default async function TenantDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("bimbelsync_session")?.value;
   const session = sessionCookie ? await decrypt(sessionCookie) : null;
