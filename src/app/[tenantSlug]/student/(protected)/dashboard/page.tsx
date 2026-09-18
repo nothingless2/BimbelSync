@@ -73,7 +73,7 @@ export default async function StudentDashboardPage({
     orderBy: {
       start_time: 'asc'
     },
-    take: 10 // Ambil 10 jadwal terdekat
+    take: 3 // Ambil 3 jadwal terdekat agar tidak memanjang
   });
 
   return (
@@ -103,7 +103,10 @@ export default async function StudentDashboardPage({
       </div>
 
       {/* Upcoming Classes */}
-      <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Jadwal Mendatang</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-bold text-slate-900 dark:text-white">Jadwal Mendatang</h2>
+        <a href={`/${tenantSlug}/student/schedules`} className="text-sm font-semibold text-blue-600 dark:text-blue-400">Lihat Semua</a>
+      </div>
       
       {upcomingSchedules.length > 0 ? (
         <div className="space-y-4 mb-10">

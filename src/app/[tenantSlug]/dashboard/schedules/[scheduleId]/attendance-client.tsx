@@ -32,6 +32,8 @@ export function AttendanceClient({
     studentsData.reduce((acc, curr) => {
       if (curr.currentStatus) {
         acc[curr.student.id] = curr.currentStatus;
+      } else {
+        acc[curr.student.id] = 'ABSENT';
       }
       return acc;
     }, {} as Record<string, AttendanceStatus>)
