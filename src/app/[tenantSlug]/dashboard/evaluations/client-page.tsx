@@ -161,7 +161,7 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
           <CustomSelect
             value={selectedProgramId}
             onChange={setSelectedProgramId}
-            placeholder="-- Pilih Program --"
+            placeholder="Pilih Program"
             options={programs.map((p: any) => ({
               value: p.id,
               label: p.name
