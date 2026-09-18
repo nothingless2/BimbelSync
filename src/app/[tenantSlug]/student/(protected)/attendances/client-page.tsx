@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Search, CheckCircle2, XCircle, AlertCircle, Calendar, Clock, MapPin } from "lucide-react";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 // Helper format waktu (WIB)
 const formatTimeWIB = (date: Date | string) => {
@@ -18,6 +19,13 @@ export default function StudentAttendancesClientPage({ attendances }: { attendan
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
+  const statusOptions = [
+    { value: "ALL", label: "Semua Status" },
+    { value: "PRESENT", label: "Hadir" },
+    { value: "ABSENT", label: "Alpa" },
+    { value: "PERMIT", label: "Izin" },
+  ];
+
   const filteredAttendances = attendances.filter((a: any) => {
     const matchQuery = a.schedule.program.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                        a.schedule.tutor.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -29,7 +37,7 @@ export default function StudentAttendancesClientPage({ attendances }: { attendan
     <div className="space-y-6 animate-in fade-in duration-500">
       
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-4 relative z-20">
         <div className="relative flex-1">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search size={16} className="text-slate-400" />
@@ -39,20 +47,17 @@ export default function StudentAttendancesClientPage({ attendances }: { attendan
             placeholder="Cari program atau nama tutor..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="block w-full pl-9 pr-3 py-3 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-900 shadow-sm dark:text-slate-200"
+            className="block w-full pl-9 pr-3 py-2.5 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-900 shadow-sm dark:text-slate-200 outline-none"
           />
         </div>
         
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-900 shadow-sm dark:text-slate-200 outline-none"
-        >
-          <option value="ALL">Semua Status</option>
-          <option value="PRESENT">Hadir</option>
-          <option value="ABSENT">Alpa</option>
-          <option value="PERMIT">Izin</option>
-        </select>
+        <div className="w-full sm:w-48">
+          <CustomSelect
+            options={statusOptions}
+            value={statusFilter}
+            onChange={(val) => setStatusFilter(val)}
+          />
+        </div>
       </div>
 
       {filteredAttendances.length === 0 ? (
@@ -62,61 +67,59 @@ export default function StudentAttendancesClientPage({ attendances }: { attendan
           <p className="text-slate-500 dark:text-slate-400 mt-2">Belum ada data absensi yang sesuai dengan pencarianmu.</p>
         </div>
       ) : (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-          <div className="divide-y divide-slate-100 dark:divide-slate-800">
-            {filteredAttendances.map((record: any) => (
-              <div key={record.id} className="p-4 sm:p-5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                
-                <div className="flex items-start gap-4">
-                  <div className={`mt-1 p-2.5 rounded-full shrink-0 ${
-                    record.attendance_status === 'PRESENT' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' :
-                    record.attendance_status === 'ABSENT' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' :
-                    'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400'
-                  }`}>
-                    {record.attendance_status === 'PRESENT' ? <CheckCircle2 size={20} /> :
-                     record.attendance_status === 'ABSENT' ? <XCircle size={20} /> :
-                     <AlertCircle size={20} />}
-                  </div>
-                  
-                  <div>
-                    <h3 className="font-bold text-slate-900 dark:text-white text-base">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-x-auto shadow-sm relative z-10">
+          <table className="w-full text-left text-sm whitespace-nowrap min-w-[600px]">
+            <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+              <tr>
+                <th className="px-6 py-4 font-semibold">Program & Tutor</th>
+                <th className="px-6 py-4 font-semibold">Waktu & Ruangan</th>
+                <th className="px-6 py-4 font-semibold text-right">Status Kehadiran</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {filteredAttendances.map((record: any) => (
+                <tr key={record.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                  <td className="px-6 py-4">
+                    <div className="font-bold text-slate-900 dark:text-white text-base">
                       {record.schedule.program.name}
-                    </h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 mb-2">
+                    </div>
+                    <div className="text-slate-500 mt-1">
                       Tutor: {record.schedule.tutor.name}
-                    </p>
-                    
-                    <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
-                      <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-md">
-                        <Calendar size={12} />
-                        {formatFullDateWIB(record.scanned_at)}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3 mb-1.5">
+                      <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">
+                        <Calendar size={14} />
+                        <span>{formatFullDateWIB(record.scanned_at)}</span>
                       </div>
-                      <div className="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2.5 py-1 rounded-md">
-                        <Clock size={12} />
-                        {formatTimeWIB(record.scanned_at)}
-                      </div>
-                      <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-md">
-                        <MapPin size={12} />
-                        Ruang {record.schedule.room.name}
+                      <div className="flex items-center gap-1.5 text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 font-bold px-2 py-1 rounded-md">
+                        <Clock size={14} />
+                        <span>{formatTimeWIB(record.scanned_at)}</span>
                       </div>
                     </div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between sm:flex-col sm:items-end gap-2 shrink-0">
-                  <span className={`text-sm font-bold px-3 py-1.5 rounded-lg ${
-                    record.attendance_status === 'PRESENT' ? 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20' :
-                    record.attendance_status === 'ABSENT' ? 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20' :
-                    'text-orange-700 bg-orange-50 dark:text-orange-400 dark:bg-orange-900/20'
-                  }`}>
-                    {record.attendance_status === 'PRESENT' ? 'Hadir' :
-                     record.attendance_status === 'ABSENT' ? 'Alpa' : 'Izin'}
-                  </span>
-                </div>
-                
-              </div>
-            ))}
-          </div>
+                    <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 px-1">
+                      <MapPin size={14} />
+                      <span>Ruang {record.schedule.room.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <span className={`inline-flex items-center gap-1.5 font-bold px-3 py-1.5 rounded-lg text-sm ${
+                      record.attendance_status === 'PRESENT' ? 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20' :
+                      record.attendance_status === 'ABSENT' ? 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20' :
+                      'text-orange-700 bg-orange-50 dark:text-orange-400 dark:bg-orange-900/20'
+                    }`}>
+                      {record.attendance_status === 'PRESENT' ? <CheckCircle2 size={16} /> :
+                       record.attendance_status === 'ABSENT' ? <XCircle size={16} /> :
+                       <AlertCircle size={16} />}
+                      {record.attendance_status === 'PRESENT' ? 'Hadir' :
+                       record.attendance_status === 'ABSENT' ? 'Alpa' : 'Izin'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
