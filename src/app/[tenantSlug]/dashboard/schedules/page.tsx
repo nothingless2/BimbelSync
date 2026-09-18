@@ -88,7 +88,7 @@ export default async function SchedulesPage({
       orderBy: { name: 'asc' }
     }),
     prisma.staff.findMany({
-      where: { academy_id: session.academy_id, deleted_at: null },
+      where: { academy_id: session.academy_id, deleted_at: null, role: 'TUTOR' },
       orderBy: { email: 'asc' } // Actually should be by name if it existed, but email works for MVP
     })
   ]);
