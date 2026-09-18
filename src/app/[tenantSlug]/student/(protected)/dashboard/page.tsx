@@ -3,8 +3,17 @@ import { decrypt } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import { Calendar, Clock, MapPin, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
-import { format } from 'date-fns';
-import { id } from 'date-fns/locale';
+
+// Helper format waktu (WIB) untuk Server Component di Vercel
+const formatTimeWIB = (date: Date | string) => {
+  return new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(date)).replace('.', ':');
+};
+const formatDateWIB = (date: Date | string) => {
+  return new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(date));
+};
+const formatFullDateWIB = (date: Date | string) => {
+  return new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(date));
+};
 
 export default async function StudentDashboardPage({
   params,
@@ -120,11 +129,11 @@ export default async function StudentDashboardPage({
                 <div className="flex flex-col items-end gap-1">
                   <div className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5">
                     <Calendar size={12} />
-                    {format(new Date(schedule.start_time), 'EEEE, d MMM yyyy', { locale: id })}
+                    {formatFullDateWIB(schedule.start_time)}
                   </div>
                   <div className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 py-1 rounded-lg text-sm font-bold flex items-center gap-1.5">
                     <Clock size={14} />
-                    {format(new Date(schedule.start_time), 'HH:mm')} - {format(new Date(schedule.end_time), 'HH:mm')}
+                    {formatTimeWIB(schedule.start_time)} - {formatTimeWIB(schedule.end_time)}
                   </div>
                 </div>
               </div>
@@ -172,7 +181,7 @@ export default async function StudentDashboardPage({
                       {record.schedule.program.name}
                     </p>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      {format(new Date(record.scanned_at), 'd MMM yyyy, HH:mm', { locale: id })}
+                      {formatDateWIB(record.scanned_at)}, {formatTimeWIB(record.scanned_at)}
                     </p>
                   </div>
                 </div>
