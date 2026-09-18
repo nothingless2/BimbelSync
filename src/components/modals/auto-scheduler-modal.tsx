@@ -152,21 +152,6 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  Algoritma Penjadwalan
-                </label>
-                <CustomSelect
-                  name="algorithm"
-                  required
-                  placeholder="Pilih Algoritma"
-                  defaultValue="BALANCED"
-                  options={[
-                    { value: "BALANCED", label: "Balanced (Sebang & Merata)" },
-                    { value: "COMPACT", label: "Compact (Padat & Efisien)" }
-                  ]}
-                />
-              </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
