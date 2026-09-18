@@ -6,8 +6,10 @@ import { toast } from "@/components/ui/sonner";
 import { deleteStudentAction, withdrawEnrollmentAction } from "./actions";
 import { EditStudentModal } from "@/components/modals/edit-student-modal";
 import { ManageEnrollmentsModal } from "@/components/modals/manage-enrollments-modal";
+import { ImportStudentsModal } from "@/components/modals/import-students-modal";
 import { Student, Program, Enrollment } from "@prisma/client";
 import { Pagination } from "@/components/ui/pagination";
+import Papa from "papaparse";
 
 type StudentWithEnrollments = Student & {
   enrollments: (Enrollment & { program: Program })[];
@@ -25,6 +27,7 @@ export default function StudentsClientPage({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [enrollingStudent, setEnrollingStudent] = useState<Student | null>(null);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
@@ -90,13 +93,33 @@ export default function StudentsClientPage({
     });
   };
 
+  const handleExportCSV = () => {
+    const exportData = filteredStudents.map(s => ({
+      "Nama Lengkap": s.full_name,
+      "Username": s.username,
+      "WhatsApp Wali": s.parent_whatsapp || "-",
+      "Program Aktif": s.enrollments.filter(e => e.status === 'ACTIVE').map(e => e.program.name).join(", ") || "-"
+    }));
+
+    const csv = Papa.unparse(exportData);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `Data_Siswa_${tenantSlug}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Data berhasil diekspor ke CSV!");
+  };
+
   return (
     <>
       <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
         
         {/* Toolbar Filter */}
-        <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20">
-          <div className="relative max-w-sm">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+          <div className="relative w-full max-w-sm">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search size={16} className="text-slate-400" />
             </div>
@@ -110,6 +133,22 @@ export default function StudentsClientPage({
               }}
               className="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200"
             />
+          </div>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <button
+              onClick={() => setIsImportModalOpen(true)}
+              className="flex-1 sm:flex-none px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
+            >
+              <Users size={16} />
+              <span className="hidden sm:inline">Import</span>
+            </button>
+            <button
+              onClick={handleExportCSV}
+              className="flex-1 sm:flex-none px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
+            >
+              <LogOut size={16} className="rotate-90" />
+              <span className="hidden sm:inline">Export</span>
+            </button>
           </div>
         </div>
 
@@ -258,6 +297,14 @@ export default function StudentsClientPage({
           programs={programs} 
           tenantSlug={tenantSlug} 
           onClose={() => setEnrollingStudent(null)} 
+        />
+      )}
+
+      {isImportModalOpen && (
+        <ImportStudentsModal
+          tenantSlug={tenantSlug}
+          programs={programs}
+          onClose={() => setIsImportModalOpen(false)}
         />
       )}
     </>

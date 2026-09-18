@@ -332,3 +332,127 @@ export async function withdrawEnrollmentAction(enrollmentId: string, reason: Wit
     return { error: "Terjadi kesalahan saat menghentikan partisipasi siswa." };
   }
 }
+
+export async function bulkCreateStudentsAction(programId: string, studentsToImport: { full_name: string, username: string, parent_whatsapp: string }[]) {
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
+  if (!sessionToken) return { error: "Autentikasi diperlukan." };
+
+  const session = await decrypt(sessionToken);
+  if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
+
+  if (!programId) {
+    return { error: "Program harus dipilih." };
+  }
+
+  if (!studentsToImport || studentsToImport.length === 0) {
+    return { error: "Data siswa kosong." };
+  }
+
+  // Feature Gating: Check max_students from Plan
+  const academy = await prisma.academy.findUnique({
+    where: { id: session.academy_id },
+    include: {
+      plan: true,
+      _count: {
+        select: { students: { where: { deleted_at: null } } }
+      }
+    }
+  });
+
+  if (!academy) return { error: "Data akademi tidak ditemukan." };
+
+  const currentStudents = academy._count.students;
+  const maxStudents = academy.plan.max_students;
+  const amountToImport = studentsToImport.length;
+
+  if (maxStudents !== null && (currentStudents + amountToImport) > maxStudents) {
+    return { error: `Batas paket tidak mencukupi! Anda mencoba mengimpor ${amountToImport} siswa, tapi kuota tersisa hanya ${maxStudents - currentStudents}. Harap upgrade paket.` };
+  }
+
+  try {
+    const program = await prisma.program.findUnique({
+      where: { id: programId }
+    });
+    
+    if (!program) return { error: "Program tidak ditemukan." };
+
+    // Get all existing usernames to check for duplicates
+    const incomingUsernames = studentsToImport.map(s => s.username);
+    const existingStudents = await prisma.student.findMany({
+      where: {
+        academy_id: session.academy_id,
+        username: { in: incomingUsernames }
+      }
+    });
+
+    if (existingStudents.length > 0) {
+      const existingNames = existingStudents.map(s => s.username).join(", ");
+      return { error: `Username berikut sudah digunakan atau pernah dihapus: ${existingNames}.` };
+    }
+
+    // Default password: username + "123!"
+    // Calculate hashes
+    const studentsWithHashes = await Promise.all(studentsToImport.map(async (s) => {
+      const defaultPassword = `${s.username}123!`;
+      const hash = await bcrypt.hash(defaultPassword, 10);
+      return { ...s, password_hash: hash };
+    }));
+
+    // Perform bulk operations in a transaction
+    await prisma.$transaction(async (tx) => {
+      const currentMonthPeriod = new Date().toISOString().substring(0, 7);
+      
+      for (const s of studentsWithHashes) {
+        const student = await tx.student.create({
+          data: {
+            academy_id: session.academy_id as string,
+            full_name: s.full_name,
+            username: s.username,
+            password_hash: s.password_hash,
+            parent_whatsapp: s.parent_whatsapp || null,
+            must_change_password: true,
+          }
+        });
+
+        await tx.enrollment.create({
+          data: {
+            student_id: student.id,
+            program_id: programId,
+          }
+        });
+
+        await tx.invoice.create({
+          data: {
+            academy_id: session.academy_id as string,
+            student_id: student.id,
+            total_amount: program.monthly_fee,
+            payment_option: "FULL",
+            payment_status: "UNPAID",
+            billing_period: currentMonthPeriod,
+            items: {
+              create: {
+                description: `Pendaftaran ${program.name}`,
+                amount: program.monthly_fee
+              }
+            }
+          }
+        });
+      }
+    });
+
+    await createAuditLog({
+      academy_id: session.academy_id,
+      staff_id: session.id,
+      action: "CREATE",
+      entity_type: "Student",
+      details: { action: "BULK_IMPORT", amount: amountToImport, program_id: programId }
+    });
+
+    revalidatePath(`/${session.tenant_slug}/dashboard/master-data/students`);
+    return { success: true };
+  } catch (error) {
+    console.error("Error bulk creating students:", error);
+    return { error: "Terjadi kesalahan internal pada server saat melakukan impor." };
+  }
+}
