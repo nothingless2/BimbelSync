@@ -10,6 +10,7 @@ import React from "react";
 import { UserAvatar } from "@/components/user-avatar";
 import { Pagination } from "@/components/ui/pagination";
 import { toast } from "@/components/ui/sonner";
+import { CustomSelect } from "@/components/ui/custom-select";
 import {
   deactivateAdminAction, reactivateAdminAction,
   sendResetPasswordLinkAction, inviteAdminAction, updateAcademyAction
@@ -507,19 +508,26 @@ export default function TenantDetailClientPage({ academy, plans, invoices, audit
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Paket Langganan</label>
-                  <select value={editForm.planId} onChange={(e) => setEditForm({...editForm, planId: e.target.value})}
-                    className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none appearance-none">
-                    {plans.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                  </select>
+                  <CustomSelect
+                    value={editForm.planId}
+                    onChange={(value) => setEditForm({...editForm, planId: value})}
+                    options={plans.map(p => ({
+                      value: p.id,
+                      label: p.name
+                    }))}
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Status</label>
-                  <select value={editForm.subscriptionStatus} onChange={(e) => setEditForm({...editForm, subscriptionStatus: e.target.value as any})}
-                    className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none appearance-none">
-                    <option value="TRIAL">Trial</option>
-                    <option value="ACTIVE">Active</option>
-                    <option value="SUSPENDED">Suspended</option>
-                  </select>
+                  <CustomSelect
+                    value={editForm.subscriptionStatus}
+                    onChange={(value) => setEditForm({...editForm, subscriptionStatus: value as any})}
+                    options={[
+                      { value: "TRIAL", label: "Trial" },
+                      { value: "ACTIVE", label: "Active" },
+                      { value: "SUSPENDED", label: "Suspended" }
+                    ]}
+                  />
                 </div>
               </div>
 

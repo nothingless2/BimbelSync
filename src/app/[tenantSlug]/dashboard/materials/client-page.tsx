@@ -6,6 +6,7 @@ import { AddMaterialModal } from "@/components/modals/add-material-modal";
 import { UserAvatar } from "@/components/user-avatar";
 import { deleteMaterialAction } from "./actions";
 import { toast } from "@/components/ui/sonner";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 export default function MaterialsClientPage({ materials, programs, tenantSlug, academyId, userRole }: any) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -73,16 +74,17 @@ export default function MaterialsClientPage({ materials, programs, tenantSlug, a
           />
         </div>
         <div className="sm:w-64">
-          <select
+          <CustomSelect
             value={filterProgram}
-            onChange={(e) => setFilterProgram(e.target.value)}
-            className="block w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200"
-          >
-            <option value="ALL">Semua Program</option>
-            {programs.map((p: any) => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
+            onChange={setFilterProgram}
+            options={[
+              { value: "ALL", label: "Semua Program" },
+              ...programs.map((p: any) => ({
+                value: p.id,
+                label: p.name
+              }))
+            ]}
+          />
         </div>
       </div>
 

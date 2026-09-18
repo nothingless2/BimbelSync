@@ -4,6 +4,8 @@ import { useState } from "react";
 import { X, Loader2, Link as LinkIcon, FileText, Video } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { createMaterialAction } from "@/app/[tenantSlug]/dashboard/materials/actions";
+import { Program } from "@prisma/client";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 interface AddMaterialModalProps {
   isOpen: boolean;
@@ -91,17 +93,14 @@ export function AddMaterialModal({ isOpen, onClose, tenantSlug, academyId, progr
             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
               Program Terkait <span className="text-red-500">*</span>
             </label>
-            <select
-              required
+            <CustomSelect
               value={formData.programId}
-              onChange={e => setFormData({ ...formData, programId: e.target.value })}
-              className="w-full px-3 py-2 sm:px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm"
-            >
-              <option value="">-- Pilih Program --</option>
-              {programs.map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
+              onChange={(value) => setFormData({ ...formData, programId: value })}
+              name="program_id"
+              required
+              placeholder="-- Pilih Program --"
+              options={programs.map(p => ({ value: p.id, label: p.name }))}
+            />
           </div>
 
           <div className="space-y-1.5">

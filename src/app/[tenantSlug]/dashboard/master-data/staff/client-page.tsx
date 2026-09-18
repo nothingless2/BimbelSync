@@ -4,6 +4,7 @@ import { useState } from "react";
 import { UserCog, Pencil, Trash2, Mail, ShieldAlert, Search, Filter } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { deleteStaffAction } from "./actions";
+import { CustomSelect } from "@/components/ui/custom-select";
 import { EditStaffModal } from "@/components/modals/edit-staff-modal";
 import { Staff } from "@prisma/client";
 import { Pagination } from "@/components/ui/pagination";
@@ -70,22 +71,19 @@ export default function StaffClientPage({ staffList, tenantSlug }: { staffList: 
               className="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200"
             />
           </div>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Filter size={14} className="text-slate-400" />
-            </div>
-            <select
+          <div className="relative w-full sm:w-auto">
+            <CustomSelect
               value={filterRole}
-              onChange={(e) => {
-                setFilterRole(e.target.value as any);
+              onChange={(value) => {
+                setFilterRole(value as any);
                 setCurrentPage(1);
               }}
-              className="block w-full sm:w-48 pl-9 pr-8 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200 appearance-none bg-white"
-            >
-              <option value="ALL">Semua Peran</option>
-              <option value="ADMIN">Admin</option>
-              <option value="TUTOR">Tutor</option>
-            </select>
+              options={[
+                { value: "ALL", label: "Semua Peran" },
+                { value: "ADMIN", label: "Admin" },
+                { value: "TUTOR", label: "Tutor" }
+              ]}
+            />
           </div>
         </div>
 

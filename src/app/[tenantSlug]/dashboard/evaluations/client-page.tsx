@@ -6,6 +6,7 @@ import { updateEvaluationScoreAction, deleteEvaluationColumnAction, bulkCreateEv
 import { toast } from "@/components/ui/sonner";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 export default function EvaluationsClientPage({ evaluations, students, programs, tenantSlug, academyId, userRole }: any) {
   const [selectedProgramId, setSelectedProgramId] = useState<string>("");
@@ -157,16 +158,15 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-3 sm:p-4 flex flex-col sm:flex-row gap-4">
         <div className="sm:w-80 flex items-center gap-3">
           <label className="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap">Program:</label>
-          <select
+          <CustomSelect
             value={selectedProgramId}
-            onChange={e => setSelectedProgramId(e.target.value)}
-            className="w-full bg-transparent text-slate-900 dark:text-white focus:outline-none text-sm font-medium"
-          >
-            <option value="" disabled>-- Pilih Program --</option>
-            {programs.map((p: any) => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
+            onChange={setSelectedProgramId}
+            placeholder="-- Pilih Program --"
+            options={programs.map((p: any) => ({
+              value: p.id,
+              label: p.name
+            }))}
+          />
         </div>
       </div>
 
@@ -342,15 +342,15 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Jenis</label>
-                <select
+                <CustomSelect
                   value={formData.evaluationType}
-                  onChange={e => setFormData({ ...formData, evaluationType: e.target.value as any })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                >
-                  <option value="HOMEWORK">PR / Tugas</option>
-                  <option value="EXAM">Ujian / Kuis</option>
-                  <option value="MONTHLY_REPORT">Laporan Bulanan (Rapor)</option>
-                </select>
+                  onChange={(value) => setFormData({ ...formData, evaluationType: value as any })}
+                  options={[
+                    { value: "HOMEWORK", label: "PR / Tugas" },
+                    { value: "EXAM", label: "Ujian / Kuis" },
+                    { value: "MONTHLY_REPORT", label: "Laporan Bulanan (Rapor)" }
+                  ]}
+                />
               </div>
               <div className="pt-4 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-800 mt-6">
                 <button

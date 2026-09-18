@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Building, X, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { createAcademyAction } from "@/app/superadmin/(dashboard)/actions";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 type Plan = { id: string; name: string; price: number };
 
@@ -81,24 +82,32 @@ export function AddAcademyModal({ plans }: { plans: Plan[] }) {
 
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Paket Berlangganan</label>
-                <select name="plan_id" required className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm">
-                  <option value="">-- Pilih Paket --</option>
-                  {plans.map((plan) => (
-                    <option key={plan.id} value={plan.id}>
-                      {plan.name} — {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(plan.price)}/bln
-                    </option>
-                  ))}
-                </select>
+                <CustomSelect
+                  name="plan_id"
+                  required
+                  placeholder="-- Pilih Paket --"
+                  options={plans.map((plan) => ({
+                    value: plan.id,
+                    label: `${plan.name} — ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(plan.price)}/bln`
+                  }))}
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Status Awal</label>
-                  <select name="status" value={status} onChange={(e) => setStatus(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm">
-                    <option value="TRIAL">Trial</option>
-                    <option value="ACTIVE">Active</option>
-                    <option value="SUSPENDED">Suspended</option>
-                  </select>
+                  <CustomSelect
+                    name="status"
+                    required
+                    value={status}
+                    onChange={setStatus}
+                    placeholder="Pilih Status..."
+                    options={[
+                      { value: "TRIAL", label: "Trial" },
+                      { value: "ACTIVE", label: "Active" },
+                      { value: "SUSPENDED", label: "Suspended" }
+                    ]}
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Jatuh Tempo <span className="text-slate-400 font-normal">(opsional)</span></label>

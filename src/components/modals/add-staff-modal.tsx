@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Plus, X, AlertCircle } from "lucide-react";
 import { createStaffAction } from "@/app/[tenantSlug]/dashboard/master-data/staff/actions";
+import { UserRole } from "@prisma/client";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 export function AddStaffModal({ tenantSlug }: { tenantSlug: string }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -73,15 +75,16 @@ export function AddStaffModal({ tenantSlug }: { tenantSlug: string }) {
               <div className="space-y-2">
                 <label htmlFor="role" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Peran (Role)</label>
-                <select
+                <CustomSelect
                   id="role"
                   name="role"
                   required
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none"
-                >
-                  <option value="TUTOR">Tutor (Pengajar)</option>
-                  <option value="ADMIN">Admin (Pengelola)</option>
-                </select>
+                  placeholder="-- Pilih Role --"
+                  options={[
+                    { value: "TUTOR", label: "Tutor (Pengajar)" },
+                    { value: "ADMIN", label: "Admin (Pengelola)" }
+                  ]}
+                />
               </div>
 
               <div className="space-y-2">

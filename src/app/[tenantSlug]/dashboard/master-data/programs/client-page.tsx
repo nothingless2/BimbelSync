@@ -7,6 +7,7 @@ import { deleteProgramAction } from "./actions";
 import { EditProgramModal } from "@/components/modals/edit-program-modal";
 import { Program } from "@prisma/client";
 import { Pagination } from "@/components/ui/pagination";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 import { AutoSchedulerModal } from "@/components/modals/auto-scheduler-modal";
 
@@ -25,7 +26,7 @@ export default function ProgramsClientPage({
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState<"ALL" | "REGULER" | "INTENSIF">("ALL");
+  const [filterType, setFilterType] = useState<"ALL" | "REGULER" | "INTENSIF" | "PRIVATE" | "WORKSHOP">("ALL");
 
   // Filtering
   const filteredPrograms = programs.filter(program => {
@@ -83,22 +84,21 @@ export default function ProgramsClientPage({
               className="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200"
             />
           </div>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Filter size={14} className="text-slate-400" />
-            </div>
-            <select
+          <div className="relative w-full sm:w-auto">
+            <CustomSelect
               value={filterType}
-              onChange={(e) => {
-                setFilterType(e.target.value as any);
+              onChange={(value) => {
+                setFilterType(value as any);
                 setCurrentPage(1);
               }}
-              className="block w-full sm:w-48 pl-9 pr-8 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200 appearance-none bg-white"
-            >
-              <option value="ALL">Semua Tipe</option>
-              <option value="REGULER">Program Reguler</option>
-              <option value="INTENSIF">Paket Intensif</option>
-            </select>
+              options={[
+                { value: "ALL", label: "Semua Tipe" },
+                { value: "REGULER", label: "Program Reguler" },
+                { value: "INTENSIF", label: "Paket Intensif" },
+                { value: "PRIVATE", label: "Kelas Privat" },
+                { value: "WORKSHOP", label: "Workshop/Seminar" }
+              ]}
+            />
           </div>
         </div>
 

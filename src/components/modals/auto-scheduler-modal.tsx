@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X, AlertCircle, CalendarClock } from "lucide-react";
 import { Program } from "@prisma/client";
+import { CustomSelect } from "@/components/ui/custom-select";
 import { generateSchedulesAction } from "@/app/[tenantSlug]/dashboard/schedules/actions";
 import { toast } from "@/components/ui/sonner";
 
@@ -121,17 +122,17 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Pilih Program
                 </label>
-                <select
-                  value={selectedProgramId}
-                  onChange={(e) => setSelectedProgramId(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                <CustomSelect
+                  name="program_id"
                   required
-                >
-                  <option value="" disabled>-- Pilih Program --</option>
-                  {programs.map(p => (
-                    <option key={p.id} value={p.id}>{p.name} {p.total_meetings ? `(${p.total_meetings} Pertemuan)` : '(Tak Terbatas)'}</option>
-                  ))}
-                </select>
+                  placeholder="-- Pilih Program --"
+                  value={selectedProgramId}
+                  onChange={setSelectedProgramId}
+                  options={programs.map(p => ({
+                    value: p.id,
+                    label: `${p.name} ${p.total_meetings ? `(${p.total_meetings} Pertemuan)` : '(Tak Terbatas)'}`
+                  }))}
+                />
               </div>
 
               {selectedProgram && !selectedProgram.total_meetings && (
@@ -148,6 +149,22 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
                   name="start_date"
                   required
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Algoritma Penjadwalan
+                </label>
+                <CustomSelect
+                  name="algorithm"
+                  required
+                  placeholder="Pilih Algoritma"
+                  defaultValue="BALANCED"
+                  options={[
+                    { value: "BALANCED", label: "Balanced (Sebang & Merata)" },
+                    { value: "COMPACT", label: "Compact (Padat & Efisien)" }
+                  ]}
                 />
               </div>
 
@@ -207,31 +224,29 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Tutor Pengajar</label>
-                <select
+                <CustomSelect
                   name="tutor_id"
                   required
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-                >
-                  <option value="">-- Pilih Tutor --</option>
-                  {staffs.map(staff => (
-                    <option key={staff.id} value={staff.id}>{staff.name || staff.email} {staff.role ? `(${staff.role})` : ''}</option>
-                  ))}
-                </select>
+                  placeholder="-- Pilih Tutor --"
+                  options={staffs.map(staff => ({
+                    value: staff.id,
+                    label: `${staff.name || staff.email} ${staff.role ? `(${staff.role})` : ''}`
+                  }))}
+                />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Ruang Kelas</label>
-                <select
+                <CustomSelect
                   name="room_id"
                   required
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-                >
-                  <option value="">-- Pilih Ruangan --</option>
-                  {rooms.map(room => (
-                    <option key={room.id} value={room.id}>{room.name} (Kapasitas: {room.capacity})</option>
-                  ))}
-                </select>
+                  placeholder="-- Pilih Ruangan --"
+                  options={rooms.map(room => ({
+                    value: room.id,
+                    label: `${room.name} (Kapasitas: ${room.capacity})`
+                  }))}
+                />
               </div>
 
               <div className="pt-4 flex gap-3 justify-end border-t border-slate-100 dark:border-slate-800">

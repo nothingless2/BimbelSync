@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { X, Loader2, Star, BookOpen, BarChart } from "lucide-react";
+import { X, Loader2, Star, BookOpen, BarChart, ClipboardCheck, AlertCircle } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { bulkCreateEvaluationsAction } from "@/app/[tenantSlug]/dashboard/evaluations/actions";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 interface AddEvaluationModalProps {
   isOpen: boolean;
@@ -91,20 +92,17 @@ export function AddEvaluationModal({ isOpen, onClose, tenantSlug, academyId, stu
             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
               Program Kursus <span className="text-red-500">*</span>
             </label>
-            <select
+            <CustomSelect
+              name="program_id"
               required
+              placeholder="-- Pilih Program --"
               value={formData.programId}
-              onChange={e => {
-                setFormData({ ...formData, programId: e.target.value });
+              onChange={value => {
+                setFormData({ ...formData, programId: value });
                 setStudentEvaluations({});
               }}
-              className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm"
-            >
-              <option value="">-- Pilih Program --</option>
-              {programs.map((p: any) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
+              options={programs.map((p: any) => ({ value: p.id, label: p.name }))}
+            />
           </div>
 
           <div className="space-y-1.5">

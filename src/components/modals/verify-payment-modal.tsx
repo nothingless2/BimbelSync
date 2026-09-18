@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { X, AlertCircle, CheckCircle } from "lucide-react";
+import { CheckCircle, X, AlertCircle } from "lucide-react";
 import { verifyPaymentAction } from "@/app/[tenantSlug]/dashboard/finance/actions";
+import { CustomSelect } from "@/components/ui/custom-select";
 import { Invoice } from "@prisma/client";
 
 export function VerifyPaymentModal({ 
@@ -82,17 +83,16 @@ export function VerifyPaymentModal({
             <label htmlFor="payment_method" className="text-sm font-bold text-slate-700 dark:text-slate-300">
               Metode Pembayaran</label>
             <p className="text-xs text-slate-500 mb-2">Pilih bagaimana siswa ini melunasi tagihannya kepada Anda.</p>
-            <select
+            <CustomSelect
               id="payment_method"
               name="payment_method"
               required
-              defaultValue=""
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all appearance-none font-medium"
-            >
-              <option value="" disabled>Pilih Metode...</option>
-              <option value="CASH">Tunai (Cash di Resepsionis)</option>
-              <option value="MANUAL_TRANSFER">Transfer Bank Manual (Telah dicek mutasi)</option>
-            </select>
+              placeholder="Pilih Metode..."
+              options={[
+                { value: "CASH", label: "Tunai (Cash di Resepsionis)" },
+                { value: "MANUAL_TRANSFER", label: "Transfer Bank Manual (Telah dicek mutasi)" }
+              ]}
+            />
           </div>
 
           <div className="pt-4 flex gap-3 justify-end border-t border-slate-100 dark:border-slate-800">

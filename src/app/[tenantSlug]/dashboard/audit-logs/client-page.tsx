@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { CustomSelect } from "@/components/ui/custom-select";
 import { Pagination } from "@/components/ui/pagination";
 import { Filter } from "lucide-react";
 
@@ -51,25 +52,25 @@ export default function AuditLogsClientPage({ logs }: Props) {
       
       {/* Toolbar Filter */}
       <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 flex justify-end">
-        <div className="relative w-full sm:w-64">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Filter size={14} className="text-slate-400" />
-          </div>
-          <select
+        <div className="relative w-full sm:w-64 shrink-0">
+          <CustomSelect
             value={filterAction}
-            onChange={(e) => {
-              setFilterAction(e.target.value);
+            onChange={(value) => {
+              setFilterAction(value);
               setCurrentPage(1);
             }}
-            className="block w-full pl-9 pr-8 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200 appearance-none bg-white"
-          >
-            <option value="ALL">Semua Aksi</option>
-            <option value="CREATE">CREATE (Membuat)</option>
-            <option value="UPDATE">UPDATE (Memperbarui)</option>
-            <option value="DELETE">DELETE (Menghapus)</option>
-            <option value="VERIFY">VERIFY (Verifikasi)</option>
-            <option value="LOGIN">LOGIN (Masuk Sistem)</option>
-          </select>
+            options={[
+              { value: "ALL", label: "Semua Aksi" },
+              { value: "CREATE", label: "CREATE (Membuat)" },
+              { value: "UPDATE", label: "UPDATE (Memperbarui)" },
+              { value: "DELETE", label: "DELETE (Menghapus)" },
+              { value: "LOGIN", label: "LOGIN (Masuk Aplikasi)" },
+              { value: "VERIFY_PAYMENT", label: "VERIFY_PAYMENT (Verifikasi Pembayaran)" },
+              { value: "ENROLL", label: "ENROLL (Mendaftarkan Siswa)" },
+              { value: "GENERATE", label: "GENERATE (Auto-Generate)" },
+              { value: "OTHER", label: "Lainnya" }
+            ]}
+          />
         </div>
       </div>
 

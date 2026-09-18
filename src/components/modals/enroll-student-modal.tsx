@@ -4,6 +4,7 @@ import { useState } from "react";
 import { X, AlertCircle } from "lucide-react";
 import { enrollStudentAction } from "@/app/[tenantSlug]/dashboard/master-data/students/actions";
 import { Student, Program } from "@prisma/client";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 export function EnrollStudentModal({ 
   student, 
@@ -71,20 +72,16 @@ export function EnrollStudentModal({
           <div className="space-y-2">
             <label htmlFor="program_id" className="text-sm font-bold text-slate-700 dark:text-slate-300">
               Pilih Program / Paket Belajar</label>
-            <select
+            <CustomSelect
               id="program_id"
               name="program_id"
               required
-              defaultValue=""
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none font-medium"
-            >
-              <option value="" disabled>Pilih Program...</option>
-              {programs.map((program) => (
-                <option key={program.id} value={program.id}>
-                  {program.name} - {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(program.monthly_fee)}/bln
-                </option>
-              ))}
-            </select>
+              placeholder="Pilih Program..."
+              options={programs.map((program) => ({
+                value: program.id,
+                label: `${program.name} - ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(program.monthly_fee)}/bln`
+              }))}
+            />
           </div>
 
           <div className="pt-4 flex gap-3 justify-end border-t border-slate-100 dark:border-slate-800">

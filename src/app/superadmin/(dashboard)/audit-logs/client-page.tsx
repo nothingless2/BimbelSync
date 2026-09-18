@@ -6,6 +6,7 @@ import { ShieldAlert, Filter, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
 import Link from "next/link";
 import { UserAvatar } from "@/components/user-avatar";
 import { Pagination } from "@/components/ui/pagination";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 const COMMON_ACTIONS = [
   "SEARCH_TENANT",
@@ -107,51 +108,42 @@ export default function AuditLogsClientPage({
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-500">Berdasarkan Tenant</label>
             <div className="relative">
-              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-              <select 
+              <CustomSelect
                 value={filters.tenant}
-                onChange={(e) => handleFilterChange("tenant", e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-sm appearance-none"
-              >
-                <option value="">Semua Tenant</option>
-                {academies.map(a => (
-                  <option key={a.id} value={a.id}>{a.name}</option>
-                ))}
-              </select>
+                onChange={(value) => handleFilterChange("tenant", value)}
+                options={[
+                  { value: "", label: "Semua Tenant" },
+                  ...academies.map(a => ({ value: a.id, label: a.name }))
+                ]}
+              />
             </div>
           </div>
 
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-500">Berdasarkan Superadmin</label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-              <select 
+              <CustomSelect
                 value={filters.superadmin}
-                onChange={(e) => handleFilterChange("superadmin", e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-sm appearance-none"
-              >
-                <option value="">Semua Superadmin</option>
-                {superadmins.map(s => (
-                  <option key={s.id} value={s.id}>{s.name || s.email}</option>
-                ))}
-              </select>
+                onChange={(value) => handleFilterChange("superadmin", value)}
+                options={[
+                  { value: "", label: "Semua Superadmin" },
+                  ...superadmins.map(s => ({ value: s.id, label: s.name || s.email }))
+                ]}
+              />
             </div>
           </div>
 
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-500">Berdasarkan Aksi</label>
             <div className="relative">
-              <ShieldAlert className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-              <select 
+              <CustomSelect
                 value={filters.action}
-                onChange={(e) => handleFilterChange("action", e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-sm appearance-none"
-              >
-                <option value="">Semua Aksi</option>
-                {COMMON_ACTIONS.map(action => (
-                  <option key={action} value={action}>{action}</option>
-                ))}
-              </select>
+                onChange={(value) => handleFilterChange("action", value)}
+                options={[
+                  { value: "", label: "Semua Aksi" },
+                  ...COMMON_ACTIONS.map(action => ({ value: action, label: action }))
+                ]}
+              />
             </div>
           </div>
         </div>

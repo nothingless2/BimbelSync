@@ -4,6 +4,7 @@ import { useState } from "react";
 import { X, AlertCircle, Plus, LogOut } from "lucide-react";
 import { enrollStudentAction, withdrawEnrollmentAction } from "@/app/[tenantSlug]/dashboard/master-data/students/actions";
 import { Student, Program, Enrollment } from "@prisma/client";
+import { CustomSelect } from "@/components/ui/custom-select";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/sonner";
 
@@ -129,22 +130,16 @@ export function ManageEnrollmentsModal({
           <div className="space-y-3">
             <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">Daftarkan ke Kelas Baru</h3>
             <div className="flex gap-2">
-              <select
+              <CustomSelect
+                className="flex-1"
+                placeholder="Pilih Program..."
                 value={selectedProgramId}
-                onChange={(e) => setSelectedProgramId(e.target.value)}
-                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none font-medium text-sm"
-              >
-                <option value="" disabled>Pilih Program...</option>
-                {availablePrograms.length === 0 ? (
-                  <option value="" disabled>Tidak ada program tersedia</option>
-                ) : (
-                  availablePrograms.map((program) => (
-                    <option key={program.id} value={program.id}>
-                      {program.name}
-                    </option>
-                  ))
-                )}
-              </select>
+                onChange={setSelectedProgramId}
+                options={availablePrograms.length === 0 ? [] : availablePrograms.map((program) => ({
+                  value: program.id,
+                  label: program.name
+                }))}
+              />
               <button
                 onClick={handleEnroll}
                 disabled={isLoading || !selectedProgramId}

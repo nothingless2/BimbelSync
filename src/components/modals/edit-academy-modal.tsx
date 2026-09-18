@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { X, Save, Loader2, Building } from "lucide-react";
+import { Pencil, X, AlertCircle, Save, Loader2, Building } from "lucide-react";
 import { updateAcademyAction } from "@/app/superadmin/(dashboard)/actions";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 interface EditAcademyModalProps {
   isOpen: boolean;
@@ -86,32 +87,32 @@ export function EditAcademyModal({ isOpen, onClose, academy, plans }: EditAcadem
 
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Paket Berlangganan (Plan)</label>
-              <select 
+              <CustomSelect 
                 name="plan_id" 
                 required 
                 defaultValue={academy.plan_id}
-                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-900 dark:text-white text-sm"
-              >
-                <option value="">Pilih Paket...</option>
-                {plans.map((p) => (
-                  <option key={p.id} value={p.id}>{p.name} - Rp {p.price.toLocaleString('id-ID')}/bln</option>
-                ))}
-              </select>
+                placeholder="Pilih Paket..."
+                options={plans.map((p) => ({
+                  value: p.id,
+                  label: `${p.name} - Rp ${p.price.toLocaleString('id-ID')}/bln`
+                }))}
+              />
             </div>
 
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Status Langganan</label>
-              <select 
+              <CustomSelect 
                 name="status" 
                 required 
                 defaultValue={academy.subscription_status}
-                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-900 dark:text-white text-sm"
-              >
-                <option value="TRIAL">TRIAL</option>
-                <option value="ACTIVE">ACTIVE</option>
-                <option value="SUSPENDED">SUSPENDED</option>
-                <option value="EXPIRED_TRIAL">EXPIRED TRIAL</option>
-              </select>
+                placeholder="Pilih Status..."
+                options={[
+                  { value: "TRIAL", label: "TRIAL" },
+                  { value: "ACTIVE", label: "ACTIVE" },
+                  { value: "SUSPENDED", label: "SUSPENDED" },
+                  { value: "EXPIRED_TRIAL", label: "EXPIRED TRIAL" }
+                ]}
+              />
             </div>
 
             <div className="space-y-1.5">

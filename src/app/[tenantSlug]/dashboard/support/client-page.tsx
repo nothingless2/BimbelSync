@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Mail, MessageCircle, Phone, FileText, Send, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 const faqs = [
   {
@@ -87,14 +88,17 @@ export default function SupportClientPage({ tenantSlug, staffEmail }: { tenantSl
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Kategori Masalah</label>
-              <select required className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                <option value="">Pilih Kategori...</option>
-                <option value="billing">Kendala Tagihan & Pembayaran</option>
-                <option value="account">Akun & Akses</option>
-                <option value="feature">Cara Penggunaan Fitur</option>
-                <option value="bug">Laporan Bug / Error</option>
-                <option value="other">Lainnya</option>
-              </select>
+              <CustomSelect
+                required
+                placeholder="Pilih Kategori..."
+                options={[
+                  { value: "billing", label: "Kendala Tagihan & Pembayaran" },
+                  { value: "account", label: "Akun & Akses" },
+                  { value: "feature", label: "Cara Penggunaan Fitur" },
+                  { value: "bug", label: "Laporan Bug / Error" },
+                  { value: "other", label: "Lainnya" }
+                ]}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Pesan / Kendala</label>

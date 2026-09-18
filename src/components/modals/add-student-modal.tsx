@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus, X, AlertCircle } from "lucide-react";
 import { createStudentAction } from "@/app/[tenantSlug]/dashboard/master-data/students/actions";
 import { Program } from "@prisma/client";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 export function AddStudentModal({ tenantSlug, programs }: { tenantSlug: string, programs: Program[] }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -121,20 +122,16 @@ export function AddStudentModal({ tenantSlug, programs }: { tenantSlug: string, 
                   <label htmlFor="program_id" className="text-sm font-bold text-slate-700 dark:text-slate-300">
                     Pilih Program / Paket Belajar</label>
                   <p className="text-xs text-slate-500 mb-2">Siswa wajib dimasukkan ke dalam minimal 1 program saat mendaftar.</p>
-                  <select
+                  <CustomSelect
                     id="program_id"
                     name="program_id"
                     required
-                    defaultValue=""
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none font-medium"
-                  >
-                    <option value="" disabled>Pilih Program...</option>
-                    {programs.map((program) => (
-                      <option key={program.id} value={program.id}>
-                        {program.name} - {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(program.monthly_fee)}/bln
-                      </option>
-                    ))}
-                  </select>
+                    placeholder="Pilih Program..."
+                    options={programs.map((program) => ({
+                      value: program.id,
+                      label: `${program.name} - ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(program.monthly_fee)}/bln`
+                    }))}
+                  />
                 </div>
               </div>
 

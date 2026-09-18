@@ -5,6 +5,7 @@ import {
   FileText, CheckCircle2, Clock, AlertTriangle, Check, Ban, ChevronDown,
   Plus, Building2, Loader2, AlertCircle, X, Trash2, Search, Filter
 } from "lucide-react";
+import { CustomSelect } from "@/components/ui/custom-select";
 import { toast } from "@/components/ui/sonner";
 import { verifyInvoiceAction, markOverdueAction, voidInvoiceAction, createInvoiceAction, deleteInvoiceAction } from "./actions";
 import { Pagination } from "@/components/ui/pagination";
@@ -466,12 +467,10 @@ export default function BillingClientPage({ invoices, academies }: Props) {
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Akademi</label>
                 <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                  <select
-                    required
+                  <CustomSelect
                     value={form.academyId}
-                    onChange={(e) => {
-                      const acad = academies.find(a => a.id === e.target.value);
+                    onChange={(value) => {
+                      const acad = academies.find(a => a.id === value);
                       let autoDueDate = "";
                       let autoBillingPeriod = "";
                       
@@ -486,17 +485,18 @@ export default function BillingClientPage({ invoices, academies }: Props) {
                       
                       setForm({ 
                         ...form, 
-                        academyId: e.target.value, 
+                        academyId: value, 
                         amount: acad ? (acad.plan.price * (parseInt(form.durationMonths) || 1)).toString() : "",
                         dueDate: autoDueDate,
                         billingPeriod: autoBillingPeriod
                       });
                     }}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none appearance-none"
-                  >
-                    <option value="">Pilih Akademi...</option>
-                    {academies.map(a => <option key={a.id} value={a.id}>{a.name} ({a.plan.name})</option>)}
-                  </select>
+                    placeholder="Pilih Tenant..."
+                    options={academies.map(a => ({
+                      value: a.id,
+                      label: a.name
+                    }))}
+                  />
                 </div>
               </div>
 

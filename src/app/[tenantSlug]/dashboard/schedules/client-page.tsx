@@ -10,6 +10,7 @@ import { Schedule, Program, Staff, Room } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { format, addDays, subWeeks, addWeeks, isSameDay, parseISO, startOfMonth, endOfMonth, startOfWeek, endOfWeek, subMonths, addMonths, isSameMonth } from "date-fns";
 import { id as localeId } from "date-fns/locale";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 type ScheduleWithRelations = Schedule & {
   program: Program;
@@ -187,19 +188,16 @@ export default function SchedulesClientPage({
             </div>
             
             {/* Status Filter */}
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Filter size={12} className="text-slate-400" />
-              </div>
-              <select
+            <div className="relative w-full sm:w-auto">
+              <CustomSelect
                 value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value as any)}
-                className="block w-full pl-8 pr-6 py-1.5 border border-slate-200 dark:border-slate-700 rounded-lg text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200 appearance-none bg-white"
-              >
-                <option value="ALL">Semua Status</option>
-                <option value="SCHEDULED">Terjadwal</option>
-                <option value="CANCELLED">Dibatalkan</option>
-              </select>
+                onChange={setFilterStatus}
+                options={[
+                  { value: "ALL", label: "Semua Status" },
+                  { value: "SCHEDULED", label: "Terjadwal" },
+                  { value: "CANCELLED", label: "Dibatalkan" }
+                ]}
+              />
             </div>
 
             <div className="hidden md:flex items-center gap-4 ml-2 border-l border-slate-200 dark:border-slate-700 pl-4">
