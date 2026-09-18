@@ -11,8 +11,27 @@ export default function StudentScanPage() {
   const router = useRouter();
   const tenantSlug = pathname.split('/')[1] || 'Bimbel';
 
-  const [scanStatus, setScanStatus] = useState<'IDLE' | 'SCANNING' | 'PROCESSING' | 'SUCCESS' | 'ERROR'>('SCANNING');
+  const [scanStatus, setScanStatus] = useState<'IDLE' | 'SCANNING' | 'PROCESSING' | 'SUCCESS' | 'ERROR' | 'PERMISSION_DENIED'>('SCANNING');
   const [message, setMessage] = useState('');
+
+  const handleError = (error: unknown) => {
+    console.error(error);
+    if (error instanceof Error) {
+      if (error.name === 'NotAllowedError' || error.message.includes('Permission denied')) {
+        setScanStatus('PERMISSION_DENIED');
+        setMessage('Akses kamera ditolak. Harap izinkan akses kamera di pengaturan browser Anda.');
+      } else if (error.name === 'NotFoundError') {
+        setScanStatus('ERROR');
+        setMessage('Kamera tidak ditemukan di perangkat ini.');
+      } else {
+        setScanStatus('ERROR');
+        setMessage('Terjadi kesalahan saat mengakses kamera: ' + error.message);
+      }
+    } else {
+      setScanStatus('ERROR');
+      setMessage('Terjadi kesalahan yang tidak diketahui pada kamera.');
+    }
+  };
 
   const handleScan = async (detectedCodes: any[]) => {
     if (scanStatus !== 'SCANNING' || detectedCodes.length === 0) return;
@@ -60,6 +79,7 @@ export default function StudentScanPage() {
             <div className="w-full aspect-square rounded-2xl overflow-hidden border-4 border-slate-100 dark:border-slate-800 relative bg-slate-900">
               <Scanner 
                 onScan={handleScan}
+                onError={handleError}
                 components={{
                   onOff: true,
                   torch: true,
@@ -103,6 +123,33 @@ export default function StudentScanPage() {
             >
               <AlertCircle size={18} />
               Coba Lagi
+            </button>
+          </div>
+        )}
+
+        {scanStatus === 'PERMISSION_DENIED' && (
+          <div className="py-8 flex flex-col items-center">
+            <div className="w-20 h-20 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center mb-6">
+              <AlertCircle size={40} className="text-orange-600 dark:text-orange-400" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Akses Kamera Ditolak</h2>
+            <p className="text-slate-500 mb-6 text-center max-w-xs">{message}</p>
+            
+            <div className="bg-orange-50 dark:bg-orange-900/10 p-4 rounded-xl text-sm text-orange-800 dark:text-orange-300 text-left mb-6">
+              <p className="font-semibold mb-2">Cara mengaktifkan kamera:</p>
+              <ol className="list-decimal pl-4 space-y-1">
+                <li>Klik ikon gembok 🔒 di dekat URL web browser.</li>
+                <li>Cari pengaturan <strong>Kamera</strong> atau <strong>Camera</strong>.</li>
+                <li>Ubah dari <em>Block</em> menjadi <em>Allow</em>.</li>
+                <li>Refresh halaman ini.</li>
+              </ol>
+            </div>
+
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors flex items-center gap-2"
+            >
+              Refresh Halaman
             </button>
           </div>
         )}
