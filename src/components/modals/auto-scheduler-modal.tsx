@@ -143,7 +143,7 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Tanggal Mulai Kelas
-                </label>
+                 <span className="text-red-500">*</span></label>
                 <input
                   type="date"
                   name="start_date"
@@ -156,7 +156,7 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                     Jam Mulai
-                  </label>
+                   <span className="text-red-500">*</span></label>
                   <input
                     type="time"
                     name="start_time"
@@ -167,7 +167,7 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                     Jam Selesai
-                  </label>
+                   <span className="text-red-500">*</span></label>
                   <input
                     type="time"
                     name="end_time"
@@ -210,7 +210,7 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Tutor Pengajar
-                </label>
+                 <span className="text-red-500">*</span></label>
                 <select
                   name="tutor_id"
                   required
@@ -226,7 +226,7 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Ruang Kelas
-                </label>
+                 <span className="text-red-500">*</span></label>
                 <select
                   name="room_id"
                   required

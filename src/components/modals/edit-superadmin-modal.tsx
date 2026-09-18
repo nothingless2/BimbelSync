@@ -70,7 +70,7 @@ export function EditSuperadminModal({ isOpen, onClose, user }: EditSuperadminMod
 
           <form action={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Password Baru</label>
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Password Baru <span className="text-red-500">*</span></label>
               <input 
                 type="password" 
                 name="password"
@@ -82,7 +82,7 @@ export function EditSuperadminModal({ isOpen, onClose, user }: EditSuperadminMod
             </div>
 
             <div className="space-y-1.5 mb-2">
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Konfirmasi Password Baru</label>
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Konfirmasi Password Baru <span className="text-red-500">*</span></label>
               <input 
                 type="password" 
                 name="confirm_password"

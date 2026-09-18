@@ -66,14 +66,14 @@ export function AddAcademyModal({ plans }: { plans: Plan[] }) {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Nama Bimbel</label>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Nama Bimbel <span className="text-red-500">*</span></label>
                 <input name="name" required onChange={handleNameChange} placeholder="Contoh: Bimbel Sukses Mandiri" className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Slug URL <span className="text-slate-400 font-normal">(untuk akses: domain.com/<strong>slug</strong>/login)</span>
-                </label>
+                 <span className="text-red-500">*</span></label>
                 <input name="path_url" required value={slugPreview} onChange={(e) => setSlugPreview(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))} placeholder="bimbel-sukses-mandiri" className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono" />
                 {slugPreview && (
                   <p className="text-xs text-slate-500">Preview: <span className="text-blue-600 font-medium">localhost:3000/{slugPreview}/login</span></p>
@@ -81,7 +81,7 @@ export function AddAcademyModal({ plans }: { plans: Plan[] }) {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Paket Berlangganan</label>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Paket Berlangganan <span className="text-red-500">*</span></label>
                 <select name="plan_id" required className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm">
                   <option value="">-- Pilih Paket --</option>
                   {plans.map((plan) => (
@@ -129,7 +129,7 @@ export function AddAcademyModal({ plans }: { plans: Plan[] }) {
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wider pt-2">Akun Admin Bimbel</p>
 
                 <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Email Admin</label>
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Email Admin <span className="text-red-500">*</span></label>
                   <input type="email" name="admin_email" required placeholder="admin@namabimbel.com" className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                 </div>
 

@@ -59,7 +59,7 @@ export function EditPlanModal({ isOpen, onClose, plan }: EditPlanModalProps) {
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Nama Paket</label>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Nama Paket <span className="text-red-500">*</span></label>
                 <input 
                   type="text" 
                   name="name"
@@ -71,7 +71,7 @@ export function EditPlanModal({ isOpen, onClose, plan }: EditPlanModalProps) {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Harga (Rp) / Bulan</label>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Harga (Rp) / Bulan <span className="text-red-500">*</span></label>
                 <input 
                   type="number" 
                   name="price"

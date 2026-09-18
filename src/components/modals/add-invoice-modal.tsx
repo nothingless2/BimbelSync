@@ -102,7 +102,7 @@ export function AddInvoiceModal({ students }: { students: Student[] }) {
               <div className="space-y-2">
                 <label htmlFor="student_id" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Pilih Siswa
-                </label>
+                 <span className="text-red-500">*</span></label>
                 <select
                   id="student_id"
                   name="student_id"

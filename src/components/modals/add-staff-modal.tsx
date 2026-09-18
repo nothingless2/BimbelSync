@@ -60,7 +60,7 @@ export function AddStaffModal({ tenantSlug }: { tenantSlug: string }) {
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Email Staf
-                </label>
+                 <span className="text-red-500">*</span></label>
                 <input
                   type="email"
                   id="email"
@@ -74,7 +74,7 @@ export function AddStaffModal({ tenantSlug }: { tenantSlug: string }) {
               <div className="space-y-2">
                 <label htmlFor="role" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Peran (Role)
-                </label>
+                 <span className="text-red-500">*</span></label>
                 <select
                   id="role"
                   name="role"
@@ -89,7 +89,7 @@ export function AddStaffModal({ tenantSlug }: { tenantSlug: string }) {
               <div className="space-y-2">
                 <label htmlFor="password" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Password Sementara
-                </label>
+                 <span className="text-red-500">*</span></label>
                 <input
                   type="password"
                   id="password"

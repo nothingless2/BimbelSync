@@ -73,7 +73,7 @@ export function AddScheduleModal({
               <div className="space-y-2">
                 <label htmlFor="program_id" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Pilih Program
-                </label>
+                 <span className="text-red-500">*</span></label>
                 <select
                   id="program_id"
                   name="program_id"
@@ -92,7 +92,7 @@ export function AddScheduleModal({
                 <div className="space-y-2">
                   <label htmlFor="tutor_id" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                     Pilih Tutor
-                  </label>
+                   <span className="text-red-500">*</span></label>
                   <select
                     id="tutor_id"
                     name="tutor_id"
@@ -109,7 +109,7 @@ export function AddScheduleModal({
                 <div className="space-y-2">
                   <label htmlFor="room_id" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                     Pilih Ruangan
-                  </label>
+                   <span className="text-red-500">*</span></label>
                   <select
                     id="room_id"
                     name="room_id"
@@ -129,7 +129,7 @@ export function AddScheduleModal({
                 <div className="space-y-2">
                   <label htmlFor="date" className="text-sm font-bold text-slate-700 dark:text-slate-300">
                     Tanggal Pelaksanaan
-                  </label>
+                   <span className="text-red-500">*</span></label>
                   <input
                     type="date"
                     id="date"
@@ -143,7 +143,7 @@ export function AddScheduleModal({
                   <div className="space-y-2">
                     <label htmlFor="start_time" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                       Jam Mulai
-                    </label>
+                     <span className="text-red-500">*</span></label>
                     <input
                       type="time"
                       id="start_time"
@@ -155,7 +155,7 @@ export function AddScheduleModal({
                   <div className="space-y-2">
                     <label htmlFor="end_time" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                       Jam Selesai
-                    </label>
+                     <span className="text-red-500">*</span></label>
                     <input
                       type="time"
                       id="end_time"

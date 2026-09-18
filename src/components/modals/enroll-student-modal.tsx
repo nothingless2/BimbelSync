@@ -71,7 +71,7 @@ export function EnrollStudentModal({
           <div className="space-y-2">
             <label htmlFor="program_id" className="text-sm font-bold text-slate-700 dark:text-slate-300">
               Pilih Program / Paket Belajar
-            </label>
+             <span className="text-red-500">*</span></label>
             <select
               id="program_id"
               name="program_id"

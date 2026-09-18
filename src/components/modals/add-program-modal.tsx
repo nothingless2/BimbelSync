@@ -60,7 +60,7 @@ export function AddProgramModal({ tenantSlug }: { tenantSlug: string }) {
               <div className="space-y-2">
                 <label htmlFor="name" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Nama Program
-                </label>
+                 <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   id="name"
@@ -75,7 +75,7 @@ export function AddProgramModal({ tenantSlug }: { tenantSlug: string }) {
                 <div className="space-y-2">
                   <label htmlFor="max_capacity" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                     Kapasitas (Siswa)
-                  </label>
+                   <span className="text-red-500">*</span></label>
                   <input
                     type="number"
                     id="max_capacity"

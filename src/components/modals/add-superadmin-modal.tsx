@@ -58,7 +58,7 @@ export function AddSuperadminModal({ isOpen, onClose }: AddSuperadminModalProps)
 
           <form action={handleSubmit} className="space-y-5">
             <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Email Address</label>
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Email Address <span className="text-red-500">*</span></label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input 
@@ -72,7 +72,7 @@ export function AddSuperadminModal({ isOpen, onClose }: AddSuperadminModalProps)
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Password Sementara</label>
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Password Sementara <span className="text-red-500">*</span></label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input 
