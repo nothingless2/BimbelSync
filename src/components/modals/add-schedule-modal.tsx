@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus, X, AlertCircle } from "lucide-react";
 import { createScheduleAction } from "@/app/[tenantSlug]/dashboard/schedules/actions";
 import { Program, Room, Staff } from "@prisma/client";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 export function AddScheduleModal({ 
   programs, 
@@ -73,52 +74,37 @@ export function AddScheduleModal({
               <div className="space-y-2">
                 <label htmlFor="program_id" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Pilih Program</label>
-                <select
+                <CustomSelect
                   id="program_id"
                   name="program_id"
                   required
-                  defaultValue=""
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none font-medium"
-                >
-                  <option value="" disabled>Pilih Program...</option>
-                  {programs.map((p) => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
-                </select>
+                  placeholder="Pilih Program..."
+                  options={programs.map((p) => ({ value: p.id, label: p.name }))}
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label htmlFor="tutor_id" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                     Pilih Tutor</label>
-                  <select
+                  <CustomSelect
                     id="tutor_id"
                     name="tutor_id"
                     required
-                    defaultValue=""
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none"
-                  >
-                    <option value="" disabled>Pilih Tutor...</option>
-                    {tutors.map((t) => (
-                      <option key={t.id} value={t.id}>{t.email} ({t.role})</option>
-                    ))}
-                  </select>
+                    placeholder="Pilih Tutor..."
+                    options={tutors.map((t) => ({ value: t.id, label: `${t.email} (${t.role})` }))}
+                  />
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="room_id" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                     Pilih Ruangan</label>
-                  <select
+                  <CustomSelect
                     id="room_id"
                     name="room_id"
                     required
-                    defaultValue=""
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none"
-                  >
-                    <option value="" disabled>Pilih Ruangan...</option>
-                    {rooms.map((r) => (
-                      <option key={r.id} value={r.id}>{r.name} (Kapasitas: {r.capacity})</option>
-                    ))}
-                  </select>
+                    placeholder="Pilih Ruangan..."
+                    options={rooms.map((r) => ({ value: r.id, label: `${r.name} (Kapasitas: ${r.capacity})` }))}
+                  />
                 </div>
               </div>
 
