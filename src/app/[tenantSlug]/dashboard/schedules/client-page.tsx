@@ -191,7 +191,7 @@ export default function SchedulesClientPage({
             <div className="relative w-full sm:w-auto">
               <CustomSelect
                 value={filterStatus}
-                onChange={setFilterStatus}
+                onChange={(val) => setFilterStatus(val as any)}
                 options={[
                   { value: "ALL", label: "Semua Status" },
                   { value: "SCHEDULED", label: "Terjadwal" },

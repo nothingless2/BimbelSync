@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Building, X, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Building, X, AlertCircle, Eye, EyeOff, Plus } from "lucide-react";
 import { createAcademyAction } from "@/app/superadmin/(dashboard)/actions";
 import { CustomSelect } from "@/components/ui/custom-select";
 

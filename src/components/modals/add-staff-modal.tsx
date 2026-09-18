@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Plus, X, AlertCircle } from "lucide-react";
 import { createStaffAction } from "@/app/[tenantSlug]/dashboard/master-data/staff/actions";
-import { UserRole } from "@prisma/client";
+
 import { CustomSelect } from "@/components/ui/custom-select";
 
 export function AddStaffModal({ tenantSlug }: { tenantSlug: string }) {
