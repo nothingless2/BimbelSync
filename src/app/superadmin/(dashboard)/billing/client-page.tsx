@@ -502,19 +502,19 @@ export default function BillingClientPage({ invoices, academies }: Props) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Periode Billing <span className="text-red-500">*</span></label>
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Periode Billing</label>
                   <input type="month" required value={form.billingPeriod.slice(0, 7)} onChange={(e) => setForm({ ...form, billingPeriod: e.target.value + "-01" })}
                     className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none" />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Jatuh Tempo <span className="text-red-500">*</span></label>
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Jatuh Tempo</label>
                   <input type="date" required value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
                     className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none" />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Nominal (Rp) <span className="text-red-500">*</span></label>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Nominal (Rp)</label>
                 <input type="number" required min={0} value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })}
                   placeholder={selectedAcademy ? `Default: ${IDR(selectedAcademy.plan.price)}` : "0"}
                   className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none" />
@@ -523,8 +523,7 @@ export default function BillingClientPage({ invoices, academies }: Props) {
 
               <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">
-                  Durasi Langganan (Bulan)
-                 <span className="text-red-500">*</span></label>
+                  Durasi Langganan (Bulan)</label>
                 <p className="text-[11px] text-slate-500 mb-3">Tentukan berapa bulan akses yang akan diberikan jika tagihan ini dilunasi.</p>
                 <input
                   type="number"

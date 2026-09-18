@@ -80,8 +80,7 @@ export function VerifyPaymentModal({
 
           <div className="space-y-2">
             <label htmlFor="payment_method" className="text-sm font-bold text-slate-700 dark:text-slate-300">
-              Metode Pembayaran
-             <span className="text-red-500">*</span></label>
+              Metode Pembayaran</label>
             <p className="text-xs text-slate-500 mb-2">Pilih bagaimana siswa ini melunasi tagihannya kepada Anda.</p>
             <select
               id="payment_method"

@@ -72,8 +72,7 @@ export function AddScheduleModal({
 
               <div className="space-y-2">
                 <label htmlFor="program_id" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  Pilih Program
-                 <span className="text-red-500">*</span></label>
+                  Pilih Program</label>
                 <select
                   id="program_id"
                   name="program_id"
@@ -91,8 +90,7 @@ export function AddScheduleModal({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label htmlFor="tutor_id" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                    Pilih Tutor
-                   <span className="text-red-500">*</span></label>
+                    Pilih Tutor</label>
                   <select
                     id="tutor_id"
                     name="tutor_id"
@@ -108,8 +106,7 @@ export function AddScheduleModal({
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="room_id" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                    Pilih Ruangan
-                   <span className="text-red-500">*</span></label>
+                    Pilih Ruangan</label>
                   <select
                     id="room_id"
                     name="room_id"
@@ -128,8 +125,7 @@ export function AddScheduleModal({
               <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-4">
                 <div className="space-y-2">
                   <label htmlFor="date" className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                    Tanggal Pelaksanaan
-                   <span className="text-red-500">*</span></label>
+                    Tanggal Pelaksanaan</label>
                   <input
                     type="date"
                     id="date"
@@ -142,8 +138,7 @@ export function AddScheduleModal({
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label htmlFor="start_time" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                      Jam Mulai
-                     <span className="text-red-500">*</span></label>
+                      Jam Mulai</label>
                     <input
                       type="time"
                       id="start_time"
@@ -154,8 +149,7 @@ export function AddScheduleModal({
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="end_time" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                      Jam Selesai
-                     <span className="text-red-500">*</span></label>
+                      Jam Selesai</label>
                     <input
                       type="time"
                       id="end_time"

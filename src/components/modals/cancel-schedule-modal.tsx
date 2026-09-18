@@ -68,8 +68,7 @@ export function CancelScheduleModal({
 
           <div className="space-y-2">
             <label htmlFor="reason" className="text-sm font-bold text-slate-700 dark:text-slate-300">
-              Alasan Pembatalan
-             <span className="text-red-500">*</span></label>
+              Alasan Pembatalan</label>
             <p className="text-xs text-slate-500 mb-2">Berikan alasan mengapa kelas ini dibatalkan (misal: Tutor berhalangan hadir).</p>
             <textarea
               id="reason"

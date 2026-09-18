@@ -142,8 +142,7 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  Tanggal Mulai Kelas
-                 <span className="text-red-500">*</span></label>
+                  Tanggal Mulai Kelas</label>
                 <input
                   type="date"
                   name="start_date"
@@ -155,8 +154,7 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                    Jam Mulai
-                   <span className="text-red-500">*</span></label>
+                    Jam Mulai</label>
                   <input
                     type="time"
                     name="start_time"
@@ -166,8 +164,7 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                    Jam Selesai
-                   <span className="text-red-500">*</span></label>
+                    Jam Selesai</label>
                   <input
                     type="time"
                     name="end_time"
@@ -209,8 +206,7 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  Tutor Pengajar
-                 <span className="text-red-500">*</span></label>
+                  Tutor Pengajar</label>
                 <select
                   name="tutor_id"
                   required
@@ -225,8 +221,7 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  Ruang Kelas
-                 <span className="text-red-500">*</span></label>
+                  Ruang Kelas</label>
                 <select
                   name="room_id"
                   required

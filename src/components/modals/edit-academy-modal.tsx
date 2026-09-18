@@ -62,7 +62,7 @@ export function EditAcademyModal({ isOpen, onClose, academy, plans }: EditAcadem
 
           <form action={handleSubmit} className="space-y-5">
             <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Nama Bimbel <span className="text-red-500">*</span></label>
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Nama Bimbel</label>
               <input 
                 type="text" 
                 name="name"
@@ -73,7 +73,7 @@ export function EditAcademyModal({ isOpen, onClose, academy, plans }: EditAcadem
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Path URL (Slug) <span className="text-red-500">*</span></label>
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Path URL (Slug)</label>
               <input 
                 type="text" 
                 name="path_url"
@@ -85,7 +85,7 @@ export function EditAcademyModal({ isOpen, onClose, academy, plans }: EditAcadem
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Paket Berlangganan (Plan) <span className="text-red-500">*</span></label>
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Paket Berlangganan (Plan)</label>
               <select 
                 name="plan_id" 
                 required 
@@ -100,7 +100,7 @@ export function EditAcademyModal({ isOpen, onClose, academy, plans }: EditAcadem
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Status Langganan <span className="text-red-500">*</span></label>
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Status Langganan</label>
               <select 
                 name="status" 
                 required 

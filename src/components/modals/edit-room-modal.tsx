@@ -57,8 +57,7 @@ export function EditRoomModal({
 
           <div className="space-y-2">
             <label htmlFor="name" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-              Nama Ruangan
-             <span className="text-red-500">*</span></label>
+              Nama Ruangan</label>
             <input
               type="text"
               id="name"
@@ -72,8 +71,7 @@ export function EditRoomModal({
 
           <div className="space-y-2">
             <label htmlFor="capacity" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-              Maksimal Kapasitas (Siswa)
-             <span className="text-red-500">*</span></label>
+              Maksimal Kapasitas (Siswa)</label>
             <input
               type="number"
               id="capacity"

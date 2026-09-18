@@ -330,7 +330,7 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
             </div>
             <form onSubmit={handleAddColumn} className="p-5 space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Judul Tugas <span className="text-red-500">*</span></label>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Judul Tugas</label>
                 <input
                   type="text"
                   required

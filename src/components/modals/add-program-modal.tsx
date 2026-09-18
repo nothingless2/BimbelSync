@@ -59,8 +59,7 @@ export function AddProgramModal({ tenantSlug }: { tenantSlug: string }) {
 
               <div className="space-y-2">
                 <label htmlFor="name" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  Nama Program
-                 <span className="text-red-500">*</span></label>
+                  Nama Program</label>
                 <input
                   type="text"
                   id="name"
@@ -74,8 +73,7 @@ export function AddProgramModal({ tenantSlug }: { tenantSlug: string }) {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <label htmlFor="max_capacity" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                    Kapasitas (Siswa)
-                   <span className="text-red-500">*</span></label>
+                    Kapasitas (Siswa)</label>
                   <input
                     type="number"
                     id="max_capacity"

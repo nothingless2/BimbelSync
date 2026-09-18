@@ -64,8 +64,7 @@ export function AddStudentModal({ tenantSlug, programs }: { tenantSlug: string, 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label htmlFor="full_name" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                    Nama Lengkap
-                   <span className="text-red-500">*</span></label>
+                    Nama Lengkap</label>
                   <input
                     type="text"
                     id="full_name"
@@ -92,8 +91,7 @@ export function AddStudentModal({ tenantSlug, programs }: { tenantSlug: string, 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label htmlFor="username" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                    Username
-                   <span className="text-red-500">*</span></label>
+                    Username</label>
                   <input
                     type="text"
                     id="username"
@@ -105,8 +103,7 @@ export function AddStudentModal({ tenantSlug, programs }: { tenantSlug: string, 
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="password" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                    Password Sementara
-                   <span className="text-red-500">*</span></label>
+                    Password Sementara</label>
                   <input
                     type="password"
                     id="password"
@@ -122,8 +119,7 @@ export function AddStudentModal({ tenantSlug, programs }: { tenantSlug: string, 
               <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
                 <div className="space-y-2">
                   <label htmlFor="program_id" className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                    Pilih Program / Paket Belajar
-                   <span className="text-red-500">*</span></label>
+                    Pilih Program / Paket Belajar</label>
                   <p className="text-xs text-slate-500 mb-2">Siswa wajib dimasukkan ke dalam minimal 1 program saat mendaftar.</p>
                   <select
                     id="program_id"

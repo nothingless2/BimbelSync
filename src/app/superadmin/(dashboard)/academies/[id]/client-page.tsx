@@ -493,7 +493,7 @@ export default function TenantDetailClientPage({ academy, plans, invoices, audit
             </div>
             <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
               <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Nama Akademi <span className="text-red-500">*</span></label>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Nama Akademi</label>
                 <input type="text" required value={editForm.name} onChange={(e) => setEditForm({...editForm, name: e.target.value})}
                   className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
