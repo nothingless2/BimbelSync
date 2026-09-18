@@ -102,8 +102,8 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
 
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm transition-opacity overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in duration-200 my-auto">
-            <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-slate-800 bg-emerald-50 dark:bg-emerald-900/10">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-lg overflow-visible border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in duration-200 my-auto flex flex-col max-h-[90vh]">
+            <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-slate-800 bg-emerald-50 dark:bg-emerald-900/10 shrink-0 rounded-t-2xl">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
                   <CalendarClock size={20} className="text-emerald-600 dark:text-emerald-400" />
@@ -121,7 +121,7 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-5">
+            <form onSubmit={handleSubmit} className="p-6 space-y-5 overflow-y-visible">
               {errorMsg && (
                 <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-lg flex gap-3 items-start text-sm border border-red-200 dark:border-red-900/50">
                   <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
@@ -191,7 +191,9 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
                         { value: "75", label: "75 Menit" },
                         { value: "90", label: "90 Menit (1.5 Jam)" },
                         { value: "120", label: "120 Menit (2 Jam)" },
+                        { value: "150", label: "150 Menit (2.5 Jam)" },
                         { value: "180", label: "180 Menit (3 Jam)" },
+                        { value: "240", label: "240 Menit (4 Jam)" },
                       ]}
                     />
                     {/* Hidden input for end_time */}

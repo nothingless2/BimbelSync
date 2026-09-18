@@ -60,8 +60,8 @@ export function AddScheduleModal({
 
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm transition-opacity overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in duration-200 my-auto">
-            <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-slate-800">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl overflow-visible border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in duration-200 my-auto flex flex-col max-h-[90vh]">
+            <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-slate-800 shrink-0">
               <div>
                 <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Buat Jadwal Baru</h2>
                 <p className="text-sm text-slate-500">Tentukan waktu kelas, program, tutor, dan ruangan.</p>
@@ -75,7 +75,7 @@ export function AddScheduleModal({
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-5">
+            <form onSubmit={handleSubmit} className="p-6 space-y-5 overflow-y-visible">
               {errorMsg && (
                 <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-lg flex gap-3 items-start text-sm border border-red-200 dark:border-red-900/50">
                   <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
@@ -162,7 +162,9 @@ export function AddScheduleModal({
                         { value: "75", label: "75 Menit" },
                         { value: "90", label: "90 Menit (1.5 Jam)" },
                         { value: "120", label: "120 Menit (2 Jam)" },
+                        { value: "150", label: "150 Menit (2.5 Jam)" },
                         { value: "180", label: "180 Menit (3 Jam)" },
+                        { value: "240", label: "240 Menit (4 Jam)" },
                       ]}
                     />
                     {/* Hidden input for end_time */}
