@@ -19,22 +19,22 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://bimbel-sync.vercel.app"),
   title: "BimbelSync - Manajemen Bimbel Modern",
   description: "Platform orkestrasi penjadwalan dan keuangan bimbel.",
-  // Tambahkan baris di bawah ini:
   openGraph: {
     title: "BimbelSync - Manajemen Bimbel Modern",
     description: "Tinggalkan cara manual. Bergabunglah dengan ratusan pemilik bimbel yang telah menghemat waktu dan meningkatkan omzet.",
-    url: "https://bimbelsync.com",
+    url: "https://bimbel-sync.vercel.app",
     siteName: "BimbelSync",
     locale: "id_ID",
     type: "website",
     images: [
       {
-        url: "/login-bg.png", // Menggunakan gambar yang ada sebagai thumbnail sementara
-        width: 1200,
-        height: 630,
-        alt: "BimbelSync Preview",
+        url: "/logo.png", // Menggunakan logo karena ukurannya kecil (di bawah 300KB) agar tampil di WA
+        width: 800,
+        height: 800,
+        alt: "BimbelSync Logo",
       }
     ],
   },
