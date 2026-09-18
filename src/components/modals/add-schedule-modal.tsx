@@ -18,6 +18,18 @@ export function AddScheduleModal({
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  
+  const [startTime, setStartTime] = useState("");
+  const [duration, setDuration] = useState("90");
+
+  const computeEndTime = () => {
+    if (!startTime) return "";
+    const [h, m] = startTime.split(":").map(Number);
+    const d = new Date();
+    d.setHours(h, m + parseInt(duration), 0, 0);
+    return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+  };
+  const computedEndTime = computeEndTime();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -130,19 +142,34 @@ export function AddScheduleModal({
                       id="start_time"
                       name="start_time"
                       required
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label htmlFor="end_time" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                      Jam Selesai</label>
-                    <input
-                      type="time"
-                      id="end_time"
-                      name="end_time"
+                    <label htmlFor="duration" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                      Durasi Waktu</label>
+                    <CustomSelect
+                      id="duration"
+                      name="duration"
                       required
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                      value={duration}
+                      onChange={setDuration}
+                      options={[
+                        { value: "45", label: "45 Menit" },
+                        { value: "60", label: "60 Menit (1 Jam)" },
+                        { value: "75", label: "75 Menit" },
+                        { value: "90", label: "90 Menit (1.5 Jam)" },
+                        { value: "120", label: "120 Menit (2 Jam)" },
+                        { value: "180", label: "180 Menit (3 Jam)" },
+                      ]}
                     />
+                    {/* Hidden input for end_time */}
+                    <input type="hidden" name="end_time" value={computedEndTime} />
+                    {startTime && (
+                      <p className="text-xs text-slate-500 mt-1">Selesai: {computedEndTime}</p>
+                    )}
                   </div>
                 </div>
               </div>
