@@ -26,8 +26,8 @@ const nextConfig: NextConfig = {
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           // Mengontrol informasi apa yang dikirim di header Referer
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          // Menonaktifkan API browser yang tidak dibutuhkan (kamera, mikrofon, GPS)
-          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          // Menonaktifkan API browser yang tidak dibutuhkan, tapi mengizinkan kamera
+          { key: 'Permissions-Policy', value: 'camera=(self), microphone=(), geolocation=()' },
           // Memaksa browser selalu pakai HTTPS (aktif di production)
           { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
         ],
