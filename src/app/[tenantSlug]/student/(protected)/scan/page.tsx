@@ -14,22 +14,29 @@ export default function StudentScanPage() {
   const [scanStatus, setScanStatus] = useState<'IDLE' | 'SCANNING' | 'PROCESSING' | 'SUCCESS' | 'ERROR' | 'PERMISSION_DENIED'>('SCANNING');
   const [message, setMessage] = useState('');
 
-  const handleError = (error: unknown) => {
-    console.error(error);
-    if (error instanceof Error) {
-      if (error.name === 'NotAllowedError' || error.message.includes('Permission denied')) {
-        setScanStatus('PERMISSION_DENIED');
-        setMessage('Akses kamera ditolak. Harap izinkan akses kamera di pengaturan browser Anda.');
-      } else if (error.name === 'NotFoundError') {
-        setScanStatus('ERROR');
-        setMessage('Kamera tidak ditemukan di perangkat ini.');
-      } else {
-        setScanStatus('ERROR');
-        setMessage('Terjadi kesalahan saat mengakses kamera: ' + error.message);
-      }
+  const handleError = (error: any) => {
+    console.error("Camera Error:", error);
+    
+    let errorName = '';
+    let errorMessage = '';
+
+    if (typeof error === 'string') {
+      errorMessage = error;
+      errorName = error;
+    } else if (error && typeof error === 'object') {
+      errorName = error.name || '';
+      errorMessage = error.message || JSON.stringify(error);
+    }
+
+    if (errorName === 'NotAllowedError' || errorMessage.includes('Permission denied') || errorMessage.includes('NotAllowedError')) {
+      setScanStatus('PERMISSION_DENIED');
+      setMessage('Akses kamera ditolak. Harap izinkan akses kamera di pengaturan browser Anda.');
+    } else if (errorName === 'NotFoundError' || errorMessage.includes('NotFoundError')) {
+      setScanStatus('ERROR');
+      setMessage('Kamera tidak ditemukan di perangkat ini.');
     } else {
       setScanStatus('ERROR');
-      setMessage('Terjadi kesalahan yang tidak diketahui pada kamera.');
+      setMessage(`Gagal mengakses kamera: ${errorMessage || 'Kesalahan tidak diketahui'}`);
     }
   };
 
