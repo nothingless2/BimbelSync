@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -14,10 +14,24 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  themeColor: "#2563EB",
+};
+
 export const metadata: Metadata = {
   title: "BimbelSync - Manajemen Bimbel Modern",
   description: "Platform orkestrasi penjadwalan dan keuangan bimbel.",
+  // Tambahkan baris di bawah ini:
+  openGraph: {
+    title: "BimbelSync - Manajemen Bimbel Modern",
+    description: "Tinggalkan cara manual. Bergabunglah dengan ratusan pemilik bimbel yang telah menghemat waktu dan meningkatkan omzet.",
+    url: "https://bimbelsync.com",
+    siteName: "BimbelSync",
+    locale: "id_ID",
+    type: "website",
+  },
 };
+
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
