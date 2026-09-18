@@ -29,6 +29,14 @@ export const metadata: Metadata = {
     siteName: "BimbelSync",
     locale: "id_ID",
     type: "website",
+    images: [
+      {
+        url: "/login-bg.png", // Menggunakan gambar yang ada sebagai thumbnail sementara
+        width: 1200,
+        height: 630,
+        alt: "BimbelSync Preview",
+      }
+    ],
   },
 };
 
