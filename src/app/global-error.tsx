@@ -24,7 +24,7 @@ export default function GlobalError({
               </p>
               <button 
                 onClick={() => reset()}
-                className="inline-flex items-center justify-center px-6 py-3 bg-red-600 text-white font-bold rounded-none hover:bg-red-700 transition-colors"
+                className="inline-flex items-center justify-center px-6 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
               >
                 Muat Ulang Paksa
               </button>
