@@ -115,7 +115,7 @@ export function CustomSelect({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute z-50 w-full mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg shadow-slate-200/20 dark:shadow-black/40 overflow-hidden"
+            className="absolute z-50 min-w-full w-max mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg shadow-slate-200/20 dark:shadow-black/40 overflow-hidden"
           >
             <ul className="max-h-60 overflow-y-auto custom-scrollbar p-1">
               {options.length === 0 ? (
@@ -131,7 +131,7 @@ export function CustomSelect({
                         : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
                     }`}
                   >
-                    <span className="truncate">{opt.label}</span>
+                    <span className="whitespace-nowrap pr-4">{opt.label}</span>
                     {value === opt.value && <Check size={16} className="text-blue-600 dark:text-blue-400" />}
                   </li>
                 ))
