@@ -48,10 +48,10 @@ export default function AuditLogsClientPage({ logs }: Props) {
   }
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm flex flex-col">
       
       {/* Toolbar Filter */}
-      <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 flex justify-end">
+      <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 flex justify-end rounded-t-2xl relative z-10">
         <div className="relative w-full sm:w-64 shrink-0">
           <CustomSelect
             value={filterAction}
