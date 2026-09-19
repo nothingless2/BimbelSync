@@ -234,9 +234,9 @@ export async function rescheduleScheduleAction(formData: FormData) {
     return { error: "Semua field wajib diisi." };
   }
 
-  // Parse time
-  const startDateTime = new Date(`${dateStr}T${startTimeStr}:00`);
-  const endDateTime = new Date(`${dateStr}T${endTimeStr}:00`);
+  // Parse time (Asumsikan input adalah WIB / Asia/Jakarta)
+  const startDateTime = new Date(`${dateStr}T${startTimeStr}:00+07:00`);
+  const endDateTime = new Date(`${dateStr}T${endTimeStr}:00+07:00`);
 
   if (endDateTime <= startDateTime) {
     return { error: "Waktu selesai harus lebih dari waktu mulai." };
