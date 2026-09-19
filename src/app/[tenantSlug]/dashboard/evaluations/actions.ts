@@ -164,3 +164,75 @@ export async function updateEvaluationNotesAction(id: string, notes: string | nu
     return { error: error.message || "Failed to update notes" };
   }
 }
+
+export async function publishEvaluationColumnAction(programId: string, title: string, evaluationType: "EXAM" | "HOMEWORK" | "MONTHLY_REPORT", tenantSlug: string) {
+  const session = await getSession();
+  if (!session || !session.id) return { error: "Unauthorized" };
+
+  try {
+    await prisma.studentEvaluation.updateMany({
+      where: {
+        program_id: programId,
+        title: title,
+        evaluation_type: evaluationType
+      },
+      data: {
+        status: "PUBLISHED"
+      }
+    });
+    revalidatePath(`/${tenantSlug}/dashboard/evaluations`);
+    revalidatePath(`/${tenantSlug}/dashboard/evaluations/gradebook`);
+    revalidatePath(`/${tenantSlug}/student/(protected)/evaluations`);
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message || "Failed to publish column" };
+  }
+}
+
+export async function unpublishEvaluationColumnAction(programId: string, title: string, evaluationType: "EXAM" | "HOMEWORK" | "MONTHLY_REPORT", tenantSlug: string) {
+  const session = await getSession();
+  if (!session || !session.id) return { error: "Unauthorized" };
+
+  try {
+    await prisma.studentEvaluation.updateMany({
+      where: {
+        program_id: programId,
+        title: title,
+        evaluation_type: evaluationType
+      },
+      data: {
+        status: "DRAFT"
+      }
+    });
+    revalidatePath(`/${tenantSlug}/dashboard/evaluations`);
+    revalidatePath(`/${tenantSlug}/dashboard/evaluations/gradebook`);
+    revalidatePath(`/${tenantSlug}/student/(protected)/evaluations`);
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message || "Failed to revert to draft" };
+  }
+}
+
+export async function updateProgramWeightsAction(programId: string, weightExam: number, weightHomework: number, tenantSlug: string) {
+  const session = await getSession();
+  if (!session || !session.id) return { error: "Unauthorized" };
+
+  if (weightExam + weightHomework !== 100) {
+    return { error: "Total bobot harus 100%" };
+  }
+
+  try {
+    await prisma.program.update({
+      where: { id: programId },
+      data: {
+        weight_exam: weightExam,
+        weight_homework: weightHomework
+      }
+    });
+    revalidatePath(`/${tenantSlug}/dashboard/evaluations/gradebook`);
+    revalidatePath(`/${tenantSlug}/dashboard/evaluations`);
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message || "Failed to update weights" };
+  }
+}

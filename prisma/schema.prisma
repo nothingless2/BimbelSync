@@ -90,6 +90,11 @@ enum SubscriptionStatus {
   EXPIRED_TRIAL
 }
 
+enum EvaluationStatus {
+  DRAFT
+  PUBLISHED
+}
+
 model Room {
   id         String    @id @default(uuid()) @db.Uuid
   academy_id String    @db.Uuid
@@ -154,6 +159,8 @@ model Program {
   monthly_fee     Int
   duration_months Int?
   total_meetings  Int?
+  weight_exam     Int       @default(70)
+  weight_homework Int       @default(30)
   deleted_at      DateTime?
 
   academy     Academy      @relation(fields: [academy_id], references: [id])
@@ -351,6 +358,7 @@ model StudentEvaluation {
   evaluation_type  EvaluationType
   score            Decimal?       @db.Decimal(5, 2)
   notes            String?
+  status           EvaluationStatus @default(DRAFT)
   created_at       DateTime       @default(now())
   updated_at       DateTime       @updatedAt
 

@@ -7,6 +7,9 @@ import { toast } from "@/components/ui/sonner";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
+import { publishEvaluationColumnAction, unpublishEvaluationColumnAction } from "./actions";
+import Link from "next/link";
 
 export default function EvaluationsClientPage({ evaluations, students, programs, tenantSlug, academyId, userRole }: any) {
   const [selectedProgramId, setSelectedProgramId] = useState<string>("");
@@ -46,7 +49,7 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
     evals.forEach((e: any) => {
       const key = `${e.title.toLowerCase()}_${e.evaluation_type}`;
       if (!cols.has(key)) {
-        cols.set(key, { title: e.title, type: e.evaluation_type, date: e.created_at });
+        cols.set(key, { title: e.title, type: e.evaluation_type, date: e.created_at, status: e.status });
       }
     });
     // Sort by date descending (newest on left)
@@ -110,6 +113,25 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
     }
   };
 
+  const handleTogglePublish = async (title: string, type: string, currentStatus: string) => {
+    setSavingStatus("SAVING");
+    let res;
+    if (currentStatus === "DRAFT") {
+      res = await publishEvaluationColumnAction(selectedProgramId, title, type as any, tenantSlug);
+    } else {
+      res = await unpublishEvaluationColumnAction(selectedProgramId, title, type as any, tenantSlug);
+    }
+    
+    if (res.error) {
+      toast.error(res.error);
+      setSavingStatus("IDLE");
+    } else {
+      toast.success(currentStatus === "DRAFT" ? "Tugas diterbitkan!" : "Tugas dikembalikan ke Draf.");
+      setSavingStatus("SAVED");
+      setTimeout(() => setSavingStatus("IDLE"), 2000);
+    }
+  };
+
   const handleScoreBlur = async (evaluationId: string, originalScore: string | number | null, newValue: string) => {
     const originalStr = originalScore !== null ? originalScore.toString() : "";
     if (newValue === originalStr) return; // No change
@@ -155,19 +177,27 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
       </div>
 
       {/* Toolbar Filter */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-3 sm:p-4 flex flex-col sm:flex-row gap-4">
-        <div className="sm:w-80 flex items-center gap-3">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-3 sm:p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="w-full sm:w-96 flex flex-col sm:flex-row sm:items-center gap-3">
           <label className="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap">Program:</label>
-          <CustomSelect
+          <SearchableSelect
             value={selectedProgramId}
             onChange={setSelectedProgramId}
-            placeholder="Pilih Program"
+            placeholder="Ketik & Pilih Program..."
             options={programs.map((p: any) => ({
               value: p.id,
               label: p.name
             }))}
           />
         </div>
+        {selectedProgramId && (
+          <Link
+            href={`/${tenantSlug}/dashboard/evaluations/gradebook?programId=${selectedProgramId}`}
+            className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-4 py-2 rounded-xl text-sm font-semibold transition"
+          >
+            <BarChart size={16} /> Lihat Gradebook Akhir
+          </Link>
+        )}
       </div>
 
       {selectedProgramId ? (
@@ -232,16 +262,30 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
                             {format(new Date(col.date), 'dd MMM yy', { locale: id })}
                           </span>
                           
-                          {/* Hover Delete Button */}
+                          {/* Dropdown Menu untuk Status & Hapus */}
                           {userRole === "TUTOR" && (
-                            <button
-                              onClick={() => handleDeleteColumn(col.title, col.type)}
-                              className="absolute -top-1 -right-1 p-1 bg-red-100 text-red-600 rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-200 transition-all shadow-sm"
-                              title="Hapus Tugas Ini"
-                            >
-                              <Trash2 size={12} />
-                            </button>
+                            <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-all flex flex-col gap-1">
+                              <button
+                                onClick={() => handleTogglePublish(col.title, col.type, col.status)}
+                                className={`p-1 rounded-md shadow-sm transition-colors text-white ${col.status === 'DRAFT' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-slate-500 hover:bg-slate-600'}`}
+                                title={col.status === 'DRAFT' ? 'Publish (Siswa bisa melihat)' : 'Jadikan Draf (Sembunyikan dari siswa)'}
+                              >
+                                {col.status === 'DRAFT' ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
+                              </button>
+                              <button
+                                onClick={() => handleDeleteColumn(col.title, col.type)}
+                                className="p-1 bg-red-500 text-white hover:bg-red-600 rounded-md shadow-sm transition-colors"
+                                title="Hapus Tugas Ini"
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
                           )}
+                          <div className="mt-1">
+                            <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide ${col.status === 'PUBLISHED' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'}`}>
+                              {col.status}
+                            </span>
+                          </div>
                         </div>
                       </th>
                     ))}

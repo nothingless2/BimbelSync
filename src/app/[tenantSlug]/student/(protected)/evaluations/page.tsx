@@ -28,7 +28,10 @@ export default async function StudentEvaluationsPage({
 
   // Fetch all evaluations for this student
   const rawEvaluations = await prisma.studentEvaluation.findMany({
-    where: { student_id: session.id as string },
+    where: { 
+      student_id: session.id as string,
+      status: "PUBLISHED"
+    },
     include: {
       program: true,
       evaluator: true,
