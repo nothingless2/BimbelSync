@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Clock, MapPin, User, MoreVertical, Trash2, C
 import { toast } from "@/components/ui/sonner";
 import { deleteScheduleAction } from "./actions";
 import { CancelScheduleModal } from "@/components/modals/cancel-schedule-modal";
+import { RescheduleModal } from "@/components/modals/reschedule-modal";
 import { DaySchedulesModal } from "@/components/modals/day-schedules-modal";
 import { Schedule, Program, Staff, Room } from "@prisma/client";
 import { useRouter } from "next/navigation";
@@ -36,6 +37,7 @@ export default function SchedulesClientPage({
   const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [cancellingSchedule, setCancellingSchedule] = useState<ScheduleWithRelations | null>(null);
+  const [reschedulingSchedule, setReschedulingSchedule] = useState<ScheduleWithRelations | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [selectedDaySchedules, setSelectedDaySchedules] = useState<{date: Date, schedules: ScheduleWithRelations[]} | null>(null);
 
@@ -390,6 +392,14 @@ export default function SchedulesClientPage({
         />
       )}
 
+      {reschedulingSchedule && (
+        <RescheduleModal 
+          schedule={reschedulingSchedule}
+          rooms={rooms}
+          onClose={() => setReschedulingSchedule(null)}
+        />
+      )}
+
       {selectedDaySchedules && (
         <DaySchedulesModal
           date={selectedDaySchedules.date}
@@ -440,6 +450,19 @@ export default function SchedulesClientPage({
                     </div>
                     Lihat Detail & Absensi
                   </button>
+                  
+                  {!isCancelled && !isTutor && (
+                    <button 
+                      type="button" 
+                      onClick={() => { setReschedulingSchedule(activeSch); setOpenDropdownId(null); }} 
+                      className="w-full text-left px-5 py-4 text-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 font-medium text-blue-700 dark:text-blue-400 flex items-center gap-3 transition-colors border-t border-slate-100 dark:border-slate-700/50"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                        <Clock size={16} />
+                      </div>
+                      Ubah Waktu & Ruangan
+                    </button>
+                  )}
                   
                   {!isCancelled && !isTutor && (
                     <button 
