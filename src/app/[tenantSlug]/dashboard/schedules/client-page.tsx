@@ -124,7 +124,7 @@ export default function SchedulesClientPage({
   };
 
   const formatTime = (date: Date) => {
-    return new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' }).format(new Date(date));
+    return new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit' }).format(new Date(date));
   };
 
   const handleDayClick = (day: Date, daySchedules: ScheduleWithRelations[]) => {

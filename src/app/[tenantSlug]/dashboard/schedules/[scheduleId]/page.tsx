@@ -93,13 +93,13 @@ export default async function AttendancePage({
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('id-ID', { 
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+      timeZone: 'Asia/Jakarta', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
     }).format(new Date(date));
   };
 
   const formatTime = (date: Date) => {
     return new Intl.DateTimeFormat('id-ID', { 
-      hour: '2-digit', minute: '2-digit' 
+      timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit' 
     }).format(new Date(date));
   };
 
