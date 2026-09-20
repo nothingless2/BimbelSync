@@ -41,6 +41,12 @@ export async function GET(request: Request) {
         continue;
       }
 
+      // Jika akademi berstatus TRIAL, lewati penagihan SPP
+      if (enrollment.student.academy.subscription_status === 'TRIAL') {
+        console.log(`[CRON] Lewati: Akademi ${enrollment.student.academy.name} masih berstatus TRIAL.`);
+        continue;
+      }
+
       // Pastikan belum ada tagihan SPP untuk bulan dan program ini agar tidak dobel
       const existingInvoice = await prisma.invoice.findFirst({
         where: {

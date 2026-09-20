@@ -45,9 +45,10 @@ interface Props {
   plans: Plan[];
   invoices: InvoiceItem[];
   auditLogs: any[];
+  totalTunggakanSiswa: number;
 }
 
-export default function TenantDetailClientPage({ academy, plans, invoices, auditLogs }: Props) {
+export default function TenantDetailClientPage({ academy, plans, invoices, auditLogs, totalTunggakanSiswa }: Props) {
   const [activeTab, setActiveTab] = useState<"overview" | "admins" | "billing" | "logs">("overview");
   
   // Invite modal state
@@ -269,7 +270,7 @@ export default function TenantDetailClientPage({ academy, plans, invoices, audit
         {activeTab === "billing" && (
           <div className="space-y-6">
             {/* Mini KPI */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
                 <p className="text-xs font-bold text-slate-500 mb-1">Total Invoice</p>
                 <p className="text-2xl font-bold text-slate-800 dark:text-white">{invoices.length}</p>
@@ -281,6 +282,10 @@ export default function TenantDetailClientPage({ academy, plans, invoices, audit
               <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
                 <p className="text-xs font-bold text-slate-500 mb-1">Belum Dibayar</p>
                 <p className="text-xl font-bold text-amber-600">{IDR(totalUnpaid)}</p>
+              </div>
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
+                <p className="text-xs font-bold text-slate-500 mb-1">Total Tunggakan Siswa</p>
+                <p className="text-xl font-bold text-red-600">{IDR(totalTunggakanSiswa)}</p>
               </div>
             </div>
 

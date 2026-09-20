@@ -71,7 +71,7 @@ export default function DashboardClientPage({
                 <Receipt size={120} />
               </div>
               <div className="relative z-10">
-                <h3 className="text-sm font-bold text-rose-100 uppercase tracking-wider mb-2">Tunggakan (Piutang)</h3>
+                <h3 className="text-sm font-bold text-rose-100 uppercase tracking-wider mb-2">Total Tunggakan Siswa</h3>
                 <p className="text-4xl font-black text-white">{formatRupiah(totalUnpaid)}</p>
               </div>
             </div>

@@ -1,11 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import { Star, BookOpen, BarChart, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { Pagination } from "@/components/ui/pagination";
 
 export default function StudentEvaluationsClientPage({ evaluations }: { evaluations: any[] }) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(evaluations.length / itemsPerPage);
   
+  const currentData = evaluations.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   const getIcon = (type: string) => {
     if (type === "EXAM") return <Star size={24} className="text-yellow-500" />;
     if (type === "HOMEWORK") return <BookOpen size={24} className="text-emerald-500" />;
@@ -36,7 +43,7 @@ export default function StudentEvaluationsClientPage({ evaluations }: { evaluati
         </div>
       ) : (
         <div className="space-y-4">
-          {evaluations.map((evaluation: any) => (
+          {currentData.map((evaluation: any) => (
             <div key={evaluation.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -73,12 +80,20 @@ export default function StudentEvaluationsClientPage({ evaluations }: { evaluati
                     {evaluation.program?.name}
                   </p>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Tutor: {evaluation.evaluator?.name}
+                    Tutor: {evaluation.evaluator?.name || evaluation.evaluator?.email || 'Tutor'}
                   </p>
                 </div>
               </div>
             </div>
           ))}
+          
+          <Pagination 
+            currentPage={currentPage} 
+            totalPages={totalPages} 
+            onPageChange={setCurrentPage} 
+            totalItems={evaluations.length} 
+            itemsPerPage={itemsPerPage} 
+          />
         </div>
       )}
     </div>

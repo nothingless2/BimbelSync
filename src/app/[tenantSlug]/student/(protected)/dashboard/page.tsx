@@ -3,6 +3,7 @@ import { decrypt } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import { Calendar, Clock, MapPin, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import StudentSchedulesClientPage from '../schedules/client-page';
 
 // Helper format waktu (WIB) untuk Server Component di Vercel
 const formatTimeWIB = (date: Date | string) => {
@@ -61,18 +62,14 @@ export default async function StudentDashboardPage({
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const upcomingSchedules = await prisma.schedule.findMany({
+  const allSchedules = await prisma.schedule.findMany({
     where: {
       program: {
         academy_id: session.academy_id,
         enrollments: {
           some: { student_id: session.id, status: 'ACTIVE' }
         }
-      },
-      start_time: {
-        gte: today
-      },
-      status: 'SCHEDULED'
+      }
     },
     include: {
       room: true,
@@ -81,15 +78,14 @@ export default async function StudentDashboardPage({
     },
     orderBy: {
       start_time: 'asc'
-    },
-    take: 3 // Ambil 3 jadwal terdekat agar tidak memanjang
+    }
   });
 
   return (
-    <div className="p-4 sm:p-8 md:pt-10">
+    <div className="p-4 sm:p-8 md:pt-10 space-y-8">
       
       {/* Welcome Card */}
-      <div className="bg-blue-700 rounded-3xl p-6 sm:p-8 text-white mb-8">
+      <div className="bg-blue-700 rounded-3xl p-6 sm:p-8 text-white">
         
         <div className="relative z-10">
           <p className="text-blue-100 font-medium mb-1">Selamat datang kembali,</p>
@@ -111,49 +107,11 @@ export default async function StudentDashboardPage({
         </div>
       </div>
 
-      {/* Upcoming Classes */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold text-slate-900 dark:text-white">Jadwal Mendatang</h2>
-        <a href={`/${tenantSlug}/student/schedules`} className="text-sm font-semibold text-blue-600 dark:text-blue-400">Lihat Semua</a>
+      {/* Full Schedule Calendar */}
+      <div>
+        <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Jadwal Kelas</h2>
+        <StudentSchedulesClientPage schedules={allSchedules} tenantSlug={tenantSlug} />
       </div>
-      
-      {upcomingSchedules.length > 0 ? (
-        <div className="space-y-4 mb-10">
-          {upcomingSchedules.map(schedule => (
-            <div key={schedule.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="font-bold text-slate-900 dark:text-white text-lg">{schedule.program.name}</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Tutor: {schedule.tutor.name}</p>
-                </div>
-                <div className="flex flex-col items-end gap-1">
-                  <div className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5">
-                    <Calendar size={12} />
-                    {formatFullDateWIB(schedule.start_time)}
-                  </div>
-                  <div className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 py-1 rounded-lg text-sm font-bold flex items-center gap-1.5">
-                    <Clock size={14} />
-                    {formatTimeWIB(schedule.start_time)} - {formatTimeWIB(schedule.end_time)}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
-                <MapPin size={16} className="text-slate-400" />
-                Ruang {schedule.room.name}
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-dashed rounded-2xl p-8 text-center mb-10">
-          <div className="bg-white dark:bg-slate-800 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
-            <Calendar size={24} className="text-slate-400" />
-          </div>
-          <h3 className="font-semibold text-slate-900 dark:text-white">Tidak ada jadwal mendatang</h3>
-          <p className="text-sm text-slate-500 mt-1">Belum ada kelas yang dijadwalkan untuk Anda.</p>
-        </div>
-      )}
 
       {/* Recent Attendance */}
       <div className="flex justify-between items-center mb-4">

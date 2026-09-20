@@ -15,7 +15,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
 
   const { id } = await params;
 
-  const [academy, plans, invoices, auditLogs] = await Promise.all([
+  const [academy, plans, invoices, auditLogs, totalStudentUnpaid] = await Promise.all([
     prisma.academy.findUnique({
       where: { id },
       include: {
@@ -50,7 +50,16 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
       orderBy: { created_at: "desc" },
       take: 100
     }),
+    prisma.invoice.aggregate({
+      where: {
+        academy_id: id,
+        payment_status: { in: ['UNPAID', 'OVERDUE'] }
+      },
+      _sum: { amount: true }
+    })
   ]);
+
+  const totalTunggakanSiswa = totalStudentUnpaid._sum.amount || 0;
 
   if (!academy) {
     redirect("/superadmin/academies");
@@ -67,5 +76,5 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
     verified_by: inv.verified_by,
   }));
 
-  return <TenantDetailClientPage academy={academy} plans={plans} invoices={serializedInvoices} auditLogs={auditLogs} />;
+  return <TenantDetailClientPage academy={academy} plans={plans} invoices={serializedInvoices} auditLogs={auditLogs} totalTunggakanSiswa={totalTunggakanSiswa} />;
 }

@@ -168,6 +168,10 @@ export async function createInvoiceAction(academyId: string, planId: string, amo
   if (!superadminId) return { error: "Tidak terautentikasi." };
 
   try {
+    const academy = await prisma.academy.findUnique({ where: { id: academyId } });
+    if (!academy) return { error: "Akademi tidak ditemukan." };
+    if (academy.subscription_status === "TRIAL") return { error: "Tidak dapat membuat invoice untuk akademi berstatus TRIAL." };
+
     const newInvoice = await prisma.platformInvoice.create({
       data: {
         academy_id: academyId,

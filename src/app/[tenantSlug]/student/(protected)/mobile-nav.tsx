@@ -12,7 +12,7 @@ export function StudentMobileNav({ tenantSlug }: { tenantSlug: string }) {
   // 4 Primary Menu Items + 1 Menu Button
   const primaryItems = [
     { href: `/${tenantSlug}/student/dashboard`, icon: Home, label: 'Beranda', exact: true },
-    { href: `/${tenantSlug}/student/schedules`, icon: Calendar, label: 'Jadwal' },
+    { href: `/${tenantSlug}/student/evaluations`, icon: BarChart, label: 'Evaluasi' },
     { href: `/${tenantSlug}/student/scan`, icon: QrCode, label: 'Scan', isAction: true }, // Highlighted action
     { href: `/${tenantSlug}/student/profile`, icon: User, label: 'Profil' },
   ];
@@ -21,7 +21,6 @@ export function StudentMobileNav({ tenantSlug }: { tenantSlug: string }) {
   const secondaryItems = [
     { href: `/${tenantSlug}/student/materials`, icon: BookOpen, label: 'Materi Belajar', desc: 'Akses modul dan video pembelajaran' },
     { href: `/${tenantSlug}/student/invoices`, icon: CreditCard, label: 'Tagihan Saya', desc: 'Kelola SPP dan riwayat pembayaran' },
-    { href: `/${tenantSlug}/student/evaluations`, icon: BarChart, label: 'Rapor & Evaluasi', desc: 'Pantau nilai ujian dan laporan harian' },
   ];
 
   const isActive = (href: string, exact?: boolean) => {
