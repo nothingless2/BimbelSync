@@ -138,6 +138,7 @@ export default function StudentAttendancesClientPage({ attendances }: { attendan
             itemsPerPage={itemsPerPage} 
           />
         </div>
+      )}
     </div>
   );
 }
