@@ -55,11 +55,11 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
         academy_id: id,
         payment_status: { in: ['UNPAID', 'OVERDUE'] }
       },
-      _sum: { amount: true }
+      _sum: { total_amount: true }
     })
   ]);
 
-  const totalTunggakanSiswa = totalStudentUnpaid._sum.amount || 0;
+  const totalTunggakanSiswa = totalStudentUnpaid?._sum?.total_amount || 0;
 
   if (!academy) {
     redirect("/superadmin/academies");
