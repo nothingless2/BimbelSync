@@ -174,9 +174,9 @@ export default function DashboardClientPage({
                     <div className="flex-1 min-w-0">
                       <h4 className="text-base font-bold text-slate-900 dark:text-white truncate">{schedule.program?.name}</h4>
                       <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-1">
-                        <span className="truncate">Tutor: {schedule.tutor?.name || schedule.tutor?.email}</span>
+                        <span className="truncate">{schedule.tutor?.name || schedule.tutor?.email}</span>
                         <span>•</span>
-                        <span className="truncate">Ruang: {schedule.room?.name}</span>
+                        <span className="truncate">{schedule.room?.name}</span>
                       </p>
                     </div>
                   </div>
