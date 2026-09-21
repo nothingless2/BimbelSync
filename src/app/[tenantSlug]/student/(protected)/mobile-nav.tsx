@@ -19,6 +19,7 @@ export function StudentMobileNav({ tenantSlug }: { tenantSlug: string }) {
 
   // Secondary Menu Items (inside the "Lainnya" drawer)
   const secondaryItems = [
+    { href: `/${tenantSlug}/student/attendances`, icon: Calendar, label: 'Riwayat Absensi', desc: 'Lihat daftar kehadiran kelas' },
     { href: `/${tenantSlug}/student/materials`, icon: BookOpen, label: 'Materi Belajar', desc: 'Akses modul dan video pembelajaran' },
     { href: `/${tenantSlug}/student/invoices`, icon: CreditCard, label: 'Tagihan Saya', desc: 'Kelola SPP dan riwayat pembayaran' },
   ];

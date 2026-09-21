@@ -1,13 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Clock, MapPin, User, Calendar as CalendarIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Clock, MapPin, User, Calendar as CalendarIcon } from "lucide-react";
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 
 export default function StudentSchedulesClientPage({ schedules, tenantSlug }: any) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [expandedSchedules, setExpandedSchedules] = useState<string[]>([]);
+
+  const toggleSchedule = (id: string) => {
+    setExpandedSchedules(prev => 
+      prev.includes(id) ? prev.filter(sId => sId !== id) : [...prev, id]
+    );
+  };
 
   // Calendar Grid Generation
   const monthStart = startOfMonth(currentDate);
@@ -144,36 +151,44 @@ export default function StudentSchedulesClientPage({ schedules, tenantSlug }: an
           <div className="space-y-3">
             {selectedDaySchedules.map((schedule: any) => {
               const isCancelled = schedule.status === 'CANCELLED';
+              const isExpanded = expandedSchedules.includes(schedule.id);
+              
               return (
                 <div 
                   key={schedule.id}
-                  className={`p-4 rounded-2xl border flex flex-col sm:flex-row gap-4 sm:items-center ${
+                  onClick={() => toggleSchedule(schedule.id)}
+                  className={`p-4 rounded-2xl border flex flex-col gap-3 cursor-pointer transition-all ${
                     isCancelled 
                       ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700' 
-                      : 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/50'
+                      : 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/50 hover:border-blue-300 dark:hover:border-blue-700'
                   }`}
                 >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
                       <h4 className={`font-bold text-base ${isCancelled ? 'text-slate-500 dark:text-slate-400 line-through' : 'text-slate-900 dark:text-white'}`}>
                         {schedule.program.name}
                       </h4>
                       {isCancelled && <span className="bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300 text-[10px] px-2 py-0.5 rounded-full font-bold">DIBATALKAN</span>}
                     </div>
-                    
-                    <div className="flex flex-wrap gap-x-4 gap-y-2 mt-2">
+                    <div className="text-slate-400 transition-transform duration-200">
+                      {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    </div>
+                  </div>
+                  
+                  {isExpanded && (
+                    <div className="flex flex-wrap gap-x-4 gap-y-2 pt-2 border-t border-slate-200/50 dark:border-slate-700/50 animate-in slide-in-from-top-2 fade-in duration-200">
                       <div className={`flex items-center gap-1.5 text-sm font-medium ${isCancelled ? 'text-slate-400' : 'text-blue-600 dark:text-blue-400'}`}>
                         <Clock size={16} className={isCancelled ? "text-slate-400" : "text-blue-500"} />
                         {format(new Date(schedule.start_time), 'HH:mm')} - {format(new Date(schedule.end_time), 'HH:mm')}
                       </div>
                       <div className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
-                        <User size={16} /> {schedule.tutor.name}
+                        <User size={16} /> {schedule.tutor.name || schedule.tutor.email || 'Tutor'}
                       </div>
                       <div className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
                         <MapPin size={16} /> {schedule.room.name}
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               );
             })}
