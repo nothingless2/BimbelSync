@@ -86,12 +86,20 @@ export function TenantNav({ tenantSlug, userRole }: { tenantSlug: string, userRo
           active={isRouteActive(`/${tenantSlug}/dashboard/evaluations`)} 
         />
         {userRole !== 'TUTOR' && (
-          <NavItem 
-            href={`/${tenantSlug}/dashboard/finance`} 
-            icon={<CreditCard size={18} />} 
-            label="Finance" 
-            active={isRouteActive(`/${tenantSlug}/dashboard/finance`)} 
-          />
+          <>
+            <NavItem 
+              href={`/${tenantSlug}/dashboard/finance`} 
+              icon={<CreditCard size={18} />} 
+              label="Finance" 
+              active={isRouteActive(`/${tenantSlug}/dashboard/finance`)} 
+            />
+            <NavItem 
+              href={`/${tenantSlug}/dashboard/reports`} 
+              icon={<FileText size={18} />} 
+              label="Laporan Keuangan" 
+              active={isRouteActive(`/${tenantSlug}/dashboard/reports`)} 
+            />
+          </>
         )}
         
         {userRole === 'ADMIN' && (
