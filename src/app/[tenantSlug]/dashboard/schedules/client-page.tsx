@@ -25,7 +25,8 @@ export default function SchedulesClientPage({
   tenantSlug,
   currentDateStr,
   viewMode,
-  isTutor
+  isTutor,
+  headerActions
 }: { 
   schedules: ScheduleWithRelations[], 
   rooms: Room[],
