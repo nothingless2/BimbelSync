@@ -32,51 +32,7 @@ export default async function SuperadminReportsPage() {
       })
     ]);
 
-    // 1. Revenue over time (Last 12 months)
-    const revenueMap: Record<string, number> = {};
-    const subscriptionGrowthMap: Record<string, number> = {};
-    
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const key = d.toLocaleDateString("id-ID", { month: "short", year: "numeric" });
-      revenueMap[key] = 0;
-      subscriptionGrowthMap[key] = 0;
-    }
-
-    invoices.forEach(inv => {
-      if (!inv.paid_at) return;
-      const d = new Date(inv.paid_at);
-      const key = d.toLocaleDateString("id-ID", { month: "short", year: "numeric" });
-      if (revenueMap[key] !== undefined) {
-        revenueMap[key] += inv.amount;
-      }
-    });
-
-    const firstInvoicePerAcademy: Record<string, Date> = {};
-    invoices.forEach((inv) => {
-      const d = new Date(inv.paid_at!);
-      if (!firstInvoicePerAcademy[inv.academy_id] || d < firstInvoicePerAcademy[inv.academy_id]) {
-        firstInvoicePerAcademy[inv.academy_id] = d;
-      }
-    });
-    
-    Object.values(firstInvoicePerAcademy).forEach((d) => {
-      const key = d.toLocaleDateString("id-ID", { month: "short", year: "numeric" });
-      if (subscriptionGrowthMap[key] !== undefined) {
-        subscriptionGrowthMap[key]++;
-      }
-    });
-
-    let cumulativeSubscribers = 0;
-    const chartData = Object.keys(revenueMap).map(month => {
-      cumulativeSubscribers += subscriptionGrowthMap[month];
-      return {
-        month,
-        revenue: revenueMap[month],
-        newSubscribers: subscriptionGrowthMap[month],
-        totalSubscribers: cumulativeSubscribers
-      };
-    });
+    // Removed static chartData logic. It will be computed on the client.
 
     // 2. Plan Revenue Distribution
     const planRevenueMap: Record<string, number> = {};
@@ -88,6 +44,7 @@ export default async function SuperadminReportsPage() {
     // Serialize invoices for table
     const serializedInvoices = invoices.map(inv => ({
       id: inv.id,
+      academy_id: inv.academy_id,
       academy_name: inv.academy.name,
       plan_name: inv.plan.name,
       amount: inv.amount,
@@ -96,7 +53,6 @@ export default async function SuperadminReportsPage() {
 
     return (
       <ReportsClientPage 
-        chartData={chartData}
         planRevenueData={planRevenueData}
         invoices={serializedInvoices}
       />

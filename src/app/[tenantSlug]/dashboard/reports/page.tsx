@@ -46,38 +46,7 @@ export default async function TenantReportsPage({
       where: { academy_id: session.academy_id, deleted_at: null }
     });
 
-    // 1. Revenue over time (Last 6 months)
-    const revenueMap: Record<string, number> = {};
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const key = format(d, "MMM yyyy");
-      revenueMap[key] = 0;
-    }
-
-    invoices.forEach(inv => {
-      // Determine actual paid date (if installment use paid_at, else invoice created_at or due_date approximation)
-      // Since invoice doesn't have a direct `paid_at` field (except in installments), we use created_at for FULL payments 
-      // or check the latest installment paid_at
-      let paidDate = inv.created_at;
-      if (inv.payment_option === "INSTALLMENT" && inv.installments.length > 0) {
-        const paidInstallments = inv.installments.filter(inst => inst.status === "PAID" && inst.paid_at);
-        if (paidInstallments.length > 0) {
-          // Sort to get the latest payment date
-          paidInstallments.sort((a, b) => b.paid_at!.getTime() - a.paid_at!.getTime());
-          paidDate = paidInstallments[0].paid_at!;
-        }
-      }
-      
-      const key = format(paidDate, "MMM yyyy");
-      if (revenueMap[key] !== undefined) {
-        revenueMap[key] += inv.total_amount;
-      }
-    });
-
-    const chartData = Object.keys(revenueMap).map(month => ({
-      month,
-      revenue: revenueMap[month]
-    }));
+    // Removed static chartData logic. It will be computed on the client.
 
     // 2. Program Revenue Distribution
     const programRevenueMap: Record<string, number> = {};
@@ -98,12 +67,24 @@ export default async function TenantReportsPage({
       .sort((a, b) => b.value - a.value);
 
     // Calculate growth vs last month
-    const thisMonthKey = format(now, "MMM yyyy");
+    const thisMonthRevenue = invoices.filter(inv => {
+      let d = inv.created_at;
+      if (inv.payment_option === "INSTALLMENT" && inv.installments.length > 0) {
+        const p = inv.installments.filter(i => i.status === "PAID" && i.paid_at);
+        if (p.length > 0) { p.sort((a,b)=>b.paid_at!.getTime()-a.paid_at!.getTime()); d = p[0].paid_at!; }
+      }
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }).reduce((sum, inv) => sum + inv.total_amount, 0);
+
     const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const lastMonthKey = format(lastMonthDate, "MMM yyyy");
-    
-    const thisMonthRevenue = revenueMap[thisMonthKey] || 0;
-    const lastMonthRevenue = revenueMap[lastMonthKey] || 0;
+    const lastMonthRevenue = invoices.filter(inv => {
+      let d = inv.created_at;
+      if (inv.payment_option === "INSTALLMENT" && inv.installments.length > 0) {
+        const p = inv.installments.filter(i => i.status === "PAID" && i.paid_at);
+        if (p.length > 0) { p.sort((a,b)=>b.paid_at!.getTime()-a.paid_at!.getTime()); d = p[0].paid_at!; }
+      }
+      return d.getMonth() === lastMonthDate.getMonth() && d.getFullYear() === lastMonthDate.getFullYear();
+    }).reduce((sum, inv) => sum + inv.total_amount, 0);
 
     let growthPercentage = 0;
     if (lastMonthRevenue > 0) {
@@ -133,7 +114,6 @@ export default async function TenantReportsPage({
 
     return (
       <TenantReportsClientPage 
-        chartData={chartData}
         programRevenueData={programRevenueData}
         invoices={serializedInvoices}
         activeStudentsCount={activeStudentsCount}
