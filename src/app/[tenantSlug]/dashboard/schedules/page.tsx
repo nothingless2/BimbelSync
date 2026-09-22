@@ -94,19 +94,16 @@ export default async function SchedulesPage({
   ]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Jadwal Kelas</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            {isTutor 
-              ? "Lihat jadwal mengajar Anda."
-              : "Kelola perencanaan kelas reguler maupun pertemuan intensif di bimbel Anda."}
-          </p>
-        </div>
-        
-        {!isTutor && (
-          <div className="flex gap-2">
+    <div className="space-y-0">
+      <SchedulesClientPage 
+        schedules={schedules} 
+        rooms={rooms}
+        tenantSlug={tenantSlug} 
+        currentDateStr={queryStart.toISOString()}
+        viewMode={view}
+        isTutor={isTutor}
+        headerActions={
+          <>
             <AutoSchedulerModal 
               programs={programs} 
               rooms={rooms} 
@@ -117,17 +114,8 @@ export default async function SchedulesPage({
               rooms={rooms} 
               tutors={tutors} 
             />
-          </div>
-        )}
-      </div>
-
-      <SchedulesClientPage 
-        schedules={schedules} 
-        rooms={rooms}
-        tenantSlug={tenantSlug} 
-        currentDateStr={queryStart.toISOString()}
-        viewMode={view}
-        isTutor={isTutor}
+          </>
+        }
       />
     </div>
   );

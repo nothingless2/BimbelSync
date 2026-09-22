@@ -32,7 +32,8 @@ export default function SchedulesClientPage({
   tenantSlug: string,
   currentDateStr: string,
   viewMode: string,
-  isTutor?: boolean
+  isTutor?: boolean,
+  headerActions?: React.ReactNode
 }) {
   const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -162,7 +163,40 @@ export default function SchedulesClientPage({
   };
 
   return (
-    <>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Jadwal Kelas</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            {isTutor 
+              ? "Lihat jadwal mengajar Anda."
+              : "Kelola perencanaan kelas reguler maupun pertemuan intensif di bimbel Anda."}
+          </p>
+        </div>
+        
+        {!isTutor && (
+          <div className="flex items-center gap-2">
+            {!isMonthly && (
+              <button
+                onClick={() => {
+                  setIsSelectMode(!isSelectMode);
+                  setSelectedSchedules([]);
+                }}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors border ${
+                  isSelectMode 
+                    ? 'bg-red-50 border-red-200 text-red-600 dark:bg-red-900/30 dark:border-red-800' 
+                    : 'bg-white border-slate-200 text-slate-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-red-400'
+                }`}
+              >
+                <Trash2 size={16} />
+                {isSelectMode ? 'Batal Hapus' : 'Hapus Jadwal'}
+              </button>
+            )}
+            {headerActions}
+          </div>
+        )}
+      </div>
+
       <div className="bg-white dark:bg-[#111827] rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
         
         {/* Toolbar & Legend */}
@@ -229,23 +263,6 @@ export default function SchedulesClientPage({
                 ]}
               />
             </div>
-
-            {!isTutor && !isMonthly && (
-              <button
-                onClick={() => {
-                  setIsSelectMode(!isSelectMode);
-                  setSelectedSchedules([]);
-                }}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
-                  isSelectMode 
-                    ? 'bg-blue-50 border-blue-200 text-blue-600 dark:bg-blue-900/30 dark:border-blue-800' 
-                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300'
-                }`}
-              >
-                <Trash2 size={14} />
-                {isSelectMode ? 'Batal Pilih' : 'Pilih Jadwal'}
-              </button>
-            )}
 
             <div className="hidden md:flex items-center gap-4 ml-2 border-l border-slate-200 dark:border-slate-700 pl-4">
               <div className="flex items-center gap-2">
@@ -574,6 +591,6 @@ export default function SchedulesClientPage({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
