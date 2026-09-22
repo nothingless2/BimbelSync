@@ -218,8 +218,10 @@ export default function ReportsClientPage({
           .print-card, .print-chart-wrapper { display: none !important; }
           
           /* Simplify Table */
-          .print-table { border: none !important; border-radius: 0 !important; box-shadow: none !important; background: transparent !important; }
-          .print-table th, .print-table td { border-bottom: 1px solid #000 !important; }
+          .print-table { border: none !important; border-radius: 0 !important; box-shadow: none !important; background: transparent !important; overflow: visible !important; }
+          .print-table th, .print-table td { border-bottom: 1px solid #000 !important; padding-top: 8px !important; padding-bottom: 8px !important; }
+          .print-table tr { page-break-inside: avoid; break-inside: avoid; }
+          .print-table thead { display: table-header-group; }
         }
       `}} />
 
