@@ -19,34 +19,31 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [selectedProgramId, setSelectedProgramId] = useState<string>("");
-  const [selectedDays, setSelectedDays] = useState<number[]>([]);
-  const [startTime, setStartTime] = useState("");
-  const [duration, setDuration] = useState("90");
+  
+  type DayConfig = { day: number; label: string; startTime: string; duration: string; enabled: boolean };
+  const [daysConfig, setDaysConfig] = useState<DayConfig[]>([
+    { day: 1, label: "Senin", startTime: "14:00", duration: "90", enabled: false },
+    { day: 2, label: "Selasa", startTime: "14:00", duration: "90", enabled: false },
+    { day: 3, label: "Rabu", startTime: "14:00", duration: "90", enabled: false },
+    { day: 4, label: "Kamis", startTime: "14:00", duration: "90", enabled: false },
+    { day: 5, label: "Jumat", startTime: "14:00", duration: "90", enabled: false },
+    { day: 6, label: "Sabtu", startTime: "09:00", duration: "90", enabled: false },
+    { day: 0, label: "Minggu", startTime: "09:00", duration: "90", enabled: false }
+  ]);
 
-  const computeEndTime = () => {
-    if (!startTime) return "";
-    const [h, m] = startTime.split(":").map(Number);
-    const d = new Date();
-    d.setHours(h, m + parseInt(duration), 0, 0);
-    return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+  const updateDayConfig = (index: number, updates: Partial<DayConfig>) => {
+    const newConfigs = [...daysConfig];
+    newConfigs[index] = { ...newConfigs[index], ...updates };
+    setDaysConfig(newConfigs);
   };
-  const computedEndTime = computeEndTime();
 
   const selectedProgram = programs.find(p => p.id === selectedProgramId);
-
-  const toggleDay = (day: number) => {
-    if (selectedDays.includes(day)) {
-      setSelectedDays(selectedDays.filter(d => d !== day));
-    } else {
-      setSelectedDays([...selectedDays, day]);
-    }
-  };
 
   const handleOpen = () => {
     setIsOpen(true);
     setErrorMsg(null);
     setSelectedProgramId("");
-    setSelectedDays([]);
+    setDaysConfig(daysConfig.map(c => ({ ...c, enabled: false })));
   };
 
   const handleClose = () => {
@@ -59,10 +56,13 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
       setErrorMsg("Pilih program terlebih dahulu.");
       return;
     }
-    if (selectedDays.length === 0) {
+    
+    const activeDays = daysConfig.filter(d => d.enabled);
+    if (activeDays.length === 0) {
       setErrorMsg("Pilih minimal satu hari dalam seminggu.");
       return;
     }
+    
     if (!selectedProgram?.total_meetings) {
       setErrorMsg("Program ini tidak memiliki batas Total Pertemuan. Silakan edit program ini dan tetapkan Total Pertemuan terlebih dahulu.");
       return;
@@ -73,8 +73,16 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
 
     const formData = new FormData(e.currentTarget);
     
-    // Append selected days to formData
-    formData.append("days", JSON.stringify(selectedDays));
+    // Transform days config for payload
+    const payloadConfigs = activeDays.map(d => {
+      const [h, m] = d.startTime.split(":").map(Number);
+      const endD = new Date();
+      endD.setHours(h, m + parseInt(d.duration), 0, 0);
+      const endTime = `${endD.getHours().toString().padStart(2, '0')}:${endD.getMinutes().toString().padStart(2, '0')}`;
+      return { day: d.day, startTime: d.startTime, endTime, duration: d.duration };
+    });
+
+    formData.append("day_configs", JSON.stringify(payloadConfigs));
     formData.append("program_id", selectedProgramId);
     formData.append("total_meetings", selectedProgram.total_meetings.toString());
 
@@ -164,72 +172,51 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
               </div>
 
 
-              <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                      Jam Mulai</label>
-                    <input
-                      type="time"
-                      name="start_time"
-                      required
-                      value={startTime}
-                      onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                      Durasi Waktu</label>
-                    <CustomSelect
-                      name="duration"
-                      required
-                      value={duration}
-                      onChange={setDuration}
-                      options={[
-                        { value: "45", label: "45 Menit" },
-                        { value: "60", label: "60 Menit (1 Jam)" },
-                        { value: "75", label: "75 Menit" },
-                        { value: "90", label: "90 Menit (1.5 Jam)" },
-                        { value: "120", label: "120 Menit (2 Jam)" },
-                        { value: "150", label: "150 Menit (2.5 Jam)" },
-                        { value: "180", label: "180 Menit (3 Jam)" },
-                        { value: "240", label: "240 Menit (4 Jam)" },
-                      ]}
-                    />
-                    {/* Hidden input for end_time */}
-                    <input type="hidden" name="end_time" value={computedEndTime} />
-                    {startTime && (
-                      <p className="text-xs text-slate-500 mt-1">Selesai: {computedEndTime}</p>
-                    )}
-                  </div>
-              </div>
-
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  Hari Rutin
+                  Pengaturan Hari & Waktu
                 </label>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { id: 1, label: "Sen" },
-                    { id: 2, label: "Sel" },
-                    { id: 3, label: "Rab" },
-                    { id: 4, label: "Kam" },
-                    { id: 5, label: "Jum" },
-                    { id: 6, label: "Sab" },
-                    { id: 0, label: "Min" },
-                  ].map(day => (
-                    <button
-                      key={day.id}
-                      type="button"
-                      onClick={() => toggleDay(day.id)}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
-                        selectedDays.includes(day.id) 
-                          ? 'bg-emerald-100 border-emerald-500 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200' 
-                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-400'
-                      }`}
-                    >
-                      {day.label}
-                    </button>
+                <div className="space-y-2">
+                  {daysConfig.map((config, idx) => (
+                    <div key={config.day} className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${config.enabled ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/10' : 'border-slate-200 dark:border-slate-800'}`}>
+                      <label className="flex items-center gap-3 min-w-[90px] cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={config.enabled}
+                          onChange={(e) => updateDayConfig(idx, { enabled: e.target.checked })}
+                          className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                        />
+                        <span className={`text-sm font-bold ${config.enabled ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-400'}`}>
+                          {config.label}
+                        </span>
+                      </label>
+                      
+                      {config.enabled && (
+                        <div className="flex flex-1 items-center gap-2 animate-in fade-in slide-in-from-left-2">
+                          <input
+                            type="time"
+                            required
+                            value={config.startTime}
+                            onChange={(e) => updateDayConfig(idx, { startTime: e.target.value })}
+                            className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
+                          />
+                          <select
+                            required
+                            value={config.duration}
+                            onChange={(e) => updateDayConfig(idx, { duration: e.target.value })}
+                            className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
+                          >
+                            <option value="45">45 Menit</option>
+                            <option value="60">60 Menit</option>
+                            <option value="75">75 Menit</option>
+                            <option value="90">90 Menit</option>
+                            <option value="120">120 Menit</option>
+                            <option value="150">150 Menit</option>
+                            <option value="180">180 Menit</option>
+                          </select>
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
@@ -272,7 +259,7 @@ export function AutoSchedulerModal({ programs, staffs, rooms }: Props) {
                 </button>
                 <button
                   type="submit"
-                  disabled={isLoading || (selectedProgram && !selectedProgram.total_meetings) || selectedDays.length === 0}
+                  disabled={isLoading || (selectedProgram && !selectedProgram.total_meetings) || daysConfig.filter(d => d.enabled).length === 0}
                   className="mt-4 px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2"
                 >
                   {isLoading ? "Memproses..." : "Generate Jadwal"}

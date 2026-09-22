@@ -426,22 +426,20 @@ export async function generateSchedulesAction(formData: FormData) {
   const roomId = formData.get("room_id") as string;
   const totalMeetingsStr = formData.get("total_meetings") as string;
   const startDateStr = formData.get("start_date") as string;
-  const startTimeStr = formData.get("start_time") as string;
-  const endTimeStr = formData.get("end_time") as string;
-  const daysStr = formData.get("days") as string;
+  const dayConfigsStr = formData.get("day_configs") as string;
 
-  if (!programId || !tutorId || !roomId || !startDateStr || !startTimeStr || !endTimeStr || !daysStr || !totalMeetingsStr) {
+  if (!programId || !tutorId || !roomId || !startDateStr || !dayConfigsStr || !totalMeetingsStr) {
     return { error: "Semua field wajib diisi." };
   }
 
   const totalMeetings = parseInt(totalMeetingsStr, 10);
-  const days = JSON.parse(daysStr) as number[];
+  const dayConfigs = JSON.parse(dayConfigsStr) as { day: number, startTime: string, endTime: string, duration: string }[];
 
   if (isNaN(totalMeetings) || totalMeetings <= 0) {
     return { error: "Total pertemuan tidak valid." };
   }
   
-  if (days.length === 0) {
+  if (dayConfigs.length === 0) {
     return { error: "Minimal pilih satu hari rutinan." };
   }
 
@@ -468,16 +466,17 @@ export async function generateSchedulesAction(formData: FormData) {
     
     while (meetingsGenerated < remainingMeetings && iterations < 365) {
       const dayOfWeek = currentDate.getDay();
+      const dayConfig = dayConfigs.find(d => d.day === dayOfWeek);
       
-      if (days.includes(dayOfWeek)) {
+      if (dayConfig) {
         // Cek apakah ini hari libur nasional
         const dateString = currentDate.toISOString().split('T')[0];
         const isHoliday = NATIONAL_HOLIDAYS.includes(dateString);
         
         if (!isHoliday) {
           // Asumsikan input adalah WIB / Asia/Jakarta
-          const startDateTime = new Date(`${dateString}T${startTimeStr}:00+07:00`);
-          const endDateTime = new Date(`${dateString}T${endTimeStr}:00+07:00`);
+          const startDateTime = new Date(`${dateString}T${dayConfig.startTime}:00+07:00`);
+          const endDateTime = new Date(`${dateString}T${dayConfig.endTime}:00+07:00`);
           
           schedulesToCreate.push({
             program_id: programId,
