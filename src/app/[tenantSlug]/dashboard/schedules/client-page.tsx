@@ -41,6 +41,7 @@ export default function SchedulesClientPage({
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [selectedDaySchedules, setSelectedDaySchedules] = useState<{date: Date, schedules: ScheduleWithRelations[]} | null>(null);
   const [selectedSchedules, setSelectedSchedules] = useState<string[]>([]);
+  const [isSelectMode, setIsSelectMode] = useState(false);
 
   const currentDate = parseISO(currentDateStr);
   const isMonthly = viewMode === "monthly";
@@ -229,6 +230,23 @@ export default function SchedulesClientPage({
               />
             </div>
 
+            {!isTutor && !isMonthly && (
+              <button
+                onClick={() => {
+                  setIsSelectMode(!isSelectMode);
+                  setSelectedSchedules([]);
+                }}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                  isSelectMode 
+                    ? 'bg-blue-50 border-blue-200 text-blue-600 dark:bg-blue-900/30 dark:border-blue-800' 
+                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300'
+                }`}
+              >
+                <Trash2 size={14} />
+                {isSelectMode ? 'Batal Pilih' : 'Pilih Jadwal'}
+              </button>
+            )}
+
             <div className="hidden md:flex items-center gap-4 ml-2 border-l border-slate-200 dark:border-slate-700 pl-4">
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-blue-500"></span>
@@ -304,7 +322,7 @@ export default function SchedulesClientPage({
                                   >
                                     <div className="flex items-start justify-between mb-1">
                                       <div className={`text-[10px] font-bold flex items-center gap-1 ${isCancelled ? 'text-red-600 dark:text-red-400' : 'text-blue-700 dark:text-blue-400'}`}>
-                                        {!isTutor && (
+                                        {!isTutor && isSelectMode && (
                                           <input 
                                             type="checkbox" 
                                             checked={selectedSchedules.includes(sch.id)}
@@ -539,7 +557,10 @@ export default function SchedulesClientPage({
           </span>
           <div className="flex items-center gap-2">
             <button 
-              onClick={() => setSelectedSchedules([])}
+              onClick={() => {
+                setSelectedSchedules([]);
+                setIsSelectMode(false);
+              }}
               className="text-xs font-semibold text-slate-500 hover:text-slate-700 px-3 py-1.5"
             >
               Batal
