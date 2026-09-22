@@ -16,6 +16,7 @@ export default async function BillingPage() {
         where: { academy: { deleted_at: null } },
         include: {
           academy: { include: { plan: true } },
+          plan: true,
           verified_by: { select: { name: true, email: true } },
         },
         orderBy: { billing_period: "desc" },
@@ -29,6 +30,7 @@ export default async function BillingPage() {
 
     const serializedInvoices = invoices.map(inv => ({
       ...inv,
+      plan_name: inv.plan.name,
       billing_period: inv.billing_period.toISOString(),
       due_date: inv.due_date.toISOString(),
       paid_at: inv.paid_at?.toISOString() ?? null,

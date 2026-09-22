@@ -170,6 +170,7 @@ function ActionMenu({ invoice }: { invoice: any }) {
 interface InvoiceItem {
   id: string;
   academy: { id: string; name: string; path_url: string; plan: { id: string; name: string; price: number } };
+  plan_name: string;
   billing_period: string;
   amount: number;
   duration_months: number;
@@ -409,7 +410,7 @@ export default function BillingClientPage({ invoices, academies }: Props) {
                     </td>
                     <td className="px-6 py-4">
                       <span className="bg-slate-800 dark:bg-slate-700 text-white text-[10px] font-bold px-2 py-1 rounded">
-                        {invoice.academy.plan.name.toUpperCase()}
+                        {invoice.plan_name.toUpperCase()}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
