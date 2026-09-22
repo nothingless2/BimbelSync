@@ -190,8 +190,11 @@ export async function deleteScheduleAction(scheduleId: string) {
       return { error: "Jadwal tidak ditemukan." };
     }
 
-    // Hanya bisa delete jika jadwal CANCELLED atau masa depan, 
-    // namun demi kemudahan MVP, kita ijinkan hard delete
+    // Delete related attendances first to avoid foreign key constraints
+    await prisma.attendance.deleteMany({
+      where: { schedule_id: scheduleId }
+    });
+
     await prisma.schedule.delete({
       where: { id: scheduleId }
     });
@@ -209,7 +212,7 @@ export async function deleteScheduleAction(scheduleId: string) {
     return { success: true };
   } catch (error) {
     console.error("Error deleting schedule:", error);
-    return { error: "Terjadi kesalahan saat menghapus jadwal." };
+    return { error: "Terjadi kesalahan saat menghapus jadwal. Pastikan tidak ada data terkait lainnya." };
   }
 }
 
@@ -242,6 +245,11 @@ export async function bulkDeleteSchedulesAction(scheduleIds: string[]) {
     if (validIds.length === 0) {
       return { error: "Jadwal tidak ditemukan atau Anda tidak memiliki akses." };
     }
+
+    // Hapus data absensi (Attendance) terlebih dahulu untuk menghindari Foreign Key constraint
+    await prisma.attendance.deleteMany({
+      where: { schedule_id: { in: validIds } }
+    });
 
     await prisma.schedule.deleteMany({
       where: { id: { in: validIds } }
