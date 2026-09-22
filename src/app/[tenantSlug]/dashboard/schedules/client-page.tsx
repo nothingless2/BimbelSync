@@ -50,13 +50,17 @@ export default function SchedulesClientPage({
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<"ALL" | "SCHEDULED" | "CANCELLED">("ALL");
+  const [filterProgram, setFilterProgram] = useState<string>("ALL");
+
+  const uniquePrograms = Array.from(new Map(schedules.map(s => [s.program.id, s.program])).values());
 
   // Filtering
   const filteredSchedules = schedules.filter(schedule => {
     const matchSearch = (schedule.tutor.name || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
                         schedule.program.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchStatus = filterStatus === "ALL" || schedule.status === filterStatus;
-    return matchSearch && matchStatus;
+    const matchProgram = filterProgram === "ALL" || schedule.program.id === filterProgram;
+    return matchSearch && matchStatus && matchProgram;
   });
 
   // Navigation handlers
@@ -261,6 +265,18 @@ export default function SchedulesClientPage({
                   { value: "ALL", label: "Semua Status" },
                   { value: "SCHEDULED", label: "Terjadwal" },
                   { value: "CANCELLED", label: "Dibatalkan" }
+                ]}
+              />
+            </div>
+
+            {/* Program Filter */}
+            <div className="relative w-full sm:w-[200px]">
+              <CustomSelect
+                value={filterProgram}
+                onChange={(val) => setFilterProgram(val as string)}
+                options={[
+                  { value: "ALL", label: "Semua Program" },
+                  ...uniquePrograms.map(p => ({ value: p.id, label: p.name }))
                 ]}
               />
             </div>

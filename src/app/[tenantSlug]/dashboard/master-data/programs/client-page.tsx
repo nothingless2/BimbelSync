@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, Users2, CalendarDays, Pencil, Trash2, Search, Filter, CalendarClock } from "lucide-react";
+import { BookOpen, Users2, CalendarDays, Pencil, Trash2, Search, Filter, CalendarClock, Eye } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { deleteProgramAction } from "./actions";
 import { EditProgramModal } from "@/components/modals/edit-program-modal";
 import { Program } from "@prisma/client";
 import { Pagination } from "@/components/ui/pagination";
 import { CustomSelect } from "@/components/ui/custom-select";
+import Link from "next/link";
 
 import { AutoSchedulerModal } from "@/components/modals/auto-scheduler-modal";
 
@@ -156,6 +157,13 @@ export default function ProgramsClientPage({
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-3">
+                        <Link 
+                          href={`/${tenantSlug}/dashboard/master-data/programs/${program.id}`}
+                          className="p-1.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
+                          title="Lihat Detail & Jadwal"
+                        >
+                          <Eye size={16} />
+                        </Link>
                         <button 
                           onClick={() => setEditingProgram(program)}
                           className="p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
