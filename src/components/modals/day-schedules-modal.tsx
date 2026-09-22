@@ -24,6 +24,9 @@ export function DaySchedulesModal({
   schedules: ScheduleItem[];
   onClose: () => void;
   onNavigateToDetail: (id: string) => void;
+  isSelectMode?: boolean;
+  selectedSchedules?: string[];
+  onToggleSelect?: (id: string, e: React.MouseEvent) => void;
 }) {
   const formatTime = (d: Date) => {
     return new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' }).format(new Date(d));
@@ -68,6 +71,15 @@ export function DaySchedulesModal({
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div className={`text-xs font-bold flex items-center gap-1.5 ${isCancelled ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                        {isSelectMode && onToggleSelect && (
+                          <input 
+                            type="checkbox" 
+                            checked={selectedSchedules?.includes(sch.id)}
+                            onChange={(e) => onToggleSelect(sch.id, e as any)}
+                            onClick={(e) => e.stopPropagation()}
+                            className="mr-1 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                          />
+                        )}
                         <Clock size={14} />
                         {formatTime(sch.start_time)} - {formatTime(sch.end_time)}
                       </div>

@@ -50,17 +50,13 @@ export default function SchedulesClientPage({
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<"ALL" | "SCHEDULED" | "CANCELLED">("ALL");
-  const [filterProgram, setFilterProgram] = useState<string>("ALL");
-
-  const uniquePrograms = Array.from(new Map(schedules.map(s => [s.program.id, s.program])).values());
 
   // Filtering
   const filteredSchedules = schedules.filter(schedule => {
     const matchSearch = (schedule.tutor.name || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
                         schedule.program.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchStatus = filterStatus === "ALL" || schedule.status === filterStatus;
-    const matchProgram = filterProgram === "ALL" || schedule.program.id === filterProgram;
-    return matchSearch && matchStatus && matchProgram;
+    return matchSearch && matchStatus;
   });
 
   // Navigation handlers
@@ -181,22 +177,20 @@ export default function SchedulesClientPage({
         
         {!isTutor && (
           <div className="flex items-center gap-2">
-            {!isMonthly && (
-              <button
-                onClick={() => {
-                  setIsSelectMode(!isSelectMode);
-                  setSelectedSchedules([]);
-                }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors border ${
-                  isSelectMode 
-                    ? 'bg-red-50 border-red-200 text-red-600 dark:bg-red-900/30 dark:border-red-800' 
-                    : 'bg-white border-slate-200 text-slate-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-red-400'
-                }`}
-              >
-                <Trash2 size={16} />
-                {isSelectMode ? 'Batal Hapus' : 'Hapus Jadwal'}
-              </button>
-            )}
+            <button
+              onClick={() => {
+                setIsSelectMode(!isSelectMode);
+                setSelectedSchedules([]);
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors border ${
+                isSelectMode 
+                  ? 'bg-red-50 border-red-200 text-red-600 dark:bg-red-900/30 dark:border-red-800' 
+                  : 'bg-white border-slate-200 text-slate-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-red-400'
+              }`}
+            >
+              <Trash2 size={16} />
+              {isSelectMode ? 'Batal Hapus' : 'Hapus Jadwal'}
+            </button>
             {headerActions}
           </div>
         )}
@@ -265,18 +259,6 @@ export default function SchedulesClientPage({
                   { value: "ALL", label: "Semua Status" },
                   { value: "SCHEDULED", label: "Terjadwal" },
                   { value: "CANCELLED", label: "Dibatalkan" }
-                ]}
-              />
-            </div>
-
-            {/* Program Filter */}
-            <div className="relative w-full sm:w-[200px]">
-              <CustomSelect
-                value={filterProgram}
-                onChange={(val) => setFilterProgram(val as string)}
-                options={[
-                  { value: "ALL", label: "Semua Program" },
-                  ...uniquePrograms.map(p => ({ value: p.id, label: p.name }))
                 ]}
               />
             </div>
@@ -502,6 +484,9 @@ export default function SchedulesClientPage({
           }))}
           onClose={() => setSelectedDaySchedules(null)}
           onNavigateToDetail={(id) => router.push(`/${tenantSlug}/dashboard/schedules/${id}`)}
+          isSelectMode={!isTutor && isSelectMode}
+          selectedSchedules={selectedSchedules}
+          onToggleSelect={toggleSelectSchedule}
         />
       )}
 
