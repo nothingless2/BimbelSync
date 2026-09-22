@@ -18,7 +18,10 @@ export function DaySchedulesModal({
   date, 
   schedules, 
   onClose,
-  onNavigateToDetail
+  onNavigateToDetail,
+  isSelectMode,
+  selectedSchedules,
+  onToggleSelect
 }: { 
   date: Date;
   schedules: ScheduleItem[];
