@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Clock, MapPin, User, MoreVertical, Trash2, Calendar as CalendarIcon, Grid, ArrowRight, Search, Filter } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
-import { deleteScheduleAction } from "./actions";
+import { deleteScheduleAction, bulkDeleteSchedulesAction } from "./actions";
 import { CancelScheduleModal } from "@/components/modals/cancel-schedule-modal";
 import { RescheduleModal } from "@/components/modals/reschedule-modal";
 import { DaySchedulesModal } from "@/components/modals/day-schedules-modal";
@@ -40,6 +40,7 @@ export default function SchedulesClientPage({
   const [reschedulingSchedule, setReschedulingSchedule] = useState<ScheduleWithRelations | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [selectedDaySchedules, setSelectedDaySchedules] = useState<{date: Date, schedules: ScheduleWithRelations[]} | null>(null);
+  const [selectedSchedules, setSelectedSchedules] = useState<string[]>([]);
 
   const currentDate = parseISO(currentDateStr);
   const isMonthly = viewMode === "monthly";
@@ -97,6 +98,32 @@ export default function SchedulesClientPage({
     monthDays.push(d);
     d = addDays(d, 1);
   }
+
+  const toggleSelectSchedule = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedSchedules(prev => 
+      prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkDelete = () => {
+    toast(`Hapus ${selectedSchedules.length} Jadwal?`, {
+      description: "Data jadwal yang dipilih akan dihapus secara permanen.",
+      duration: 8000,
+      action: {
+        label: "Ya, Hapus Semua",
+        onClick: async () => {
+          const res = await bulkDeleteSchedulesAction(selectedSchedules);
+          if (res.error) toast.error(res.error);
+          else {
+            toast.success(`${res.count} Jadwal berhasil dihapus.`);
+            setSelectedSchedules([]);
+          }
+        },
+      },
+      cancel: { label: "Batal", onClick: () => {} }
+    });
+  };
 
   const toggleDropdown = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -277,6 +304,15 @@ export default function SchedulesClientPage({
                                   >
                                     <div className="flex items-start justify-between mb-1">
                                       <div className={`text-[10px] font-bold flex items-center gap-1 ${isCancelled ? 'text-red-600 dark:text-red-400' : 'text-blue-700 dark:text-blue-400'}`}>
+                                        {!isTutor && (
+                                          <input 
+                                            type="checkbox" 
+                                            checked={selectedSchedules.includes(sch.id)}
+                                            onChange={(e) => toggleSelectSchedule(sch.id, e as any)}
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="mr-0.5 w-3 h-3 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                          />
+                                        )}
                                         <Clock size={10} />
                                         {formatTime(sch.start_time)} - {formatTime(sch.end_time)}
                                       </div>
@@ -492,6 +528,28 @@ export default function SchedulesClientPage({
                 </div>
               );
             })()}
+          </div>
+        </div>
+      )}
+
+      {selectedSchedules.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-900 shadow-2xl border border-slate-200 dark:border-slate-800 rounded-full px-6 py-3 flex items-center gap-6 z-[60] animate-in slide-in-from-bottom-5">
+          <span className="font-bold text-sm text-slate-800 dark:text-slate-200">
+            {selectedSchedules.length} jadwal dipilih
+          </span>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setSelectedSchedules([])}
+              className="text-xs font-semibold text-slate-500 hover:text-slate-700 px-3 py-1.5"
+            >
+              Batal
+            </button>
+            <button 
+              onClick={handleBulkDelete}
+              className="text-xs font-bold bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full flex items-center gap-2"
+            >
+              <Trash2 size={14} /> Hapus
+            </button>
           </div>
         </div>
       )}

@@ -213,6 +213,56 @@ export async function deleteScheduleAction(scheduleId: string) {
   }
 }
 
+export async function bulkDeleteSchedulesAction(scheduleIds: string[]) {
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
+  if (!sessionToken) return { error: "Autentikasi diperlukan." };
+
+  const session = await decrypt(sessionToken);
+  if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
+
+  const staff = await prisma.staff.findUnique({ where: { id: session.id }, select: { role: true } });
+  if (staff?.role === 'TUTOR') return { error: "Akses ditolak untuk peran Tutor." };
+
+  if (!scheduleIds || scheduleIds.length === 0) {
+    return { error: "Tidak ada jadwal yang dipilih." };
+  }
+
+  try {
+    // Verifikasi bahwa semua jadwal milik akademi ini
+    const existing = await prisma.schedule.findMany({
+      where: { 
+        id: { in: scheduleIds },
+        program: { academy_id: session.academy_id }
+      },
+      select: { id: true }
+    });
+
+    const validIds = existing.map(s => s.id);
+    if (validIds.length === 0) {
+      return { error: "Jadwal tidak ditemukan atau Anda tidak memiliki akses." };
+    }
+
+    await prisma.schedule.deleteMany({
+      where: { id: { in: validIds } }
+    });
+
+    await createAuditLog({
+      academy_id: session.academy_id,
+      staff_id: session.id,
+      action: "DELETE",
+      entity_type: "Schedule_Batch",
+      details: { count: validIds.length, action: "BULK_DELETE" }
+    });
+
+    revalidatePath(`/${session.tenant_slug}/dashboard/schedules`);
+    return { success: true, count: validIds.length };
+  } catch (error) {
+    console.error("Error bulk deleting schedules:", error);
+    return { error: "Terjadi kesalahan saat menghapus jadwal." };
+  }
+}
+
 export async function rescheduleScheduleAction(formData: FormData) {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("bimbelsync_session")?.value;
