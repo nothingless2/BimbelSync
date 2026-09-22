@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
   FileText, CheckCircle2, Clock, AlertTriangle, Check, Ban, ChevronDown,
-  Plus, Building2, Loader2, AlertCircle, X, Trash2, Search, Filter
+  Plus, Building2, Loader2, AlertCircle, X, Trash2, Search, Filter, Eye
 } from "lucide-react";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { toast } from "@/components/ui/sonner";
@@ -177,6 +177,7 @@ interface InvoiceItem {
   paid_at: string | null;
   payment_status: string;
   verified_by: { name: string | null; email: string } | null;
+  proof_of_payment_url: string | null;
 }
 
 interface Props {
@@ -436,7 +437,18 @@ export default function BillingClientPage({ invoices, academies }: Props) {
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <ActionMenu invoice={invoice} />
+                      <div className="flex items-center justify-end gap-2">
+                        {invoice.proof_of_payment_url && (
+                          <button
+                            onClick={() => window.open(invoice.proof_of_payment_url!, '_blank')}
+                            className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold"
+                            title="Lihat Bukti Bayar"
+                          >
+                            <Eye size={14} /> <span className="hidden xl:inline">Bukti</span>
+                          </button>
+                        )}
+                        <ActionMenu invoice={invoice} />
+                      </div>
                     </td>
                   </tr>
                 );

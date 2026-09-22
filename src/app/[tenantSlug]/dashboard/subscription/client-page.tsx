@@ -1,6 +1,7 @@
 "use client";
 
-import { CreditCard, CheckCircle2, Clock, AlertTriangle, ShieldCheck, Download } from "lucide-react";
+import { CreditCard, CheckCircle2, Clock, AlertTriangle, ShieldCheck, Download, Loader2 } from "lucide-react";
+import { UploadProofModal } from "@/components/modals/upload-proof-modal";
 
 interface Props {
   academy: {
@@ -19,11 +20,13 @@ interface Props {
       due_date: string;
       payment_status: string;
       paid_at: string | null;
+      proof_of_payment_url: string | null;
     }[];
-  }
+  };
+  tenantSlug: string;
 }
 
-export default function SubscriptionClientPage({ academy }: Props) {
+export default function SubscriptionClientPage({ academy, tenantSlug }: Props) {
   const IDR = (amount: number) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(amount);
 
   const getStatusDisplay = (status: string) => {
@@ -34,7 +37,8 @@ export default function SubscriptionClientPage({ academy }: Props) {
     }
   };
 
-  const getInvoiceStatus = (status: string) => {
+  const getInvoiceStatus = (status: string, proofUrl: string | null) => {
+    if (proofUrl && status !== "PAID") return { label: "Menunggu Verifikasi", class: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" };
     switch(status) {
       case "PAID": return { label: "Lunas", class: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" };
       case "UNPAID": return { label: "Belum Bayar", class: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" };
@@ -141,7 +145,7 @@ export default function SubscriptionClientPage({ academy }: Props) {
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {academy.invoices.map((invoice) => {
-                  const status = getInvoiceStatus(invoice.payment_status);
+                  const status = getInvoiceStatus(invoice.payment_status, invoice.proof_of_payment_url);
                   return (
                     <tr key={invoice.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
                       <td className="px-6 py-4">
@@ -164,9 +168,14 @@ export default function SubscriptionClientPage({ academy }: Props) {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <button className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium inline-flex items-center gap-1">
-                          <Download size={14} /> <span className="hidden sm:inline">Unduh PDF</span>
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          {(invoice.payment_status === "UNPAID" || invoice.payment_status === "OVERDUE") && !invoice.proof_of_payment_url && (
+                            <UploadProofModal tenantSlug={tenantSlug} invoiceId={invoice.id} />
+                          )}
+                          <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-1.5" title="Unduh PDF">
+                            <Download size={16} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );

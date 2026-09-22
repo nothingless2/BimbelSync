@@ -46,8 +46,9 @@ export default async function SubscriptionPage({ params }: { params: Promise<{ t
       due_date: inv.due_date.toISOString(),
       payment_status: inv.payment_status,
       paid_at: inv.paid_at?.toISOString() || null,
+      proof_of_payment_url: inv.proof_of_payment_url || null,
     }))
   };
 
-  return <SubscriptionClientPage academy={data} />;
+  return <SubscriptionClientPage academy={data} tenantSlug={tenantSlug} />;
 }
