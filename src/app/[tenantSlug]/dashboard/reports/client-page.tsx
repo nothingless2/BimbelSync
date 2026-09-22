@@ -166,13 +166,13 @@ export default function TenantReportsClientPage({
         <div className="flex items-center gap-3">
           <button 
             onClick={handleExportCSV}
-            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-medium transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold transition-all hover:shadow-md hover:-translate-y-0.5"
           >
             <Download size={16} /> Excel (CSV)
           </button>
           <button 
             onClick={handleExportPDF}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors shadow-sm"
+            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5"
           >
             <Printer size={16} /> Print Report
           </button>
@@ -269,19 +269,21 @@ export default function TenantReportsClientPage({
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4 print-card">
-          <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-            <TrendingUp size={24} />
+        {/* Card 1: Revenue */}
+        <div className="group relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-fuchsia-600 p-6 rounded-3xl shadow-xl shadow-purple-500/30 flex items-center gap-5 print-card transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-500/40 border border-white/10">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none group-hover:scale-110 transition-transform duration-500"></div>
+          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/20 shadow-inner">
+            <TrendingUp size={28} className="text-white" />
           </div>
-          <div className="flex-1">
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Pendapatan Bulan Ini</p>
+          <div className="flex-1 relative z-10">
+            <p className="text-sm font-medium text-white/80">Pendapatan Bulan Ini</p>
             <div className="flex items-end gap-3 mt-1">
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
+              <h3 className="text-3xl font-extrabold text-white tracking-tight">
                 {formatRupiah(thisMonthRevenue)}
               </h3>
               {growthPercentage !== 0 && (
-                <span className={`flex items-center text-xs font-medium mb-1.5 no-print ${growthPercentage > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                  {growthPercentage > 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                <span className={`flex items-center text-xs font-bold px-2 py-1 rounded-full mb-1.5 no-print shadow-sm backdrop-blur-sm ${growthPercentage > 0 ? 'bg-emerald-500/20 text-emerald-100 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-100 border border-rose-500/30'}`}>
+                  {growthPercentage > 0 ? <ArrowUpRight size={14} className="mr-0.5" /> : <ArrowDownRight size={14} className="mr-0.5" />}
                   {Math.abs(growthPercentage).toFixed(1)}%
                 </span>
               )}
@@ -289,25 +291,29 @@ export default function TenantReportsClientPage({
           </div>
         </div>
         
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4 print-card">
-          <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 no-print">
-            <Users size={24} />
+        {/* Card 2: Active Students */}
+        <div className="group relative overflow-hidden bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 p-6 rounded-3xl shadow-xl shadow-teal-500/30 flex items-center gap-5 print-card transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-teal-500/40 border border-white/10">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none group-hover:scale-110 transition-transform duration-500"></div>
+          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/20 shadow-inner">
+            <Users size={28} className="text-white" />
           </div>
-          <div>
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Siswa Aktif</p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
+          <div className="relative z-10">
+            <p className="text-sm font-medium text-white/80">Total Siswa Aktif</p>
+            <h3 className="text-3xl font-extrabold text-white tracking-tight mt-1">
               {activeStudentsCount} Siswa
             </h3>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4 print-card">
-          <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-            <TrendingUp size={24} />
+        {/* Card 3: Outstanding Revenue */}
+        <div className="group relative overflow-hidden bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 p-6 rounded-3xl shadow-xl shadow-orange-500/30 flex items-center gap-5 print-card transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-orange-500/40 border border-white/10">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none group-hover:scale-110 transition-transform duration-500"></div>
+          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/20 shadow-inner">
+            <TrendingUp size={28} className="text-white" />
           </div>
-          <div>
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Piutang / Tunggakan</p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
+          <div className="relative z-10">
+            <p className="text-sm font-medium text-white/80">Total Piutang / Tunggakan</p>
+            <h3 className="text-3xl font-extrabold text-white tracking-tight mt-1">
               {formatRupiah(outstandingRevenue)}
             </h3>
           </div>
@@ -317,9 +323,9 @@ export default function TenantReportsClientPage({
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Revenue Bar Chart */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm print-chart-wrapper">
+        <div className="lg:col-span-2 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 dark:shadow-none print-chart-wrapper transition-all duration-300 hover:shadow-2xl">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Tren Pendapatan</h3>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Tren Pendapatan</h3>
             <div className="w-40 no-print">
               <CustomSelect
                 options={periodOptions}
@@ -328,27 +334,33 @@ export default function TenantReportsClientPage({
               />
             </div>
           </div>
-          <div className="h-[250px]">
+          <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 5, right: 0, bottom: 5, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.2} vertical={false} />
-                <XAxis dataKey="label" tick={{fontSize: 12, fill: '#64748b'}} axisLine={false} tickLine={false} />
-                <YAxis tickFormatter={(val) => `Rp${val/1000}k`} tick={{fontSize: 12, fill: '#64748b'}} axisLine={false} tickLine={false} />
+                <defs>
+                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#4f46e5" stopOpacity={1}/>
+                    <stop offset="95%" stopColor="#ec4899" stopOpacity={0.8}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#94a3b8" opacity={0.15} vertical={false} />
+                <XAxis dataKey="label" tick={{fontSize: 12, fill: '#64748b', fontWeight: 500}} axisLine={false} tickLine={false} dy={10} />
+                <YAxis tickFormatter={(val) => `Rp${val/1000}k`} tick={{fontSize: 12, fill: '#64748b', fontWeight: 500}} axisLine={false} tickLine={false} dx={-10} />
                 <RechartsTooltip 
-                  formatter={(value: any) => [formatRupiah(value), 'Revenue']}
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  cursor={{fill: 'rgba(59, 130, 246, 0.05)'}}
+                  formatter={(value: any) => [formatRupiah(value), 'Pendapatan']}
+                  contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.2)', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(8px)' }}
+                  cursor={{fill: 'rgba(99, 102, 241, 0.05)'}}
                 />
-                <Bar dataKey="revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={50} />
+                <Bar dataKey="revenue" fill="url(#colorRevenue)" radius={[6, 6, 0, 0]} maxBarSize={45} animationDuration={1500} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Program Revenue Pie Chart */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm print-chart-wrapper">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Pendapatan per Program</h3>
-          <div className="h-[250px]">
+        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 dark:shadow-none print-chart-wrapper transition-all duration-300 hover:shadow-2xl">
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight">Pendapatan per Program</h3>
+          <div className="h-[280px]">
             {programRevenueData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -367,7 +379,7 @@ export default function TenantReportsClientPage({
                   </Pie>
                   <RechartsTooltip 
                     formatter={(value: any) => formatRupiah(value)}
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.2)', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(8px)' }}
                   />
                   <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px' }}/>
                 </PieChart>
@@ -382,38 +394,38 @@ export default function TenantReportsClientPage({
       </div>
 
       {/* Table of Latest Transactions */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden print-table mt-8">
-        <div className="p-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/20 no-print">
-          <h3 className="font-bold text-slate-900 dark:text-white">Rincian Transaksi Pendapatan</h3>
+      <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden print-table mt-8">
+        <div className="p-6 border-b border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-r from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 no-print">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Rincian Transaksi Pendapatan</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="text-xs text-slate-500 uppercase bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
+            <thead className="text-xs text-slate-500 dark:text-slate-400 uppercase bg-slate-50/50 dark:bg-slate-800/30 border-b border-slate-200/50 dark:border-slate-700/50">
               <tr>
-                <th className="px-6 py-4 font-semibold">Tanggal</th>
-                <th className="px-6 py-4 font-semibold">ID Transaksi</th>
-                <th className="px-6 py-4 font-semibold">Nama Siswa</th>
-                <th className="px-6 py-4 font-semibold text-right">Pendapatan</th>
+                <th className="px-6 py-4 font-bold tracking-wider">Tanggal</th>
+                <th className="px-6 py-4 font-bold tracking-wider">ID Transaksi</th>
+                <th className="px-6 py-4 font-bold tracking-wider">Nama Siswa</th>
+                <th className="px-6 py-4 font-bold tracking-wider text-right">Pendapatan</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-slate-100/50 dark:divide-slate-800/50">
               {invoices.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-slate-500">Tidak ada rincian transaksi.</td>
+                  <td colSpan={4} className="px-6 py-12 text-center text-slate-500 font-medium">Tidak ada rincian transaksi.</td>
                 </tr>
               ) : (
                 invoices.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                    <td className="px-6 py-3 font-medium text-slate-500 print:text-black">
+                  <tr key={inv.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
+                    <td className="px-6 py-4 whitespace-nowrap text-slate-600 dark:text-slate-300">
                       {format(new Date(inv.paid_at), "dd MMM yyyy, HH:mm", { locale: localeId })}
                     </td>
-                    <td className="px-6 py-3">
-                      <span className="font-mono text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded border border-slate-200 dark:border-slate-700 print:border-none print:bg-transparent">
-                        {inv.id.substring(0, 8).toUpperCase()}
-                      </span>
+                    <td className="px-6 py-4 whitespace-nowrap font-mono text-xs text-slate-400 dark:text-slate-500">
+                      {inv.id}
                     </td>
-                    <td className="px-6 py-3 font-medium text-slate-900 dark:text-slate-100 print:text-black">{inv.student_name}</td>
-                    <td className="px-6 py-3 font-bold text-emerald-600 dark:text-emerald-400 text-right print:text-black">
+                    <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-900 dark:text-slate-100">
+                      {inv.student_name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right font-bold text-emerald-600 dark:text-emerald-400">
                       {formatRupiah(inv.amount)}
                     </td>
                   </tr>
