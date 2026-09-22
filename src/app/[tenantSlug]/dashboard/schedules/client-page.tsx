@@ -109,6 +109,24 @@ export default function SchedulesClientPage({
     );
   };
 
+  const toggleSelectDay = (daySchedules: ScheduleWithRelations[], e: React.MouseEvent) => {
+    e.stopPropagation();
+    const dayIds = daySchedules.map(s => s.id);
+    const allSelected = dayIds.every(id => selectedSchedules.includes(id));
+    
+    if (allSelected) {
+      setSelectedSchedules(prev => prev.filter(id => !dayIds.includes(id)));
+    } else {
+      setSelectedSchedules(prev => {
+        const newSelection = [...prev];
+        dayIds.forEach(id => {
+          if (!newSelection.includes(id)) newSelection.push(id);
+        });
+        return newSelection;
+      });
+    }
+  };
+
   const handleBulkDelete = () => {
     toast(`Hapus ${selectedSchedules.length} Jadwal?`, {
       description: "Data jadwal yang dipilih akan dihapus secara permanen.",
@@ -426,6 +444,15 @@ export default function SchedulesClientPage({
                       }`}>
                         {format(day, "d")}
                       </span>
+                      {isSelectMode && !isTutor && hasSchedules && (
+                        <input
+                          type="checkbox"
+                          checked={daySchedules.every(s => selectedSchedules.includes(s.id))}
+                          onChange={(e) => toggleSelectDay(daySchedules, e as any)}
+                          onClick={(e) => e.stopPropagation()}
+                          className="mr-1 mt-1 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                        />
+                      )}
                     </div>
 
                     {/* Compact Schedule Badges */}
