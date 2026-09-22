@@ -96,7 +96,7 @@ export function TenantNav({ tenantSlug, userRole }: { tenantSlug: string, userRo
             <NavItem 
               href={`/${tenantSlug}/dashboard/reports`} 
               icon={<FileText size={18} />} 
-              label="Laporan Keuangan" 
+              label="Financial Report" 
               active={isRouteActive(`/${tenantSlug}/dashboard/reports`)} 
             />
           </>

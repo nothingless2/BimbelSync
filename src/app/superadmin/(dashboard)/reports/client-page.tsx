@@ -169,8 +169,8 @@ export default function ReportsClientPage({
       {/* Header & Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 no-print">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Platform Billing & Reports</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Overview of BimbelSync subscription revenue.</p>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Billing & Laporan Platform</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Ringkasan performa pendapatan berlangganan BimbelSync.</p>
         </div>
         
         <div className="flex items-center gap-3">
@@ -210,28 +210,64 @@ export default function ReportsClientPage({
           /* Formal Serif Font */
           .print-serif, .print-container { font-family: "Times New Roman", Times, serif !important; }
 
-          /* Reduce Chart Size */
-          .print-chart-wrapper {
-            border: 1px solid #000 !important;
-            box-shadow: none !important;
-            border-radius: 0 !important;
-            margin-bottom: 20px;
-            page-break-inside: avoid;
-            background: white !important;
-          }
+          /* Hide UI Dashboard elements to show only narrative in print */
+          .print-card, .print-chart-wrapper { display: none !important; }
           
           /* Simplify Table */
-          .print-table { border: 1px solid #000 !important; border-radius: 0 !important; box-shadow: none !important; background: white !important; }
+          .print-table { border: none !important; border-radius: 0 !important; box-shadow: none !important; background: transparent !important; }
           .print-table th, .print-table td { border-bottom: 1px solid #000 !important; }
         }
       `}} />
+
+      {/* Narrative Report (Only visible in Print mode) */}
+      <div className="hidden print:block text-black print-serif leading-relaxed text-justify mb-8">
+        <h2 className="text-xl font-bold mb-4 uppercase border-b border-black pb-2">1. Ringkasan Eksekutif</h2>
+        <p className="mb-4">
+          Dokumen ini merupakan laporan resmi pendapatan platform <strong>BimbelSync</strong> per <strong>{format(new Date(), "dd MMMM yyyy", { locale: localeId })}</strong>. 
+          Laporan ini merincikan performa keuangan dan arus kas langganan yang masuk dari berbagai institusi pendidikan (bimbel) yang berafiliasi.
+        </p>
+
+        <h2 className="text-xl font-bold mb-4 uppercase border-b border-black pb-2 mt-6">2. Tinjauan Pendapatan Langganan</h2>
+        <p className="mb-4">
+          Platform telah mengakumulasikan total <strong>{invoices.length} transaksi langganan lunas</strong> selama periode pelaporan yang dipilih. 
+          Rincian berikut menyoroti kontribusi pendapatan yang dipetakan berdasarkan paket berlangganan (*SaaS*) yang ditawarkan kepada bimbel.
+        </p>
+
+        <h2 className="text-xl font-bold mb-4 uppercase border-b border-black pb-2 mt-6">3. Alokasi Pendapatan per Paket Langganan</h2>
+        <table className="w-full mb-6 border-collapse">
+          <thead>
+            <tr>
+              <th className="border border-black px-4 py-2 text-left bg-gray-100">Paket Langganan</th>
+              <th className="border border-black px-4 py-2 text-right bg-gray-100">Total Pendapatan</th>
+            </tr>
+          </thead>
+          <tbody>
+            {planRevenueData.map((prog, idx) => (
+              <tr key={idx}>
+                <td className="border border-black px-4 py-2">{prog.name}</td>
+                <td className="border border-black px-4 py-2 text-right font-bold">{formatRupiah(prog.value)}</td>
+              </tr>
+            ))}
+            {planRevenueData.length === 0 && (
+              <tr>
+                <td colSpan={2} className="border border-black px-4 py-2 text-center">Belum ada pendapatan paket yang tercatat.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+
+        <h2 className="text-xl font-bold mb-4 uppercase border-b border-black pb-2 mt-6">4. Buku Besar Transaksi Platform</h2>
+        <p className="mb-4">
+          Daftar lengkap seluruh tagihan (invoice) yang telah diselesaikan dan pembayaran langganan yang diterima dari bimbel terkait dicatat di bawah ini untuk keperluan audit dan kepatuhan.
+        </p>
+      </div>
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Revenue Line Chart */}
         <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm print-chart-wrapper">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Platform Growth</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Pertumbuhan Platform</h3>
             <div className="w-40 no-print">
               <CustomSelect
                 options={periodOptions}
@@ -264,7 +300,7 @@ export default function ReportsClientPage({
 
         {/* Program Revenue Pie Chart */}
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm print-chart-wrapper">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Revenue by Plan</h3>
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Pendapatan per Paket</h3>
           <div className="h-[250px]">
             {planRevenueData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -299,24 +335,24 @@ export default function ReportsClientPage({
       </div>
 
       {/* Table of Latest Transactions */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden print-table">
-        <div className="p-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/20">
-          <h3 className="font-bold text-slate-900 dark:text-white">Platform Billing History (Paid)</h3>
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden print-table mt-8">
+        <div className="p-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/20 no-print">
+          <h3 className="font-bold text-slate-900 dark:text-white">Riwayat Tagihan Platform (Paid)</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="text-xs text-slate-500 uppercase bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
               <tr>
-                <th className="px-6 py-4 font-semibold">Date</th>
-                <th className="px-6 py-4 font-semibold">Academy</th>
-                <th className="px-6 py-4 font-semibold">Subscription Plan</th>
-                <th className="px-6 py-4 font-semibold text-right">Revenue</th>
+                <th className="px-6 py-4 font-semibold">Tanggal</th>
+                <th className="px-6 py-4 font-semibold">Bimbel</th>
+                <th className="px-6 py-4 font-semibold">Paket Langganan</th>
+                <th className="px-6 py-4 font-semibold text-right">Pendapatan</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {invoices.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-slate-500">No transaction history.</td>
+                  <td colSpan={4} className="px-6 py-8 text-center text-slate-500">Tidak ada riwayat transaksi.</td>
                 </tr>
               ) : (
                 invoices.map((inv) => (
