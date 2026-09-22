@@ -26,9 +26,13 @@ type PeriodFilter = "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
 export default function ReportsClientPage({
   planRevenueData,
   invoices,
+  arpu,
+  churnRate
 }: {
   planRevenueData: ProgramData[];
   invoices: InvoiceData[];
+  arpu: number;
+  churnRate: number;
 }) {
   const [period, setPeriod] = useState<PeriodFilter>("MONTHLY");
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#6366f1', '#ec4899', '#8b5cf6', '#14b8a6'];
@@ -260,6 +264,30 @@ export default function ReportsClientPage({
         <p className="mb-4">
           Daftar lengkap seluruh tagihan (invoice) yang telah diselesaikan dan pembayaran langganan yang diterima dari bimbel terkait dicatat di bawah ini untuk keperluan audit dan kepatuhan.
         </p>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm print-card">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Pendapatan Platform</p>
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+            {formatRupiah(invoices.reduce((sum, inv) => sum + inv.amount, 0))}
+          </h3>
+        </div>
+
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm print-card">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">ARPU (Average Revenue Per User)</p>
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+            {formatRupiah(arpu)}
+          </h3>
+        </div>
+
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm print-card">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Tingkat Churn (Churn Rate)</p>
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+            {churnRate.toFixed(1)}%
+          </h3>
+        </div>
       </div>
 
       {/* Charts Grid */}

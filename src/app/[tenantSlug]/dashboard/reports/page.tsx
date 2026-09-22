@@ -46,6 +46,18 @@ export default async function TenantReportsPage({
       where: { academy_id: session.academy_id, deleted_at: null }
     });
 
+    const unpaidInvoices = await prisma.invoice.findMany({
+      where: {
+        academy_id: session.academy_id,
+        payment_status: { in: ["UNPAID", "OVERDUE"] }
+      },
+      select: {
+        total_amount: true
+      }
+    });
+
+    const outstandingRevenue = unpaidInvoices.reduce((sum, inv) => sum + inv.total_amount, 0);
+
     // Removed static chartData logic. It will be computed on the client.
 
     // 2. Program Revenue Distribution
@@ -119,6 +131,7 @@ export default async function TenantReportsPage({
         activeStudentsCount={activeStudentsCount}
         thisMonthRevenue={thisMonthRevenue}
         growthPercentage={growthPercentage}
+        outstandingRevenue={outstandingRevenue}
         tenantSlug={tenantSlug}
       />
     );

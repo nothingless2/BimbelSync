@@ -27,6 +27,7 @@ export default function TenantReportsClientPage({
   activeStudentsCount,
   thisMonthRevenue,
   growthPercentage,
+  outstandingRevenue,
   tenantSlug
 }: {
   programRevenueData: ProgramData[];
@@ -34,6 +35,7 @@ export default function TenantReportsClientPage({
   activeStudentsCount: number;
   thisMonthRevenue: number;
   growthPercentage: number;
+  outstandingRevenue: number;
   tenantSlug: string;
 }) {
   const [period, setPeriod] = useState<PeriodFilter>("MONTHLY");
@@ -266,9 +268,9 @@ export default function TenantReportsClientPage({
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4 print-card">
-          <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 no-print">
+          <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
             <TrendingUp size={24} />
           </div>
           <div className="flex-1">
@@ -295,6 +297,18 @@ export default function TenantReportsClientPage({
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Siswa Aktif</p>
             <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
               {activeStudentsCount} Siswa
+            </h3>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4 print-card">
+          <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+            <TrendingUp size={24} />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Piutang / Tunggakan</p>
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
+              {formatRupiah(outstandingRevenue)}
             </h3>
           </div>
         </div>

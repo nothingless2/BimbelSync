@@ -41,6 +41,15 @@ export default async function SuperadminReportsPage() {
     });
     const planRevenueData = Object.entries(planRevenueMap).map(([name, value]) => ({ name, value }));
 
+    // 3. SaaS Metrics
+    const totalAcademies = allAcademies.length;
+    const churnedAcademies = allAcademies.filter(a => a.subscription_status === "SUSPENDED" || a.subscription_status === "EXPIRED_TRIAL").length;
+    const churnRate = totalAcademies > 0 ? (churnedAcademies / totalAcademies) * 100 : 0;
+    
+    const paidAcademiesSet = new Set(invoices.map(inv => inv.academy_id));
+    const totalRevenue = invoices.reduce((sum, inv) => sum + inv.amount, 0);
+    const arpu = paidAcademiesSet.size > 0 ? totalRevenue / paidAcademiesSet.size : 0;
+
     // Serialize invoices for table
     const serializedInvoices = invoices.map(inv => ({
       id: inv.id,
@@ -55,6 +64,8 @@ export default async function SuperadminReportsPage() {
       <ReportsClientPage 
         planRevenueData={planRevenueData}
         invoices={serializedInvoices}
+        arpu={arpu}
+        churnRate={churnRate}
       />
     );
   } catch (error) {
