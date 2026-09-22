@@ -19,7 +19,7 @@ type InvoiceData = {
   paid_at: string;
 };
 
-type PeriodFilter = "WEEKLY" | "MONTHLY" | "YEARLY";
+type PeriodFilter = "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
 
 export default function TenantReportsClientPage({
   programRevenueData,
@@ -49,7 +49,20 @@ export default function TenantReportsClientPage({
     const dataMap: Record<string, number> = {};
     const labels: string[] = [];
 
-    if (period === "WEEKLY") {
+    if (period === "DAILY") {
+      // Last 14 days
+      for (let i = 13; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+        const key = format(d, "dd MMM", { locale: localeId });
+        labels.push(key);
+        dataMap[key] = 0;
+      }
+      invoices.forEach(inv => {
+        const d = new Date(inv.paid_at);
+        const key = format(d, "dd MMM", { locale: localeId });
+        if (dataMap[key] !== undefined) dataMap[key] += inv.amount;
+      });
+    } else if (period === "WEEKLY") {
       // Last 12 weeks
       for (let i = 11; i >= 0; i--) {
         const d = subWeeks(now, i);
@@ -99,7 +112,7 @@ export default function TenantReportsClientPage({
   }, [invoices, period]);
 
   const handleExportCSV = () => {
-    const headers = ["ID Transaksi", "Tanggal Lunas", "Nama Siswa", "Pendapatan (Rp)"];
+    const headers = ["Transaction ID", "Date Paid", "Student Name", "Revenue (Rp)"];
     const rows = invoices.map(inv => [
       inv.id,
       format(new Date(inv.paid_at), "dd MMM yyyy HH:mm", { locale: localeId }),
@@ -116,7 +129,7 @@ export default function TenantReportsClientPage({
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `laporan_pendapatan_bimbel_${format(new Date(), 'yyyyMMdd')}.csv`);
+    link.setAttribute("download", `financial_report_${format(new Date(), 'yyyyMMdd')}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -127,6 +140,7 @@ export default function TenantReportsClientPage({
   };
 
   const periodOptions = [
+    { value: "DAILY", label: "Harian" },
     { value: "WEEKLY", label: "Mingguan" },
     { value: "MONTHLY", label: "Bulanan" },
     { value: "YEARLY", label: "Tahunan" },
@@ -136,15 +150,15 @@ export default function TenantReportsClientPage({
     <div className="space-y-6 print-container">
       {/* Formal PDF Header (Only visible in Print mode) */}
       <div className="hidden print:block text-center mb-8 border-b-2 border-black pb-4">
-        <h1 className="text-2xl font-bold uppercase tracking-widest text-black print-serif">Laporan Keuangan</h1>
-        <p className="text-black text-sm mt-1 print-serif">Disusun pada: {format(new Date(), "dd MMMM yyyy", { locale: localeId })}</p>
+        <h1 className="text-2xl font-bold uppercase tracking-widest text-black print-serif">FINANCIAL REPORT</h1>
+        <p className="text-black text-sm mt-1 print-serif">Generated on: {format(new Date(), "dd MMMM yyyy", { locale: localeId })}</p>
       </div>
 
       {/* Header & Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 no-print">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Laporan Keuangan Bimbel</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Ringkasan performa pendapatan dari siswa.</p>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Financial Report</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Overview of student revenue performance.</p>
         </div>
         
         <div className="flex items-center gap-3">
@@ -158,7 +172,7 @@ export default function TenantReportsClientPage({
             onClick={handleExportPDF}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors shadow-sm"
           >
-            <Printer size={16} /> Cetak Laporan
+            <Printer size={16} /> Print Report
           </button>
         </div>
       </div>
@@ -195,7 +209,6 @@ export default function TenantReportsClientPage({
 
           /* Reduce Chart Size */
           .print-chart-wrapper {
-            height: 200px !important;
             border: 1px solid #000 !important;
             box-shadow: none !important;
             border-radius: 0 !important;
@@ -216,7 +229,7 @@ export default function TenantReportsClientPage({
             <TrendingUp size={24} />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Pendapatan Bulan Ini</p>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">This Month's Revenue</p>
             <div className="flex items-end gap-3 mt-1">
               <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
                 {formatRupiah(thisMonthRevenue)}
@@ -236,9 +249,9 @@ export default function TenantReportsClientPage({
             <Users size={24} />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Siswa Aktif</p>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Active Students</p>
             <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
-              {activeStudentsCount} Siswa
+              {activeStudentsCount} Students
             </h3>
           </div>
         </div>
@@ -249,7 +262,7 @@ export default function TenantReportsClientPage({
         {/* Revenue Bar Chart */}
         <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm print-chart-wrapper">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Tren Pendapatan</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Revenue Trend</h3>
             <div className="w-40 no-print">
               <CustomSelect
                 options={periodOptions}
@@ -258,14 +271,14 @@ export default function TenantReportsClientPage({
               />
             </div>
           </div>
-          <div className="h-[250px] print:h-[150px]">
+          <div className="h-[250px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 5, right: 0, bottom: 5, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.2} vertical={false} />
                 <XAxis dataKey="label" tick={{fontSize: 12, fill: '#64748b'}} axisLine={false} tickLine={false} />
                 <YAxis tickFormatter={(val) => `Rp${val/1000}k`} tick={{fontSize: 12, fill: '#64748b'}} axisLine={false} tickLine={false} />
                 <RechartsTooltip 
-                  formatter={(value: any) => [formatRupiah(value), 'Pendapatan']}
+                  formatter={(value: any) => [formatRupiah(value), 'Revenue']}
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                   cursor={{fill: 'rgba(59, 130, 246, 0.05)'}}
                 />
@@ -277,8 +290,8 @@ export default function TenantReportsClientPage({
 
         {/* Program Revenue Pie Chart */}
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm print-chart-wrapper">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Pendapatan per Program</h3>
-          <div className="h-[250px] print:h-[150px]">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Revenue by Program</h3>
+          <div className="h-[250px]">
             {programRevenueData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -304,7 +317,7 @@ export default function TenantReportsClientPage({
               </ResponsiveContainer>
             ) : (
               <div className="h-full flex items-center justify-center text-slate-500">
-                Belum ada data pendapatan
+                No revenue data available
               </div>
             )}
           </div>
@@ -314,22 +327,22 @@ export default function TenantReportsClientPage({
       {/* Table of Latest Transactions */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden print-table">
         <div className="p-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/20">
-          <h3 className="font-bold text-slate-900 dark:text-white">Rincian Transaksi Pendapatan</h3>
+          <h3 className="font-bold text-slate-900 dark:text-white">Revenue Transaction Details</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="text-xs text-slate-500 uppercase bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
               <tr>
-                <th className="px-6 py-4 font-semibold">Tanggal</th>
-                <th className="px-6 py-4 font-semibold">ID Transaksi</th>
-                <th className="px-6 py-4 font-semibold">Nama Siswa</th>
-                <th className="px-6 py-4 font-semibold text-right">Pendapatan</th>
+                <th className="px-6 py-4 font-semibold">Date</th>
+                <th className="px-6 py-4 font-semibold">Transaction ID</th>
+                <th className="px-6 py-4 font-semibold">Student Name</th>
+                <th className="px-6 py-4 font-semibold text-right">Revenue</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {invoices.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-slate-500">Tidak ada transaksi.</td>
+                  <td colSpan={4} className="px-6 py-8 text-center text-slate-500">No transactions found.</td>
                 </tr>
               ) : (
                 invoices.map((inv) => (

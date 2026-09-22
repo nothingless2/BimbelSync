@@ -21,7 +21,7 @@ type InvoiceData = {
   paid_at: string;
 };
 
-type PeriodFilter = "WEEKLY" | "MONTHLY" | "YEARLY";
+type PeriodFilter = "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
 
 export default function ReportsClientPage({
   planRevenueData,
@@ -53,7 +53,9 @@ export default function ReportsClientPage({
     });
 
     const getLabel = (d: Date) => {
-      if (period === "WEEKLY") {
+      if (period === "DAILY") {
+        return format(d, "dd MMM", { locale: localeId });
+      } else if (period === "WEEKLY") {
         const wDate = startOfWeek(d, { weekStartsOn: 1 });
         return `Minggu ${getWeek(wDate)}, ${format(wDate, "yy")}`;
       } else if (period === "MONTHLY") {
@@ -63,7 +65,14 @@ export default function ReportsClientPage({
       }
     };
 
-    if (period === "WEEKLY") {
+    if (period === "DAILY") {
+      for (let i = 13; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+        const label = getLabel(d);
+        if (!labels.includes(label)) labels.push(label);
+        dataMap[label] = { revenue: 0, newSubscribers: 0 };
+      }
+    } else if (period === "WEEKLY") {
       for (let i = 11; i >= 0; i--) {
         const d = subWeeks(now, i);
         const label = getLabel(d);
@@ -114,7 +123,7 @@ export default function ReportsClientPage({
   }, [invoices, period]);
 
   const handleExportCSV = () => {
-    const headers = ["ID Transaksi", "Tanggal Lunas", "Nama Bimbel", "Paket", "Pendapatan (Rp)"];
+    const headers = ["Transaction ID", "Date Paid", "Academy Name", "Plan", "Revenue (Rp)"];
     const rows = invoices.map(inv => [
       inv.id,
       format(new Date(inv.paid_at), "dd MMM yyyy HH:mm", { locale: localeId }),
@@ -132,7 +141,7 @@ export default function ReportsClientPage({
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `laporan_platform_${format(new Date(), 'yyyyMMdd')}.csv`);
+    link.setAttribute("download", `platform_report_${format(new Date(), 'yyyyMMdd')}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -143,6 +152,7 @@ export default function ReportsClientPage({
   };
 
   const periodOptions = [
+    { value: "DAILY", label: "Harian" },
     { value: "WEEKLY", label: "Mingguan" },
     { value: "MONTHLY", label: "Bulanan" },
     { value: "YEARLY", label: "Tahunan" },
@@ -152,15 +162,15 @@ export default function ReportsClientPage({
     <div className="space-y-6 print-container">
       {/* Formal PDF Header (Only visible in Print mode) */}
       <div className="hidden print:block text-center mb-8 border-b-2 border-black pb-4">
-        <h1 className="text-2xl font-bold uppercase tracking-widest text-black print-serif">Laporan Keuangan Platform</h1>
-        <p className="text-black text-sm mt-1 print-serif">BimbelSync | Disusun pada: {format(new Date(), "dd MMMM yyyy", { locale: localeId })}</p>
+        <h1 className="text-2xl font-bold uppercase tracking-widest text-black print-serif">PLATFORM FINANCIAL REPORT</h1>
+        <p className="text-black text-sm mt-1 print-serif">BimbelSync | Generated on: {format(new Date(), "dd MMMM yyyy", { locale: localeId })}</p>
       </div>
 
       {/* Header & Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 no-print">
         <div>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Platform Billing & Reports</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Ringkasan performa pendapatan berlangganan BimbelSync.</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Overview of BimbelSync subscription revenue.</p>
         </div>
         
         <div className="flex items-center gap-3">
@@ -174,7 +184,7 @@ export default function ReportsClientPage({
             onClick={handleExportPDF}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors shadow-sm"
           >
-            <Printer size={16} /> Cetak Laporan
+            <Printer size={16} /> Print Report
           </button>
         </div>
       </div>
@@ -202,7 +212,6 @@ export default function ReportsClientPage({
 
           /* Reduce Chart Size */
           .print-chart-wrapper {
-            height: 200px !important;
             border: 1px solid #000 !important;
             box-shadow: none !important;
             border-radius: 0 !important;
@@ -222,7 +231,7 @@ export default function ReportsClientPage({
         {/* Revenue Line Chart */}
         <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm print-chart-wrapper">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Pertumbuhan Platform</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Platform Growth</h3>
             <div className="w-40 no-print">
               <CustomSelect
                 options={periodOptions}
@@ -231,7 +240,7 @@ export default function ReportsClientPage({
               />
             </div>
           </div>
-          <div className="h-[250px] print:h-[150px]">
+          <div className="h-[250px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 5, right: 0, bottom: 5, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.2} vertical={false} />
@@ -240,8 +249,8 @@ export default function ReportsClientPage({
                 <YAxis yAxisId="right" orientation="right" tick={{fontSize: 12, fill: '#64748b'}} axisLine={false} tickLine={false} />
                 <RechartsTooltip 
                   formatter={(value: any, name: any) => {
-                    if (name === 'revenue') return [formatRupiah(value), 'Pendapatan'];
-                    if (name === 'totalSubscribers') return [`${value} Bimbel`, 'Total Bimbel'];
+                    if (name === 'revenue') return [formatRupiah(value), 'Revenue'];
+                    if (name === 'totalSubscribers') return [`${value} Academies`, 'Total Academies'];
                     return [value, name];
                   }}
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
@@ -255,8 +264,8 @@ export default function ReportsClientPage({
 
         {/* Program Revenue Pie Chart */}
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm print-chart-wrapper">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Pendapatan per Paket</h3>
-          <div className="h-[250px] print:h-[150px]">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Revenue by Plan</h3>
+          <div className="h-[250px]">
             {planRevenueData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -282,7 +291,7 @@ export default function ReportsClientPage({
               </ResponsiveContainer>
             ) : (
               <div className="h-full flex items-center justify-center text-slate-500">
-                Belum ada data pendapatan
+                No revenue data available
               </div>
             )}
           </div>
@@ -292,22 +301,22 @@ export default function ReportsClientPage({
       {/* Table of Latest Transactions */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden print-table">
         <div className="p-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/20">
-          <h3 className="font-bold text-slate-900 dark:text-white">Riwayat Tagihan Platform (Paid)</h3>
+          <h3 className="font-bold text-slate-900 dark:text-white">Platform Billing History (Paid)</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="text-xs text-slate-500 uppercase bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
               <tr>
-                <th className="px-6 py-4 font-semibold">Tanggal</th>
-                <th className="px-6 py-4 font-semibold">Bimbel</th>
-                <th className="px-6 py-4 font-semibold">Paket Langganan</th>
-                <th className="px-6 py-4 font-semibold text-right">Pendapatan</th>
+                <th className="px-6 py-4 font-semibold">Date</th>
+                <th className="px-6 py-4 font-semibold">Academy</th>
+                <th className="px-6 py-4 font-semibold">Subscription Plan</th>
+                <th className="px-6 py-4 font-semibold text-right">Revenue</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {invoices.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-slate-500">Tidak ada riwayat transaksi.</td>
+                  <td colSpan={4} className="px-6 py-8 text-center text-slate-500">No transaction history.</td>
                 </tr>
               ) : (
                 invoices.map((inv) => (
