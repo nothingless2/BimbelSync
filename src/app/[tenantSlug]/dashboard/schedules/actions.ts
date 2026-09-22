@@ -388,6 +388,19 @@ export async function generateSchedulesAction(formData: FormData) {
   }
 
   try {
+    const existingSchedulesCount = await prisma.schedule.count({
+      where: {
+        program_id: programId,
+        status: { not: "CANCELLED" }
+      }
+    });
+
+    const remainingMeetings = totalMeetings - existingSchedulesCount;
+
+    if (remainingMeetings <= 0) {
+      return { error: `Program ini sudah mencapai batas maksimal pertemuan (${totalMeetings}). Tidak dapat meng-generate jadwal baru.` };
+    }
+
     let schedulesToCreate = [];
     let currentDate = new Date(startDateStr);
     let meetingsGenerated = 0;
@@ -395,7 +408,7 @@ export async function generateSchedulesAction(formData: FormData) {
     // Safety break (max 365 days iteration to avoid infinite loop)
     let iterations = 0; 
     
-    while (meetingsGenerated < totalMeetings && iterations < 365) {
+    while (meetingsGenerated < remainingMeetings && iterations < 365) {
       const dayOfWeek = currentDate.getDay();
       
       if (days.includes(dayOfWeek)) {
