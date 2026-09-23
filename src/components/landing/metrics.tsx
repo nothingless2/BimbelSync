@@ -35,16 +35,16 @@ export function Metrics() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
-              Bukan Sekadar Alat,<br /> Ini Adalah <span className="text-blue-600">Mesin Pertumbuhan.</span>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-6 tracking-tight">
+              Fokus mengajar, biar sistem yang<br />urus <span className="text-blue-600">administrasinya.</span>
             </h2>
-            <p className="text-lg md:text-xl text-slate-500 font-medium leading-relaxed max-w-2xl mx-auto">
-              BimbelSync memotong birokrasi operasional agar Anda bisa kembali fokus pada hal terpenting: <span className="text-slate-700 font-semibold">kualitas pendidikan siswa Anda.</span>
+            <p className="text-lg text-slate-500 font-medium leading-relaxed max-w-2xl mx-auto">
+              BimbelSync memotong pekerjaan berulang agar Anda bisa kembali fokus pada hal terpenting: mendampingi siswa belajar.
             </p>
           </motion.div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto">
           {metrics.map((metric, index) => (
             <motion.div 
               key={index}
@@ -52,9 +52,9 @@ export function Metrics() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.15 }}
-              className={`group relative p-8 md:p-10 rounded-[2rem] transition-all duration-300 flex flex-col h-full ${
+              className={`group relative p-6 md:p-8 rounded-[1.5rem] transition-all duration-300 flex flex-col h-full ${
                 metric.highlight 
-                  ? 'bg-blue-600 text-white shadow-xl shadow-blue-900/20' 
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' 
                   : 'bg-white border border-slate-200/60 shadow-sm hover:shadow-md'
               }`}
             >
@@ -67,15 +67,15 @@ export function Metrics() {
               )}
 
               <div className="relative z-10 flex-1 flex flex-col">
-                <div className={`mb-8 inline-flex items-center justify-center w-12 h-12 rounded-xl ${metric.bgClass}`}>
+                <div className={`mb-6 inline-flex items-center justify-center w-10 h-10 rounded-xl ${metric.bgClass}`}>
                   {metric.icon}
                 </div>
                 
-                <h3 className={`text-xl font-bold mb-4 ${metric.highlight ? 'text-white' : 'text-slate-900'}`}>
+                <h3 className={`text-lg font-bold mb-3 ${metric.highlight ? 'text-white' : 'text-slate-900'}`}>
                   {metric.title}
                 </h3>
                 
-                <p className={`leading-relaxed font-medium mb-12 flex-1 ${metric.highlight ? 'text-blue-100' : 'text-slate-500'}`}>
+                <p className={`text-sm leading-relaxed font-medium mb-8 flex-1 ${metric.highlight ? 'text-blue-100' : 'text-slate-500'}`}>
                   {metric.description}
                 </p>
 
