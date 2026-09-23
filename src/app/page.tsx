@@ -1,5 +1,6 @@
 import React from 'react';
-import { CheckCircle2, Check, Calendar, QrCode, MessageSquare, CreditCard, ArrowRight, Globe, Mail, X } from 'lucide-react';
+import { CheckCircle2, Check, Calendar, QrCode, CreditCard, Mail, X } from 'lucide-react';
+import Link from 'next/link';
 import { FadeInView } from '@/components/fade-in-view';
 import { LandingHeader } from '@/components/landing-header';
 import { Metrics } from '@/components/landing/metrics';
@@ -429,8 +430,8 @@ export default async function LandingPage() {
             <div>
               <h4 className="text-white font-bold text-sm tracking-widest mb-6 uppercase">Legal</h4>
               <ul className="space-y-4 text-sm text-slate-400">
-                <li><a href="/privacy" className="hover:text-white transition">Privacy Policy</a></li>
-                <li><a href="/terms" className="hover:text-white transition">Terms of Service</a></li>
+                <li><Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="hover:text-white transition">Terms of Service</Link></li>
               </ul>
             </div>
           </div>
