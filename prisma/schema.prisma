@@ -57,6 +57,7 @@ model Plan {
   deleted_at             DateTime?
 
   academies         Academy[]
+  pending_academies Academy[] @relation("PendingPlan")
   platform_invoices PlatformInvoice[]
 }
 
@@ -69,9 +70,12 @@ model Academy {
   max_leave_per_month          Int       @default(0)
   subscription_status          SubscriptionStatus @default(TRIAL)
   subscription_due_date        DateTime? @db.Date
+  pending_plan_id              String?   @db.Uuid
+  pending_plan_date            DateTime? @db.Date
   deleted_at                   DateTime?
 
   plan              Plan              @relation(fields: [plan_id], references: [id])
+  pending_plan      Plan?             @relation("PendingPlan", fields: [pending_plan_id], references: [id])
   staff             Staff[]
   students          Student[]
   programs          Program[]

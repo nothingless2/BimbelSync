@@ -73,6 +73,12 @@ export async function verifyInvoiceAction(invoiceId: string) {
     const duration = invoice.duration_months || 1;
     newDueDate.setMonth(newDueDate.getMonth() + duration);
 
+    // Cek apakah ada perubahan paket
+    const isPlanUpgrade = invoice.plan_id !== academy.plan_id;
+    const pendingPlanId = isPlanUpgrade ? invoice.plan_id : null;
+    // Jika tidak ada due date sebelumnya, berarti dia langsung aktif ke plan tersebut hari ini juga, tidak perlu ditunda
+    const pendingPlanDate = (isPlanUpgrade && academy.subscription_due_date) ? new Date(academy.subscription_due_date) : null;
+
     await prisma.$transaction([
       prisma.platformInvoice.update({
         where: { id: invoiceId },
@@ -86,7 +92,12 @@ export async function verifyInvoiceAction(invoiceId: string) {
         where: { id: invoice.academy_id },
         data: {
           subscription_status: "ACTIVE",
-          subscription_due_date: newDueDate
+          subscription_due_date: newDueDate,
+          ...(isPlanUpgrade && !academy.subscription_due_date && { plan_id: invoice.plan_id }),
+          ...(isPlanUpgrade && academy.subscription_due_date && { 
+            pending_plan_id: pendingPlanId,
+            pending_plan_date: pendingPlanDate
+          })
         }
       })
     ]);

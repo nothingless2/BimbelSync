@@ -34,14 +34,34 @@ export default async function DashboardLayout({
     select: { id: true, email: true, avatar_url: true, role: true }
   });
 
-  const academy = await prisma.academy.findUnique({
+  let academy = await prisma.academy.findUnique({
     where: { id: session.academy_id },
-    select: { subscription_status: true, subscription_due_date: true, deleted_at: true }
+    select: { id: true, subscription_status: true, subscription_due_date: true, deleted_at: true, pending_plan_id: true, pending_plan_date: true }
   });
 
   // Jika akademi sudah dihapus (soft delete) atau tidak ada
   if (!academy || academy.deleted_at !== null) {
     redirect(`/${tenantSlug}/login`);
+  }
+
+  // Cek apakah ada jadwal upgrade otomatis yang sudah tiba waktunya
+  if (academy.pending_plan_id && academy.pending_plan_date) {
+    const todayForActivation = new Date();
+    todayForActivation.setHours(0, 0, 0, 0);
+    const activationDate = new Date(academy.pending_plan_date);
+    activationDate.setHours(0, 0, 0, 0);
+    
+    if (todayForActivation >= activationDate) {
+      academy = await prisma.academy.update({
+        where: { id: academy.id },
+        data: {
+          plan_id: academy.pending_plan_id,
+          pending_plan_id: null,
+          pending_plan_date: null
+        },
+        select: { id: true, subscription_status: true, subscription_due_date: true, deleted_at: true, pending_plan_id: true, pending_plan_date: true }
+      });
+    }
   }
 
   const unpaidInvoices = await prisma.platformInvoice.findMany({

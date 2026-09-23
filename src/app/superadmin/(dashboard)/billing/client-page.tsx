@@ -184,11 +184,12 @@ interface InvoiceItem {
 interface Props {
   invoices: InvoiceItem[];
   academies: { id: string; name: string; subscription_due_date: string | null; plan: { id: string; name: string; price: number } }[];
+  plans: { id: string; name: string; price: number }[];
 }
 
-export default function BillingClientPage({ invoices, academies }: Props) {
+export default function BillingClientPage({ invoices, academies, plans }: Props) {
   const [createModal, setCreateModal] = useState(false);
-  const [form, setForm] = useState({ academyId: "", billingPeriod: "", dueDate: "", amount: "", durationMonths: "1" });
+  const [form, setForm] = useState({ academyId: "", planId: "", billingPeriod: "", dueDate: "", amount: "", durationMonths: "1" });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -213,15 +214,16 @@ export default function BillingClientPage({ invoices, academies }: Props) {
   const totalRevenue = invoices.filter(i => i.payment_status === "PAID").reduce((sum, i) => sum + i.amount, 0);
 
   const selectedAcademy = academies.find(a => a.id === form.academyId);
+  const selectedPlan = plans.find(p => p.id === form.planId) || selectedAcademy?.plan;
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.academyId || !form.billingPeriod || !form.dueDate || !form.amount) return;
+    if (!form.academyId || !form.planId || !form.billingPeriod || !form.dueDate || !form.amount) return;
     setIsSubmitting(true);
 
     const res = await createInvoiceAction(
       form.academyId,
-      selectedAcademy!.plan.id,
+      form.planId,
       parseInt(form.amount),
       form.billingPeriod,
       form.dueDate,
@@ -232,7 +234,7 @@ export default function BillingClientPage({ invoices, academies }: Props) {
     else {
       toast.success("Invoice berhasil dibuat!");
       setCreateModal(false);
-      setForm({ academyId: "", billingPeriod: "", dueDate: "", amount: "", durationMonths: "1" });
+      setForm({ academyId: "", planId: "", billingPeriod: "", dueDate: "", amount: "", durationMonths: "1" });
     }
     setIsSubmitting(false);
   };
@@ -499,6 +501,7 @@ export default function BillingClientPage({ invoices, academies }: Props) {
                       setForm({ 
                         ...form, 
                         academyId: value, 
+                        planId: acad ? acad.plan.id : "",
                         amount: acad ? (acad.plan.price * (parseInt(form.durationMonths) || 1)).toString() : "",
                         dueDate: autoDueDate,
                         billingPeriod: autoBillingPeriod
@@ -510,6 +513,31 @@ export default function BillingClientPage({ invoices, academies }: Props) {
                       label: a.name
                     }))}
                   />
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">Paket Langganan</label>
+                <div className="relative">
+                  <select
+                    value={form.planId}
+                    required
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      const plan = plans.find(p => p.id === value);
+                      setForm({ 
+                        ...form, 
+                        planId: value, 
+                        amount: plan ? (plan.price * (parseInt(form.durationMonths) || 1)).toString() : form.amount 
+                      });
+                    }}
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm appearance-none outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="" disabled>Pilih Paket...</option>
+                    {plans.map(p => (
+                      <option key={p.id} value={p.id}>{p.name} - {IDR(p.price)}/bln</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -529,9 +557,9 @@ export default function BillingClientPage({ invoices, academies }: Props) {
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Nominal (Rp)</label>
                 <input type="number" required min={0} value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                  placeholder={selectedAcademy ? `Default: ${IDR(selectedAcademy.plan.price)}` : "0"}
+                  placeholder={selectedPlan ? `Default: ${IDR(selectedPlan.price)}` : "0"}
                   className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none" />
-                {selectedAcademy && <p className="text-xs text-slate-400">Harga paket {selectedAcademy.plan.name}: {IDR(selectedAcademy.plan.price)}/bulan</p>}
+                {selectedPlan && <p className="text-xs text-slate-400">Harga paket {selectedPlan.name}: {IDR(selectedPlan.price)}/bulan</p>}
               </div>
 
               <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
@@ -545,11 +573,11 @@ export default function BillingClientPage({ invoices, academies }: Props) {
                   value={form.durationMonths}
                   onChange={(e) => {
                     const newDuration = parseInt(e.target.value) || 1;
-                    const acad = academies.find(a => a.id === form.academyId);
+                    const plan = plans.find(p => p.id === form.planId);
                     setForm({ 
                       ...form, 
                       durationMonths: e.target.value,
-                      amount: acad ? (acad.plan.price * newDuration).toString() : form.amount
+                      amount: plan ? (plan.price * newDuration).toString() : form.amount
                     });
                   }}
                   className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"

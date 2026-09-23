@@ -11,7 +11,31 @@ export default async function BillingPage() {
   if (!session || session.role !== "SUPERADMIN") redirect("/superadmin/login");
 
   try {
-    const [invoices, academies] = await Promise.all([
+    // Process auto-activations
+    const todayForActivation = new Date();
+    todayForActivation.setHours(0, 0, 0, 0);
+
+    const pendingAcademies = await prisma.academy.findMany({
+      where: {
+        pending_plan_id: { not: null },
+        pending_plan_date: { lte: todayForActivation }
+      }
+    });
+
+    if (pendingAcademies.length > 0) {
+      await Promise.all(pendingAcademies.map(acad => 
+        prisma.academy.update({
+          where: { id: acad.id },
+          data: {
+            plan_id: acad.pending_plan_id!,
+            pending_plan_id: null,
+            pending_plan_date: null
+          }
+        })
+      ));
+    }
+
+    const [invoices, academies, plans] = await Promise.all([
       prisma.platformInvoice.findMany({
         where: { academy: { deleted_at: null } },
         include: {
@@ -25,6 +49,10 @@ export default async function BillingPage() {
         where: { deleted_at: null },
         include: { plan: true },
         orderBy: { name: "asc" },
+      }),
+      prisma.plan.findMany({
+        where: { deleted_at: null, is_active: true },
+        orderBy: { price: "asc" },
       }),
     ]);
 
@@ -43,7 +71,13 @@ export default async function BillingPage() {
       plan: { id: a.plan.id, name: a.plan.name, price: a.plan.price },
     }));
 
-    return <BillingClientPage invoices={serializedInvoices} academies={serializedAcademies} />;
+    const serializedPlans = plans.map(p => ({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+    }));
+
+    return <BillingClientPage invoices={serializedInvoices} academies={serializedAcademies} plans={serializedPlans} />;
   } catch (error) {
     console.error("BillingPage error:", error);
     return (
