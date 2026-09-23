@@ -163,7 +163,7 @@ export default async function LandingPage() {
                 <QrCode className="w-6 h-6 text-[#2563EB]" />
               </div>
               <h3 className="text-2xl font-bold text-slate-900 mb-4">Presensi QR Dinamis</h3>
-              <p className="text-slate-600 mb-6 text-lg leading-relaxed">Tinggalkan absen kertas. Siswa cukup scan QR code dinamis di layar kelas. Data presensi langsung tercatat dan notifikasi terkirim ke orang tua.</p>
+              <p className="text-slate-600 mb-6 text-lg leading-relaxed">Tinggalkan absen kertas. Siswa cukup scan QR code dinamis di layar kelas. Data presensi langsung tercatat dan notifikasi langsung terkirim.</p>
               <ul className="space-y-3 text-slate-700 font-medium">
                 <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> QR code berubah setiap 10 detik</li>
                 <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Anti-titip absen</li>
@@ -184,7 +184,7 @@ export default async function LandingPage() {
                 <Mail className="w-6 h-6 text-[#2563EB]" />
               </div>
               <h3 className="text-2xl font-bold text-slate-900 mb-4">Tagihan via Email</h3>
-              <p className="text-slate-600 mb-6 text-lg leading-relaxed">Kirim invoice, pengingat jatuh tempo, dan resi pembayaran langsung ke email orang tua secara otomatis. Tingkatkan persentase pembayaran tepat waktu.</p>
+              <p className="text-slate-600 mb-6 text-lg leading-relaxed">Kirim invoice, pengingat jatuh tempo, dan resi pembayaran langsung ke email secara otomatis. Tingkatkan persentase pembayaran tepat waktu.</p>
               <ul className="space-y-3 text-slate-700 font-medium">
                 <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Pengingat otomatis (H-3, H-1)</li>
                 <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Lampiran PDF Profesional</li>
@@ -205,7 +205,7 @@ export default async function LandingPage() {
                 <CreditCard className="w-6 h-6 text-[#2563EB]" />
               </div>
               <h3 className="text-2xl font-bold text-slate-900 mb-4">Pencatatan & Verifikasi Pembayaran</h3>
-              <p className="text-slate-600 mb-6 text-lg leading-relaxed">Kelola seluruh pembayaran kursus secara praktis. Orang tua mengunggah resi transfer, admin memverifikasinya dalam satu dasbor tagihan.</p>
+              <p className="text-slate-600 mb-6 text-lg leading-relaxed">Kelola seluruh pembayaran kursus secara praktis. Tinggal unggah resi transfer, admin memverifikasinya dalam satu dasbor tagihan.</p>
               <ul className="space-y-3 text-slate-700 font-medium">
                 <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Unggah bukti transfer & resi pembayaran</li>
                 <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Verifikasi cepat & pantau status tagihan</li>
