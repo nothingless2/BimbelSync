@@ -81,6 +81,20 @@ export function EditStudentModal({
           </div>
 
           <div className="space-y-2">
+            <label htmlFor="email" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+              Email Siswa (Opsional)
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              defaultValue={student.email || ""}
+              placeholder="Contoh: budi@gmail.com"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+            />
+          </div>
+
+          <div className="space-y-2">
             <label htmlFor="parent_whatsapp" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
               No. WhatsApp Orang Tua
             </label>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Users, Pencil, Trash2, Phone, BookOpen, MoreVertical, LogOut, CheckCircle2, Search } from "lucide-react";
+import { Users, Pencil, Trash2, Phone, Mail, BookOpen, MoreVertical, LogOut, CheckCircle2, Search } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { deleteStudentAction, withdrawEnrollmentAction } from "./actions";
 import { EditStudentModal } from "@/components/modals/edit-student-modal";
@@ -36,7 +36,8 @@ export default function StudentsClientPage({
   // Filtering
   const filteredStudents = students.filter(student => 
     student.full_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    student.username.toLowerCase().includes(searchQuery.toLowerCase())
+    student.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (student.email && student.email.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   // Pagination State
@@ -97,6 +98,7 @@ export default function StudentsClientPage({
     const exportData = filteredStudents.map(s => ({
       "Nama Lengkap": s.full_name,
       "Username": s.username,
+      "Email Siswa": s.email || "-",
       "WhatsApp Wali": s.parent_whatsapp || "-",
       "Program Aktif": s.enrollments.filter(e => e.status === 'ACTIVE').map(e => e.program.name).join(", ") || "-"
     }));
@@ -187,14 +189,22 @@ export default function StudentsClientPage({
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        {student.parent_whatsapp ? (
-                          <div className="flex items-center gap-2">
-                            <Phone size={14} className="text-slate-400" />
-                            <span>{student.parent_whatsapp}</span>
-                          </div>
-                        ) : (
-                          <span className="text-slate-400 italic text-xs">Tidak ada kontak</span>
-                        )}
+                        <div className="space-y-1">
+                          {student.email && (
+                            <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+                              <Mail size={13} className="text-slate-400 shrink-0" />
+                              <span>{student.email}</span>
+                            </div>
+                          )}
+                          {student.parent_whatsapp ? (
+                            <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+                              <Phone size={13} className="text-slate-400 shrink-0" />
+                              <span>{student.parent_whatsapp}</span>
+                            </div>
+                          ) : !student.email && (
+                            <span className="text-slate-400 italic text-xs">Tidak ada kontak</span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-wrap gap-2">

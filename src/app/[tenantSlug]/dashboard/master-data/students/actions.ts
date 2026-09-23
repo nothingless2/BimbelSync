@@ -19,6 +19,7 @@ export async function createStudentAction(formData: FormData) {
   const fullName = formData.get("full_name") as string;
   const username = formData.get("username") as string;
   const password = formData.get("password") as string;
+  const email = formData.get("email") as string;
   const parentWhatsapp = formData.get("parent_whatsapp") as string;
   const programId = formData.get("program_id") as string;
 
@@ -85,6 +86,7 @@ export async function createStudentAction(formData: FormData) {
           full_name: fullName,
           username,
           password_hash: passwordHash,
+          email: email || null,
           parent_whatsapp: parentWhatsapp || null,
         }
       });
@@ -142,6 +144,7 @@ export async function updateStudentAction(studentId: string, formData: FormData)
   if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
 
   const fullName = formData.get("full_name") as string;
+  const email = formData.get("email") as string;
   const parentWhatsapp = formData.get("parent_whatsapp") as string;
   const password = formData.get("password") as string; 
 
@@ -158,6 +161,7 @@ export async function updateStudentAction(studentId: string, formData: FormData)
 
     const updateData: any = { 
       full_name: fullName,
+      email: email || null,
       parent_whatsapp: parentWhatsapp || null,
     };
 
@@ -333,7 +337,7 @@ export async function withdrawEnrollmentAction(enrollmentId: string, reason: Wit
   }
 }
 
-export async function bulkCreateStudentsAction(programId: string, studentsToImport: { full_name: string, username: string, parent_whatsapp: string }[]) {
+export async function bulkCreateStudentsAction(programId: string, studentsToImport: { full_name: string, username: string, email?: string, parent_whatsapp: string }[]) {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("bimbelsync_session")?.value;
   if (!sessionToken) return { error: "Autentikasi diperlukan." };
@@ -410,6 +414,7 @@ export async function bulkCreateStudentsAction(programId: string, studentsToImpo
             full_name: s.full_name,
             username: s.username,
             password_hash: s.password_hash,
+            email: s.email || null,
             parent_whatsapp: s.parent_whatsapp || null,
             must_change_password: true,
           }

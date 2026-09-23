@@ -23,7 +23,7 @@ export function ImportStudentsModal({
   const [parsedData, setParsedData] = useState<any[] | null>(null);
 
   const handleDownloadTemplate = () => {
-    const csvContent = "full_name,username,parent_whatsapp\nBudi Santoso,budi123,081234567890\nSiti Aminah,siti_a,089876543210";
+    const csvContent = "full_name,username,email,parent_whatsapp\nBudi Santoso,budi123,budi@gmail.com,081234567890\nSiti Aminah,siti_a,siti@gmail.com,089876543210";
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -93,6 +93,7 @@ export function ImportStudentsModal({
     const studentsToImport = parsedData.map(row => ({
       full_name: row.full_name,
       username: row.username,
+      email: row.email || "",
       parent_whatsapp: row.parent_whatsapp || "",
     }));
 

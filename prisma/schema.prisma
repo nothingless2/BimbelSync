@@ -143,6 +143,7 @@ model Student {
   username             String
   password_hash        String
   must_change_password Boolean   @default(true)
+  email                String?
   parent_whatsapp      String?
   deleted_at           DateTime?
 
