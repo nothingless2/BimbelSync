@@ -51,7 +51,7 @@ export default async function LandingPage() {
 
         <FadeInView direction="up" delay={0.25}>
           <h1 className="text-4xl sm:text-5xl md:text-[3.5rem] font-extrabold text-slate-900 tracking-tight leading-[1.12] mb-6 max-w-3xl mx-auto">
-            Satu Sistem Terpadu untuk Kelola Jadwal, Absensi dan Tagihan Bimbel Anda.
+            Kelola Jadwal, Absensi dan Tagihan Bimbel Anda dengan Mudah.
           </h1>
         </FadeInView>
 
