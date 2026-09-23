@@ -9,7 +9,7 @@ const WA_URL = "https://wa.me/6281234567890?text=Halo%20tim%20BimbelSync,%20saya
 
 export const metadata: Metadata = {
   title: "BimbelSync | Software Manajemen & Operasional Bimbel Terbaik",
-  description: "BimbelSync adalah platform orkestrasi untuk bimbingan belajar. Kelola jadwal tutor, presensi QR cerdas, dan tagihan invoice otomatis dengan payment gateway. Coba sekarang!",
+  description: "BimbelSync adalah platform orkestrasi untuk bimbingan belajar. Kelola jadwal tutor, presensi QR cerdas, dan tagihan invoice otomatis dengan verifikasi pembayaran mudah. Coba sekarang!",
   keywords: ["software bimbel", "aplikasi manajemen bimbel", "sistem informasi bimbel", "jadwal bimbel", "presensi siswa", "invoice otomatis"],
   openGraph: {
     title: "BimbelSync | Software Manajemen Bimbel Modern",
@@ -197,18 +197,18 @@ export default async function LandingPage() {
             <div className="flex flex-col md:flex-row-reverse gap-12 items-center">
             <div className="flex-1 w-full flex justify-center">
                <div className="relative">
-                  <img src="/features/payment-bg.png" alt="Mockup Payment Gateway" className="w-full max-w-sm h-auto object-contain drop-shadow-md opacity-90" />
+                  <img src="/features/payment-bg.png" alt="Mockup Pembayaran & Bukti Transfer" className="w-full max-w-sm h-auto object-contain drop-shadow-md opacity-90" />
                </div>
             </div>
             <div className="flex-1">
               <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
                 <CreditCard className="w-6 h-6 text-[#2563EB]" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-4">Sistem Pembayaran Terintegrasi</h3>
-              <p className="text-slate-600 mb-6 text-lg leading-relaxed">Terima pembayaran secara fleksibel lewat Payment Gateway otomatis atau Transfer Manual dengan unggah bukti bayar. Kelola semua status tagihan dalam satu dasbor.</p>
+              <h3 className="text-2xl font-bold text-slate-900 mb-4">Pencatatan & Verifikasi Pembayaran</h3>
+              <p className="text-slate-600 mb-6 text-lg leading-relaxed">Kelola seluruh pembayaran kursus secara praktis. Orang tua mengunggah resi transfer, admin memverifikasinya dalam satu dasbor tagihan.</p>
               <ul className="space-y-3 text-slate-700 font-medium">
-                <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Mendukung Transfer Manual & Otomatis</li>
-                <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Verifikasi bukti bayar mudah</li>
+                <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Unggah bukti transfer & resi pembayaran</li>
+                <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Verifikasi cepat & pantau status tagihan</li>
               </ul>
               </div>
             </div>
