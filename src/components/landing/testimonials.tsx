@@ -26,7 +26,9 @@ export function Testimonials() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <p className="text-sm font-semibold text-blue-600 tracking-wide uppercase mb-3">Testimoni</p>
+          <div className="inline-block bg-white border border-slate-200 text-slate-600 rounded-full px-4 py-1.5 text-xs font-semibold mb-4 tracking-wide shadow-sm">
+            Testimoni
+          </div>
           <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
             Cerita nyata dari pengelola bimbel
           </h2>

@@ -43,18 +43,20 @@ export default async function LandingPage() {
       {/* Hero */}
       <section className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 md:pt-24 md:pb-28 text-center">
         <FadeInView direction="up" delay={0.15}>
-          <p className="text-sm font-semibold text-blue-600 tracking-wide uppercase mb-4">Software Manajemen Bimbel #1</p>
+          <div className="inline-block bg-white border border-slate-200 text-slate-600 rounded-full px-4 py-1.5 text-xs font-semibold mb-6 tracking-wide shadow-sm">
+            Software Manajemen Bimbel #1
+          </div>
         </FadeInView>
 
         <FadeInView direction="up" delay={0.25}>
           <h1 className="text-4xl sm:text-5xl md:text-[3.5rem] font-extrabold text-slate-900 tracking-tight leading-[1.12] mb-6 max-w-3xl mx-auto">
-            Kelola jadwal, absensi, dan tagihan bimbel — dalam satu sistem.
+            Satu Sistem Terpadu untuk Kelola Jadwal, Absensi dan Tagihan Bimbel Anda.
           </h1>
         </FadeInView>
 
         <FadeInView direction="up" delay={0.35}>
           <p className="text-lg text-slate-500 max-w-xl mx-auto mb-10 leading-relaxed">
-            Berhenti rekap manual. BimbelSync mengotomatisasi operasional harian agar Anda bisa fokus mengajar dan mengembangkan bisnis.
+            Tinggalkan cara manual yang merepotkan. BimbelSync otomatiskan operasional harian agar Anda leluasa mengajar dan mengembangkan bisnis.
           </p>
         </FadeInView>
 
@@ -70,12 +72,17 @@ export default async function LandingPage() {
         </FadeInView>
 
         <FadeInView direction="up" delay={0.6}>
-          <div className="relative max-w-4xl mx-auto rounded-2xl overflow-hidden border border-slate-200 shadow-lg aspect-video">
-            <img
-              src="/photo-1.avif"
-              alt="Dashboard BimbelSync"
-              className="w-full h-full object-cover"
-            />
+          <div className="relative max-w-5xl mx-auto rounded-2xl overflow-hidden border border-slate-200 shadow-lg aspect-video bg-black">
+           <iframe 
+             width="100%" 
+             height="100%" 
+             src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0&rel=0" 
+             title="BimbelSync Demo" 
+             frameBorder="0" 
+             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+             allowFullScreen
+             className="absolute inset-0"
+           ></iframe>
           </div>
         </FadeInView>
       </section>
@@ -126,7 +133,9 @@ export default async function LandingPage() {
 
       <section id="features" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <p className="text-sm font-semibold text-blue-600 tracking-wide uppercase mb-3">Fitur Utama</p>
+          <div className="inline-block bg-white border border-slate-200 text-slate-600 rounded-full px-4 py-1.5 text-xs font-semibold mb-4 tracking-wide shadow-sm">
+            Fitur Utama
+          </div>
           <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Empat fitur yang menyelesaikan<br/>masalah operasional harian</h2>
           <p className="text-slate-500 leading-relaxed">Setiap fitur dirancang berdasarkan masalah nyata yang dihadapi pengelola bimbel di lapangan.</p>
         </div>
@@ -227,7 +236,9 @@ export default async function LandingPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
             <div className="flex-1">
-              <p className="text-sm font-semibold text-blue-600 tracking-wide uppercase mb-3">Tentang Kami</p>
+              <div className="inline-block bg-white border border-slate-200 text-slate-600 rounded-full px-4 py-1.5 text-xs font-semibold mb-6 tracking-wide shadow-sm">
+                Tentang Kami
+              </div>
               <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-6 tracking-tight leading-tight">Dibuat oleh orang yang paham masalah bimbel.</h2>
               <p className="text-slate-500 mb-4 leading-relaxed">
                 Kebanyakan software manajemen pendidikan dibuat terlalu rumit — seolah-olah penggunanya adalah perusahaan besar dengan tim IT sendiri. Kenyataannya, bimbel di Indonesia dikelola oleh 1-3 orang yang merangkap segalanya.
@@ -251,7 +262,9 @@ export default async function LandingPage() {
 
       <section id="pricing" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <p className="text-sm font-semibold text-blue-600 tracking-wide uppercase mb-3">Harga</p>
+          <div className="inline-block bg-white border border-slate-200 text-slate-600 rounded-full px-4 py-1.5 text-xs font-semibold mb-4 tracking-wide shadow-sm">
+            Harga
+          </div>
           <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Pilih paket sesuai skala bimbel Anda</h2>
           <p className="text-slate-500 leading-relaxed">Tanpa biaya tersembunyi. Upgrade atau downgrade kapan saja.</p>
         </div>
