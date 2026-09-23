@@ -176,18 +176,18 @@ export default async function LandingPage() {
             <div className="flex flex-col md:flex-row gap-12 items-center">
             <div className="flex-1 w-full flex justify-center">
                <div className="relative">
-                  <img src="/features/whatsapp-bg.png" alt="Mockup Tagihan WhatsApp" className="w-full max-w-sm h-auto object-contain drop-shadow-md opacity-90" />
+                  <img src="/features/whatsapp-bg.png" alt="Mockup Tagihan Email" className="w-full max-w-sm h-auto object-contain drop-shadow-md opacity-90 hue-rotate-180" />
                </div>
             </div>
             <div className="flex-1">
               <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
-                <MessageSquare className="w-6 h-6 text-[#2563EB]" />
+                <Mail className="w-6 h-6 text-[#2563EB]" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-4">Tagihan via WhatsApp</h3>
-              <p className="text-slate-600 mb-6 text-lg leading-relaxed">Kirim invoice, pengingat jatuh tempo, dan bukti pembayaran langsung ke WhatsApp orang tua secara otomatis. Tingkatkan persentase pembayaran tepat waktu.</p>
+              <h3 className="text-2xl font-bold text-slate-900 mb-4">Tagihan via Email</h3>
+              <p className="text-slate-600 mb-6 text-lg leading-relaxed">Kirim invoice, pengingat jatuh tempo, dan resi pembayaran langsung ke email orang tua secara otomatis. Tingkatkan persentase pembayaran tepat waktu.</p>
               <ul className="space-y-3 text-slate-700 font-medium">
                 <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Pengingat otomatis (H-3, H-1)</li>
-                <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Template pesan kustom</li>
+                <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Lampiran PDF Profesional</li>
               </ul>
               </div>
             </div>
@@ -204,11 +204,11 @@ export default async function LandingPage() {
               <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
                 <CreditCard className="w-6 h-6 text-[#2563EB]" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-4">Payment Gateway Terintegrasi</h3>
-              <p className="text-slate-600 mb-6 text-lg leading-relaxed">Terima pembayaran dari berbagai channel: VA, e-Wallet, Kartu Kredit. Status pembayaran otomatis ter-update tanpa perlu cek mutasi bank manual.</p>
+              <h3 className="text-2xl font-bold text-slate-900 mb-4">Sistem Pembayaran Terintegrasi</h3>
+              <p className="text-slate-600 mb-6 text-lg leading-relaxed">Terima pembayaran secara fleksibel lewat Payment Gateway otomatis atau Transfer Manual dengan unggah bukti bayar. Kelola semua status tagihan dalam satu dasbor.</p>
               <ul className="space-y-3 text-slate-700 font-medium">
-                <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Update status seketika</li>
-                <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Rekonsiliasi instan</li>
+                <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Mendukung Transfer Manual & Otomatis</li>
+                <li className="flex items-center gap-3"><Check className="w-5 h-5 text-slate-400"/> Verifikasi bukti bayar mudah</li>
               </ul>
               </div>
             </div>
