@@ -4,87 +4,111 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutDashboard, Users, UserCog } from 'lucide-react';
 
-export function Showcase() {
-  const [activeTab, setActiveTab] = useState(0);
+const tabs = [
+  {
+    id: 'admin',
+    label: 'Pemilik & Admin',
+    icon: LayoutDashboard,
+    summary: 'Satu dasbor untuk semua',
+    bullets: ['Jadwal, keuangan, dan laporan', 'Kelola staf, siswa, dan ruangan', 'Pantau operasional kapan saja'],
+    image: '/photo-1.avif',
+  },
+  {
+    id: 'student',
+    label: 'Siswa & Orang Tua',
+    icon: Users,
+    summary: 'Portal khusus siswa',
+    bullets: ['Lihat jadwal dan scan QR absen', 'Cek nilai dan riwayat kehadiran', 'Pantau status tagihan'],
+    image: '/photo-2.avif',
+  },
+  {
+    id: 'tutor',
+    label: 'Tutor & Pengajar',
+    icon: UserCog,
+    summary: 'Fokus mengajar, bukan admin',
+    bullets: ['Jadwal mengajar di satu tempat', 'Input nilai siswa langsung', 'Kelola presensi dari HP'],
+    image: '/photo.avif',
+  },
+];
 
-  const tabs = [
-    {
-      id: 'admin',
-      label: 'Admin & Staf',
-      icon: <LayoutDashboard className="w-5 h-5" />,
-      description: 'Dasbor pusat kontrol untuk mengelola seluruh aspek bimbel, mulai dari pendaftaran, jadwal, hingga laporan keuangan.',
-      image: '/photo-1.avif' // Fallback to existing images
-    },
-    {
-      id: 'student',
-      label: 'Siswa / Orang Tua',
-      icon: <Users className="w-5 h-5" />,
-      description: 'Akses mudah ke jadwal kelas, nilai, absensi, dan riwayat tagihan dari portal khusus siswa.',
-      image: '/photo-2.avif'
-    },
-    {
-      id: 'tutor',
-      label: 'Tutor / Pengajar',
-      icon: <UserCog className="w-5 h-5" />,
-      description: 'Lihat jadwal mengajar, input nilai siswa, dan presensi dengan mudah melalui HP.',
-      image: '/photo-3.avif'
-    }
-  ];
+export function Showcase() {
+  const [active, setActive] = useState(0);
 
   return (
-    <section className="py-24 bg-slate-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">Pengalaman Terbaik untuk Semua</h2>
-          <p className="text-lg text-slate-600">Antarmuka yang dirancang khusus untuk memenuhi kebutuhan masing-masing peran di bimbel Anda.</p>
+    <section className="py-20 md:py-28 bg-slate-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <p className="text-sm font-semibold text-blue-600 tracking-wide uppercase mb-3">Untuk semua peran</p>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            Satu platform, tiga pengalaman yang berbeda
+          </h2>
         </div>
-        
-        <div className="flex flex-col lg:flex-row gap-12 items-center">
-          {/* Tabs Menu */}
-          <div className="w-full lg:w-1/3 flex flex-col gap-4">
-            {tabs.map((tab, index) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(index)}
-                className={`text-left p-6 rounded-2xl transition-all duration-300 border-2 ${
-                  activeTab === index 
-                    ? 'border-blue-600 bg-white shadow-lg shadow-blue-900/5' 
-                    : 'border-transparent bg-transparent hover:bg-white/60 hover:border-slate-200'
-                }`}
-              >
-                <div className="flex items-center gap-4 mb-3">
-                  <div className={`p-2 rounded-xl ${activeTab === index ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500'}`}>
-                    {tab.icon}
+
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-stretch">
+
+          {/* Tab buttons */}
+          <div className="w-full lg:w-[340px] shrink-0 flex flex-col gap-3">
+            {tabs.map((tab, i) => {
+              const Icon = tab.icon;
+              const isActive = active === i;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActive(i)}
+                  className={`text-left p-5 rounded-xl border transition-all duration-200 ${
+                    isActive
+                      ? 'bg-white border-slate-200 shadow-sm'
+                      : 'bg-transparent border-transparent hover:bg-white/60'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isActive ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <span className={`font-semibold ${isActive ? 'text-slate-900' : 'text-slate-600'}`}>
+                      {tab.label}
+                    </span>
                   </div>
-                  <h3 className={`text-xl font-bold ${activeTab === index ? 'text-slate-900' : 'text-slate-600'}`}>
-                    {tab.label}
-                  </h3>
-                </div>
-                <p className={`text-sm leading-relaxed ${activeTab === index ? 'text-slate-600' : 'text-slate-500'}`}>
-                  {tab.description}
-                </p>
-              </button>
-            ))}
+
+                  {isActive && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <p className="text-sm text-slate-500 mb-3">{tab.summary}</p>
+                      <ul className="space-y-1.5">
+                        {tab.bullets.map((b, j) => (
+                          <li key={j} className="text-sm text-slate-600 flex items-center gap-2">
+                            <span className="w-1 h-1 bg-blue-600 rounded-full shrink-0" />
+                            {b}
+                          </li>
+                        ))}
+                      </ul>
+                    </motion.div>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Interactive Image Showcase */}
-          <div className="w-full lg:w-2/3 h-[400px] sm:h-[500px] lg:h-[600px] relative rounded-3xl overflow-hidden shadow-2xl bg-slate-200 border border-slate-200">
+          {/* Image area */}
+          <div className="flex-1 relative rounded-2xl overflow-hidden bg-slate-200 border border-slate-200 min-h-[360px] sm:min-h-[440px]">
             <AnimatePresence mode="wait">
               <motion.img
-                key={activeTab}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.05 }}
-                transition={{ duration: 0.4 }}
-                src={tabs[activeTab].image}
-                alt={tabs[activeTab].label}
-                className="w-full h-full object-cover"
+                key={active}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                src={tabs[active].image}
+                alt={tabs[active].label}
+                className="absolute inset-0 w-full h-full object-cover"
               />
             </AnimatePresence>
-            
-            {/* UI Overlay subtle gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 to-transparent pointer-events-none"></div>
           </div>
+
         </div>
       </div>
     </section>

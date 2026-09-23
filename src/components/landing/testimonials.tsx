@@ -1,66 +1,65 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Quote } from 'lucide-react';
+
+const testimonials = [
+  {
+    body: 'Dulu admin saya habiskan setengah hari hanya untuk rekap absensi dan kirim tagihan satu-satu via chat. Sekarang semuanya otomatis. Saya bisa fokus mengembangkan kurikulum.',
+    name: 'Budi Santoso',
+    title: 'Pemilik Bimbel EduCerdas, Bandung',
+  },
+  {
+    body: 'Yang paling terasa dampaknya itu fitur pengingat tagihan otomatis. Dulu banyak orang tua yang "lupa" bayar, sekarang 90% bayar sebelum jatuh tempo.',
+    name: 'Siti Rahmawati',
+    title: 'Manajer Operasional, PintarBangsa',
+  },
+  {
+    body: 'Saya punya 4 tutor yang jadwalnya sering bentrok. Sejak pakai BimbelSync, tidak pernah lagi ada double-booking. Siswa dan tutor sama-sama senang.',
+    name: 'Andi Wijaya',
+    title: 'Koordinator Akademik, JuaraAcademy',
+  },
+];
 
 export function Testimonials() {
-  const testimonials = [
-    {
-      content: "Sejak pakai BimbelSync, admin kami hemat waktu 15 jam seminggu dari urusan rekap absen dan pembayaran manual. Sangat direkomendasikan!",
-      author: "Budi Santoso",
-      role: "Pemilik, EduCerdas",
-      avatar: "https://i.pravatar.cc/150?u=a042581f4e29026024d"
-    },
-    {
-      content: "Fitur tagihan otomatisnya luar biasa. Orang tua siswa jadi jarang terlambat bayar karena notifikasi yang dikirim otomatis. Sangat membantu cash flow.",
-      author: "Siti Rahmawati",
-      role: "Manajer, PintarBangsa",
-      avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d"
-    },
-    {
-      content: "Sebelumnya kami kewalahan atur jadwal tutor yang sering bentrok. Dengan BimbelSync, jadwal jadi rapi dan tutor bisa cek langsung dari HP mereka.",
-      author: "Andi Wijaya",
-      role: "Akademik, JuaraAcademy",
-      avatar: "https://i.pravatar.cc/150?u=a04258114e29026702d"
-    }
-  ];
-
   return (
-    <section className="py-24 relative overflow-hidden bg-slate-900">
-      {/* Background Ornaments */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-      </div>
+    <section className="py-20 md:py-28 bg-white">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">Dipercaya oleh Pengelola Bimbel</h2>
-          <p className="text-lg text-slate-300">Dengarkan apa kata mereka yang telah beralih ke cara manajemen yang lebih modern.</p>
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <p className="text-sm font-semibold text-blue-600 tracking-wide uppercase mb-3">Testimoni</p>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            Cerita nyata dari pengelola bimbel
+          </h2>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {testimonials.map((testi, index) => (
-            <motion.div 
-              key={index}
-              initial={{ opacity: 0, y: 30 }}
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {testimonials.map((t, i) => (
+            <motion.blockquote
+              key={i}
+              initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.15 }}
-              className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-xl relative"
+              viewport={{ once: true, margin: '-60px' }}
+              transition={{ duration: 0.45, delay: i * 0.1 }}
+              className="bg-slate-50 rounded-2xl p-8 border border-slate-100 flex flex-col"
             >
-              <Quote className="w-10 h-10 text-blue-400 mb-6 opacity-50" />
-              <p className="text-white text-lg leading-relaxed mb-8 relative z-10">
-                "{testi.content}"
-              </p>
-              <div className="flex items-center gap-4">
-                <img src={testi.avatar} alt={testi.author} className="w-12 h-12 rounded-full border-2 border-slate-500" />
-                <div>
-                  <h4 className="text-white font-bold">{testi.author}</h4>
-                  <p className="text-slate-400 text-sm">{testi.role}</p>
-                </div>
+              {/* Stars */}
+              <div className="flex gap-1 mb-5">
+                {[...Array(5)].map((_, s) => (
+                  <svg key={s} className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
               </div>
-            </motion.div>
+
+              <p className="text-slate-700 leading-relaxed flex-1 mb-6">
+                &ldquo;{t.body}&rdquo;
+              </p>
+
+              <footer className="border-t border-slate-200 pt-5">
+                <div className="font-semibold text-slate-900 text-sm">{t.name}</div>
+                <div className="text-slate-500 text-sm">{t.title}</div>
+              </footer>
+            </motion.blockquote>
           ))}
         </div>
       </div>

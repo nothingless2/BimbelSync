@@ -40,47 +40,42 @@ export default async function LandingPage() {
     <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900 selection:bg-blue-200 overflow-x-hidden">
       <LandingHeader />
 
-      <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 md:pt-20 md:pb-24 text-center">
-        
-
-
-
-        
-        <FadeInView direction="up" delay={0.2}>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-6 max-w-4xl mx-auto">
-          Platform Manajemen Bimbingan Belajar.
-        </h1>
+      {/* Hero */}
+      <section className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 md:pt-24 md:pb-28 text-center">
+        <FadeInView direction="up" delay={0.15}>
+          <p className="text-sm font-semibold text-blue-600 tracking-wide uppercase mb-4">Software Manajemen Bimbel #1</p>
         </FadeInView>
-        
-        <FadeInView direction="up" delay={0.3}>
-          <p className="text-base md:text-lg lg:text-xl text-slate-600 max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed">
-          Satu sistem untuk jadwal, presensi QR, dan tagihan. Fokus mengajar, biarkan sistem yang mengurus administrasi.
+
+        <FadeInView direction="up" delay={0.25}>
+          <h1 className="text-4xl sm:text-5xl md:text-[3.5rem] font-extrabold text-slate-900 tracking-tight leading-[1.12] mb-6 max-w-3xl mx-auto">
+            Kelola jadwal, absensi, dan tagihan bimbel — dalam satu sistem.
+          </h1>
+        </FadeInView>
+
+        <FadeInView direction="up" delay={0.35}>
+          <p className="text-lg text-slate-500 max-w-xl mx-auto mb-10 leading-relaxed">
+            Berhenti rekap manual. BimbelSync mengotomatisasi operasional harian agar Anda bisa fokus mengajar dan mengembangkan bisnis.
           </p>
         </FadeInView>
-        
-        <FadeInView direction="up" delay={0.4}>
-          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
-          <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-lg transition flex items-center justify-center gap-2">
-            Mulai Gratis
-          </a>
-          <a href="#features" className="bg-white text-slate-700 font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-lg border border-slate-200 hover:bg-slate-50 transition flex items-center justify-center">
-            Pelajari Fitur
-          </a>
+
+        <FadeInView direction="up" delay={0.45}>
+          <div className="flex flex-col sm:flex-row justify-center gap-3 mb-16">
+            <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3.5 px-7 rounded-xl transition-colors text-sm">
+              Coba Gratis Sekarang
+            </a>
+            <a href="#features" className="bg-white text-slate-700 font-semibold py-3.5 px-7 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors text-sm">
+              Lihat Fitur
+            </a>
           </div>
         </FadeInView>
 
         <FadeInView direction="up" delay={0.6}>
-          <div className="relative max-w-5xl mx-auto rounded-xl overflow-hidden border border-slate-200 shadow-sm aspect-video bg-black">
-           <iframe 
-             width="100%" 
-             height="100%" 
-             src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0&rel=0" 
-             title="BimbelSync Demo" 
-             frameBorder="0" 
-             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-             allowFullScreen
-             className="absolute inset-0"
-           ></iframe>
+          <div className="relative max-w-4xl mx-auto rounded-2xl overflow-hidden border border-slate-200 shadow-lg aspect-video">
+            <img
+              src="/photo-1.avif"
+              alt="Dashboard BimbelSync"
+              className="w-full h-full object-cover"
+            />
           </div>
         </FadeInView>
       </section>
@@ -129,10 +124,11 @@ export default async function LandingPage() {
 
       <Metrics />
 
-      <section id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+      <section id="features" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Satu Platform,<br/>Semua Kebutuhan Operasional</h2>
-          <p className="text-slate-600">Tingkatkan efisiensi bimbel Anda dengan fitur-fitur yang dirancang khusus untuk mengatasi masalah operasional sehari-hari.</p>
+          <p className="text-sm font-semibold text-blue-600 tracking-wide uppercase mb-3">Fitur Utama</p>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Empat fitur yang menyelesaikan<br/>masalah operasional harian</h2>
+          <p className="text-slate-500 leading-relaxed">Setiap fitur dirancang berdasarkan masalah nyata yang dihadapi pengelola bimbel di lapangan.</p>
         </div>
 
         <div className="flex flex-col gap-24">
@@ -227,25 +223,24 @@ export default async function LandingPage() {
       <Showcase />
       <Testimonials />
 
-      <section id="about" className="bg-slate-200/50 py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row items-center gap-16">
+      <section id="about" className="py-20 md:py-28 bg-white border-t border-slate-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
             <div className="flex-1">
-              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 leading-tight">Fokus Pada Apa Yang Paling Penting.</h2>
-              <div className="w-16 h-1 bg-blue-600 mb-6"></div>
-              <p className="text-slate-600 mb-4 leading-relaxed">
-                Kami membangun BimbelSync karena melihat banyak software manajemen bimbel yang terlalu rumit dan lambat digunakan. Kami percaya sistem administrasi haruslah tidak terlihat, bersih, dan presisi.
+              <p className="text-sm font-semibold text-blue-600 tracking-wide uppercase mb-3">Tentang Kami</p>
+              <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-6 tracking-tight leading-tight">Dibuat oleh orang yang paham masalah bimbel.</h2>
+              <p className="text-slate-500 mb-4 leading-relaxed">
+                Kebanyakan software manajemen pendidikan dibuat terlalu rumit — seolah-olah penggunanya adalah perusahaan besar dengan tim IT sendiri. Kenyataannya, bimbel di Indonesia dikelola oleh 1-3 orang yang merangkap segalanya.
               </p>
-              <p className="text-slate-600 leading-relaxed">
-                Desain kami dirancang untuk kecepatan operasional tinggi, memberdayakan UMKM pendidikan Indonesia untuk fokus pada kualitas layanan mereka.
+              <p className="text-slate-500 leading-relaxed">
+                BimbelSync dirancang untuk realita itu. Antarmuka yang bersih, alur kerja yang singkat, dan harga yang masuk akal untuk UMKM pendidikan.
               </p>
             </div>
-            <div className="flex-1 relative">
-              <div className="aspect-video w-full rounded-2xl overflow-hidden border border-slate-200 shadow-sm relative">
-               
-                <img 
-                  src="/photo-2.avif" 
-                  alt="Siswa Belajar" 
+            <div className="flex-1">
+              <div className="aspect-video w-full rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+                <img
+                  src="/photo-2.avif"
+                  alt="Suasana belajar di bimbingan belajar"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -254,10 +249,11 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <section id="pricing" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+      <section id="pricing" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Harga Transparan</h2>
-          <p className="text-slate-600">Pilih paket yang sesuai dengan ukuran bimbingan belajar Anda. Terintegrasi langsung dengan database platform.</p>
+          <p className="text-sm font-semibold text-blue-600 tracking-wide uppercase mb-3">Harga</p>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Pilih paket sesuai skala bimbel Anda</h2>
+          <p className="text-slate-500 leading-relaxed">Tanpa biaya tersembunyi. Upgrade atau downgrade kapan saja.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
