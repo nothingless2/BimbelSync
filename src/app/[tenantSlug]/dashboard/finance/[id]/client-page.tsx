@@ -207,7 +207,7 @@ export default function FinanceDetailClient({
 
           {canSplitInstallments === false && invoice.payment_status !== 'PAID' && (
             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 rounded-xl text-sm border border-blue-100 dark:border-blue-800/30">
-              Tingkatkan paket langganan Anda ke <strong>Growth</strong> atau <strong>Pro</strong> untuk membuka fitur cicilan bertahap.
+              Paket langganan Anda saat ini tidak mendukung fitur <strong>Cicilan Bertahap</strong>. Silakan upgrade paket Anda untuk menikmati fitur ini.
             </div>
           )}
 
