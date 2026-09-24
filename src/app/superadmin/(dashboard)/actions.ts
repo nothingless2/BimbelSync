@@ -15,12 +15,37 @@ export async function createPlanAction(formData: FormData) {
   const maxRooms = formData.get("max_rooms") ? parseInt(formData.get("max_rooms") as string, 10) : null;
   const allowsPaymentGateway = formData.get("allows_payment_gateway") === "on";
   const allowsInstallment = formData.get("allows_installment") === "on";
+  const allowsAutomatedEmail = formData.get("allows_automated_email") === "on";
+  const allowsQrAttendance = formData.get("allows_qr_attendance") === "on";
+  const allowsErapor = formData.get("allows_erapor") === "on";
+  const allowsAuditTrail = formData.get("allows_audit_trail") === "on";
+  
+  const discount6Months = parseInt(formData.get("discount_6_months") as string || "10", 10);
+  const discount12Months = parseInt(formData.get("discount_12_months") as string || "17", 10);
+  
+  // Extract all dynamic features
+  const additionalFeatures = formData.getAll("additional_features[]").filter(f => f.toString().trim() !== "") as string[];
 
   if (!name || isNaN(price)) return { error: "Nama dan harga paket wajib diisi." };
 
   try {
     await prisma.plan.create({
-      data: { name, price, max_students: maxStudents, max_staff: maxStaff, max_rooms: maxRooms, allows_payment_gateway: allowsPaymentGateway, allows_installment: allowsInstallment },
+      data: { 
+        name, 
+        price, 
+        max_students: maxStudents, 
+        max_staff: maxStaff, 
+        max_rooms: maxRooms, 
+        allows_payment_gateway: allowsPaymentGateway, 
+        allows_installment: allowsInstallment,
+        allows_automated_email: allowsAutomatedEmail,
+        allows_qr_attendance: allowsQrAttendance,
+        allows_erapor: allowsErapor,
+        allows_audit_trail: allowsAuditTrail,
+        discount_6_months: discount6Months,
+        discount_12_months: discount12Months,
+        additional_features: additionalFeatures
+      },
     });
     revalidatePath("/superadmin/plans");
     revalidatePath("/");
@@ -40,13 +65,38 @@ export async function updatePlanAction(formData: FormData) {
   const maxRooms = formData.get("max_rooms") ? parseInt(formData.get("max_rooms") as string, 10) : null;
   const allowsPaymentGateway = formData.get("allows_payment_gateway") === "on";
   const allowsInstallment = formData.get("allows_installment") === "on";
+  const allowsAutomatedEmail = formData.get("allows_automated_email") === "on";
+  const allowsQrAttendance = formData.get("allows_qr_attendance") === "on";
+  const allowsErapor = formData.get("allows_erapor") === "on";
+  const allowsAuditTrail = formData.get("allows_audit_trail") === "on";
+  
+  const discount6Months = parseInt(formData.get("discount_6_months") as string || "10", 10);
+  const discount12Months = parseInt(formData.get("discount_12_months") as string || "17", 10);
+  
+  // Extract all dynamic features
+  const additionalFeatures = formData.getAll("additional_features[]").filter(f => f.toString().trim() !== "") as string[];
 
   if (!id || !name || isNaN(price)) return { error: "ID, Nama dan harga paket wajib diisi." };
 
   try {
     await prisma.plan.update({
       where: { id },
-      data: { name, price, max_students: maxStudents, max_staff: maxStaff, max_rooms: maxRooms, allows_payment_gateway: allowsPaymentGateway, allows_installment: allowsInstallment },
+      data: { 
+        name, 
+        price, 
+        max_students: maxStudents, 
+        max_staff: maxStaff, 
+        max_rooms: maxRooms, 
+        allows_payment_gateway: allowsPaymentGateway, 
+        allows_installment: allowsInstallment,
+        allows_automated_email: allowsAutomatedEmail,
+        allows_qr_attendance: allowsQrAttendance,
+        allows_erapor: allowsErapor,
+        allows_audit_trail: allowsAuditTrail,
+        discount_6_months: discount6Months,
+        discount_12_months: discount12Months,
+        additional_features: additionalFeatures
+      },
     });
     revalidatePath("/superadmin/plans");
     revalidatePath("/");

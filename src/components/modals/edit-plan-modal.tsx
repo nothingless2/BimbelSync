@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { X, Save, Loader2 } from "lucide-react";
+import { useState, useRef } from "react";
+import { X, Save, Loader2, Plus, Trash2 } from "lucide-react";
 import { updatePlanAction } from "@/app/superadmin/(dashboard)/actions";
 
 interface EditPlanModalProps {
@@ -13,6 +13,15 @@ interface EditPlanModalProps {
 export function EditPlanModal({ isOpen, onClose, plan }: EditPlanModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [additionalFeatures, setAdditionalFeatures] = useState<string[]>(plan?.additional_features || []);
+
+  const addFeature = () => setAdditionalFeatures([...additionalFeatures, ""]);
+  const removeFeature = (idx: number) => setAdditionalFeatures(additionalFeatures.filter((_, i) => i !== idx));
+  const updateFeature = (idx: number, val: string) => {
+    const newF = [...additionalFeatures];
+    newF[idx] = val;
+    setAdditionalFeatures(newF);
+  };
 
   if (!isOpen || !plan) return null;
 
@@ -141,6 +150,91 @@ export function EditPlanModal({ isOpen, onClose, plan }: EditPlanModalProps) {
                     <p className="text-xs text-slate-500">Bimbel dapat menagih pembayaran secara bertahap / termin</p>
                   </div>
                 </label>
+                
+                <label className="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                  <input type="checkbox" name="allows_automated_email" defaultChecked={plan.allows_automated_email} className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">Email & Pengingat Otomatis</p>
+                    <p className="text-xs text-slate-500">Otomatisasi pengiriman invoice dan reminder jatuh tempo</p>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                  <input type="checkbox" name="allows_qr_attendance" defaultChecked={plan.allows_qr_attendance} className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">Absensi QR Code Dinamis</p>
+                    <p className="text-xs text-slate-500">Siswa bisa presensi mandiri dengan scan QR Code</p>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                  <input type="checkbox" name="allows_erapor" defaultChecked={plan.allows_erapor} className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">E-Rapor & Evaluasi Siswa</p>
+                    <p className="text-xs text-slate-500">Laporan perkembangan belajar digital</p>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                  <input type="checkbox" name="allows_audit_trail" defaultChecked={plan.allows_audit_trail} className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">Audit Trail Keamanan</p>
+                    <p className="text-xs text-slate-500">Catat log semua aktivitas admin untuk mencegah fraud</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-100 dark:border-slate-800/60 pt-4">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Pengaturan Diskon (%)</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Diskon 6 Bulan (Semester)</label>
+                  <input 
+                    type="number" 
+                    name="discount_6_months"
+                    defaultValue={plan.discount_6_months ?? 10}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition text-slate-900 dark:text-white text-sm"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Diskon 12 Bulan (Tahunan)</label>
+                  <input 
+                    type="number" 
+                    name="discount_12_months"
+                    defaultValue={plan.discount_12_months ?? 17}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition text-slate-900 dark:text-white text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-100 dark:border-slate-800/60 pt-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Fitur Tambahan Dinamis</h3>
+                <button type="button" onClick={addFeature} className="text-xs font-semibold text-blue-600 flex items-center hover:text-blue-700">
+                  <Plus size={14} className="mr-1" /> Tambah Fitur
+                </button>
+              </div>
+              <div className="space-y-2">
+                {additionalFeatures.length === 0 && (
+                  <p className="text-xs text-slate-400 italic">Belum ada fitur dinamis.</p>
+                )}
+                {additionalFeatures.map((feat, idx) => (
+                  <div key={idx} className="flex gap-2">
+                    <input 
+                      type="text"
+                      name="additional_features[]"
+                      value={feat}
+                      onChange={(e) => updateFeature(idx, e.target.value)}
+                      placeholder="Misal: Prioritas Support 24/7"
+                      className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm text-slate-900 dark:text-white"
+                    />
+                    <button type="button" onClick={() => removeFeature(idx)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition">
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
 

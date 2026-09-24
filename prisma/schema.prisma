@@ -53,6 +53,13 @@ model Plan {
   max_rooms              Int?
   allows_payment_gateway Boolean   @default(false)
   allows_installment     Boolean   @default(false)
+  allows_automated_email Boolean   @default(false)
+  allows_qr_attendance   Boolean   @default(false)
+  allows_erapor          Boolean   @default(false)
+  allows_audit_trail     Boolean   @default(false)
+  discount_6_months      Int       @default(10)
+  discount_12_months     Int       @default(17)
+  additional_features    String[]  @default([])
   is_active              Boolean   @default(true)
   deleted_at             DateTime?
 
