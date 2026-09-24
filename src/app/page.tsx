@@ -267,7 +267,16 @@ export default async function LandingPage() {
             Harga
           </div>
           <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Pilih paket sesuai skala bimbel Anda</h2>
-          <p className="text-slate-500 leading-relaxed">Tanpa biaya tersembunyi. Upgrade atau downgrade kapan saja.</p>
+          <p className="text-slate-500 leading-relaxed mb-8">Tanpa biaya tersembunyi. Upgrade atau downgrade kapan saja.</p>
+          
+          <div className="flex flex-col items-center justify-center space-y-3">
+            <div className="inline-flex bg-slate-100 p-1 rounded-full border border-slate-200">
+              <button className="px-5 py-2 rounded-full text-sm font-semibold bg-white shadow-sm text-slate-900">Bulanan</button>
+              <button className="px-5 py-2 rounded-full text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">Semester (6 Bulan) <span className="ml-1 text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">HEMAT 10%</span></button>
+              <button className="px-5 py-2 rounded-full text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors hidden sm:inline-block">Tahunan <span className="ml-1 text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">HEMAT 2 BULAN</span></button>
+            </div>
+            <p className="text-xs text-slate-400">Kas bimbel sedang ketat? Tersedia opsi bayar per-semester untuk menyesuaikan arus kas Anda.</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -365,9 +374,17 @@ export default async function LandingPage() {
                     </>
                   )}
                 </ul>
-                <a href={WA_URL} target="_blank" rel="noreferrer" className={`w-full block text-center py-3 px-4 rounded-xl font-semibold transition ${isPopular ? "bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg" : "border border-slate-200 text-slate-700 hover:bg-slate-50"}`}>
-                  Pilih {plan.name}
-                </a>
+                <div className="space-y-3">
+                  <a href={WA_URL} target="_blank" rel="noreferrer" className={`w-full block text-center py-3.5 px-4 rounded-xl font-bold transition ${isPopular ? "bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg" : "border border-slate-200 text-slate-700 hover:bg-slate-50"}`}>
+                    Coba Gratis 14 Hari
+                  </a>
+                  {!isPopular && (
+                    <p className="text-center text-xs text-slate-400 font-medium">Tanpa kartu kredit.</p>
+                  )}
+                  {isPopular && (
+                    <p className="text-center text-xs text-blue-600/70 font-medium">Akses semua fitur Growth.</p>
+                  )}
+                </div>
               </div>
             );
           })}
