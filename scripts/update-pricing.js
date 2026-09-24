@@ -9,21 +9,40 @@ async function main() {
     const name = plan.name.toLowerCase();
     let newPrice = plan.price;
     
+    let allows_automated_email = false;
+    let allows_qr_attendance = false;
+    let allows_erapor = false;
+    let allows_installment = false;
+    let allows_audit_trail = false;
+    
     if (name.includes('starter')) {
       newPrice = 149000;
     } else if (name.includes('growth')) {
       newPrice = 349000;
+      allows_automated_email = true;
+      allows_qr_attendance = true;
+      allows_erapor = true;
     } else if (name.includes('pro') || name.includes('premium')) {
       newPrice = 899000;
+      allows_automated_email = true;
+      allows_qr_attendance = true;
+      allows_erapor = true;
+      allows_installment = true;
+      allows_audit_trail = true;
     }
 
-    if (newPrice !== plan.price) {
-      await prisma.plan.update({
-        where: { id: plan.id },
-        data: { price: newPrice }
-      });
-      console.log(`Updated ${plan.name} price to Rp ${newPrice}`);
-    }
+    await prisma.plan.update({
+      where: { id: plan.id },
+      data: { 
+        price: newPrice,
+        allows_automated_email,
+        allows_qr_attendance,
+        allows_erapor,
+        allows_installment,
+        allows_audit_trail
+      }
+    });
+    console.log(`Updated ${plan.name} features and price to Rp ${newPrice}`);
   }
 }
 

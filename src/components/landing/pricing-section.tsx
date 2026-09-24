@@ -102,21 +102,17 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
               <h3 className="text-xl font-bold text-slate-900 mb-2">{plan.name}</h3>
               <p className="text-sm text-slate-500 mb-6 min-h-[40px]">{angle}</p>
               
-              <div className="mb-6">
-                {isPro ? (
-                  <span className="text-3xl font-extrabold text-slate-900">Custom</span>
-                ) : (
-                  <>
-                    <span className="text-4xl font-extrabold text-slate-900">
-                      {formattedPrice}
-                    </span>
-                    <span className="text-slate-500">{billingSuffix}</span>
-                    {billingCycle !== "monthly" && (
-                      <p className="text-xs text-emerald-600 font-semibold mt-1">
-                        Setara {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Math.round(displayPrice / (billingCycle === 'semester' ? 6 : 12))).replace(",00", "")}/bln
-                      </p>
-                    )}
-                  </>
+              <div className="mb-6 flex flex-wrap items-baseline gap-x-1">
+                <span className="text-4xl font-extrabold text-slate-900">
+                  {formattedPrice}
+                </span>
+                <span className="text-slate-500 whitespace-nowrap">{billingSuffix}</span>
+                {billingCycle !== "monthly" && (
+                  <div className="w-full mt-1">
+                    <p className="text-xs text-emerald-600 font-semibold">
+                      Setara {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Math.round(displayPrice / (billingCycle === 'semester' ? 6 : 12))).replace(",00", "")}/bln
+                    </p>
+                  </div>
                 )}
               </div>
               
