@@ -276,7 +276,16 @@ export default async function LandingPage() {
               Belum ada paket tersedia saat ini. Silakan hubungi tim sales.
             </div>
           ) : plans.map((plan, index) => {
-            const isPopular = index === 1 || plan.name.toLowerCase() === 'growth'; // Highlight the middle/second plan or "Growth"
+            const isStarter = plan.name.toLowerCase().includes('starter');
+            const isGrowth = plan.name.toLowerCase().includes('growth');
+            const isPro = plan.name.toLowerCase().includes('pro') || plan.name.toLowerCase().includes('premium');
+            const isPopular = isGrowth || index === 1;
+
+            let angle = "Sempurna untuk skala bisnis Anda.";
+            if (isStarter) angle = "Langkah pertama digitalisasi bimbel Anda.";
+            else if (isGrowth) angle = "Tampil lebih profesional & otomatiskan operasional.";
+            else if (isPro) angle = "Skala tanpa batas, kontrol penuh, & fitur mahir.";
+
             return (
               <div key={plan.id} className={`bg-white rounded-3xl p-8 flex flex-col ${isPopular ? "border-2 border-blue-600 shadow-xl relative transform md:-translate-y-4 z-10" : "border border-slate-200 shadow-sm"}`}>
                 {isPopular && (
@@ -285,7 +294,7 @@ export default async function LandingPage() {
                   </div>
                 )}
                 <h3 className="text-xl font-bold text-slate-900 mb-2">{plan.name}</h3>
-                <p className="text-sm text-slate-500 mb-6">Sempurna untuk skala bisnis Anda</p>
+                <p className="text-sm text-slate-500 mb-6 min-h-[40px]">{angle}</p>
                 <div className="mb-6">
                   <span className="text-4xl font-extrabold text-slate-900">
                     {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(plan.price).replace(",00", "")}
@@ -293,39 +302,67 @@ export default async function LandingPage() {
                   <span className="text-slate-500">/bulan</span>
                 </div>
                 <ul className="space-y-4 mb-8 flex-1">
-                  <li className="flex items-center gap-3 text-sm text-slate-700">
+                  <li className="flex items-center gap-3 text-sm text-slate-700 font-medium">
                     <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/> 
                     Maks {plan.max_students === null ? "Unlimited" : plan.max_students} Siswa
                   </li>
-                  <li className="flex items-center gap-3 text-sm text-slate-700">
+                  <li className="flex items-center gap-3 text-sm text-slate-700 font-medium pb-2 border-b border-slate-100">
                     <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/> 
-                    Maks {plan.max_staff === null ? "Unlimited" : plan.max_staff} Staff
-                  </li>
-                  <li className="flex items-center gap-3 text-sm text-slate-700">
-                    <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/> 
-                    Maks {plan.max_rooms === null ? "Unlimited" : plan.max_rooms} Ruangan
+                    Maks {plan.max_staff === null ? "Unlimited" : plan.max_staff} Staff & {plan.max_rooms === null ? "Unlimited" : plan.max_rooms} Ruang
                   </li>
                   
-                  {plan.allows_payment_gateway ? (
-                    <li className="flex items-center gap-3 text-sm text-slate-700">
-                      <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/> 
-                      Payment Gateway Integrasi
-                    </li>
-                  ) : (
-                    <li className="flex items-center gap-3 text-sm text-slate-400 opacity-60">
-                      <X className="w-5 h-5"/> Payment Gateway Integrasi
-                    </li>
+                  {isStarter && (
+                    <>
+                      <li className="flex items-center gap-3 text-sm text-slate-700">
+                        <CheckCircle2 className="w-5 h-5 text-green-500"/> Absensi & Penjadwalan Manual
+                      </li>
+                      <li className="flex items-center gap-3 text-sm text-slate-700">
+                        <CheckCircle2 className="w-5 h-5 text-green-500"/> Tagihan Digital (Verifikasi Manual)
+                      </li>
+                      <li className="flex items-center gap-3 text-sm text-slate-400 opacity-60">
+                        <X className="w-5 h-5"/> Email Pengingat Otomatis
+                      </li>
+                      <li className="flex items-center gap-3 text-sm text-slate-400 opacity-60">
+                        <X className="w-5 h-5"/> Absensi Scan QR Code
+                      </li>
+                    </>
                   )}
-                  
-                  {plan.allows_installment ? (
-                    <li className="flex items-center gap-3 text-sm text-slate-700">
-                      <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/> 
-                      Fitur Bayar Cicilan (Installment)
-                    </li>
-                  ) : (
-                    <li className="flex items-center gap-3 text-sm text-slate-400 opacity-60">
-                      <X className="w-5 h-5"/> Fitur Bayar Cicilan (Installment)
-                    </li>
+
+                  {isGrowth && (
+                    <>
+                      <li className="flex items-center gap-3 text-sm text-slate-900 font-bold">
+                        <CheckCircle2 className="w-5 h-5 text-blue-600"/> Email Tagihan & Reminder Otomatis
+                      </li>
+                      <li className="flex items-center gap-3 text-sm text-slate-900 font-bold">
+                        <CheckCircle2 className="w-5 h-5 text-blue-600"/> Absensi QR Code Dinamis
+                      </li>
+                      <li className="flex items-center gap-3 text-sm text-slate-700">
+                        <CheckCircle2 className="w-5 h-5 text-blue-600"/> E-Rapor & Evaluasi Siswa
+                      </li>
+                      <li className="flex items-center gap-3 text-sm text-slate-700">
+                        <CheckCircle2 className="w-5 h-5 text-blue-600"/> Manajemen Materi E-Learning
+                      </li>
+                      <li className="flex items-center gap-3 text-sm text-slate-400 opacity-60">
+                        <X className="w-5 h-5"/> Sistem Tagihan Cicilan
+                      </li>
+                    </>
+                  )}
+
+                  {isPro && (
+                    <>
+                      <li className="flex items-center gap-3 text-sm text-slate-700">
+                        <CheckCircle2 className="w-5 h-5 text-green-500"/> Semua Fitur Paket Growth
+                      </li>
+                      <li className="flex items-center gap-3 text-sm text-slate-900 font-bold">
+                        <CheckCircle2 className="w-5 h-5 text-green-500"/> Sistem Tagihan Cicilan (Termin)
+                      </li>
+                      <li className="flex items-center gap-3 text-sm text-slate-900 font-bold">
+                        <CheckCircle2 className="w-5 h-5 text-green-500"/> Audit Trail Keamanan
+                      </li>
+                      <li className="flex items-center gap-3 text-sm text-slate-700">
+                        <CheckCircle2 className="w-5 h-5 text-green-500"/> Dukungan Prioritas
+                      </li>
+                    </>
                   )}
                 </ul>
                 <a href={WA_URL} target="_blank" rel="noreferrer" className={`w-full block text-center py-3 px-4 rounded-xl font-semibold transition ${isPopular ? "bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg" : "border border-slate-200 text-slate-700 hover:bg-slate-50"}`}>
@@ -371,18 +408,42 @@ export default async function LandingPage() {
                     ))}
                   </tr>
                   <tr className="border-b border-slate-100">
-                    <td className="py-3 px-2 md:py-5 md:px-8">Payment Gateway</td>
+                    <td className="py-3 px-2 md:py-5 md:px-8">Email & Pengingat Otomatis</td>
                     {plans.map((p) => (
                       <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
-                        {p.allows_payment_gateway ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-slate-300 mx-auto" />}
+                        {p.name.toLowerCase().includes('starter') ? <X className="w-4 h-4 text-slate-300 mx-auto" /> : <Check className="w-5 h-5 text-green-500 mx-auto" />}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-slate-100">
+                    <td className="py-3 px-2 md:py-5 md:px-8">Absensi QR Dinamis</td>
+                    {plans.map((p) => (
+                      <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
+                        {p.name.toLowerCase().includes('starter') ? <X className="w-4 h-4 text-slate-300 mx-auto" /> : <Check className="w-5 h-5 text-green-500 mx-auto" />}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-slate-100">
+                    <td className="py-3 px-2 md:py-5 md:px-8">E-Rapor & Evaluasi Siswa</td>
+                    {plans.map((p) => (
+                      <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
+                        {p.name.toLowerCase().includes('starter') ? <X className="w-4 h-4 text-slate-300 mx-auto" /> : <Check className="w-5 h-5 text-green-500 mx-auto" />}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-slate-100">
+                    <td className="py-3 px-2 md:py-5 md:px-8">Manajemen Cicilan Bertahap</td>
+                    {plans.map((p) => (
+                      <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
+                        {p.allows_installment ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-slate-300 mx-auto" />}
                       </td>
                     ))}
                   </tr>
                   <tr>
-                    <td className="py-3 px-2 md:py-5 md:px-8">Sistem Pembayaran Cicilan</td>
+                    <td className="py-3 px-2 md:py-5 md:px-8">Audit Trail Keamanan</td>
                     {plans.map((p) => (
                       <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
-                        {p.allows_installment ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-slate-300 mx-auto" />}
+                        {p.name.toLowerCase().includes('pro') || p.name.toLowerCase().includes('premium') ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-slate-300 mx-auto" />}
                       </td>
                     ))}
                   </tr>
