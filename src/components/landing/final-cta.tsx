@@ -9,13 +9,13 @@ export function FinalCTA() {
   return (
     <section className="py-24 bg-white relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative rounded-[2.5rem] bg-[#0A0F1C] overflow-hidden shadow-2xl flex flex-col lg:flex-row items-center border border-slate-800">
+        <div className="relative rounded-[2.5rem] bg-[#0A0F1C] overflow-hidden shadow-2xl flex flex-col lg:flex-row items-stretch border border-slate-800">
           
           {/* Subtle noise texture & glow for the background */}
           <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay"></div>
           
           {/* Left side: Image / Visual (Larger, Left side, Overflow Hidden by parent) */}
-          <div className="w-full lg:w-1/2 relative h-[400px] lg:h-[600px] order-2 lg:order-1 flex items-end justify-center lg:justify-start">
+          <div className="w-full lg:w-1/2 relative min-h-[400px] pt-12 lg:pt-0 order-2 lg:order-1 flex items-end justify-center lg:justify-start">
              {/* Decorative glow behind image */}
              <div className="absolute left-1/4 bottom-0 w-[400px] h-[400px] bg-blue-600/20 blur-[100px] rounded-full"></div>
              
