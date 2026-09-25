@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import FinanceClientPage from "./client-page";
 import { AddInvoiceModal } from "@/components/modals/add-invoice-modal";
 import { GenerateInvoicesButton } from "./generate-button";
+import { Prisma } from "@prisma/client";
+import { formatRupiah } from "@/lib/session";
 
 export default async function FinancePage({ 
   params,
@@ -16,7 +18,12 @@ export default async function FinancePage({
   const resolvedParams = await params;
   const tenantSlug = resolvedParams.tenantSlug;
   const resolvedSearchParams = await searchParams;
-  const q = resolvedSearchParams?.q as string || "";
+  
+  const q = (resolvedSearchParams?.q as string) || "";
+  const statusParam = (resolvedSearchParams?.status as string) || "ALL";
+  const pageParam = Number(resolvedSearchParams?.page) || 1;
+  const page = pageParam > 0 ? pageParam : 1;
+  const PAGE_SIZE = 10;
 
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("bimbelsync_session")?.value;
@@ -30,22 +37,49 @@ export default async function FinancePage({
     redirect(`/${tenantSlug}/login`);
   }
 
-  // Fetch all invoices for this academy
+  // Calculate global stats using aggregations (fast, O(1) memory)
+  const [totalInvoices, paidAgg, unpaidAgg] = await Promise.all([
+    prisma.invoice.count({ where: { academy_id: session.academy_id } }),
+    prisma.invoice.aggregate({
+      _sum: { total_amount: true },
+      _count: { id: true },
+      where: { academy_id: session.academy_id, payment_status: 'PAID' }
+    }),
+    prisma.invoice.aggregate({
+      _sum: { total_amount: true },
+      _count: { id: true },
+      where: { academy_id: session.academy_id, payment_status: 'UNPAID' }
+    })
+  ]);
+
+  const totalRevenue = paidAgg._sum.total_amount || 0;
+  const potentialRevenue = unpaidAgg._sum.total_amount || 0;
+  const paidCount = paidAgg._count.id;
+  const unpaidCount = unpaidAgg._count.id;
+
+  // Build filter for paginated list
+  const whereClause: Prisma.InvoiceWhereInput = {
+    academy_id: session.academy_id,
+    ...(q ? { student: { full_name: { contains: q, mode: 'insensitive' } } } : {}),
+    ...(statusParam !== "ALL" ? { payment_status: statusParam as any } : {})
+  };
+
+  const totalFiltered = await prisma.invoice.count({ where: whereClause });
+  const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
+
+  // Fetch paginated invoices
   const invoices = await prisma.invoice.findMany({
-    where: {
-      academy_id: session.academy_id,
-      ...(q ? {
-        student: { full_name: { contains: q, mode: 'insensitive' } }
-      } : {})
-    },
+    where: whereClause,
     include: {
       student: true,
       items: true,
       verified_by: true
     },
     orderBy: {
-      id: 'desc' // Newest first
-    }
+      created_at: 'desc'
+    },
+    take: PAGE_SIZE,
+    skip: (page - 1) * PAGE_SIZE
   });
 
   // Fetch active students for the AddInvoiceModal dropdown
@@ -58,18 +92,6 @@ export default async function FinancePage({
       full_name: 'asc'
     }
   });
-
-  // Calculate some stats
-  const totalInvoices = invoices.length;
-  const paidInvoices = invoices.filter(i => i.payment_status === 'PAID');
-  const unpaidInvoices = invoices.filter(i => i.payment_status === 'UNPAID');
-
-  const totalRevenue = paidInvoices.reduce((acc, curr) => acc + curr.total_amount, 0);
-  const potentialRevenue = unpaidInvoices.reduce((acc, curr) => acc + curr.total_amount, 0);
-
-  const formatRupiah = (num: number) => {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
-  };
 
   return (
     <div className="space-y-6">
@@ -100,19 +122,26 @@ export default async function FinancePage({
           <p className="text-sm font-semibold text-emerald-100 uppercase tracking-wider">Pendapatan Diterima (Lunas)</p>
           <div className="flex items-end gap-3 mt-1">
             <span className="text-3xl font-bold text-white">{formatRupiah(totalRevenue)}</span>
-            <span className="text-sm font-medium text-emerald-200 mb-1">dari {paidInvoices.length} inv</span>
+            <span className="text-sm font-medium text-emerald-200 mb-1">dari {paidCount} inv</span>
           </div>
         </div>
         <div className="bg-gradient-to-br from-amber-500 to-amber-700 rounded-2xl border border-amber-600 p-5 shadow-lg flex flex-col gap-1">
           <p className="text-sm font-semibold text-amber-100 uppercase tracking-wider">Potensi Pendapatan (Belum Bayar)</p>
           <div className="flex items-end gap-3 mt-1">
             <span className="text-3xl font-bold text-white">{formatRupiah(potentialRevenue)}</span>
-            <span className="text-sm font-medium text-amber-200 mb-1">dari {unpaidInvoices.length} inv</span>
+            <span className="text-sm font-medium text-amber-200 mb-1">dari {unpaidCount} inv</span>
           </div>
         </div>
       </div>
 
-      <FinanceClientPage invoices={invoices} />
+      <FinanceClientPage 
+        invoices={invoices} 
+        currentPage={page}
+        totalPages={totalPages}
+        totalItems={totalFiltered}
+        initialQ={q}
+        initialStatus={statusParam}
+      />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { VerifyPaymentModal } from "@/components/modals/verify-payment-modal";
 import { Invoice, Student, InvoiceItem, Staff } from "@prisma/client";
 import { Pagination } from "@/components/ui/pagination";
 import Link from "next/link";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 type InvoiceWithRelations = Invoice & {
   student: Student;
@@ -16,34 +17,49 @@ type InvoiceWithRelations = Invoice & {
 };
 
 export default function FinanceClientPage({ 
-  invoices 
+  invoices,
+  currentPage,
+  totalPages,
+  totalItems,
+  initialQ,
+  initialStatus
 }: { 
-  invoices: InvoiceWithRelations[] 
+  invoices: InvoiceWithRelations[],
+  currentPage: number,
+  totalPages: number,
+  totalItems: number,
+  initialQ: string,
+  initialStatus: string
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [verifyingInvoice, setVerifyingInvoice] = useState<InvoiceWithRelations | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-  const tenantSlug = invoices.length > 0 ? invoices[0].academy_id : ""; // We can extract this or just use window.location
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState<"ALL" | "UNPAID" | "PAID">("ALL");
+  const [searchQuery, setSearchQuery] = useState(initialQ);
+  const filterStatus = initialStatus;
 
-  // Filtering
-  const filteredInvoices = invoices.filter(invoice => {
-    const invIdSearch = `INV-${invoice.id.substring(0, 6).toUpperCase()}`;
-    const matchSearch = invIdSearch.includes(searchQuery.toUpperCase()) || 
-                        invoice.student.full_name.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchStatus = filterStatus === "ALL" || invoice.payment_status === filterStatus;
-    
-    return matchSearch && matchStatus;
-  });
+  const updateParams = (updates: Record<string, string | null>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null) params.delete(key);
+      else params.set(key, value);
+    });
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
-  // Pagination State
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-  const totalPages = Math.max(1, Math.ceil(filteredInvoices.length / itemsPerPage));
-  const currentData = filteredInvoices.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const handleSearchKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      updateParams({ q: searchQuery || null, page: "1" });
+    }
+  };
+
+  const handleStatusChange = (status: string) => {
+    updateParams({ status: status === "ALL" ? null : status, page: "1" });
+  };
 
   const toggleDropdown = (id: string) => {
     if (openDropdownId === id) setOpenDropdownId(null);
@@ -88,31 +104,29 @@ export default function FinanceClientPage({
             </div>
             <input
               type="text"
-              placeholder="Cari ID tagihan atau siswa..."
+              placeholder="Cari ID tagihan atau siswa... (Tekan Enter)"
               value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearchKey}
               className="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200"
             />
           </div>
           
           <div className="flex bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-1 shrink-0 overflow-hidden">
             <button 
-              onClick={() => { setFilterStatus("ALL"); setCurrentPage(1); }}
+              onClick={() => handleStatusChange("ALL")}
               className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${filterStatus === "ALL" ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
             >
               Semua
             </button>
             <button 
-              onClick={() => { setFilterStatus("UNPAID"); setCurrentPage(1); }}
+              onClick={() => handleStatusChange("UNPAID")}
               className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${filterStatus === "UNPAID" ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-500 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
             >
               Belum Dibayar
             </button>
             <button 
-              onClick={() => { setFilterStatus("PAID"); setCurrentPage(1); }}
+              onClick={() => handleStatusChange("PAID")}
               className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${filterStatus === "PAID" ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-500 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
             >
               Lunas
@@ -133,21 +147,21 @@ export default function FinanceClientPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {currentData.length === 0 ? (
+              {invoices.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
                     <Receipt className="mx-auto h-12 w-12 text-slate-300 dark:text-slate-700 mb-3" />
-                    Belum ada riwayat tagihan.<br/>Klik "Buat Tagihan" untuk menerbitkan tagihan pertama.
+                    Belum ada riwayat tagihan atau tidak ada hasil pencarian.
                   </td>
                 </tr>
               ) : (
-                currentData.map((invoice, index) => {
+                invoices.map((invoice, index) => {
                   const isPaid = invoice.payment_status === 'PAID';
                   
                   return (
                     <tr key={invoice.id} className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${deletingId === invoice.id ? 'opacity-50' : ''} ${isPaid ? 'bg-emerald-50/20 dark:bg-emerald-900/5' : ''}`}>
                       <td className="px-6 py-4 font-medium text-slate-500">
-                        {(currentPage - 1) * itemsPerPage + index + 1}
+                        {(currentPage - 1) * 10 + index + 1}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col gap-1.5">
@@ -214,7 +228,7 @@ export default function FinanceClientPage({
                             <>
                               <div className="fixed inset-0 z-10" onClick={() => setOpenDropdownId(null)}></div>
                               <div className={`absolute right-0 w-48 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 z-50 overflow-hidden animate-in fade-in duration-200 ${
-                                index >= currentData.length - 2 && currentData.length > 2 
+                                index >= invoices.length - 2 && invoices.length > 2 
                                   ? 'bottom-full mb-2 slide-in-from-bottom-2' 
                                   : 'top-full mt-2 slide-in-from-top-2'
                               }`}>
@@ -267,9 +281,9 @@ export default function FinanceClientPage({
         <Pagination 
           currentPage={currentPage} 
           totalPages={totalPages} 
-          onPageChange={setCurrentPage} 
-          totalItems={filteredInvoices.length} 
-          itemsPerPage={itemsPerPage} 
+          onPageChange={(p) => updateParams({ page: p.toString() })} 
+          totalItems={totalItems} 
+          itemsPerPage={10} 
         />
       </div>
 
