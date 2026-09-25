@@ -12,6 +12,7 @@ import { PricingSection } from '@/components/landing/pricing-section';
 import prisma from '@/lib/prisma';
 import { Metadata } from 'next';
 import { CustomCursor } from '@/components/ui/custom-cursor';
+import { TextRotator } from '@/components/ui/text-rotator';
 
 const WA_URL = "https://wa.me/6281234567890?text=Halo%20tim%20BimbelSync,%20saya%20tertarik%20menggunakan%20platform%20ini.";
 
@@ -54,7 +55,11 @@ export default async function LandingPage() {
 
         <FadeInView direction="up" delay={0.25}>
           <h1 className="text-4xl sm:text-5xl md:text-[3.5rem] font-extrabold text-slate-900 tracking-tight leading-[1.12] mb-6 max-w-3xl mx-auto">
-            Kelola Jadwal, Absensi dan Tagihan Bimbel Anda dengan Mudah.
+            Kelola Jadwal, Absensi dan Tagihan Bimbel Anda{" "}
+            <TextRotator 
+              words={["dengan Mudah.", "tanpa Ribet.", "lebih Cepat.", "Otomatis."]} 
+              className="text-blue-600"
+            />
           </h1>
         </FadeInView>
 
