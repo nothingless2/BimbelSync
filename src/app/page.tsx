@@ -65,13 +65,24 @@ export default async function LandingPage() {
           </div>
         </FadeInView>
 
-        <div className="mb-6 max-w-3xl mx-auto text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] font-extrabold text-slate-900 tracking-tight leading-[1.12] text-center">
-          <TextReveal text="Kelola Jadwal, Absensi dan Tagihan Bimbel" delay={0.3} className="inline-flex mr-2" />
-          <TextReveal text="Anda" delay={1.0} className="hidden sm:inline-flex mr-2" />
-          <TextRotator 
-            words={["dengan Mudah.", "tanpa Ribet.", "lebih Cepat.", "Otomatis."]} 
-            className="text-blue-600 block sm:inline-block mt-2 sm:mt-0"
-          />
+        <div className="mb-8 max-w-3xl mx-auto text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] font-extrabold text-slate-900 tracking-tight leading-[1.12] text-center px-2 sm:px-0">
+          
+          {/* Mobile version without "Anda" */}
+          <div className="sm:hidden">
+            <TextReveal text="Kelola Jadwal, Absensi dan Tagihan Bimbel" delay={0.3} />
+          </div>
+
+          {/* Desktop version with "Anda" */}
+          <div className="hidden sm:block">
+            <TextReveal text="Kelola Jadwal, Absensi dan Tagihan Bimbel Anda" delay={0.3} />
+          </div>
+
+          <div className="block mt-2 sm:mt-4">
+            <TextRotator 
+              words={["dengan Mudah.", "tanpa Ribet.", "lebih Cepat.", "Otomatis."]} 
+              className="text-blue-600 inline-block"
+            />
+          </div>
         </div>
 
         <FadeInView direction="up" delay={0.35}>

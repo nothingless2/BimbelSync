@@ -43,12 +43,12 @@ export function TextReveal({ text, className = "", delay = 0 }: TextRevealProps)
 
   return (
     <motion.div
-      style={{ overflow: "hidden", display: "flex", flexWrap: "wrap", justifyContent: "center" }}
+      style={{ overflow: "hidden" }}
       variants={container}
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-10%" }}
-      className={className}
+      className={`flex flex-wrap justify-center ${className}`}
     >
       {words.map((word, index) => (
         <motion.span variants={child} style={{ marginRight: "0.25em" }} key={index}>
