@@ -13,6 +13,9 @@ import prisma from '@/lib/prisma';
 import { Metadata } from 'next';
 import { CustomCursor } from '@/components/ui/custom-cursor';
 import { TextRotator } from '@/components/ui/text-rotator';
+import { MagneticButton } from '@/components/ui/magnetic-button';
+import { TextReveal } from '@/components/ui/text-reveal';
+import { ParallaxElement } from '@/components/ui/parallax-element';
 
 const WA_URL = "https://wa.me/6281234567890?text=Halo%20tim%20BimbelSync,%20saya%20tertarik%20menggunakan%20platform%20ini.";
 
@@ -47,20 +50,27 @@ export default async function LandingPage() {
 
       {/* Hero */}
       <section className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 md:pt-24 md:pb-28 text-center">
+        
+        {/* Parallax Background Elements */}
+        <ParallaxElement offset={80} className="absolute top-20 left-10 hidden lg:block opacity-20 pointer-events-none">
+           <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-400 to-transparent blur-2xl"></div>
+        </ParallaxElement>
+        <ParallaxElement offset={-60} className="absolute bottom-40 right-10 hidden lg:block opacity-20 pointer-events-none">
+           <div className="w-48 h-48 rounded-full bg-gradient-to-tl from-emerald-400 to-transparent blur-3xl"></div>
+        </ParallaxElement>
+
         <FadeInView direction="up" delay={0.15}>
           <div className="inline-block bg-white border border-slate-200 text-slate-600 rounded-full px-4 py-1.5 text-xs font-semibold mb-6 tracking-wide shadow-sm">
             Software Manajemen Bimbel #1
           </div>
         </FadeInView>
 
-        <FadeInView direction="up" delay={0.25}>
-          <h1 className="text-4xl sm:text-5xl md:text-[3.5rem] font-extrabold text-slate-900 tracking-tight leading-[1.12] mb-6 max-w-3xl mx-auto">
-            Kelola Jadwal, Absensi dan Tagihan Bimbel Anda{" "}
-            <TextRotator 
-              words={["dengan Mudah.", "tanpa Ribet.", "lebih Cepat.", "Otomatis."]} 
-            />
-          </h1>
-        </FadeInView>
+        <div className="mb-6 max-w-3xl mx-auto text-4xl sm:text-5xl md:text-[3.5rem] font-extrabold text-slate-900 tracking-tight leading-[1.12]">
+          <TextReveal text="Kelola Jadwal, Absensi dan Tagihan Bimbel Anda" delay={0.3} className="inline-flex mr-2" />
+          <TextRotator 
+            words={["dengan Mudah.", "tanpa Ribet.", "lebih Cepat.", "Otomatis."]} 
+          />
+        </div>
 
         <FadeInView direction="up" delay={0.35}>
           <p className="text-lg text-slate-500 max-w-xl mx-auto mb-10 leading-relaxed">
@@ -68,14 +78,18 @@ export default async function LandingPage() {
           </p>
         </FadeInView>
 
-        <FadeInView direction="up" delay={0.45}>
-          <div className="flex flex-col sm:flex-row justify-center gap-3 mb-16">
-            <a href={WA_URL} target="_blank" rel="noreferrer" className="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3.5 px-7 rounded-xl transition-colors text-sm">
-              Coba Gratis Sekarang
-            </a>
-            <a href="#features" className="bg-white text-slate-700 font-semibold py-3.5 px-7 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors text-sm">
-              Lihat Fitur
-            </a>
+        <FadeInView direction="up" delay={0.8}>
+          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
+            <MagneticButton>
+              <a href={WA_URL} target="_blank" rel="noreferrer" className="block bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3.5 px-7 rounded-xl transition-colors text-sm shadow-md">
+                Coba Gratis Sekarang
+              </a>
+            </MagneticButton>
+            <MagneticButton strength={10}>
+              <a href="#features" className="block bg-white text-slate-700 font-semibold py-3.5 px-7 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors text-sm shadow-sm">
+                Lihat Fitur
+              </a>
+            </MagneticButton>
           </div>
         </FadeInView>
 
@@ -192,7 +206,7 @@ export default async function LandingPage() {
             </div>
           </FadeInView>
 
-          <FadeInView direction="up" delay={0.2}>
+          <FadeInView direction="up" delay={0.4}>
             <div className="flex flex-col md:flex-row gap-12 items-center">
             <div className="flex-1 w-full flex justify-center">
                <div className="relative">
@@ -213,7 +227,7 @@ export default async function LandingPage() {
             </div>
           </FadeInView>
 
-          <FadeInView direction="up" delay={0.2}>
+          <FadeInView direction="up" delay={0.6}>
             <div className="flex flex-col md:flex-row-reverse gap-12 items-center">
             <div className="flex-1 w-full flex justify-center">
                <div className="relative">
