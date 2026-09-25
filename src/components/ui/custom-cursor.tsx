@@ -7,9 +7,14 @@ export function CustomCursor() {
   const [isVisible, setIsVisible] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   
-  // Position for the small dot (snaps exactly to mouse)
+  // Base position tracking
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
+
+  // Position for the small dot (noticeable lag/delay)
+  const dotSpringConfig = { damping: 20, stiffness: 120, mass: 1.2 };
+  const cursorXSpringDot = useSpring(cursorX, dotSpringConfig);
+  const cursorYSpringDot = useSpring(cursorY, dotSpringConfig);
 
   // Position for the outer ring (trails with spring physics)
   const springConfig = { damping: 25, stiffness: 300, mass: 0.5 };
@@ -17,10 +22,17 @@ export function CustomCursor() {
   const cursorYSpring = useSpring(cursorY, springConfig);
 
   useEffect(() => {
-    // Only show on devices with a pointing device (mouse)
-    if (window.matchMedia("(pointer: fine)").matches) {
-      setIsVisible(true);
-    }
+    // Only show on large desktop screens with a pointing device (mouse)
+    const checkVisibility = () => {
+      if (window.matchMedia("(min-width: 1024px) and (pointer: fine)").matches) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+
+    checkVisibility();
+    window.addEventListener("resize", checkVisibility);
 
     const moveCursor = (e: MouseEvent) => {
       cursorX.set(e.clientX);
@@ -40,6 +52,7 @@ export function CustomCursor() {
     document.documentElement.addEventListener("mouseenter", handleMouseEnter);
 
     return () => {
+      window.removeEventListener("resize", checkVisibility);
       window.removeEventListener("mousemove", moveCursor);
       document.documentElement.removeEventListener("mouseleave", handleMouseLeave);
       document.documentElement.removeEventListener("mouseenter", handleMouseEnter);
@@ -73,8 +86,8 @@ export function CustomCursor() {
       <motion.div
         className="fixed top-0 left-0 w-2.5 h-2.5 bg-blue-600 rounded-full pointer-events-none z-[10000]"
         style={{
-          x: cursorX,
-          y: cursorY,
+          x: cursorXSpringDot,
+          y: cursorYSpringDot,
           translateX: "-50%",
           translateY: "-50%",
         }}
