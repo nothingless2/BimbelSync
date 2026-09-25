@@ -26,7 +26,7 @@ export function FinalCTA() {
                 transition={{ duration: 0.8 }}
                 src="/cs-agent.png" 
                 alt="Customer Success Agent" 
-                className="relative z-10 w-full h-[120%] lg:h-[110%] object-cover object-top lg:object-right-top"
+                className="relative z-10 w-full h-[120%] lg:h-[110%] object-cover object-bottom"
              />
              
              {/* Floating Badge (Kept from previous design, moved to left side of image) */}
