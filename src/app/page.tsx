@@ -58,7 +58,6 @@ export default async function LandingPage() {
             Kelola Jadwal, Absensi dan Tagihan Bimbel Anda{" "}
             <TextRotator 
               words={["dengan Mudah.", "tanpa Ribet.", "lebih Cepat.", "Otomatis."]} 
-              className="text-blue-600"
             />
           </h1>
         </FadeInView>
