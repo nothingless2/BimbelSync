@@ -30,6 +30,7 @@
     "recharts": "^3.10.1",
     "serwist": "^9.5.12",
     "sweetalert2": "^11.26.25",
+    "typewriter-effect": "^2.22.0",
     "zod": "^4.5.4"
   },
   "devDependencies": {
