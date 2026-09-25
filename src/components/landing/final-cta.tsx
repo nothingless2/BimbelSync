@@ -14,8 +14,8 @@ export function FinalCTA() {
           {/* Subtle noise texture & glow for the background */}
           <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay"></div>
           
-          {/* Left side: Image / Visual (Larger, Left side, Overflow Hidden by parent) */}
-          <div className="w-full lg:w-1/2 relative min-h-[400px] pt-12 lg:pt-0 order-2 lg:order-1 flex items-end justify-center lg:justify-start">
+          {/* Left side: Image / Visual (Hidden on mobile/tablet for a cleaner look, visible on desktop) */}
+          <div className="hidden lg:flex w-full lg:w-1/2 relative min-h-[400px] order-2 lg:order-1 items-end justify-start">
              {/* Decorative glow behind image */}
              <div className="absolute left-1/4 bottom-0 w-[400px] h-[400px] bg-blue-600/20 blur-[100px] rounded-full"></div>
              
@@ -35,7 +35,7 @@ export function FinalCTA() {
                whileInView={{ opacity: 1, x: 0 }}
                viewport={{ once: true }}
                transition={{ duration: 0.6, delay: 0.4 }}
-               className="absolute top-auto bottom-8 left-4 lg:bottom-auto lg:top-1/3 lg:left-12 bg-white/10 backdrop-blur-md border border-white/20 p-3 lg:p-4 rounded-2xl shadow-xl flex items-center gap-3 lg:gap-4 z-20"
+               className="absolute top-1/3 left-12 bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl shadow-xl flex items-center gap-4 z-20"
              >
                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.8)]"></div>
                <div className="text-white">
@@ -45,8 +45,8 @@ export function FinalCTA() {
              </motion.div>
           </div>
 
-          {/* Right side: Text Content (Order 1 on mobile so text is above image, Order 2 on desktop) */}
-          <div className="w-full lg:w-1/2 px-8 py-16 sm:px-12 lg:px-16 lg:py-24 order-1 lg:order-2 relative z-10">
+          {/* Right side: Text Content (Full width on mobile/tablet, Half width on desktop) */}
+          <div className="w-full lg:w-1/2 px-6 py-12 sm:px-12 lg:px-16 lg:py-24 order-1 lg:order-2 relative z-10 flex flex-col justify-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -71,13 +71,13 @@ export function FinalCTA() {
                   href={WA_URL} 
                   target="_blank" 
                   rel="noreferrer" 
-                  className="w-full sm:w-auto inline-flex items-center justify-center bg-blue-600 text-white hover:bg-blue-500 font-semibold text-base py-4 px-8 rounded-full transition-all duration-300 shadow-lg shadow-blue-900/50 hover:shadow-blue-900/80 hover:-translate-y-0.5"
+                  className="w-full sm:w-auto inline-flex items-center justify-center bg-blue-600 text-white hover:bg-blue-500 font-semibold text-sm sm:text-base py-3.5 sm:py-4 px-6 sm:px-8 rounded-full transition-all duration-300 shadow-lg shadow-blue-900/50 hover:shadow-blue-900/80 hover:-translate-y-0.5"
                 >
                   Hubungi via WhatsApp
                 </a>
                 <a 
                   href="#features" 
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-transparent hover:bg-white/5 text-white border border-slate-700 hover:border-slate-500 font-semibold text-base py-4 px-8 rounded-full transition-colors duration-200"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-transparent hover:bg-white/5 text-white border border-slate-700 hover:border-slate-500 font-semibold text-sm sm:text-base py-3.5 sm:py-4 px-6 sm:px-8 rounded-full transition-colors duration-200"
                 >
                   Pelajari Fitur <ArrowRight className="w-4 h-4" />
                 </a>

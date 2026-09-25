@@ -34,7 +34,7 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
         <div className="inline-block bg-white border border-slate-200 text-slate-600 rounded-full px-4 py-1.5 text-xs font-semibold mb-4 tracking-wide shadow-sm">
           Harga
         </div>
-        <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Pilih paket sesuai skala bimbel Anda</h2>
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Pilih paket sesuai skala bimbel Anda</h2>
         <p className="text-slate-500 leading-relaxed mb-8">Tanpa biaya tersembunyi. Upgrade atau downgrade kapan saja.</p>
         
         <div className="flex flex-col items-center justify-center space-y-3">
@@ -62,7 +62,7 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-sm lg:max-w-5xl mx-auto">
         {plans.length === 0 ? (
           <div className="col-span-3 text-center text-slate-500 py-10">
             Belum ada paket tersedia saat ini. Silakan hubungi tim sales.
@@ -94,7 +94,7 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
             .replace(",00", "");
 
           return (
-            <div key={plan.id} className={isPopular ? "relative z-10 md:-translate-y-4" : "relative z-0"}>
+            <div key={plan.id} className={isPopular ? "relative z-10 lg:-translate-y-4" : "relative z-0"}>
               <motion.div 
                 key={`${plan.id}-${billingCycle}`}
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
