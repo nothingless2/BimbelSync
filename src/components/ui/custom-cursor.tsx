@@ -50,14 +50,7 @@ export function CustomCursor() {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: `
-        /* Hide default cursor only on devices with pointer: fine */
-        @media (pointer: fine) {
-          body, a, button, input, textarea, select {
-            cursor: none !important;
-          }
-        }
-      `}} />
+
       
       {/* Outer trailing circle */}
       <motion.div

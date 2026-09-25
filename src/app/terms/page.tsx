@@ -26,7 +26,7 @@ export default function TermsPage() {
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 relative">
         <div className="prose prose-slate max-w-none text-slate-600 space-y-8">
           <p className="text-lg text-slate-700 leading-relaxed font-medium">
-            Selamat datang di BimbelSync. Dengan mendaftar, mengakses, atau menggunakan platform kami, Anda setuju untuk terikat oleh Syarat dan Ketentuan ("Ketentuan") berikut ini. Harap baca dengan saksama sebelum menggunakan layanan kami.
+            Selamat datang di BimbelSync. Dengan mendaftar, mengakses, atau menggunakan platform kami, Anda setuju untuk terikat oleh Syarat dan Ketentuan (Ketentuan) berikut ini. Harap baca dengan saksama sebelum menggunakan layanan kami.
           </p>
 
           <h2 className="text-xl font-bold text-slate-900 mt-12 mb-6">1. Penerimaan Syarat</h2>
@@ -46,7 +46,7 @@ export default function TermsPage() {
 
           <h2 className="text-xl font-bold text-slate-900 mt-12 mb-6">3. Biaya dan Pembayaran</h2>
           <p>
-            Layanan BimbelSync disediakan berdasarkan model berlangganan (SaaS). Biaya langganan dibebankan sesuai siklus tagihan yang Anda pilih. Kegagalan pembayaran dapat mengakibatkan penangguhan atau penghentian akses ke platform. Biaya transaksi dari pihak ketiga (seperti Payment Gateway) tunduk pada kebijakan penyedia tersebut.
+            Layanan BimbelSync disediakan berdasarkan model berlangganan. Biaya langganan dibebankan sesuai siklus tagihan yang Anda pilih. Kegagalan pembayaran dapat mengakibatkan penangguhan atau penghentian akses ke platform. Biaya transaksi dari pihak ketiga (seperti Payment Gateway) tunduk pada kebijakan penyedia tersebut.
           </p>
 
           <h2 className="text-xl font-bold text-slate-900 mt-12 mb-6">4. Pemutusan Layanan</h2>

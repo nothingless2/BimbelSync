@@ -81,12 +81,12 @@ export default async function LandingPage() {
         <FadeInView direction="up" delay={0.8}>
           <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
             <MagneticButton>
-              <a href={WA_URL} target="_blank" rel="noreferrer" className="block bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3.5 px-7 rounded-xl transition-colors text-sm shadow-md">
+              <a href={WA_URL} target="_blank" rel="noreferrer" className="block bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3.5 px-7 rounded-xl transition-all duration-300 text-sm shadow-md hover:shadow-[0_0_20px_rgba(59,130,246,0.5)]">
                 Coba Gratis Sekarang
               </a>
             </MagneticButton>
             <MagneticButton strength={10}>
-              <a href="#features" className="block bg-white text-slate-700 font-semibold py-3.5 px-7 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors text-sm shadow-sm">
+              <a href="#features" className="block bg-white text-slate-700 font-semibold py-3.5 px-7 rounded-xl border border-slate-200 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300 text-sm shadow-sm hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]">
                 Lihat Fitur
               </a>
             </MagneticButton>
@@ -165,7 +165,7 @@ export default async function LandingPage() {
         <div className="flex flex-col gap-24">
           
           <FadeInView direction="up" delay={0.2}>
-            <div className="flex flex-col md:flex-row gap-12 items-center">
+            <div className="flex flex-col md:flex-row gap-12 items-center group p-6 sm:p-10 rounded-3xl transition-all duration-500 hover:bg-white hover:shadow-[0_10px_40px_rgba(59,130,246,0.1)] border border-transparent hover:border-blue-100">
             <div className="flex-1 w-full flex justify-center">
                <div className="relative">
                   <img src="/features/calendar-bg.png" alt="Mockup Penjadwalan" className="w-full max-w-md h-auto object-contain drop-shadow-md opacity-90" />
@@ -186,7 +186,7 @@ export default async function LandingPage() {
           </FadeInView>
 
           <FadeInView direction="up" delay={0.2}>
-            <div className="flex flex-col md:flex-row-reverse gap-12 items-center">
+            <div className="flex flex-col md:flex-row-reverse gap-12 items-center group p-6 sm:p-10 rounded-3xl transition-all duration-500 hover:bg-white hover:shadow-[0_10px_40px_rgba(59,130,246,0.1)] border border-transparent hover:border-blue-100">
             <div className="flex-1 w-full flex justify-center">
                <div className="relative">
                   <img src="/features/qr-bg.png" alt="Mockup Presensi QR" className="w-full max-w-sm h-auto object-contain drop-shadow-md opacity-90" />
@@ -207,7 +207,7 @@ export default async function LandingPage() {
           </FadeInView>
 
           <FadeInView direction="up" delay={0.4}>
-            <div className="flex flex-col md:flex-row gap-12 items-center">
+            <div className="flex flex-col md:flex-row gap-12 items-center group p-6 sm:p-10 rounded-3xl transition-all duration-500 hover:bg-white hover:shadow-[0_10px_40px_rgba(59,130,246,0.1)] border border-transparent hover:border-blue-100">
             <div className="flex-1 w-full flex justify-center">
                <div className="relative">
                   <img src="/features/whatsapp-bg.png" alt="Mockup Tagihan Email" className="w-full max-w-sm h-auto object-contain drop-shadow-md opacity-90 hue-rotate-180" />
@@ -228,7 +228,7 @@ export default async function LandingPage() {
           </FadeInView>
 
           <FadeInView direction="up" delay={0.6}>
-            <div className="flex flex-col md:flex-row-reverse gap-12 items-center">
+            <div className="flex flex-col md:flex-row-reverse gap-12 items-center group p-6 sm:p-10 rounded-3xl transition-all duration-500 hover:bg-white hover:shadow-[0_10px_40px_rgba(59,130,246,0.1)] border border-transparent hover:border-blue-100">
             <div className="flex-1 w-full flex justify-center">
                <div className="relative">
                   <img src="/features/payment-bg.png" alt="Mockup Pembayaran & Bukti Transfer" className="w-full max-w-sm h-auto object-contain drop-shadow-md opacity-90" />

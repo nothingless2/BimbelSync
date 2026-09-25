@@ -7,11 +7,11 @@ import { Plus } from 'lucide-react';
 const faqs = [
   {
     q: 'Berapa lama proses migrasi data dari Excel ke BimbelSync?',
-    a: 'Biasanya kurang dari 5 menit. Kami menyediakan fitur import massal via file CSV — tinggal unduh template, isi data, unggah. Ratusan data siswa dan staf langsung masuk.',
+    a: 'Biasanya kurang dari 5 menit. Kami menyediakan fitur import massal via file CSV, tinggal unduh template, isi data, unggah. Ratusan data siswa dan staf langsung masuk.',
   },
   {
     q: 'Apakah saya perlu install aplikasi?',
-    a: 'Tidak. BimbelSync 100% berbasis web. Cukup buka browser di laptop, tablet, atau HP — langsung bisa digunakan tanpa instalasi apapun.',
+    a: 'Tidak. BimbelSync 100% berbasis web. Cukup buka browser di laptop, tablet, atau HP, langsung bisa digunakan tanpa instalasi apapun.',
   },
   {
     q: 'Bagaimana kalau internet mati saat siswa scan QR absen?',
@@ -23,7 +23,7 @@ const faqs = [
   },
   {
     q: 'Saya baru punya 10 siswa. Apakah tetap worth it?',
-    a: 'Justru saat bimbel masih kecil adalah waktu terbaik untuk membangun sistem yang rapi. Paket Starter kami dirancang khusus untuk bimbel rintisan — harganya terjangkau dan bisa di-upgrade kapan saja seiring pertumbuhan.',
+    a: 'Justru saat bimbel masih kecil adalah waktu terbaik untuk membangun sistem yang rapi. Paket Starter kami dirancang khusus untuk bimbel rintisan, harganya terjangkau dan bisa di-upgrade kapan saja seiring pertumbuhan.',
   },
 ];
 
