@@ -35,7 +35,7 @@ export function FinalCTA() {
                whileInView={{ opacity: 1, x: 0 }}
                viewport={{ once: true }}
                transition={{ duration: 0.6, delay: 0.4 }}
-               className="absolute top-1/3 left-6 lg:left-12 bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl shadow-xl flex items-center gap-4 z-20"
+               className="absolute top-auto bottom-8 left-4 lg:bottom-auto lg:top-1/3 lg:left-12 bg-white/10 backdrop-blur-md border border-white/20 p-3 lg:p-4 rounded-2xl shadow-xl flex items-center gap-3 lg:gap-4 z-20"
              >
                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.8)]"></div>
                <div className="text-white">
@@ -58,11 +58,11 @@ export function FinalCTA() {
                 KONSULTASI GRATIS
               </div>
               
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 tracking-tight leading-[1.15]">
-                Siap Bawa Bimbel Anda <br/> <span className="text-blue-500">Naik Kelas?</span>
+              <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 tracking-tight leading-[1.15]">
+                Siap Bawa Bimbel Anda <br className="hidden md:block"/> <span className="text-blue-500">Naik Kelas?</span>
               </h2>
               
-              <p className="text-lg text-slate-400 mb-10 max-w-lg font-medium leading-relaxed">
+              <p className="text-base sm:text-lg text-slate-400 mb-10 max-w-lg font-medium leading-relaxed">
                 Tinggalkan sistem manual yang menghambat skala bisnis Anda. Mari diskusikan bagaimana BimbelSync dapat disesuaikan untuk kebutuhan spesifik Anda.
               </p>
               

@@ -35,16 +35,16 @@ export function Metrics() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-6 tracking-tight">
-              Fokus mengajar, biar sistem yang<br />urus <span className="text-blue-600">administrasinya.</span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-6 tracking-tight">
+              Fokus mengajar, biar sistem yang<br className="hidden sm:block" /> urus <span className="text-blue-600">administrasinya.</span>
             </h2>
-            <p className="text-lg text-slate-500 font-medium leading-relaxed max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-slate-500 font-medium leading-relaxed max-w-2xl mx-auto">
               BimbelSync memotong pekerjaan berulang agar Anda bisa kembali fokus pada hal terpenting: mendampingi siswa belajar.
             </p>
           </motion.div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto">
+        <div className="flex flex-col md:flex-row flex-wrap justify-center gap-5 max-w-5xl mx-auto">
           {metrics.map((metric, index) => (
             <motion.div 
               key={index}
@@ -52,7 +52,7 @@ export function Metrics() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.15 }}
-              className={`group relative p-6 md:p-8 rounded-[1.5rem] transition-all duration-300 flex flex-col h-full ${
+              className={`group relative p-6 md:p-8 rounded-[1.5rem] transition-all duration-300 flex flex-col w-full md:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)] ${
                 metric.highlight 
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' 
                   : 'bg-white border border-slate-200/60 shadow-sm hover:shadow-md'
