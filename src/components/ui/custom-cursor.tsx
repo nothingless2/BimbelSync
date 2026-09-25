@@ -11,13 +11,13 @@ export function CustomCursor() {
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
 
-  // Position for the small dot (noticeable lag/delay)
-  const dotSpringConfig = { damping: 20, stiffness: 120, mass: 1.2 };
+  // Position for the small dot (snaps faster/tighter to cursor)
+  const dotSpringConfig = { damping: 25, stiffness: 300, mass: 0.5 };
   const cursorXSpringDot = useSpring(cursorX, dotSpringConfig);
   const cursorYSpringDot = useSpring(cursorY, dotSpringConfig);
 
-  // Position for the outer ring (trails with spring physics)
-  const springConfig = { damping: 25, stiffness: 300, mass: 0.5 };
+  // Position for the outer ring (trails with noticeable lag/delay)
+  const springConfig = { damping: 20, stiffness: 120, mass: 1.2 };
   const cursorXSpring = useSpring(cursorX, springConfig);
   const cursorYSpring = useSpring(cursorY, springConfig);
 

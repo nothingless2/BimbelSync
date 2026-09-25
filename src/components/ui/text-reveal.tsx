@@ -42,8 +42,8 @@ export function TextReveal({ text, className = "", delay = 0 }: TextRevealProps)
   };
 
   return (
-    <motion.span
-      style={{ display: "inline" }}
+    <motion.div
+      style={{ overflow: "hidden", display: "flex", flexWrap: "wrap", justifyContent: "center" }}
       variants={container}
       initial="hidden"
       whileInView="visible"
@@ -51,10 +51,10 @@ export function TextReveal({ text, className = "", delay = 0 }: TextRevealProps)
       className={className}
     >
       {words.map((word, index) => (
-        <motion.span variants={child} style={{ display: "inline-block", marginRight: "0.25em" }} key={index}>
+        <motion.span variants={child} style={{ marginRight: "0.25em" }} key={index}>
           {word}
         </motion.span>
       ))}
-    </motion.span>
+    </motion.div>
   );
 }
