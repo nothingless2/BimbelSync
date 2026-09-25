@@ -6,7 +6,6 @@ import { cookies } from "next/headers";
 import { decrypt } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { runAutoBillingEngine } from "@/lib/auto-billing";
 
 export default async function SuperadminLayout({
   children,
@@ -30,8 +29,6 @@ export default async function SuperadminLayout({
     redirect('/superadmin/logout');
   }
 
-  // Jalankan Auto-Billing Engine di background tanpa memblokir render
-  runAutoBillingEngine().catch(e => console.error("AutoBilling error", e));
 
   return (
     <div className="flex h-screen bg-[#F8FAFC] dark:bg-slate-950 font-sans">

@@ -1,18 +1,17 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { decrypt } from "@/lib/auth";
-import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createAuditLog } from "@/lib/audit";
+import { requireTenantSession } from "@/lib/session";
+
+const VALID_PAYMENT_METHODS = ["GATEWAY", "MANUAL_TRANSFER", "CASH"] as const;
+type PaymentMethodType = typeof VALID_PAYMENT_METHODS[number];
 
 export async function createInvoiceAction(formData: FormData) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) return { error: "Autentikasi diperlukan." };
-
-  const session = await decrypt(sessionToken);
-  if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
+  const result = await requireTenantSession();
+  if ('error' in result) return { error: result.error };
+  const session = result.session;
 
   const studentId = formData.get("student_id") as string;
   const descriptions = formData.getAll("item_description[]") as string[];
@@ -84,12 +83,14 @@ export async function createInvoiceAction(formData: FormData) {
 }
 
 export async function verifyPaymentAction(invoiceId: string, paymentMethod: string) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) return { error: "Autentikasi diperlukan." };
+  const result = await requireTenantSession();
+  if ('error' in result) return { error: result.error };
+  const session = result.session;
 
-  const session = await decrypt(sessionToken);
-  if (!session || !session.academy_id || !session.id) return { error: "Sesi tidak valid." };
+  // Validasi payment method terhadap enum yang diizinkan
+  if (!VALID_PAYMENT_METHODS.includes(paymentMethod as PaymentMethodType)) {
+    return { error: "Metode pembayaran tidak valid." };
+  }
 
   try {
     const existing = await prisma.invoice.findUnique({
@@ -117,7 +118,7 @@ export async function verifyPaymentAction(invoiceId: string, paymentMethod: stri
       where: { id: invoiceId },
       data: {
         payment_status: "PAID",
-        payment_method: paymentMethod as any, // "CASH" atau "MANUAL_TRANSFER"
+        payment_method: paymentMethod as PaymentMethodType,
         verified_by_staff_id: isStaff ? session.id : null
       }
     });
@@ -140,12 +141,9 @@ export async function verifyPaymentAction(invoiceId: string, paymentMethod: stri
 }
 
 export async function deleteInvoiceAction(invoiceId: string) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) return { error: "Autentikasi diperlukan." };
-
-  const session = await decrypt(sessionToken);
-  if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
+  const result = await requireTenantSession();
+  if ('error' in result) return { error: result.error };
+  const session = result.session;
 
   try {
     const existing = await prisma.invoice.findUnique({
@@ -191,12 +189,9 @@ export async function splitInstallmentsAction(
   invoiceId: string, 
   installmentsData: { amount: number; due_date: string }[]
 ) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) return { error: "Autentikasi diperlukan." };
-
-  const session = await decrypt(sessionToken);
-  if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
+  const result = await requireTenantSession();
+  if ('error' in result) return { error: result.error };
+  const session = result.session;
 
   try {
     const invoice = await prisma.invoice.findUnique({

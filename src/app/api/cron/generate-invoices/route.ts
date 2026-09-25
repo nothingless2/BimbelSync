@@ -3,14 +3,41 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { format, startOfMonth, addMonths, addDays } from "date-fns";
 import { createAuditLog } from "@/lib/audit";
+import { decrypt } from "@/lib/auth";
+import { cookies } from "next/headers";
 
-// This endpoint is meant to be called by a Cron Service (like Vercel Cron)
-// In production, you would add an Authorization header check to prevent public abuse.
+const CRON_SECRET = process.env.CRON_SECRET;
+
 export async function POST(request: Request) {
   try {
-    // 1. Get request body
+    // 1. Otorisasi: harus punya Bearer token CRON_SECRET atau session JWT yang valid
+    const authHeader = request.headers.get('authorization');
+    const isCronAuth = CRON_SECRET && authHeader === `Bearer ${CRON_SECRET}`;
+    
+    let sessionAcademyId: string | null = null;
+    
+    if (!isCronAuth) {
+      // Fallback: cek session JWT (untuk panggilan dari dashboard admin)
+      const cookieStore = await cookies();
+      const sessionToken = cookieStore.get("bimbelsync_session")?.value;
+      if (!sessionToken) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      const session = await decrypt(sessionToken);
+      if (!session || (!session.academy_id && session.role !== 'SUPERADMIN')) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      sessionAcademyId = session.academy_id || null;
+    }
+
+    // 2. Get request body
     const body = await request.json();
-    const { academy_id } = body; // If provided, only generate for this academy. Otherwise all active academies.
+    const { academy_id } = body;
+    
+    // Jika bukan cron/superadmin, pastikan hanya bisa generate untuk akademi sendiri
+    if (sessionAcademyId && academy_id !== sessionAcademyId) {
+      return NextResponse.json({ error: "Forbidden: Anda hanya bisa generate untuk akademi Anda sendiri." }, { status: 403 });
+    }
 
     const today = new Date();
     const currentMonthPeriod = format(today, "yyyy-MM"); // e.g. "2026-09"

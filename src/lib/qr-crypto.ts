@@ -1,7 +1,11 @@
 import crypto from 'crypto';
 
-// Gunakan environment variable jika ada, jika tidak gunakan fallback 32 bytes
-const SECRET_KEY = process.env.QR_SECRET_KEY || 'bimbel-sync-super-secret-key-32b'; 
+// Secret key WAJIB diatur di .env
+const _qrKey = process.env.QR_SECRET_KEY;
+if (!_qrKey) {
+  throw new Error("CRITICAL: QR_SECRET_KEY belum diatur di file .env!");
+}
+const SECRET_KEY: string = _qrKey;
 
 export function encryptQrData(payload: object): string {
   try {

@@ -7,6 +7,7 @@ const withSerwist = withSerwistInit({
   disable: process.env.NODE_ENV === "development",
 });
 const nextConfig: NextConfig = {
+  turbopack: {},
   experimental: {
     serverActions: {
       // Dibatasi ke 500KB — cukup untuk form data biasa.

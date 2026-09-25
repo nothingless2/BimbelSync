@@ -115,6 +115,8 @@ model Room {
 
   academy   Academy    @relation(fields: [academy_id], references: [id])
   schedules Schedule[]
+
+  @@index([academy_id])
 }
 
 model Staff {
@@ -161,6 +163,7 @@ model Student {
   evaluations StudentEvaluation[]
 
   @@unique([academy_id, username])
+  @@index([academy_id, deleted_at])
 }
 
 model Program {
@@ -180,6 +183,8 @@ model Program {
   enrollments Enrollment[]
   materials   LearningMaterial[]
   evaluations StudentEvaluation[]
+
+  @@index([academy_id])
 }
 
 model Schedule {
@@ -196,6 +201,9 @@ model Schedule {
   tutor       Staff        @relation(fields: [tutor_id], references: [id])
   room        Room         @relation(fields: [room_id], references: [id])
   attendances Attendance[]
+
+  @@index([tutor_id, start_time])
+  @@index([program_id])
 }
 
 enum ScheduleStatus {
@@ -271,6 +279,10 @@ model Invoice {
   verified_by  Staff?        @relation("StaffVerifiesInvoice", fields: [verified_by_staff_id], references: [id])
   items        InvoiceItem[]
   installments Installment[]
+
+  @@index([academy_id, payment_status])
+  @@index([student_id])
+  @@index([created_at])
 }
 
 enum PaymentOption {
