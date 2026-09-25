@@ -249,7 +249,7 @@ export default async function LandingPage() {
               </div>
               <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-6 tracking-tight leading-tight">Dibuat oleh orang yang paham masalah bimbel.</h2>
               <p className="text-slate-500 mb-4 leading-relaxed">
-                Kebanyakan software manajemen pendidikan dibuat terlalu rumit — seolah-olah penggunanya adalah perusahaan besar dengan tim IT sendiri. Kenyataannya, bimbel di Indonesia dikelola oleh 1-3 orang yang merangkap segalanya.
+                Kebanyakan software manajemen pendidikan dibuat terlalu rumit, seolah-olah penggunanya adalah perusahaan besar dengan tim IT sendiri. Kenyataannya, bimbel di Indonesia dikelola oleh 1-3 orang yang merangkap segalanya.
               </p>
               <p className="text-slate-500 leading-relaxed">
                 BimbelSync dirancang untuk realita itu. Antarmuka yang bersih, alur kerja yang singkat, dan harga yang masuk akal untuk UMKM pendidikan.
