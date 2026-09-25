@@ -67,9 +67,14 @@ export default async function LandingPage() {
 
         <div className="mb-8 max-w-3xl mx-auto text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] font-extrabold text-slate-900 tracking-tight leading-[1.12] text-center px-2 sm:px-0">
           
-          {/* Mobile version without "Anda" */}
-          <div className="sm:hidden">
-            <TextReveal text="Kelola Jadwal, Absensi dan Tagihan Bimbel" delay={0.3} />
+          {/* Mobile version without "Anda" (Pyramid shape) */}
+          <div className="sm:hidden flex flex-col items-center">
+            <div className="block">
+              <TextReveal text="Kelola Jadwal, Absensi" delay={0.3} />
+            </div>
+            <div className="block">
+              <TextReveal text="dan Tagihan Bimbel" delay={0.66} />
+            </div>
           </div>
 
           {/* Desktop version with "Anda" */}
