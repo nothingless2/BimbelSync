@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CheckCircle2, X, Check } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface Plan {
   id: string;
@@ -93,12 +94,20 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
             .replace(",00", "");
 
           return (
-            <div key={plan.id} className={`bg-white rounded-3xl p-8 flex flex-col ${isPopular ? "border-2 border-blue-600 shadow-xl relative transform md:-translate-y-4 z-10" : "border border-slate-200 shadow-sm"}`}>
-              {isPopular && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
-                  Paling Populer
-                </div>
-              )}
+            <div key={plan.id} className={isPopular ? "relative z-10 md:-translate-y-4" : "relative z-0"}>
+              <motion.div 
+                key={`${plan.id}-${billingCycle}`}
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                whileHover={{ scale: 1.03, y: -8 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className={`bg-white rounded-3xl p-8 flex flex-col h-full ${isPopular ? "border-2 border-blue-600 shadow-xl" : "border border-slate-200 shadow-sm"}`}
+              >
+                {isPopular && (
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
+                    Paling Populer
+                  </div>
+                )}
               <h3 className="text-xl font-bold text-slate-900 mb-2">{plan.name}</h3>
               <p className="text-sm text-slate-500 mb-6 min-h-[40px]">{angle}</p>
               
@@ -179,6 +188,7 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
                   <p className="text-center text-xs text-blue-600/70 font-medium">Akses semua fitur Growth.</p>
                 )}
               </div>
+              </motion.div>
             </div>
           );
         })}
