@@ -92,7 +92,7 @@ export default async function LandingPage() {
 
         <FadeInView direction="up" delay={0.35}>
           <p className="text-base sm:text-lg text-slate-500 max-w-xl mx-auto mb-10 leading-relaxed">
-            Tinggalkan cara manual yang merepotkan. BimbelSync otomatiskan operasional harian agar Anda leluasa mengajar dan mengembangkan&nbsp;bisnis.
+            Tinggalkan cara manual yang merep otkan. BimbelSync otomatiskan operasional harian agar Anda leluasa mengajar dan mengembangkan&nbsp;bisnis.
           </p>
         </FadeInView>
 
