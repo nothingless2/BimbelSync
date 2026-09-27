@@ -38,24 +38,24 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
         <p className="text-slate-500 leading-relaxed mb-8">Tanpa biaya tersembunyi. Upgrade atau downgrade kapan saja.</p>
         
         <div className="flex flex-col items-center justify-center space-y-3">
-          <div className="flex flex-wrap justify-center bg-slate-100 p-1 rounded-3xl sm:rounded-full border border-slate-200 relative gap-1 sm:gap-0">
+          <div className="flex flex-row bg-slate-100 p-1 rounded-full border border-slate-200 relative w-full sm:w-auto overflow-x-auto md:overflow-visible">
             <button 
               onClick={() => setBillingCycle("monthly")}
-              className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${billingCycle === "monthly" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-900"}`}
+              className={`px-3 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${billingCycle === "monthly" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-900"}`}
             >
               Bulanan
             </button>
             <button 
               onClick={() => setBillingCycle("semester")}
-              className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${billingCycle === "semester" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-900"}`}
+              className={`px-3 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${billingCycle === "semester" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-900"}`}
             >
-              Semester (6 Bulan) <span className="ml-1 text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">HEMAT 10%</span>
+              Semester <span className="hidden sm:inline">(6 Bulan)</span> <span className="hidden sm:inline-block ml-1 text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">HEMAT 10%</span>
             </button>
             <button 
               onClick={() => setBillingCycle("yearly")}
-              className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${billingCycle === "yearly" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-900"}`}
+              className={`px-3 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${billingCycle === "yearly" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-900"}`}
             >
-              Tahunan <span className="ml-1 text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">HEMAT 2 BULAN</span>
+              Tahunan <span className="hidden sm:inline-block ml-1 text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">HEMAT 2 BULAN</span>
             </button>
           </div>
           <p className="text-xs text-slate-400">Kas bimbel sedang ketat? Tersedia opsi bayar per-semester untuk menyesuaikan arus kas Anda.</p>
