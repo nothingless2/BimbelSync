@@ -38,12 +38,15 @@ export async function superadminLoginAction(formData: FormData) {
       };
     }
 
+    let currentAttempts = superadmin.failed_attempts ?? 0;
+
     // Reset jika lock sudah kadaluarsa
     if (superadmin.locked_until && superadmin.locked_until <= now) {
       await prisma.superadmin.update({
         where: { id: superadmin.id },
         data: { failed_attempts: 0, locked_until: null },
       });
+      currentAttempts = 0;
     }
     // ────────────────────────────────────────────────────────────────────
 
@@ -51,7 +54,7 @@ export async function superadminLoginAction(formData: FormData) {
 
     if (!isValidPassword) {
       // Tambah hitungan percobaan gagal
-      const newAttempts = (superadmin.failed_attempts ?? 0) + 1;
+      const newAttempts = currentAttempts + 1;
       const shouldLock = newAttempts >= MAX_ATTEMPTS;
 
       await prisma.superadmin.update({
