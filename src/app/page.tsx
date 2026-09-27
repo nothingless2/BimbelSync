@@ -176,7 +176,7 @@ export default async function LandingPage() {
           <div className="inline-block bg-white border border-slate-200 text-slate-600 rounded-full px-4 py-1.5 text-xs font-semibold mb-4 tracking-wide shadow-sm">
             Fitur Utama
           </div>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Empat fitur yang menyelesaikan<br className="hidden sm:block" />masalah operasional harian</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Empat fitur yang menyelesaikan<br className="hidden sm:block" /> masalah operasional harian</h2>
           <p className="text-base sm:text-lg text-slate-500 leading-relaxed">Setiap fitur dirancang berdasarkan masalah nyata yang dihadapi pengelola bimbel di lapangan.</p>
         </div>
 
