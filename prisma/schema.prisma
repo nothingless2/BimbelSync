@@ -26,8 +26,6 @@ model Superadmin {
   
   verified_platform_invoices PlatformInvoice[] @relation("SuperadminVerifies")
   audit_logs                 AuditLog[]
-  failed_attempts            Int       @default(0)
-  locked_until               DateTime?
 }
 
 model AuditLog {
@@ -398,4 +396,12 @@ enum EvaluationType {
   EXAM
   HOMEWORK
   MONTHLY_REPORT
+}
+
+model LoginRateLimit {
+  id              String    @id @default(uuid()) @db.Uuid
+  ip_address      String    @unique
+  failed_attempts Int       @default(0)
+  locked_until    DateTime?
+  updated_at      DateTime  @updatedAt
 }

@@ -3,7 +3,7 @@
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
 import { encrypt } from "@/lib/auth";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 const MAX_ATTEMPTS = 5;
 const LOCK_DURATION_MINUTES = 15;
@@ -17,83 +17,102 @@ export async function superadminLoginAction(formData: FormData) {
   }
 
   try {
+    // 1. Dapatkan IP Address (Global Rate Limiting)
+    const headersList = await headers();
+    const forwardedFor = headersList.get('x-forwarded-for');
+    // Jika tidak ada x-forwarded-for (misal di localhost), gunakan fallback
+    const ip = forwardedFor ? forwardedFor.split(',')[0] : '127.0.0.1';
+
+    // 2. Cek status Rate Limit untuk IP ini
+    let rateLimit = await prisma.loginRateLimit.findUnique({
+      where: { ip_address: ip }
+    });
+
+    const now = new Date();
+
+    // Jika belum ada record untuk IP ini, buat baru
+    if (!rateLimit) {
+      rateLimit = await prisma.loginRateLimit.create({
+        data: { ip_address: ip, failed_attempts: 0 }
+      });
+    } else {
+      // Cek apakah IP ini sedang terkunci
+      if (rateLimit.locked_until && rateLimit.locked_until > now) {
+        const remainingMs = rateLimit.locked_until.getTime() - now.getTime();
+        const remainingMinutes = Math.ceil(remainingMs / 1000 / 60);
+        return {
+          error: `Terlalu banyak percobaan. Akses ditangguhkan. Coba lagi dalam ${remainingMinutes} menit.`,
+        };
+      }
+
+      // Jika hukuman sudah selesai, reset
+      if (rateLimit.locked_until && rateLimit.locked_until <= now) {
+        rateLimit = await prisma.loginRateLimit.update({
+          where: { ip_address: ip },
+          data: { failed_attempts: 0, locked_until: null },
+        });
+      }
+    }
+
+    let currentAttempts = rateLimit.failed_attempts;
+
+    // 3. Cek Kredensial di Database
     const superadmin = await prisma.superadmin.findUnique({
       where: { email },
     });
 
-    // Jika akun tidak ditemukan, kembalikan pesan samar (tidak mengungkap apakah email terdaftar)
-    if (!superadmin) {
-      return { error: "Kredensial tidak valid." };
+    let isValidPassword = false;
+    if (superadmin) {
+      isValidPassword = await bcrypt.compare(password, superadmin.password_hash);
     }
 
-    // ─── RATE LIMITING CHECK ────────────────────────────────────────────
-    const now = new Date();
-
-    // Cek apakah akun sedang dalam status terkunci
-    if (superadmin.locked_until && superadmin.locked_until > now) {
-      const remainingMs = superadmin.locked_until.getTime() - now.getTime();
-      const remainingMinutes = Math.ceil(remainingMs / 1000 / 60);
-      return {
-        error: `Terlalu banyak percobaan gagal. Akun dikunci. Coba lagi dalam ${remainingMinutes} menit.`,
-      };
-    }
-
-    let currentAttempts = superadmin.failed_attempts ?? 0;
-
-    // Reset jika lock sudah kadaluarsa
-    if (superadmin.locked_until && superadmin.locked_until <= now) {
-      await prisma.superadmin.update({
-        where: { id: superadmin.id },
-        data: { failed_attempts: 0, locked_until: null },
-      });
-      currentAttempts = 0;
-    }
-    // ────────────────────────────────────────────────────────────────────
-
-    const isValidPassword = await bcrypt.compare(password, superadmin.password_hash);
-
+    // 4. Jika Gagal Login (Email tidak ada ATAU Password salah)
     if (!isValidPassword) {
-      // Tambah hitungan percobaan gagal
       const newAttempts = currentAttempts + 1;
       const shouldLock = newAttempts >= MAX_ATTEMPTS;
 
-      await prisma.superadmin.update({
-        where: { id: superadmin.id },
+      await prisma.loginRateLimit.update({
+        where: { ip_address: ip },
         data: {
           failed_attempts: newAttempts,
           locked_until: shouldLock
             ? new Date(now.getTime() + LOCK_DURATION_MINUTES * 60 * 1000)
-            : undefined,
+            : null,
         },
       });
 
       const remaining = MAX_ATTEMPTS - newAttempts;
       if (shouldLock) {
         return {
-          error: `Terlalu banyak percobaan gagal. Akun dikunci selama ${LOCK_DURATION_MINUTES} menit.`,
+          error: `Terlalu banyak percobaan gagal. Akses ditangguhkan selama ${LOCK_DURATION_MINUTES} menit.`,
         };
       }
+      // Pesan samar agar tidak memberitahu apakah email terdaftar atau tidak
       return {
-        error: `Kredensial tidak valid. ${remaining} percobaan tersisa sebelum akun dikunci.`,
+        error: `Kredensial tidak valid. ${remaining} percobaan tersisa.`,
       };
     }
 
-    // ─── LOGIN BERHASIL ──────────────────────────────────────────────────
-    // Reset counter percobaan gagal setelah berhasil login
+    // 5. JIKA BERHASIL LOGIN (superadmin PASTI ada jika isValidPassword true)
+    // Reset counter percobaan gagal untuk IP ini
+    await prisma.loginRateLimit.update({
+      where: { ip_address: ip },
+      data: { failed_attempts: 0, locked_until: null },
+    });
+
+    // Update last_login timestamp
     await prisma.superadmin.update({
-      where: { id: superadmin.id },
+      where: { id: superadmin!.id },
       data: {
-        failed_attempts: 0,
-        locked_until: null,
         last_login: new Date(),
       },
     });
 
-    // Buat JWT token khusus role SUPERADMIN
+    // Buat JWT token
     const token = await encrypt({
-      id: superadmin.id,
+      id: superadmin!.id,
       role: "SUPERADMIN",
-      session_version: superadmin.session_version,
+      session_version: superadmin!.session_version,
     });
 
     // Simpan di HTTP-only cookie
