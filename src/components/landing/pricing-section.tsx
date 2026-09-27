@@ -38,7 +38,7 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
         <p className="text-slate-500 leading-relaxed mb-8">Tanpa biaya tersembunyi. Upgrade atau downgrade kapan saja.</p>
         
         <div className="flex flex-col items-center justify-center space-y-3">
-          <div className="flex flex-row bg-slate-100 p-1 rounded-full border border-slate-200 relative w-full sm:w-auto overflow-x-auto md:overflow-visible">
+          <div className="flex flex-row justify-center bg-slate-100 p-1 rounded-full border border-slate-200 relative w-fit mx-auto max-w-full overflow-x-auto md:overflow-visible">
             <button 
               onClick={() => setBillingCycle("monthly")}
               className={`px-3 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${billingCycle === "monthly" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-900"}`}
