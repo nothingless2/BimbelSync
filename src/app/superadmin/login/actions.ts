@@ -19,6 +19,14 @@ export async function superadminLoginAction(formData: FormData) {
   try {
     const superadmin = await prisma.superadmin.findUnique({
       where: { email },
+      select: {
+        id: true,
+        email: true,
+        password_hash: true,
+        session_version: true,
+        failed_attempts: true,
+        locked_until: true,
+      },
     });
 
     // Jika akun tidak ditemukan, kembalikan pesan samar (tidak mengungkap apakah email terdaftar)
