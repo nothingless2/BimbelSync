@@ -26,6 +26,8 @@ model Superadmin {
   
   verified_platform_invoices PlatformInvoice[] @relation("SuperadminVerifies")
   audit_logs                 AuditLog[]
+  failed_attempts            Int       @default(0)
+  locked_until               DateTime?
 }
 
 model AuditLog {
