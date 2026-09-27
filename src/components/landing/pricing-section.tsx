@@ -38,7 +38,7 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
         <p className="text-slate-500 leading-relaxed mb-8">Tanpa biaya tersembunyi. Upgrade atau downgrade kapan saja.</p>
         
         <div className="flex flex-col items-center justify-center space-y-3">
-          <div className="inline-flex bg-slate-100 p-1 rounded-full border border-slate-200 relative">
+          <div className="flex flex-wrap justify-center bg-slate-100 p-1 rounded-3xl sm:rounded-full border border-slate-200 relative gap-1 sm:gap-0">
             <button 
               onClick={() => setBillingCycle("monthly")}
               className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${billingCycle === "monthly" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-900"}`}
@@ -53,7 +53,7 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
             </button>
             <button 
               onClick={() => setBillingCycle("yearly")}
-              className={`hidden sm:inline-block px-5 py-2 rounded-full text-sm font-semibold transition-all ${billingCycle === "yearly" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-900"}`}
+              className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${billingCycle === "yearly" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-900"}`}
             >
               Tahunan <span className="ml-1 text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">HEMAT 2 BULAN</span>
             </button>
