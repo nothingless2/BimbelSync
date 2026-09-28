@@ -24,11 +24,11 @@ export function LandingHeader() {
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
-          <a href={WA_URL} target="_blank" rel="noreferrer" className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition">
-            Konsultasi
+          <a href="/register" className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition">
+            Masuk
           </a>
-          <a href={WA_URL} target="_blank" rel="noreferrer" className="text-sm font-semibold bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-700 transition shadow-sm">
-            Hubungi Sales
+          <a href="/register" className="text-sm font-semibold bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition shadow-sm hover:shadow-blue-500/25">
+            Daftar Gratis
           </a>
         </div>
 
@@ -39,10 +39,14 @@ export function LandingHeader() {
       
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-4 space-y-1">
-          <a href="/#features" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50">Fitur</a>
-          <a href="/#pricing" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50">Harga</a>
-          <a href="/#about" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50">Tentang</a>
+        <div className="md:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-6 space-y-3">
+          <a href="/#features" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50">Fitur</a>
+          <a href="/#pricing" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50">Harga</a>
+          <a href="/#about" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50">Tentang</a>
+          <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
+            <a href="/register" className="w-full text-center py-2.5 rounded-xl border border-slate-200 font-semibold text-slate-700">Masuk</a>
+            <a href="/register" className="w-full text-center py-2.5 rounded-xl bg-blue-600 font-semibold text-white shadow-sm">Daftar Gratis</a>
+          </div>
         </div>
       )}
     </header>

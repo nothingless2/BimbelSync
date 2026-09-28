@@ -68,18 +68,18 @@ export function FinalCTA() {
               
               <div className="flex flex-col sm:flex-row items-center gap-4">
                 <a 
+                  href="/register" 
+                  className="w-full sm:w-auto inline-flex items-center justify-center bg-blue-600 text-white hover:bg-blue-500 font-semibold text-sm sm:text-base py-3.5 sm:py-4 px-6 sm:px-8 rounded-full transition-all duration-300 shadow-lg shadow-blue-900/50 hover:shadow-blue-900/80 hover:-translate-y-0.5"
+                >
+                  Mulai Coba Gratis
+                </a>
+                <a 
                   href={WA_URL} 
                   target="_blank" 
                   rel="noreferrer" 
-                  className="w-full sm:w-auto inline-flex items-center justify-center bg-blue-600 text-white hover:bg-blue-500 font-semibold text-sm sm:text-base py-3.5 sm:py-4 px-6 sm:px-8 rounded-full transition-all duration-300 shadow-lg shadow-blue-900/50 hover:shadow-blue-900/80 hover:-translate-y-0.5"
-                >
-                  Hubungi via WhatsApp
-                </a>
-                <a 
-                  href="#features" 
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-transparent hover:bg-white/5 text-white border border-slate-700 hover:border-slate-500 font-semibold text-sm sm:text-base py-3.5 sm:py-4 px-6 sm:px-8 rounded-full transition-colors duration-200"
                 >
-                  Pelajari Fitur <ArrowRight className="w-4 h-4" />
+                  Konsultasi WhatsApp <ArrowRight className="w-4 h-4" />
                 </a>
               </div>
             </motion.div>

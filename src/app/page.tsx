@@ -99,7 +99,7 @@ export default async function LandingPage() {
         <FadeInView direction="up" delay={0.8}>
           <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
             <MagneticButton>
-              <a href={WA_URL} target="_blank" rel="noreferrer" className="block bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3.5 px-7 rounded-xl transition-all duration-300 text-sm shadow-md hover:shadow-[0_0_20px_rgba(59,130,246,0.5)]">
+              <a href="/register" className="block bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3.5 px-7 rounded-xl transition-all duration-300 text-sm shadow-md hover:shadow-[0_0_20px_rgba(59,130,246,0.5)]">
                 Coba Gratis Sekarang
               </a>
             </MagneticButton>
@@ -112,17 +112,76 @@ export default async function LandingPage() {
         </FadeInView>
 
         <FadeInView direction="up" delay={0.6}>
-          <div className="relative max-w-5xl mx-auto rounded-2xl overflow-hidden border border-slate-200 shadow-lg aspect-video bg-black">
-           <iframe 
-             width="100%" 
-             height="100%" 
-             src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0&rel=0" 
-             title="BimbelSync Demo" 
-             frameBorder="0" 
-             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-             allowFullScreen
-             className="absolute inset-0"
-           ></iframe>
+          <div className="relative max-w-5xl mx-auto rounded-2xl overflow-hidden border border-slate-200/80 shadow-2xl bg-white text-left">
+            {/* Browser / App Header Bar */}
+            <div className="bg-slate-900 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-rose-500/80"></div>
+                <div className="w-3 h-3 rounded-full bg-amber-500/80"></div>
+                <div className="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+                <div className="ml-4 px-3 py-1 bg-slate-800 rounded-md text-slate-400 text-xs font-mono flex items-center gap-2 border border-slate-700/50">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                  app.bimbelsync.com/bintang-pelajar/dashboard
+                </div>
+              </div>
+              <div className="text-xs font-semibold text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded-full border border-blue-500/20">
+                Live Preview System
+              </div>
+            </div>
+
+            {/* Simulated Product UI Dashboard */}
+            <div className="p-6 md:p-8 bg-slate-900 text-white space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="p-4 rounded-xl bg-slate-800/80 border border-slate-700/60">
+                  <p className="text-xs text-slate-400 font-medium uppercase">Total Siswa Aktif</p>
+                  <p className="text-2xl md:text-3xl font-extrabold text-white mt-1">248 <span className="text-xs text-emerald-400 font-semibold">+12% bulan ini</span></p>
+                </div>
+                <div className="p-4 rounded-xl bg-slate-800/80 border border-slate-700/60">
+                  <p className="text-xs text-slate-400 font-medium uppercase">Presensi QR Hari Ini</p>
+                  <p className="text-2xl md:text-3xl font-extrabold text-emerald-400 mt-1">98.4% <span className="text-xs text-slate-400 font-normal">Tercatat Otomatis</span></p>
+                </div>
+                <div className="p-4 rounded-xl bg-slate-800/80 border border-slate-700/60">
+                  <p className="text-xs text-slate-400 font-medium uppercase">Status Invoice</p>
+                  <p className="text-2xl md:text-3xl font-extrabold text-blue-400 mt-1">94% Lunas <span className="text-xs text-slate-400 font-normal">Auto Reminder</span></p>
+                </div>
+              </div>
+
+              {/* Live Schedule Stream Mockup */}
+              <div className="p-5 rounded-xl bg-slate-800/50 border border-slate-700/50 space-y-3">
+                <div className="flex items-center justify-between text-xs text-slate-400 font-medium border-b border-slate-700/60 pb-2">
+                  <span>Jadwal & Aktivitas Kelas Real-Time</span>
+                  <span className="text-emerald-400 flex items-center gap-1 font-mono">● OTOMATIS TERSINKRON</span>
+                </div>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg bg-slate-800 border border-slate-700 text-sm gap-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">
+                      14:00
+                    </div>
+                    <div>
+                      <p className="font-bold text-white text-xs sm:text-sm">Matematika Intensif UTBK - Ruang A1</p>
+                      <p className="text-xs text-slate-400">Tutor: Dr. Hendra Prasetya, M.Sc • 24 Siswa</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 self-start sm:self-auto">
+                    Presensi QR Aktif
+                  </span>
+                </div>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg bg-slate-800/60 border border-slate-700/60 text-sm gap-2 opacity-80">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-slate-700 text-slate-300 flex items-center justify-center font-bold text-xs">
+                      16:30
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-200 text-xs sm:text-sm">Fisika Dasar XI - Lab 2</p>
+                      <p className="text-xs text-slate-400">Tutor: Amanda Putri, S.Si • 18 Siswa</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 self-start sm:self-auto">
+                    Terjadwal
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </FadeInView>
       </section>
@@ -148,22 +207,60 @@ export default async function LandingPage() {
             }
           `}</style>
           
-          <div className="animate-marquee flex items-center opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500">
+          <div className="animate-marquee flex items-center opacity-80 hover:opacity-100 transition-opacity duration-300">
             {/* Set 1 */}
-            <div className="flex items-center gap-x-16 pr-16 shrink-0">
-              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 bg-slate-800 rounded-md"></div> EduCerdas</div>
-              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 rounded-full border-4 border-slate-800"></div> SmartLearn</div>
-              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 bg-slate-800 rotate-45"></div> PintarBangsa</div>
-              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 border-b-4 border-slate-800 rounded-b-full"></div> JuaraAcademy</div>
-              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 bg-slate-800 rounded-md"></div> FokusIlmu</div>
+            <div className="flex items-center gap-x-12 pr-12 shrink-0">
+              <div className="flex items-center gap-2.5 font-extrabold text-lg text-slate-800 tracking-tight">
+                <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-black">EC</div>
+                EduCerdas
+              </div>
+              <div className="flex items-center gap-2.5 font-extrabold text-lg text-slate-800 tracking-tight">
+                <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-black">SL</div>
+                SmartLearn
+              </div>
+              <div className="flex items-center gap-2.5 font-extrabold text-lg text-slate-800 tracking-tight">
+                <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs font-black">PB</div>
+                PintarBangsa
+              </div>
+              <div className="flex items-center gap-2.5 font-extrabold text-lg text-slate-800 tracking-tight">
+                <div className="w-7 h-7 rounded-lg bg-amber-600 text-white flex items-center justify-center text-xs font-black">JA</div>
+                JuaraAcademy
+              </div>
+              <div className="flex items-center gap-2.5 font-extrabold text-lg text-slate-800 tracking-tight">
+                <div className="w-7 h-7 rounded-lg bg-purple-600 text-white flex items-center justify-center text-xs font-black">FI</div>
+                FokusIlmu
+              </div>
+              <div className="flex items-center gap-2.5 font-extrabold text-lg text-slate-800 tracking-tight">
+                <div className="w-7 h-7 rounded-lg bg-teal-600 text-white flex items-center justify-center text-xs font-black">BP</div>
+                BintangPelajar
+              </div>
             </div>
             {/* Set 2 (Duplicate) */}
-            <div className="flex items-center gap-x-16 pr-16 shrink-0">
-              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 bg-slate-800 rounded-md"></div> EduCerdas</div>
-              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 rounded-full border-4 border-slate-800"></div> SmartLearn</div>
-              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 bg-slate-800 rotate-45"></div> PintarBangsa</div>
-              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 border-b-4 border-slate-800 rounded-b-full"></div> JuaraAcademy</div>
-              <div className="flex items-center gap-2 font-bold text-xl"><div className="w-6 h-6 bg-slate-800 rounded-md"></div> FokusIlmu</div>
+            <div className="flex items-center gap-x-12 pr-12 shrink-0">
+              <div className="flex items-center gap-2.5 font-extrabold text-lg text-slate-800 tracking-tight">
+                <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-black">EC</div>
+                EduCerdas
+              </div>
+              <div className="flex items-center gap-2.5 font-extrabold text-lg text-slate-800 tracking-tight">
+                <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-black">SL</div>
+                SmartLearn
+              </div>
+              <div className="flex items-center gap-2.5 font-extrabold text-lg text-slate-800 tracking-tight">
+                <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs font-black">PB</div>
+                PintarBangsa
+              </div>
+              <div className="flex items-center gap-2.5 font-extrabold text-lg text-slate-800 tracking-tight">
+                <div className="w-7 h-7 rounded-lg bg-amber-600 text-white flex items-center justify-center text-xs font-black">JA</div>
+                JuaraAcademy
+              </div>
+              <div className="flex items-center gap-2.5 font-extrabold text-lg text-slate-800 tracking-tight">
+                <div className="w-7 h-7 rounded-lg bg-purple-600 text-white flex items-center justify-center text-xs font-black">FI</div>
+                FokusIlmu
+              </div>
+              <div className="flex items-center gap-2.5 font-extrabold text-lg text-slate-800 tracking-tight">
+                <div className="w-7 h-7 rounded-lg bg-teal-600 text-white flex items-center justify-center text-xs font-black">BP</div>
+                BintangPelajar
+              </div>
             </div>
           </div>
         </div>
@@ -227,8 +324,36 @@ export default async function LandingPage() {
           <FadeInView direction="up" delay={0.4}>
             <div className="flex flex-col md:flex-row gap-12 items-center group p-6 sm:p-10 rounded-3xl transition-all duration-500 hover:bg-white hover:shadow-[0_10px_40px_rgba(59,130,246,0.1)] border border-transparent hover:border-blue-100">
             <div className="flex-1 w-full flex justify-center">
-               <div className="relative">
-                  <img src="/features/whatsapp-bg.png" alt="Mockup Tagihan Email" className="w-full max-w-sm h-auto object-contain drop-shadow-md opacity-90 hue-rotate-180" />
+               <div className="w-full max-w-sm bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden text-left p-5 space-y-4 transform group-hover:scale-105 transition-transform duration-500">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">
+                        BS
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-900">BimbelSync Billing</p>
+                        <p className="text-[10px] text-slate-400">billing@bimbelsync.com</p>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                      Terkirim Otomatis
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900">Tagihan Bimbel Bulan September 2026</h4>
+                    <p className="text-xs text-slate-500 mt-1">Yth. Orang Tua dari Ahmad Fauzi, berikut rincian tagihan kursus bulan ini...</p>
+                  </div>
+                  <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 bg-blue-600 text-white rounded-lg flex items-center justify-center font-bold text-[10px]">PDF</div>
+                      <span className="font-semibold text-slate-700">Invoice_SEP2026_Ahmad.pdf</span>
+                    </div>
+                    <span className="text-[10px] text-slate-400">128 KB</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs pt-1 border-t border-slate-100">
+                    <span className="text-slate-500">Status Pembayaran:</span>
+                    <span className="font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">Menunggu Pembayaran</span>
+                  </div>
                </div>
             </div>
             <div className="flex-1">
