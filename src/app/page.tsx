@@ -112,25 +112,25 @@ export default async function LandingPage() {
         </FadeInView>
 
         <FadeInView direction="up" delay={0.6}>
-          <div className="relative max-w-5xl mx-auto rounded-3xl overflow-hidden border border-slate-200/90 shadow-xl bg-white text-left p-2 sm:p-3">
-            {/* Light Mode YouTube Window Header */}
-            <div className="bg-slate-100/90 backdrop-blur-sm rounded-2xl px-4 py-2.5 flex items-center justify-between border border-slate-200/80 mb-2">
+          <div className="relative max-w-4xl mx-auto rounded-3xl overflow-hidden border border-slate-800/80 shadow-2xl shadow-blue-900/20 bg-slate-900/90 backdrop-blur-md text-left p-2 sm:p-3 ring-1 ring-white/10">
+            {/* Dark Mode YouTube Window Header */}
+            <div className="bg-slate-800/90 rounded-2xl px-4 py-2.5 flex items-center justify-between border border-slate-700 mb-2">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-rose-400"></div>
-                <div className="w-3 h-3 rounded-full bg-amber-400"></div>
-                <div className="w-3 h-3 rounded-full bg-emerald-400"></div>
-                <div className="ml-3 px-3 py-1 bg-white rounded-lg text-slate-600 text-xs font-mono flex items-center gap-2 border border-slate-200 shadow-2xs">
-                  <svg className="w-3.5 h-3.5 text-red-600 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                  <span className="font-semibold text-slate-800">youtube.com</span>/watch?v=bimbelsync-demo
+                <div className="w-3 h-3 rounded-full bg-slate-600"></div>
+                <div className="w-3 h-3 rounded-full bg-slate-600"></div>
+                <div className="w-3 h-3 rounded-full bg-slate-600"></div>
+                <div className="ml-3 px-3 py-1 bg-slate-900 rounded-lg text-slate-400 text-xs font-mono flex items-center gap-2 border border-slate-700">
+                  <svg className="w-3.5 h-3.5 text-red-500 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                  <span className="font-semibold text-slate-200">youtube.com</span>/watch?v=bimbelsync-demo
                 </div>
               </div>
-              <span className="text-xs font-semibold text-slate-500 bg-white px-3 py-1 rounded-full border border-slate-200 hidden sm:inline-block shadow-2xs">
+              <span className="text-xs font-semibold text-slate-400 bg-slate-800 px-3 py-1 rounded-full border border-slate-700 hidden sm:inline-block">
                 Demo Video BimbelSync
               </span>
             </div>
 
-            {/* Light Frame Container for YouTube Embed */}
-            <div className="rounded-xl overflow-hidden aspect-video bg-black relative border border-slate-200">
+            {/* Dark Frame Container for YouTube Embed */}
+            <div className="rounded-xl overflow-hidden aspect-video bg-black relative border border-slate-800">
               <iframe 
                 width="100%" 
                 height="100%" 
@@ -244,95 +244,8 @@ export default async function LandingPage() {
           <FadeInView direction="up" delay={0.4}>
             <div className="flex flex-col md:flex-row gap-12 items-center group p-6 sm:p-10 rounded-3xl transition-all duration-500 hover:bg-white hover:shadow-[0_10px_40px_rgba(59,130,246,0.1)] border border-transparent hover:border-blue-100">
             <div className="flex-1 w-full flex justify-center">
-               {/* Mobile Phone Mockup for Email Tagihan (Scaled to match other features) */}
-               <div className="relative mx-auto w-[205px] sm:w-[215px] h-[425px] bg-slate-900 rounded-[38px] p-2.5 shadow-xl border-[3px] border-slate-800 ring-1 ring-slate-900/10 group-hover:scale-105 transition-transform duration-500">
-                 {/* Phone Dynamic Island */}
-                 <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-3.5 bg-slate-900 rounded-full z-20 flex items-center justify-center gap-1.5">
-                   <div className="w-2 h-2 rounded-full bg-slate-950"></div>
-                   <div className="w-1.5 h-1.5 rounded-full bg-blue-900/60"></div>
-                 </div>
-
-                 {/* Phone Screen */}
-                 <div className="w-full h-full bg-slate-50 rounded-[28px] overflow-hidden flex flex-col pt-5 relative text-left font-sans">
-                   {/* Status Bar */}
-                   <div className="px-4 pt-0.5 pb-1 flex justify-between items-center text-[9px] font-bold text-slate-800">
-                     <span>09:41</span>
-                     <div className="flex items-center gap-1">
-                       <span className="text-[8px] font-mono">5G</span>
-                       <div className="w-3.5 h-1.5 border border-slate-800 rounded-2xs p-0.5"><div className="w-full h-full bg-slate-800"></div></div>
-                     </div>
-                   </div>
-
-                   {/* Email App Header */}
-                   <div className="px-3 py-1.5 border-b border-slate-200/80 bg-white flex items-center justify-between">
-                     <div className="flex items-center gap-1.5">
-                       <div className="w-5 h-5 rounded-full bg-blue-600 text-white font-black text-[10px] flex items-center justify-center">
-                         BS
-                       </div>
-                       <div>
-                         <p className="text-[10px] font-bold text-slate-900 leading-tight">BimbelSync Mail</p>
-                         <p className="text-[8px] text-slate-400">Kotak Masuk (1)</p>
-                       </div>
-                     </div>
-                     <span className="text-[8px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-full border border-blue-100">
-                       Baru
-                     </span>
-                   </div>
-
-                   {/* Email Body */}
-                   <div className="p-2.5 flex-1 space-y-2 bg-slate-50 overflow-hidden">
-                     <div className="bg-white p-2 rounded-xl border border-slate-200/70 shadow-2xs space-y-1">
-                       <div className="flex justify-between items-start">
-                         <div>
-                           <p className="text-[10px] font-extrabold text-slate-900">Finance BimbelSync</p>
-                           <p className="text-[8px] text-slate-400">ke: orangtua@gmail.com</p>
-                         </div>
-                         <span className="text-[8px] text-slate-400 font-medium">09:40</span>
-                       </div>
-                       <p className="text-[9.5px] font-bold text-slate-800 border-t border-slate-100 pt-1">
-                         Invoice Tagihan Bimbel Sept 2026
-                       </p>
-                     </div>
-
-                     <div className="bg-white p-2.5 rounded-xl border border-blue-100 shadow-2xs space-y-2">
-                       <div className="flex justify-between items-center">
-                         <span className="text-[8px] font-semibold text-slate-400 uppercase tracking-wider">No. Invoice</span>
-                         <span className="text-[10px] font-bold text-blue-600">#INV-2026-098</span>
-                       </div>
-
-                       <div className="space-y-0.5">
-                         <p className="text-slate-500 text-[9.5px]">Siswa: <strong className="text-slate-900">Ahmad Fauzi</strong></p>
-                         <p className="text-slate-500 text-[9.5px]">Program: <strong className="text-slate-900">Intensif UTBK</strong></p>
-                       </div>
-
-                       <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-100 flex justify-between items-center">
-                         <span className="text-[9px] text-slate-600 font-medium">Total Tagihan</span>
-                         <span className="text-[11px] font-extrabold text-slate-900">Rp 350.000</span>
-                       </div>
-
-                       <div className="bg-blue-50 border border-blue-200/60 p-1.5 rounded-lg flex items-center gap-1.5">
-                         <div className="w-5 h-5 rounded-md bg-blue-600 text-white font-bold text-[8px] flex items-center justify-center shrink-0">
-                           PDF
-                         </div>
-                         <div className="min-w-0 flex-1">
-                           <p className="text-[9px] font-bold text-slate-800 truncate">Invoice_Ahmad_Sep2026.pdf</p>
-                           <p className="text-[7.5px] text-slate-400">142 KB • Lampiran Resmi</p>
-                         </div>
-                       </div>
-
-                       <div className="pt-0.5 flex items-center justify-center">
-                         <span className="text-[8px] font-extrabold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-200 w-full text-center">
-                           ✓ Terkirim Otomatis via Email
-                         </span>
-                       </div>
-                     </div>
-                   </div>
-
-                   {/* Home Bar */}
-                   <div className="pb-1.5 pt-0.5 flex justify-center bg-slate-50">
-                     <div className="w-20 h-1 bg-slate-300 rounded-full"></div>
-                   </div>
-                 </div>
+               <div className="relative">
+                  <img src="/features/email-bg.png" alt="Mockup Email Tagihan" className="w-full max-w-sm h-auto object-contain drop-shadow-md opacity-90 group-hover:scale-105 transition-transform duration-500" />
                </div>
             </div>
             <div className="flex-1">
