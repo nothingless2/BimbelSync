@@ -1,5 +1,6 @@
 import React from 'react';
 import { LandingHeader } from '@/components/landing-header';
+import { CustomCursor } from '@/components/ui/custom-cursor';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+      <CustomCursor />
       <LandingHeader />
       
       {/* Modern Header with subtle pattern */}
