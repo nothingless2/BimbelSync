@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export function FinalCTA() {
   const WA_URL = "https://wa.me/6281234567890?text=Halo%20tim%20BimbelSync,%20saya%20ingin%20tanya%20tentang%20layanan%20Anda.";
@@ -28,21 +28,6 @@ export function FinalCTA() {
                 alt="Customer Success Agent" 
                 className="relative z-10 w-full h-[120%] lg:h-[110%] object-cover object-bottom"
              />
-             
-             {/* Floating Badge (Kept from previous design, moved to left side of image) */}
-             <motion.div 
-               initial={{ opacity: 0, x: -20 }}
-               whileInView={{ opacity: 1, x: 0 }}
-               viewport={{ once: true }}
-               transition={{ duration: 0.6, delay: 0.4 }}
-               className="absolute top-1/3 left-12 bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl shadow-xl flex items-center gap-4 z-20"
-             >
-               <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.8)]"></div>
-               <div className="text-white">
-                 <div className="text-sm font-bold">Tim CS Kami Online</div>
-                 <div className="text-xs text-slate-300">Siap membantu Anda</div>
-               </div>
-             </motion.div>
           </div>
 
           {/* Right side: Text Content (Full width on mobile/tablet, Half width on desktop) */}
@@ -53,11 +38,6 @@ export function FinalCTA() {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-slate-300 text-xs font-semibold mb-8 tracking-wide uppercase">
-                <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-                KONSULTASI GRATIS
-              </div>
-              
               <h2 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 tracking-tight leading-[1.15]">
                 Siap Bawa Bimbel Anda <br className="hidden md:block"/> <span className="text-blue-500">Naik Kelas?</span>
               </h2>
