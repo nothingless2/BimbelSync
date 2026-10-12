@@ -21,6 +21,7 @@ export function LandingHeader() {
           <a href="/#features" className="hover:text-blue-600 transition">Fitur</a>
           <a href="/#pricing" className="hover:text-blue-600 transition">Harga</a>
           <a href="/#about" className="hover:text-blue-600 transition">Tentang</a>
+          <a href="/#contact" className="hover:text-blue-600 transition">Kontak</a>
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
@@ -43,6 +44,7 @@ export function LandingHeader() {
           <a href="/#features" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50">Fitur</a>
           <a href="/#pricing" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50">Harga</a>
           <a href="/#about" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50">Tentang</a>
+          <a href="/#contact" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50">Kontak</a>
           <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
             <a href="/register" className="w-full text-center py-2.5 rounded-xl border border-slate-200 font-semibold text-slate-700">Masuk</a>
             <a href="/register" className="w-full text-center py-2.5 rounded-xl bg-blue-600 font-semibold text-white shadow-sm">Daftar Gratis</a>

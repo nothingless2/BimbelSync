@@ -323,7 +323,7 @@ export default async function LandingPage() {
 
       <FinalCTA />
 
-      <footer className="bg-[#1E293B] text-slate-300 py-16 border-t border-slate-800">
+      <footer id="contact" className="bg-[#1E293B] text-slate-300 py-16 border-t border-slate-800 scroll-mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
@@ -355,7 +355,7 @@ export default async function LandingPage() {
               <h4 className="text-white font-bold text-sm tracking-widest mb-6 uppercase">Company</h4>
               <ul className="space-y-4 text-sm text-slate-400">
                 <li><a href="#about" className="hover:text-white transition">About</a></li>
-                <li><a href="mailto:admin@bimbelsync.web.id" className="hover:text-white transition">admin@bimbelsync.web.id</a></li>
+                <li><a href="mailto:admin@bimbelsync.web.id" className="hover:text-white transition">Contact</a></li>
               </ul>
             </div>
 
