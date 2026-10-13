@@ -13,7 +13,6 @@ export async function createPlanAction(formData: FormData) {
   const maxStudents = formData.get("max_students") ? parseInt(formData.get("max_students") as string, 10) : null;
   const maxStaff = formData.get("max_staff") ? parseInt(formData.get("max_staff") as string, 10) : null;
   const maxRooms = formData.get("max_rooms") ? parseInt(formData.get("max_rooms") as string, 10) : null;
-  const allowsPaymentGateway = formData.get("allows_payment_gateway") === "on";
   const allowsInstallment = formData.get("allows_installment") === "on";
   const allowsAutomatedEmail = formData.get("allows_automated_email") === "on";
   const allowsQrAttendance = formData.get("allows_qr_attendance") === "on";
@@ -36,7 +35,6 @@ export async function createPlanAction(formData: FormData) {
         max_students: maxStudents, 
         max_staff: maxStaff, 
         max_rooms: maxRooms, 
-        allows_payment_gateway: allowsPaymentGateway, 
         allows_installment: allowsInstallment,
         allows_automated_email: allowsAutomatedEmail,
         allows_qr_attendance: allowsQrAttendance,
@@ -63,7 +61,6 @@ export async function updatePlanAction(formData: FormData) {
   const maxStudents = formData.get("max_students") ? parseInt(formData.get("max_students") as string, 10) : null;
   const maxStaff = formData.get("max_staff") ? parseInt(formData.get("max_staff") as string, 10) : null;
   const maxRooms = formData.get("max_rooms") ? parseInt(formData.get("max_rooms") as string, 10) : null;
-  const allowsPaymentGateway = formData.get("allows_payment_gateway") === "on";
   const allowsInstallment = formData.get("allows_installment") === "on";
   const allowsAutomatedEmail = formData.get("allows_automated_email") === "on";
   const allowsQrAttendance = formData.get("allows_qr_attendance") === "on";
@@ -87,7 +84,6 @@ export async function updatePlanAction(formData: FormData) {
         max_students: maxStudents, 
         max_staff: maxStaff, 
         max_rooms: maxRooms, 
-        allows_payment_gateway: allowsPaymentGateway, 
         allows_installment: allowsInstallment,
         allows_automated_email: allowsAutomatedEmail,
         allows_qr_attendance: allowsQrAttendance,

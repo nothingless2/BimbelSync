@@ -69,14 +69,26 @@ export function AddPlanModal() {
               </div>
 
               <div className="pt-2 space-y-3 border-t border-slate-100 dark:border-slate-800">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider pt-2">Fitur Tambahan</p>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider pt-2">Fitur Paket</p>
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" name="allows_payment_gateway" className="w-4 h-4 rounded text-blue-600" />
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Payment Gateway (Midtrans/Xendit)</span>
+                  <input type="checkbox" name="allows_qr_attendance" className="w-4 h-4 rounded text-blue-600" />
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Presensi QR Dinamis</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" name="allows_automated_email" className="w-4 h-4 rounded text-blue-600" />
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Email Tagihan & Pengingat Otomatis</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" name="allows_erapor" className="w-4 h-4 rounded text-blue-600" />
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">E-Rapor & Evaluasi Siswa</span>
                 </label>
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input type="checkbox" name="allows_installment" className="w-4 h-4 rounded text-blue-600" />
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Opsi Cicilan</span>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Sistem Tagihan Cicilan (Termin)</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" name="allows_audit_trail" className="w-4 h-4 rounded text-blue-600" />
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Audit Trail Keamanan Data</span>
                 </label>
               </div>
 

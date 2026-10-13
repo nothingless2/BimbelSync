@@ -9,46 +9,117 @@ async function main() {
   // 1. Buat 3 Paket (Plans) Utama
   const starterPlan = await prisma.plan.upsert({
     where: { id: '00000000-0000-0000-0000-000000000001' },
-    update: {},
+    update: {
+      price: 99000,
+      max_students: 50,
+      max_staff: 3,
+      max_rooms: 2,
+      allows_installment: false,
+      allows_automated_email: false,
+      allows_qr_attendance: false,
+      allows_erapor: false,
+      allows_audit_trail: false,
+      additional_features: [
+        "Jadwal Kelas & Kalender",
+        "Portal Siswa & Wali Murid",
+        "Cetak Rekap Laporan PDF"
+      ]
+    },
     create: {
       id: '00000000-0000-0000-0000-000000000001',
       name: 'Starter',
-      price: 150000,
+      price: 99000,
       max_students: 50,
       max_staff: 3,
-      max_rooms: 3,
-      allows_payment_gateway: false,
+      max_rooms: 2,
       allows_installment: false,
+      allows_automated_email: false,
+      allows_qr_attendance: false,
+      allows_erapor: false,
+      allows_audit_trail: false,
+      additional_features: [
+        "Jadwal Kelas & Kalender",
+        "Portal Siswa & Wali Murid",
+        "Cetak Rekap Laporan PDF"
+      ]
     },
   });
 
   const growthPlan = await prisma.plan.upsert({
     where: { id: '00000000-0000-0000-0000-000000000002' },
-    update: {},
+    update: {
+      price: 199000,
+      max_students: 200,
+      max_staff: 10,
+      max_rooms: 6,
+      allows_installment: false,
+      allows_automated_email: true,
+      allows_qr_attendance: true,
+      allows_erapor: true,
+      allows_audit_trail: false,
+      additional_features: [
+        "Jadwal Kelas & Kalender",
+        "Portal Siswa & Wali Murid",
+        "Cetak Rekap Laporan PDF"
+      ]
+    },
     create: {
       id: '00000000-0000-0000-0000-000000000002',
       name: 'Growth',
-      price: 300000,
+      price: 199000,
       max_students: 200,
       max_staff: 10,
-      max_rooms: 10,
-      allows_payment_gateway: true,
+      max_rooms: 6,
       allows_installment: false,
+      allows_automated_email: true,
+      allows_qr_attendance: true,
+      allows_erapor: true,
+      allows_audit_trail: false,
+      additional_features: [
+        "Jadwal Kelas & Kalender",
+        "Portal Siswa & Wali Murid",
+        "Cetak Rekap Laporan PDF"
+      ]
     },
   });
 
   const proPlan = await prisma.plan.upsert({
     where: { id: '00000000-0000-0000-0000-000000000003' },
-    update: {},
-    create: {
-      id: '00000000-0000-0000-0000-000000000003',
-      name: 'Pro',
-      price: 500000,
+    update: {
+      price: 399000,
       max_students: null, // Unlimited
       max_staff: null,    // Unlimited
       max_rooms: null,    // Unlimited
-      allows_payment_gateway: true,
       allows_installment: true,
+      allows_automated_email: true,
+      allows_qr_attendance: true,
+      allows_erapor: true,
+      allows_audit_trail: true,
+      additional_features: [
+        "Jadwal Kelas & Kalender",
+        "Portal Siswa & Wali Murid",
+        "Cetak Rekap Laporan PDF",
+        "Prioritas Dukungan Teknis"
+      ]
+    },
+    create: {
+      id: '00000000-0000-0000-0000-000000000003',
+      name: 'Pro',
+      price: 399000,
+      max_students: null, // Unlimited
+      max_staff: null,    // Unlimited
+      max_rooms: null,    // Unlimited
+      allows_installment: true,
+      allows_automated_email: true,
+      allows_qr_attendance: true,
+      allows_erapor: true,
+      allows_audit_trail: true,
+      additional_features: [
+        "Jadwal Kelas & Kalender",
+        "Portal Siswa & Wali Murid",
+        "Cetak Rekap Laporan PDF",
+        "Prioritas Dukungan Teknis"
+      ]
     },
   });
 

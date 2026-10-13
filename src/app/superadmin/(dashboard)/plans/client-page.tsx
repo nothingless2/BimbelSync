@@ -69,7 +69,7 @@ export default function PlansClientPage({ plans }: { plans: any[] }) {
               </div>
               
               <div className="p-6 flex-1 bg-slate-50/50 dark:bg-slate-800/20">
-                <ul className="space-y-4">
+                <ul className="space-y-3">
                   <li className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
                     <Check className="w-5 h-5 text-emerald-500 shrink-0" />
                     <span>Maks <strong className="font-semibold">{plan.max_students === null ? 'Unlimited' : plan.max_students}</strong> Siswa</span>
@@ -82,13 +82,25 @@ export default function PlansClientPage({ plans }: { plans: any[] }) {
                     <Check className="w-5 h-5 text-emerald-500 shrink-0" />
                     <span>Maks <strong className="font-semibold">{plan.max_rooms === null ? 'Unlimited' : plan.max_rooms}</strong> Ruangan</span>
                   </li>
-                  <li className={`flex items-center gap-3 text-sm ${plan.allows_payment_gateway ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500 opacity-60'}`}>
-                    {plan.allows_payment_gateway ? <Check className="w-5 h-5 text-emerald-500 shrink-0" /> : <X className="w-5 h-5 shrink-0" />}
-                    <span>Payment Gateway Integrasi</span>
+                  <li className={`flex items-center gap-3 text-sm ${plan.allows_qr_attendance ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500 opacity-60'}`}>
+                    {plan.allows_qr_attendance ? <Check className="w-5 h-5 text-emerald-500 shrink-0" /> : <X className="w-5 h-5 shrink-0" />}
+                    <span>Absensi QR Dinamis</span>
+                  </li>
+                  <li className={`flex items-center gap-3 text-sm ${plan.allows_automated_email ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500 opacity-60'}`}>
+                    {plan.allows_automated_email ? <Check className="w-5 h-5 text-emerald-500 shrink-0" /> : <X className="w-5 h-5 shrink-0" />}
+                    <span>Email & Pengingat Otomatis</span>
+                  </li>
+                  <li className={`flex items-center gap-3 text-sm ${plan.allows_erapor ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500 opacity-60'}`}>
+                    {plan.allows_erapor ? <Check className="w-5 h-5 text-emerald-500 shrink-0" /> : <X className="w-5 h-5 shrink-0" />}
+                    <span>E-Rapor & Evaluasi Siswa</span>
                   </li>
                   <li className={`flex items-center gap-3 text-sm ${plan.allows_installment ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500 opacity-60'}`}>
                     {plan.allows_installment ? <Check className="w-5 h-5 text-emerald-500 shrink-0" /> : <X className="w-5 h-5 shrink-0" />}
-                    <span>Fitur Tagihan Cicilan (Termin)</span>
+                    <span>Tagihan Cicilan (Termin)</span>
+                  </li>
+                  <li className={`flex items-center gap-3 text-sm ${plan.allows_audit_trail ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500 opacity-60'}`}>
+                    {plan.allows_audit_trail ? <Check className="w-5 h-5 text-emerald-500 shrink-0" /> : <X className="w-5 h-5 shrink-0" />}
+                    <span>Audit Trail Keamanan</span>
                   </li>
                 </ul>
               </div>

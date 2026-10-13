@@ -10,9 +10,11 @@ const nextConfig: NextConfig = {
   turbopack: {},
   experimental: {
     serverActions: {
-      // Dibatasi ke 500KB — cukup untuk form data biasa.
-      // Jika kelak ada upload file, naikkan sesuai kebutuhan.
       bodySizeLimit: '500kb',
+      allowedOrigins: [
+        'www.bimbelsync.web.id',
+        'bimbelsync.web.id',
+      ],
     },
   },
   async headers() {

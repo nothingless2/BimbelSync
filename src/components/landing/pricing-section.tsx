@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CheckCircle2, X, Check } from "lucide-react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 interface Plan {
   id: string;
@@ -11,7 +12,6 @@ interface Plan {
   max_students: number | null;
   max_staff: number | null;
   max_rooms: number | null;
-  allows_payment_gateway: boolean;
   allows_installment: boolean;
   allows_automated_email: boolean;
   allows_qr_attendance: boolean;
@@ -22,20 +22,86 @@ interface Plan {
   additional_features: string[];
 }
 
+const DEFAULT_PLANS: Plan[] = [
+  {
+    id: "plan-starter",
+    name: "Starter",
+    price: 99000,
+    max_students: 50,
+    max_staff: 3,
+    max_rooms: 2,
+    allows_installment: false,
+    allows_automated_email: false,
+    allows_qr_attendance: false,
+    allows_erapor: false,
+    allows_audit_trail: false,
+    discount_6_months: 10,
+    discount_12_months: 17,
+    additional_features: [
+      "Jadwal Kelas & Kalender",
+      "Portal Siswa & Orang Tua",
+      "Cetak Rekap Laporan PDF",
+    ],
+  },
+  {
+    id: "plan-growth",
+    name: "Growth",
+    price: 199000,
+    max_students: 200,
+    max_staff: 10,
+    max_rooms: 6,
+    allows_installment: false,
+    allows_automated_email: true,
+    allows_qr_attendance: true,
+    allows_erapor: true,
+    allows_audit_trail: false,
+    discount_6_months: 10,
+    discount_12_months: 17,
+    additional_features: [
+      "Jadwal Kelas & Kalender",
+      "Portal Siswa & Orang Tua",
+      "Cetak Rekap Laporan PDF",
+    ],
+  },
+  {
+    id: "plan-pro",
+    name: "Pro",
+    price: 399000,
+    max_students: null,
+    max_staff: null,
+    max_rooms: null,
+    allows_installment: true,
+    allows_automated_email: true,
+    allows_qr_attendance: true,
+    allows_erapor: true,
+    allows_audit_trail: true,
+    discount_6_months: 10,
+    discount_12_months: 17,
+    additional_features: [
+      "Jadwal Kelas & Kalender",
+      "Portal Siswa & Orang Tua",
+      "Cetak Rekap Laporan PDF",
+      "Prioritas Dukungan Teknis",
+    ],
+  },
+];
+
 export function PricingSection({ plans }: { plans: Plan[] }) {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "semester" | "yearly">("monthly");
   
+  const displayPlans = plans && plans.length > 0 ? plans : DEFAULT_PLANS;
+  
   // Replace with actual WA URL
-  const WA_URL = "https://wa.me/6281234567890?text=Halo%20tim%20BimbelSync,%20saya%20ingin%20mencoba%20gratis%20aplikasi%20ini.";
+  const WA_URL = "https://wa.me/6281234567890?text=Halo%20tim%20BimbelSync,%20saya%20ingin%20berlangganan%20paket%20BimbelSync.";
 
   return (
     <section id="pricing" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
       <div className="text-center max-w-2xl mx-auto mb-16">
         <div className="inline-block bg-white border border-slate-200 text-slate-600 rounded-full px-4 py-1.5 text-xs font-semibold mb-4 tracking-wide shadow-sm">
-          Harga
+          Harga Terjangkau
         </div>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Pilih paket sesuai skala bimbel Anda</h2>
-        <p className="text-slate-500 leading-relaxed mb-8">Tanpa biaya tersembunyi. Upgrade atau downgrade kapan saja.</p>
+        <p className="text-slate-500 leading-relaxed mb-8">Investasi cerdas mulai dari seharga 1 SPP siswa. Upgrade atau downgrade kapan saja.</p>
         
         <div className="flex flex-col items-center justify-center space-y-3">
           <div className="flex flex-row justify-center bg-slate-100 p-1 rounded-full border border-slate-200 relative w-fit mx-auto max-w-full overflow-x-auto md:overflow-visible">
@@ -63,11 +129,7 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-sm lg:max-w-5xl mx-auto">
-        {plans.length === 0 ? (
-          <div className="col-span-3 text-center text-slate-500 py-10">
-            Belum ada paket tersedia saat ini. Silakan hubungi tim sales.
-          </div>
-        ) : plans.map((plan, index) => {
+        {displayPlans.map((plan, index) => {
           const isStarter = plan.name.toLowerCase().includes('starter');
           const isGrowth = plan.name.toLowerCase().includes('growth');
           const isPro = plan.name.toLowerCase().includes('pro') || plan.name.toLowerCase().includes('premium');
@@ -178,14 +240,28 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
                 ))}
               </ul>
               <div className="space-y-3">
-                <a href={WA_URL} target="_blank" rel="noreferrer" className={`w-full block text-center py-3.5 px-4 rounded-xl font-bold transition ${isPopular ? "bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg" : "border border-slate-200 text-slate-700 hover:bg-slate-50"}`}>
-                  {isPro ? "Hubungi Sales" : "Coba Gratis 14 Hari"}
-                </a>
+                {isPro ? (
+                  <a 
+                    href={WA_URL} 
+                    target="_blank" 
+                    rel="noreferrer" 
+                    className="w-full block text-center py-3.5 px-4 rounded-xl font-bold transition border border-slate-200 text-slate-700 hover:bg-slate-50"
+                  >
+                    Konsultasi Tim Sales
+                  </a>
+                ) : (
+                  <Link 
+                    href="/register" 
+                    className={`w-full block text-center py-3.5 px-4 rounded-xl font-bold transition ${isPopular ? "bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg" : "border border-slate-200 text-slate-700 hover:bg-slate-50"}`}
+                  >
+                    Coba Gratis 14 Hari
+                  </Link>
+                )}
                 {!isPro && !isPopular && (
                   <p className="text-center text-xs text-slate-400 font-medium">Tanpa kartu kredit.</p>
                 )}
                 {isPopular && (
-                  <p className="text-center text-xs text-blue-600/70 font-medium">Akses semua fitur Growth.</p>
+                  <p className="text-center text-xs text-blue-600/70 font-medium">Pilihan favorit bimbel berkembang.</p>
                 )}
               </div>
               </motion.div>
@@ -195,14 +271,14 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
       </div>
 
       {/* Dynamic Comparison Table */}
-      {plans.length > 0 && (
+      {displayPlans.length > 0 && (
         <div className="max-w-5xl mx-auto mt-20 overflow-x-auto">
           <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 min-w-full md:min-w-[700px] p-2">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-100">
                   <th className="py-4 px-2 md:py-6 md:px-8 text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest w-1/4">Fitur</th>
-                  {plans.map((plan, i) => (
+                  {displayPlans.map((plan, i) => (
                     <th key={plan.id} className={`py-4 px-2 md:py-6 md:px-8 text-xs md:text-sm font-bold text-center w-1/4 ${i === 1 || plan.name.toLowerCase().includes('growth') ? "text-blue-600" : "text-slate-700"}`}>
                       {plan.name}
                     </th>
@@ -212,57 +288,81 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
               <tbody className="text-slate-600 text-xs md:text-sm font-medium">
                 <tr className="border-b border-slate-100">
                   <td className="py-3 px-2 md:py-5 md:px-8">Kapasitas Siswa</td>
-                  {plans.map((p) => (
+                  {displayPlans.map((p) => (
                     <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">{p.max_students === null ? '∞' : p.max_students}</td>
                   ))}
                 </tr>
                 <tr className="border-b border-slate-100">
                   <td className="py-3 px-2 md:py-5 md:px-8">Kapasitas Staff/Tutor</td>
-                  {plans.map((p) => (
+                  {displayPlans.map((p) => (
                     <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">{p.max_staff === null ? '∞' : p.max_staff}</td>
                   ))}
                 </tr>
                 <tr className="border-b border-slate-100">
                   <td className="py-3 px-2 md:py-5 md:px-8">Kapasitas Ruangan</td>
-                  {plans.map((p) => (
+                  {displayPlans.map((p) => (
                     <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">{p.max_rooms === null ? '∞' : p.max_rooms}</td>
                   ))}
                 </tr>
                 <tr className="border-b border-slate-100">
-                  <td className="py-3 px-2 md:py-5 md:px-8">Email & Pengingat Otomatis</td>
-                  {plans.map((p) => (
+                  <td className="py-3 px-2 md:py-5 md:px-8">Jadwal Kelas & Kalender</td>
+                  {displayPlans.map((p) => (
                     <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
-                      {p.allows_automated_email ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-slate-300 mx-auto" />}
+                      <Check className="w-5 h-5 text-green-500 mx-auto" />
                     </td>
                   ))}
                 </tr>
                 <tr className="border-b border-slate-100">
-                  <td className="py-3 px-2 md:py-5 md:px-8">Absensi QR Dinamis</td>
-                  {plans.map((p) => (
+                  <td className="py-3 px-2 md:py-5 md:px-8">Portal Siswa & Wali Murid</td>
+                  {displayPlans.map((p) => (
+                    <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
+                      <Check className="w-5 h-5 text-green-500 mx-auto" />
+                    </td>
+                  ))}
+                </tr>
+                <tr className="border-b border-slate-100">
+                  <td className="py-3 px-2 md:py-5 md:px-8">Cetak Laporan PDF</td>
+                  {displayPlans.map((p) => (
+                    <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
+                      <Check className="w-5 h-5 text-green-500 mx-auto" />
+                    </td>
+                  ))}
+                </tr>
+                <tr className="border-b border-slate-100">
+                  <td className="py-3 px-2 md:py-5 md:px-8">Presensi QR Dinamis Layar</td>
+                  {displayPlans.map((p) => (
                     <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
                       {p.allows_qr_attendance ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-slate-300 mx-auto" />}
                     </td>
                   ))}
                 </tr>
                 <tr className="border-b border-slate-100">
-                  <td className="py-3 px-2 md:py-5 md:px-8">E-Rapor & Evaluasi Siswa</td>
-                  {plans.map((p) => (
+                  <td className="py-3 px-2 md:py-5 md:px-8">Email Tagihan Otomatis</td>
+                  {displayPlans.map((p) => (
+                    <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
+                      {p.allows_automated_email ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-slate-300 mx-auto" />}
+                    </td>
+                  ))}
+                </tr>
+                <tr className="border-b border-slate-100">
+                  <td className="py-3 px-2 md:py-5 md:px-8">E-Rapor & Evaluasi Belajar</td>
+                  {displayPlans.map((p) => (
                     <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
                       {p.allows_erapor ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-slate-300 mx-auto" />}
                     </td>
                   ))}
                 </tr>
                 <tr className="border-b border-slate-100">
-                  <td className="py-3 px-2 md:py-5 md:px-8">Manajemen Cicilan Bertahap</td>
-                  {plans.map((p) => (
+                  <td className="py-3 px-2 md:py-5 md:px-8">Manajemen Cicilan Bertahap (Termin)</td>
+                  {displayPlans.map((p) => (
                     <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
                       {p.allows_installment ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-slate-300 mx-auto" />}
                     </td>
                   ))}
                 </tr>
                 <tr>
-                  <td className="py-3 px-2 md:py-5 md:px-8">Audit Trail Keamanan</td>
-                  {plans.map((p) => (
+                  <td className="py-3 px-2 md:py-5 md:px-8">Audit Trail Keamanan Data</td>
+                  {displayPlans.map((p) => (
                     <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
                       {p.allows_audit_trail ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-slate-300 mx-auto" />}
                     </td>

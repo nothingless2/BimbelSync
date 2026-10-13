@@ -51,7 +51,6 @@ model Plan {
   max_students           Int?
   max_staff              Int?
   max_rooms              Int?
-  allows_payment_gateway Boolean   @default(false)
   allows_installment     Boolean   @default(false)
   allows_automated_email Boolean   @default(false)
   allows_qr_attendance   Boolean   @default(false)

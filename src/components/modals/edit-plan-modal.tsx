@@ -135,13 +135,6 @@ export function EditPlanModal({ isOpen, onClose, plan }: EditPlanModalProps) {
               <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Fitur Tambahan</h3>
               
               <div className="space-y-3">
-                <label className="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
-                  <input type="checkbox" name="allows_payment_gateway" defaultChecked={plan.allows_payment_gateway} className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">Payment Gateway Terintegrasi</p>
-                    <p className="text-xs text-slate-500">Mendukung VA, E-Wallet, Kartu Kredit (Mutasi Otomatis)</p>
-                  </div>
-                </label>
 
                 <label className="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
                   <input type="checkbox" name="allows_installment" defaultChecked={plan.allows_installment} className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />

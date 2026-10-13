@@ -65,7 +65,6 @@ erDiagram
         int max_students "nullable = unlimited"
         int max_staff "nullable = unlimited"
         int max_rooms "nullable = unlimited"
-        boolean allows_payment_gateway "feature gate: BYOK Midtrans/Xendit"
         boolean allows_installment "feature gate: cicilan"
         boolean is_active "whether currently offered to new signups"
         datetime deleted_at
