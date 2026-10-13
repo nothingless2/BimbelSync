@@ -35,17 +35,25 @@ export async function loginAction(prevState: any, formData: FormData) {
     });
 
     for (const staff of staffList) {
-      if (!staff.academy || staff.academy.deleted_at) {
+      const isPasswordValid = await bcrypt.compare(password, staff.password_hash);
+      if (!isPasswordValid) {
         continue;
       }
 
-      const isPasswordValid = await bcrypt.compare(password, staff.password_hash);
-      if (isPasswordValid) {
+      // 1. Cek apakah email sudah diverifikasi via OTP
+      if (!staff.email_verified) {
+        return {
+          error: "Email Anda belum diverifikasi. Silakan masukkan kode OTP yang telah dikirim ke email Anda terlebih dahulu.",
+          unverifiedEmail: staff.email,
+        };
+      }
+
+      // 2. Jika akun Admin belum memiliki Bimbel:
+      // Berikan sesi login dan arahkan untuk mengisi Nama Bimbel & Path URL sebelum ke Dashboard
+      if (!staff.academy_id) {
         const sessionToken = await encrypt({
           id: staff.id,
           role: staff.role,
-          academy_id: staff.academy.id,
-          tenant_slug: staff.academy.path_url,
         });
 
         const cookieStore = await cookies();
@@ -57,9 +65,33 @@ export async function loginAction(prevState: any, formData: FormData) {
           maxAge: 60 * 60 * 8, // 8 jam
         });
 
-        redirectPath = `/${staff.academy.path_url}/dashboard`;
+        redirectPath = "/onboarding";
         break;
       }
+
+      if (!staff.academy || staff.academy.deleted_at) {
+        continue;
+      }
+
+      // 3. Jika sudah memiliki Bimbel:
+      const sessionToken = await encrypt({
+        id: staff.id,
+        role: staff.role,
+        academy_id: staff.academy.id,
+        tenant_slug: staff.academy.path_url,
+      });
+
+      const cookieStore = await cookies();
+      cookieStore.set("bimbelsync_session", sessionToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 8, // 8 jam
+      });
+
+      redirectPath = `/${staff.academy.path_url}/dashboard`;
+      break;
     }
 
     // 3. Jika belum cocok sebagai Staff, cek sebagai Student (Username atau Email)

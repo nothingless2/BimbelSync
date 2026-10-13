@@ -121,16 +121,19 @@ model Room {
 
 model Staff {
   id            String    @id @default(uuid()) @db.Uuid
-  academy_id    String    @db.Uuid
+  academy_id    String?   @db.Uuid
   email         String
   phone         String?
   name          String?
   avatar_url    String?
   password_hash String
   role          StaffRole
+  email_verified Boolean   @default(true)
+  otp_code       String?
+  otp_expires_at DateTime?
   deleted_at    DateTime?
 
-  academy               Academy       @relation(fields: [academy_id], references: [id])
+  academy               Academy?      @relation(fields: [academy_id], references: [id])
   schedules             Schedule[]
   verified_invoices     Invoice[]     @relation("StaffVerifiesInvoice")
   verified_installments Installment[] @relation("StaffVerifiesInstallment")

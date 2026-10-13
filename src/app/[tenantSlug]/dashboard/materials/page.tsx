@@ -22,7 +22,7 @@ export default async function MaterialsPage({ params }: { params: Promise<{ tena
     where: { id: session.id }
   });
 
-  if (!dbUser) redirect(`/${tenantSlug}/login`);
+  if (!dbUser || !dbUser.academy_id) redirect(`/${tenantSlug}/login`);
 
   const materials = await prisma.learningMaterial.findMany({
     where: { academy_id: dbUser.academy_id, deleted_at: null },

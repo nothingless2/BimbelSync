@@ -2,146 +2,104 @@
 
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
-import { encrypt, validatePassword } from "@/lib/auth";
-import { cookies } from "next/headers";
+import { validatePassword } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { sendOtpEmail } from "@/lib/email";
 
 export async function registerAcademyAction(prevState: any, formData: FormData) {
-  // Anti-bot Honeypot Check
+  // 1. Anti-bot Honeypot Check
   const honeypot = formData.get("_hp_website") as string;
   if (honeypot) {
     return { error: "Akses tidak sah terdeteksi." };
   }
 
-  const academyName = formData.get("academyName") as string;
-  const pathUrl = formData.get("pathUrl") as string;
-  const adminName = formData.get("adminName") as string;
-  const adminEmail = formData.get("adminEmail") as string;
+  const adminName = (formData.get("adminName") as string)?.trim();
   const adminPhone = (formData.get("adminPhone") as string)?.trim();
+  const adminEmail = (formData.get("adminEmail") as string)?.trim().toLowerCase();
   const adminPassword = formData.get("adminPassword") as string;
-  const planChoice = (formData.get("planChoice") as string)?.trim() || "Pro";
 
-  if (!academyName || !pathUrl || !adminName || !adminEmail || !adminPassword || !adminPhone) {
-    return { error: "Semua kolom wajib diisi, termasuk nomor WhatsApp." };
+  if (!adminName || !adminPhone || !adminEmail || !adminPassword) {
+    return { error: "Semua kolom wajib diisi." };
   }
 
-  // 1. Validasi Path URL (hanya huruf kecil dan angka, tanpa spasi)
-  const pathRegex = /^[a-z0-9-]+$/;
-  if (!pathRegex.test(pathUrl)) {
-    return { error: "URL Bimbel hanya boleh mengandung huruf kecil, angka, dan strip (-)." };
-  }
-  
-  if (pathUrl === "superadmin" || pathUrl === "api" || pathUrl === "register") {
-    return { error: "URL Bimbel tersebut tidak diizinkan (kata terlarang)." };
+  // 2. Validasi Nomor WhatsApp minimal 10 digit angka
+  const phoneDigits = adminPhone.replace(/\D/g, "");
+  if (phoneDigits.length < 10) {
+    return { error: "Nomor WhatsApp tidak valid (minimal 10 digit angka)." };
   }
 
-  // 2. Validasi Keamanan Password
+  // 3. Validasi Format Email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(adminEmail)) {
+    return { error: "Format email tidak valid." };
+  }
+
+  // 4. Validasi Keamanan Password
   const passwordCheck = validatePassword(adminPassword);
   if (!passwordCheck.isValid) {
     return { error: passwordCheck.errorMsg };
   }
 
+  let targetRedirectEmail = "";
+
   try {
-    // 3. Pastikan URL Bimbel belum dipakai orang lain
-    const existingAcademy = await prisma.academy.findUnique({
-      where: { path_url: pathUrl },
-    });
-
-    if (existingAcademy) {
-      return { error: "URL Bimbel sudah digunakan. Silakan pilih URL lain." };
-    }
-
-    // 4. Set Default Paket Pro untuk Uji Coba 14 Hari (Semua Fitur Terbuka Penuh)
-    let selectedPlan = await prisma.plan.findFirst({
-      where: { 
-        name: { contains: "Pro", mode: "insensitive" },
+    // 5. Cek apakah email sudah terdaftar
+    const existingStaff = await prisma.staff.findFirst({
+      where: {
+        email: { equals: adminEmail, mode: "insensitive" },
         deleted_at: null,
-        is_active: true
       },
     });
 
-    if (!selectedPlan) {
-      selectedPlan = await prisma.plan.findFirst({
-        where: { deleted_at: null, is_active: true },
-        orderBy: { price: "desc" }
-      });
-    }
-
-    // Fallback jika belum ada plan sama sekali di database
-    if (!selectedPlan) {
-      selectedPlan = await prisma.plan.create({
-        data: {
-          name: "Pro",
-          price: 399000,
-          max_students: null,
-          max_staff: null,
-          max_rooms: null,
-          allows_installment: true,
-          allows_automated_email: true,
-          allows_qr_attendance: true,
-          allows_erapor: true,
-          allows_audit_trail: true,
-          is_active: true,
-        },
-      });
-    }
-
-    // 5. Transaksi Database (Buat Bimbel + Buat Admin)
+    // Generate 6 Digit Kode OTP
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // Berlaku 10 menit
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
-    const trialDueDate = new Date();
-    trialDueDate.setDate(trialDueDate.getDate() + 14); // Masa percobaan 14 hari
 
-    const result = await prisma.$transaction(async (tx) => {
-      // Buat Academy/Bimbel
-      const newAcademy = await tx.academy.create({
+    if (existingStaff) {
+      if (existingStaff.email_verified) {
+        return { error: "Email ini sudah terdaftar dan terverifikasi. Silakan langsung masuk di menu Login." };
+      }
+
+      // Jika belum terverifikasi sebelumnya, perbarui OTP dan kirim ulang
+      await prisma.staff.update({
+        where: { id: existingStaff.id },
         data: {
-          name: academyName,
-          path_url: pathUrl,
+          name: adminName,
           phone: adminPhone,
-          plan_id: selectedPlan.id,
-          subscription_status: "TRIAL",
-          subscription_due_date: trialDueDate,
+          password_hash: hashedPassword,
+          otp_code: otpCode,
+          otp_expires_at: otpExpiresAt,
         },
       });
-
-      // Buat Akun Admin Pertama untuk Bimbel ini
-      const newAdmin = await tx.staff.create({
+    } else {
+      // Buat akun baru dengan email_verified: false
+      await prisma.staff.create({
         data: {
-          academy_id: newAcademy.id,
-          email: adminEmail,
-          phone: adminPhone,
           name: adminName,
+          phone: adminPhone,
+          email: adminEmail,
           role: "ADMIN",
           password_hash: hashedPassword,
+          email_verified: false,
+          otp_code: otpCode,
+          otp_expires_at: otpExpiresAt,
+          academy_id: null,
         },
       });
+    }
 
-      return { newAcademy, newAdmin };
-    });
-
-    // 6. Buat Sesi (Login Otomatis)
-    const token = await encrypt({
-      id: result.newAdmin.id,
-      role: "ADMIN",
-      academy_id: result.newAcademy.id,
-      tenant_slug: result.newAcademy.path_url,
-    });
-
-    const cookieStore = await cookies();
-    cookieStore.set("bimbelsync_session", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 8 * 60 * 60, // 8 jam
-      path: "/",
-    });
+    // 6. Kirim Email Berisi Kode OTP
+    await sendOtpEmail(adminEmail, otpCode, adminName);
+    targetRedirectEmail = adminEmail;
 
   } catch (error: any) {
-    console.error("Register Error:", error);
+    console.error("Register Account Error:", error);
     return { error: "Terjadi kesalahan internal. Silakan coba lagi." };
   }
 
-  // 7. Redirect ke Dashboard Tenant
-  // Redirect tidak boleh berada di dalam try-catch block karena melempar error khusus
-  redirect(`/${pathUrl}/dashboard`);
+  // 7. Arahkan ke Halaman Verifikasi OTP Email
+  if (targetRedirectEmail) {
+    redirect(`/verify-otp?email=${encodeURIComponent(targetRedirectEmail)}`);
+  }
 }

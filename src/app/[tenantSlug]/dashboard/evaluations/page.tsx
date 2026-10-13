@@ -22,7 +22,7 @@ export default async function EvaluationsPage({ params }: { params: Promise<{ te
     where: { id: session.id as string }
   });
 
-  if (!dbUser) redirect(`/${tenantSlug}/login`);
+  if (!dbUser || !dbUser.academy_id) redirect(`/${tenantSlug}/login`);
 
   // Admins see all evaluations, Tutors see evaluations for students in their programs or evaluations they created
   const isAdmin = dbUser.role === 'ADMIN';

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, Suspense } from "react";
+import { useActionState, useState } from "react";
 import { registerAcademyAction } from "./actions";
 import { useFormStatus } from "react-dom";
 import Image from "next/image";
@@ -12,7 +12,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_4px_20px_rgb(37,99,235,0.25)] hover:shadow-[0_6px_25px_rgb(37,99,235,0.35)] flex items-center justify-center gap-2 cursor-pointer text-sm sm:text-base"
+      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-300 transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_4px_20px_rgb(37,99,235,0.25)] hover:shadow-[0_6px_25px_rgb(37,99,235,0.35)] flex items-center justify-center gap-2 cursor-pointer text-sm sm:text-base"
     >
       {pending ? (
         <span className="flex items-center justify-center">
@@ -20,11 +20,11 @@ function SubmitButton() {
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          Mempersiapkan Sistem Bimbel Anda...
+          Mempersiapkan Akun Anda...
         </span>
       ) : (
         <>
-          <span>Mulai Uji Coba Gratis 14 Hari</span>
+          <span>Daftar & Kirim Kode OTP</span>
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
           </svg>
@@ -40,9 +40,6 @@ function RegisterForm() {
 
   return (
     <form action={formAction} className="space-y-4">
-      {/* Hidden input default ke Paket Pro (Semua Fitur Terbuka) */}
-      <input type="hidden" name="planChoice" value="Pro" />
-
       {/* Anti-Bot Honeypot Field (Tersembunyi dari manusia) */}
       <input 
         type="text" 
@@ -62,88 +59,50 @@ function RegisterForm() {
         </div>
       )}
 
-      {/* 1. Nama Bimbel */}
+      {/* 1. Nama Lengkap Pemilik / Admin */}
       <div>
         <label className="block text-sm font-semibold text-slate-700 mb-1">
-          Nama Bimbingan Belajar
+          Nama Lengkap
         </label>
         <input 
           type="text" 
-          name="academyName" 
+          name="adminName" 
           required 
-          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
-          placeholder="Contoh: Bintang Pelajar / Prestasi Prima"
+          className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
+          placeholder="Contoh: Budi Santoso"
         />
       </div>
-      
-      {/* 2. URL Portal Bimbel */}
+
+      {/* 2. Nomor WhatsApp */}
       <div>
         <label className="block text-sm font-semibold text-slate-700 mb-1">
-          URL Portal Bimbel
+          Nomor WhatsApp
         </label>
-        <div className="flex rounded-xl overflow-hidden border border-slate-200 focus-within:border-blue-600 focus-within:ring-4 focus-within:ring-blue-600/10 transition-all bg-slate-50 focus-within:bg-white">
-          <span className="inline-flex items-center pl-3.5 pr-1 text-slate-400 text-xs sm:text-sm font-medium select-none bg-slate-100/70 border-r border-slate-200">
-            bimbelsync.web.id/
-          </span>
-          <input 
-            type="text" 
-            name="pathUrl" 
-            required 
-            className="flex-1 block w-full min-w-0 px-3 py-2.5 border-none focus:ring-0 outline-none bg-transparent text-slate-900 placeholder-slate-400 text-sm font-medium"
-            placeholder="bintang-pelajar"
-            pattern="[a-z0-9-]+"
-            title="Hanya huruf kecil, angka, dan tanda strip (-)"
-          />
-        </div>
-        <p className="mt-1 text-xs text-slate-500">
-          Tautan akses portal untuk admin, pengajar, dan siswa Anda.
-        </p>
+        <input 
+          type="tel" 
+          name="adminPhone" 
+          required 
+          className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
+          placeholder="081234567890"
+        />
+        <p className="mt-1 text-xs text-slate-400">Untuk koordinasi aktivasi akun & bantuan tim onboarding.</p>
       </div>
 
-      {/* 3. Data Admin (Nama & WhatsApp) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-        <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-1">
-            Nama Pemilik / Admin
-          </label>
-          <input 
-            type="text" 
-            name="adminName" 
-            required 
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
-            placeholder="Budi Santoso"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-1">
-            Nomor WhatsApp
-          </label>
-          <input 
-            type="tel" 
-            name="adminPhone" 
-            required 
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
-            placeholder="081234567890"
-          />
-        </div>
-      </div>
-
-      {/* 4. Email Aktif */}
+      {/* 3. Email Aktif */}
       <div>
         <label className="block text-sm font-semibold text-slate-700 mb-1">
-          Email Admin
+          Email Aktif
         </label>
         <input 
           type="email" 
           name="adminEmail" 
           required 
-          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
+          className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
           placeholder="budi@email.com"
         />
       </div>
 
-      {/* 5. Password */}
+      {/* 4. Password */}
       <div>
         <div className="flex items-center justify-between mb-1">
           <label className="block text-sm font-semibold text-slate-700">
@@ -161,11 +120,11 @@ function RegisterForm() {
           type={showPassword ? "text" : "password"} 
           name="adminPassword" 
           required 
-          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
+          className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
           placeholder="Min. 8 karakter, huruf besar, angka & simbol"
         />
         <p className="mt-1 text-[11px] text-slate-400">
-          Min. 8 karakter (kombinasi huruf besar, kecil, angka, dan simbol).
+          Kombinasi minimal 8 karakter (huruf besar, huruf kecil, angka, dan simbol).
         </p>
       </div>
 
@@ -235,41 +194,38 @@ export default function RegisterPage() {
         </div>
       </div>
       
-      {/* KANAN - Form Pendaftaran */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-12 lg:px-14 xl:px-16 py-8 relative z-10 overflow-y-auto">
-        
-        {/* Mobile Header Brand */}
-        <div className="lg:hidden mb-6">
-          <div className="flex items-center gap-3">
-            <Image 
-              src="/logo.png" 
-              alt="BimbelSync Logo" 
-              width={34} 
-              height={34} 
-              className="rounded-lg shadow-sm"
-            />
-            <span className="text-2xl font-bold text-slate-900 tracking-tight">
-              BimbelSync
-            </span>
+      {/* KANAN - Form Pendaftaran (Ditengahkan Secara Sempurna) */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center px-6 sm:px-12 lg:px-16 py-8 relative z-10 overflow-y-auto min-h-screen">
+        <div className="max-w-md w-full mx-auto">
+          {/* Mobile Header Brand */}
+          <div className="lg:hidden mb-6">
+            <div className="flex items-center gap-3">
+              <Image 
+                src="/logo.png" 
+                alt="BimbelSync Logo" 
+                width={34} 
+                height={34} 
+                className="rounded-lg shadow-sm"
+              />
+              <span className="text-2xl font-bold text-slate-900 tracking-tight">
+                BimbelSync
+              </span>
+            </div>
           </div>
-        </div>
 
-        <div className="max-w-md w-full mx-auto lg:mx-0">
           <div className="mb-6">
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-1.5">
-              Buat Akun Bimbel
+              Daftar Akun Pengelola
             </h1>
             <p className="text-slate-500 text-sm">
-              Mulai uji coba gratis 14 hari dengan <span className="font-semibold text-blue-600">Paket Pro</span> tanpa kartu kredit.
+              Daftarkan akun Anda. Kode OTP verifikasi akan langsung dikirimkan ke email Anda.
             </p>
           </div>
           
-          <Suspense fallback={<div className="py-12 text-center text-slate-400 text-sm">Memuat formulir pendaftaran...</div>}>
-            <RegisterForm />
-          </Suspense>
+          <RegisterForm />
 
           <p className="text-center text-sm text-slate-500 mt-6 pt-3 border-t border-slate-100">
-            Sudah memiliki akun tenant?{" "}
+            Sudah memiliki akun?{" "}
             <Link href="/login" className="font-semibold text-blue-600 hover:text-blue-700 transition">
               Masuk di sini
             </Link>
