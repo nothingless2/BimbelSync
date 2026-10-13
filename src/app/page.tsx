@@ -112,36 +112,17 @@ export default async function LandingPage() {
         </FadeInView>
 
         <FadeInView direction="up" delay={0.6}>
-          <div className="relative max-w-4xl mx-auto rounded-3xl overflow-hidden border border-slate-800/80 shadow-2xl shadow-blue-900/20 bg-slate-900/90 backdrop-blur-md text-left p-2 sm:p-3 ring-1 ring-white/10">
-            {/* Dark Mode YouTube Window Header */}
-            <div className="bg-slate-800/90 rounded-2xl px-4 py-2.5 flex items-center justify-between border border-slate-700 mb-2">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-rose-500"></div>
-                <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                <div className="ml-3 px-3 py-1 bg-slate-900 rounded-lg text-slate-400 text-xs font-mono flex items-center gap-2 border border-slate-700">
-                  <svg className="w-3.5 h-3.5 text-red-500 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                  <span className="font-semibold text-slate-200">youtube.com</span>/watch?v=bimbelsync-demo
-                </div>
-              </div>
-              <span className="text-xs font-semibold text-slate-400 bg-slate-800 px-3 py-1 rounded-full border border-slate-700 hidden sm:inline-block">
-                Demo Video BimbelSync
-              </span>
-            </div>
-
-            {/* Dark Frame Container for YouTube Embed */}
-            <div className="rounded-xl overflow-hidden aspect-video bg-black relative border border-slate-800">
-              <iframe 
-                width="100%" 
-                height="100%" 
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0&rel=0" 
-                title="BimbelSync Demo Video" 
-                frameBorder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowFullScreen
-                className="w-full h-full object-cover"
-              ></iframe>
-            </div>
+          <div className="relative max-w-4xl mx-auto rounded-2xl sm:rounded-3xl overflow-hidden aspect-video bg-black shadow-2xl shadow-blue-500/10 border border-slate-200">
+            <iframe 
+              width="100%" 
+              height="100%" 
+              src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0&rel=0" 
+              title="BimbelSync Demo Video" 
+              frameBorder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowFullScreen
+              className="w-full h-full object-cover"
+            ></iframe>
           </div>
         </FadeInView>
       </section>
