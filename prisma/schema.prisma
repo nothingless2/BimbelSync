@@ -72,6 +72,7 @@ model Academy {
   plan_id                      String    @db.Uuid
   name                         String
   path_url                     String    @unique
+  phone                        String?
   encrypted_payment_server_key String?
   max_leave_per_month          Int       @default(0)
   subscription_status          SubscriptionStatus @default(TRIAL)
@@ -122,6 +123,7 @@ model Staff {
   id            String    @id @default(uuid()) @db.Uuid
   academy_id    String    @db.Uuid
   email         String
+  phone         String?
   name          String?
   avatar_url    String?
   password_hash String

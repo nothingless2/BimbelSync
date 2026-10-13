@@ -39,6 +39,10 @@ export default async function DashboardLayout({
     select: { id: true, email: true, avatar_url: true, role: true }
   });
 
+  if (!dbUser || session.role === 'STUDENT') {
+    redirect(`/${tenantSlug}/login`);
+  }
+
   let academy = await prisma.academy.findUnique({
     where: { id: session.academy_id },
     select: { id: true, subscription_status: true, subscription_due_date: true, deleted_at: true, pending_plan_id: true, pending_plan_date: true }
@@ -106,7 +110,7 @@ export default async function DashboardLayout({
            </h1>
            <p className="text-slate-600 dark:text-slate-400 mb-8 text-sm leading-relaxed">
              {effectiveIsExpiredTrial 
-               ? "Masa percobaan gratis (TRIAL) Bimbel Anda telah berakhir. Yuk tingkatkan ke Paket Premium untuk terus menikmati fitur lengkap BimbelSync!"
+               ? "Masa percobaan gratis (TRIAL) Bimbel Anda telah berakhir. Yuk tingkatkan ke Paket Pro untuk terus menikmati fitur lengkap BimbelSync!"
                : "Masa berlangganan Bimbel Anda telah berakhir atau sistem sedang ditangguhkan. Silakan lunasi tagihan atau hubungi Superadmin untuk memulihkan akses."}
            </p>
            <Link href={`/${tenantSlug}/logout`} className="inline-flex items-center justify-center px-6 py-3.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 transition rounded-xl w-full shadow-lg shadow-red-600/20">

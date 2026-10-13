@@ -25,7 +25,7 @@ export function LandingHeader() {
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
-          <a href="/register" className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition">
+          <a href="/login" className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition">
             Masuk
           </a>
           <a href="/register" className="text-sm font-semibold bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition shadow-sm hover:shadow-blue-500/25">
@@ -46,7 +46,7 @@ export function LandingHeader() {
           <a href="/#about" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50">Tentang</a>
           <a href="/#contact" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50">Kontak</a>
           <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
-            <a href="/register" className="w-full text-center py-2.5 rounded-xl border border-slate-200 font-semibold text-slate-700">Masuk</a>
+            <a href="/login" className="w-full text-center py-2.5 rounded-xl border border-slate-200 font-semibold text-slate-700">Masuk</a>
             <a href="/register" className="w-full text-center py-2.5 rounded-xl bg-blue-600 font-semibold text-white shadow-sm">Daftar Gratis</a>
           </div>
         </div>

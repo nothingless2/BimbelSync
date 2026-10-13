@@ -7,14 +7,22 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export async function registerAcademyAction(prevState: any, formData: FormData) {
+  // Anti-bot Honeypot Check
+  const honeypot = formData.get("_hp_website") as string;
+  if (honeypot) {
+    return { error: "Akses tidak sah terdeteksi." };
+  }
+
   const academyName = formData.get("academyName") as string;
   const pathUrl = formData.get("pathUrl") as string;
   const adminName = formData.get("adminName") as string;
   const adminEmail = formData.get("adminEmail") as string;
+  const adminPhone = (formData.get("adminPhone") as string)?.trim();
   const adminPassword = formData.get("adminPassword") as string;
+  const planChoice = (formData.get("planChoice") as string)?.trim() || "Pro";
 
-  if (!academyName || !pathUrl || !adminName || !adminEmail || !adminPassword) {
-    return { error: "Semua kolom wajib diisi." };
+  if (!academyName || !pathUrl || !adminName || !adminEmail || !adminPassword || !adminPhone) {
+    return { error: "Semua kolom wajib diisi, termasuk nomor WhatsApp." };
   }
 
   // 1. Validasi Path URL (hanya huruf kecil dan angka, tanpa spasi)
@@ -43,19 +51,37 @@ export async function registerAcademyAction(prevState: any, formData: FormData) 
       return { error: "URL Bimbel sudah digunakan. Silakan pilih URL lain." };
     }
 
-    // 4. Cari Plan Trial (Buat otomatis jika belum ada di database)
-    let trialPlan = await prisma.plan.findFirst({
-      where: { name: "Trial Plan" },
+    // 4. Set Default Paket Pro untuk Uji Coba 14 Hari (Semua Fitur Terbuka Penuh)
+    let selectedPlan = await prisma.plan.findFirst({
+      where: { 
+        name: { contains: "Pro", mode: "insensitive" },
+        deleted_at: null,
+        is_active: true
+      },
     });
 
-    if (!trialPlan) {
-      trialPlan = await prisma.plan.create({
+    if (!selectedPlan) {
+      selectedPlan = await prisma.plan.findFirst({
+        where: { deleted_at: null, is_active: true },
+        orderBy: { price: "desc" }
+      });
+    }
+
+    // Fallback jika belum ada plan sama sekali di database
+    if (!selectedPlan) {
+      selectedPlan = await prisma.plan.create({
         data: {
-          name: "Trial Plan",
-          price: 0,
-          max_students: 50,
-          max_staff: 5,
-          is_active: false, // Disembunyikan dari halaman harga publik
+          name: "Pro",
+          price: 399000,
+          max_students: null,
+          max_staff: null,
+          max_rooms: null,
+          allows_installment: true,
+          allows_automated_email: true,
+          allows_qr_attendance: true,
+          allows_erapor: true,
+          allows_audit_trail: true,
+          is_active: true,
         },
       });
     }
@@ -71,7 +97,8 @@ export async function registerAcademyAction(prevState: any, formData: FormData) 
         data: {
           name: academyName,
           path_url: pathUrl,
-          plan_id: trialPlan.id,
+          phone: adminPhone,
+          plan_id: selectedPlan.id,
           subscription_status: "TRIAL",
           subscription_due_date: trialDueDate,
         },
@@ -82,6 +109,7 @@ export async function registerAcademyAction(prevState: any, formData: FormData) 
         data: {
           academy_id: newAcademy.id,
           email: adminEmail,
+          phone: adminPhone,
           name: adminName,
           role: "ADMIN",
           password_hash: hashedPassword,
