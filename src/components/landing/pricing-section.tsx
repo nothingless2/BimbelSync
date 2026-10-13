@@ -187,58 +187,78 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
                 )}
               </div>
               
-              <ul className="space-y-4 mb-8 flex-1">
-                <li className="flex items-center gap-3 text-sm text-slate-700 font-medium">
-                  <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/> 
-                  Maks {plan.max_students === null ? "Unlimited" : plan.max_students} Siswa
-                </li>
-                <li className="flex items-center gap-3 text-sm text-slate-700 font-medium pb-2 border-b border-slate-100">
-                  <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/> 
-                  Maks {plan.max_staff === null ? "Unlimited" : plan.max_staff} Staff & {plan.max_rooms === null ? "Unlimited" : plan.max_rooms} Ruang
-                </li>
-                
-                <li className="flex items-center gap-3 text-sm text-slate-700">
-                  {plan.allows_automated_email ? <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/> : <X className="w-5 h-5 text-slate-300"/>}
-                  <span className={plan.allows_automated_email ? (isPopular ? "font-bold text-slate-900" : "") : "text-slate-400 opacity-60"}>
-                    Email & Pengingat Otomatis
-                  </span>
-                </li>
+              {(() => {
+                const toggleableFeatures = [
+                  {
+                    name: "Email & Pengingat Otomatis",
+                    enabled: plan.allows_automated_email,
+                    bold: isPopular && plan.allows_automated_email,
+                  },
+                  {
+                    name: "Absensi QR Dinamis",
+                    enabled: plan.allows_qr_attendance,
+                    bold: isPopular && plan.allows_qr_attendance,
+                  },
+                  {
+                    name: "E-Rapor & Evaluasi Siswa",
+                    enabled: plan.allows_erapor,
+                    bold: false,
+                  },
+                  {
+                    name: "Sistem Tagihan Cicilan",
+                    enabled: plan.allows_installment,
+                    bold: isPro && plan.allows_installment,
+                  },
+                  {
+                    name: "Audit Trail Keamanan",
+                    enabled: plan.allows_audit_trail,
+                    bold: isPro && plan.allows_audit_trail,
+                  },
+                ];
 
-                <li className="flex items-center gap-3 text-sm text-slate-700">
-                  {plan.allows_qr_attendance ? <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/> : <X className="w-5 h-5 text-slate-300"/>}
-                  <span className={plan.allows_qr_attendance ? (isPopular ? "font-bold text-slate-900" : "") : "text-slate-400 opacity-60"}>
-                    Absensi QR Dinamis
-                  </span>
-                </li>
+                const activeToggles = toggleableFeatures.filter((f) => f.enabled);
+                const inactiveToggles = toggleableFeatures.filter((f) => !f.enabled);
 
-                <li className="flex items-center gap-3 text-sm text-slate-700">
-                  {plan.allows_erapor ? <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/> : <X className="w-5 h-5 text-slate-300"/>}
-                  <span className={plan.allows_erapor ? "" : "text-slate-400 opacity-60"}>
-                    E-Rapor & Evaluasi Siswa
-                  </span>
-                </li>
+                return (
+                  <ul className="space-y-4 mb-8 flex-1">
+                    {/* 1. Kapasitas & Limit */}
+                    <li className="flex items-center gap-3 text-sm text-slate-700 font-medium">
+                      <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/> 
+                      Maks {plan.max_students === null ? "Unlimited" : plan.max_students} Siswa
+                    </li>
+                    <li className="flex items-center gap-3 text-sm text-slate-700 font-medium pb-2 border-b border-slate-100">
+                      <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/> 
+                      Maks {plan.max_staff === null ? "Unlimited" : plan.max_staff} Staff & {plan.max_rooms === null ? "Unlimited" : plan.max_rooms} Ruang
+                    </li>
 
-                <li className="flex items-center gap-3 text-sm text-slate-700">
-                  {plan.allows_installment ? <CheckCircle2 className={`w-5 h-5 ${isPro ? "text-green-500 font-bold" : "text-green-500"}`}/> : <X className="w-5 h-5 text-slate-300"/>}
-                  <span className={plan.allows_installment ? (isPro ? "font-bold text-slate-900" : "") : "text-slate-400 opacity-60"}>
-                    Sistem Tagihan Cicilan
-                  </span>
-                </li>
+                    {/* 2. Fitur Dasar & Tambahan yang Aktif */}
+                    {plan.additional_features && plan.additional_features.map((feat, i) => (
+                      <li key={`add-${i}`} className="flex items-center gap-3 text-sm text-slate-700">
+                        <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/>
+                        <span>{feat}</span>
+                      </li>
+                    ))}
 
-                <li className="flex items-center gap-3 text-sm text-slate-700">
-                  {plan.allows_audit_trail ? <CheckCircle2 className={`w-5 h-5 text-green-500`}/> : <X className="w-5 h-5 text-slate-300"/>}
-                  <span className={plan.allows_audit_trail ? "font-bold text-slate-900" : "text-slate-400 opacity-60"}>
-                    Audit Trail Keamanan
-                  </span>
-                </li>
+                    {/* 3. Fitur Utama yang Aktif (Centang Hijau/Biru) */}
+                    {activeToggles.map((feat, i) => (
+                      <li key={`act-${i}`} className="flex items-center gap-3 text-sm text-slate-700">
+                        <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/>
+                        <span className={feat.bold ? "font-bold text-slate-900" : ""}>
+                          {feat.name}
+                        </span>
+                      </li>
+                    ))}
 
-                {plan.additional_features && plan.additional_features.map((feat, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm text-slate-700">
-                    <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/>
-                    <span>{feat}</span>
-                  </li>
-                ))}
-              </ul>
+                    {/* 4. Fitur yang Tidak Tersedia (X) Ditaruh di Paling Bawah */}
+                    {inactiveToggles.map((feat, i) => (
+                      <li key={`inact-${i}`} className="flex items-center gap-3 text-sm text-slate-400 opacity-60">
+                        <X className="w-5 h-5 text-slate-300 shrink-0"/>
+                        <span>{feat.name}</span>
+                      </li>
+                    ))}
+                  </ul>
+                );
+              })()}
               <div className="space-y-3">
                 {isPro ? (
                   <a 
