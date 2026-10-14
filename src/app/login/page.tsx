@@ -101,7 +101,7 @@ function LoginForm() {
             name="identifier" 
             required 
             className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
-            placeholder="budi@email.com atau username siswa"
+            placeholder="Masukkan email atau username"
           />
         </div>
 
@@ -212,7 +212,7 @@ export default function LoginPage() {
               Masuk ke Akun Anda
             </h1>
             <p className="text-slate-500 text-sm">
-              Silakan masukkan email atau username Anda untuk melanjutkan.
+              Silakan masukkan email atau username untuk melanjutkan.
             </p>
           </div>
           
