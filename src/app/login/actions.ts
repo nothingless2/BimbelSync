@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
-import { encrypt } from "@/lib/auth";
+import { encrypt, encryptOtpPending } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -42,9 +42,19 @@ export async function loginAction(prevState: any, formData: FormData) {
 
       // 1. Cek apakah email sudah diverifikasi via OTP
       if (!staff.email_verified) {
+        const pendingToken = await encryptOtpPending({ email: staff.email, attempts: 0 });
+        const cookieStore = await cookies();
+        cookieStore.set("bimbelsync_otp_pending", pendingToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 10 * 60,
+        });
+
         return {
           error: "Email Anda belum diverifikasi. Silakan masukkan kode OTP yang telah dikirim ke email Anda terlebih dahulu.",
-          unverifiedEmail: staff.email,
+          needsVerification: true,
         };
       }
 

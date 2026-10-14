@@ -16,6 +16,12 @@ export type SessionPayload = {
   session_version?: number; // utk membandingkan session jwt dgn session database
 };
 
+// Tipe data token sementara untuk verifikasi OTP (Anti PII Leaks di URL)
+export type OtpPendingPayload = {
+  email: string;
+  attempts?: number;
+};
+
 // Fungsi untuk membuat Token/Sesi (Saat Login)
 export async function encrypt(payload: SessionPayload) {
   return new SignJWT(payload)
@@ -33,6 +39,34 @@ export async function decrypt(token: string): Promise<SessionPayload | null> {
   } catch (error) {
     return null; // Jika token tidak valid / kadaluarsa
   }
+}
+
+// Enkripsi token sesi pending OTP (HttpOnly Cookie, mencegah email tampil di URL)
+export async function encryptOtpPending(payload: OtpPendingPayload) {
+  return new SignJWT(payload)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('10m') // Sesi verifikasi berlaku 10 menit
+    .sign(SECRET_KEY);
+}
+
+// Dekripsi token sesi pending OTP
+export async function decryptOtpPending(token: string): Promise<OtpPendingPayload | null> {
+  try {
+    const { payload } = await jwtVerify(token, SECRET_KEY);
+    return payload as unknown as OtpPendingPayload;
+  } catch {
+    return null;
+  }
+}
+
+// Sensor email untuk perlindungan privasi (OWASP PII Masking)
+// Contoh: nicholassenjaya96@gmail.com -> n*****@gmail.com
+export function maskEmail(email: string): string {
+  if (!email || !email.includes('@')) return '';
+  const [user, domain] = email.split('@');
+  const firstChar = user[0] || '';
+  return `${firstChar}*****@${domain}`;
 }
 
 // Fungsi untuk validasi ketentuan password yang ketat

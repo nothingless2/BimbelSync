@@ -68,10 +68,10 @@ function LoginForm() {
             <span>{state.error}</span>
           </div>
 
-          {state.unverifiedEmail && (
+          {state.needsVerification && (
             <div className="pl-7 pt-1">
               <Link
-                href={`/verify-otp?email=${encodeURIComponent(state.unverifiedEmail)}`}
+                href="/verify-otp"
                 className="inline-flex items-center text-xs font-bold text-red-700 hover:text-red-900 underline"
               >
                 Masukkan Kode OTP Sekarang &rarr;

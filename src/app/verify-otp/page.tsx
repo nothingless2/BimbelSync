@@ -1,142 +1,42 @@
-"use client";
-
-import { useActionState, useState, useTransition, Suspense } from "react";
-import { verifyOtpAction, resendOtpAction } from "./actions";
-import { useFormStatus } from "react-dom";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { decryptOtpPending, maskEmail } from "@/lib/auth";
+import OtpForm from "./OtpForm";
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-300 transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_4px_20px_rgb(37,99,235,0.25)] hover:shadow-[0_6px_25px_rgb(37,99,235,0.35)] flex items-center justify-center gap-2 cursor-pointer text-sm sm:text-base"
-    >
-      {pending ? (
-        <span className="flex items-center justify-center">
-          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          Memverifikasi Kode OTP...
-        </span>
-      ) : (
-        <>
-          <span>Verifikasi Akun</span>
-        </>
-      )}
-    </button>
-  );
-}
+export default async function VerifyOtpPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ email?: string }>;
+}) {
+  const cookieStore = await cookies();
+  const pendingCookie = cookieStore.get("bimbelsync_otp_pending")?.value;
+  let email = "";
 
-function OtpForm() {
-  const [state, formAction] = useActionState(verifyOtpAction, null);
-  const searchParams = useSearchParams();
-  const initialEmail = searchParams.get("email") || "";
-  const [email, setEmail] = useState(initialEmail);
-  const [otpCode, setOtpCode] = useState("");
-  const [resendMsg, setResendMsg] = useState("");
-  const [resendError, setResendError] = useState("");
-  const [isPendingResend, startTransition] = useTransition();
-
-  const handleResend = () => {
-    if (!email) {
-      setResendError("Alamat email tidak boleh kosong.");
-      return;
+  if (pendingCookie) {
+    const pendingData = await decryptOtpPending(pendingCookie);
+    if (pendingData?.email) {
+      email = pendingData.email;
     }
-    setResendMsg("");
-    setResendError("");
+  }
 
-    startTransition(async () => {
-      const res = await resendOtpAction(email);
-      if (res.error) {
-        setResendError(res.error);
-      } else if (res.message) {
-        setResendMsg(res.message);
-      }
-    });
-  };
+  // Fallback jika pengguna mengakses dari riwayat URL lama yang masih ada ?email=...
+  if (!email) {
+    const params = await searchParams;
+    if (params?.email) {
+      email = params.email.trim().toLowerCase();
+    }
+  }
 
-  return (
-    <div className="space-y-5">
-      {/* Error Alert */}
-      {state?.error && (
-        <div className="bg-red-50 text-red-600 p-3.5 rounded-xl border border-red-100 text-sm font-medium flex items-start animate-fade-in shadow-xs">
-          <svg className="w-5 h-5 mr-2.5 shrink-0 mt-0.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          <span>{state.error}</span>
-        </div>
-      )}
+  // Jika tidak ada sesi email aktif, arahkan kembali ke pendaftaran
+  if (!email) {
+    redirect("/register");
+  }
 
-      {/* Resend Status Alerts */}
-      {resendMsg && (
-        <div className="bg-emerald-50 text-emerald-700 p-3.5 rounded-xl border border-emerald-100 text-sm font-medium flex items-start animate-fade-in shadow-xs">
-          <svg className="w-5 h-5 mr-2.5 shrink-0 mt-0.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-          </svg>
-          <span>{resendMsg}</span>
-        </div>
-      )}
-      {resendError && (
-        <div className="bg-red-50 text-red-600 p-3.5 rounded-xl border border-red-100 text-sm font-medium flex items-start animate-fade-in shadow-xs">
-          <svg className="w-5 h-5 mr-2.5 shrink-0 mt-0.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          <span>{resendError}</span>
-        </div>
-      )}
+  // Sensor email untuk mencegah kebocoran data privasi (Contoh: n*****@gmail.com)
+  const maskedEmail = maskEmail(email);
 
-      <form action={formAction} className="space-y-4">
-        {/* 6 Digit OTP Input */}
-        <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-1">
-            Kode OTP (6 Digit)
-          </label>
-          <input
-            type="text"
-            name="otpCode"
-            value={otpCode}
-            onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-            required
-            maxLength={6}
-            autoFocus
-            className="w-full px-4 py-3.5 rounded-xl border-2 border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-center font-mono text-2xl tracking-[0.5em] font-bold"
-            placeholder="······"
-          />
-          <p className="mt-1.5 text-xs text-slate-400 text-center">
-            Periksa kotak masuk (Inbox) atau folder Spam email Anda.
-          </p>
-        </div>
-
-        {/* Submit Button */}
-        <div className="pt-2">
-          <SubmitButton />
-        </div>
-      </form>
-
-      {/* Resend Action */}
-      <div className="text-center pt-2">
-        <p className="text-sm text-slate-500">
-          Tidak menerima kode?{" "}
-          <button
-            type="button"
-            onClick={handleResend}
-            disabled={isPendingResend}
-            className="font-semibold text-blue-600 hover:text-blue-700 disabled:opacity-50 transition cursor-pointer"
-          >
-            {isPendingResend ? "Mengirim Ulang..." : "Kirim Ulang Kode OTP"}
-          </button>
-        </p>
-      </div>
-    </div>
-  );
-}
-
-export default function VerifyOtpPage() {
   return (
     <div className="min-h-screen flex bg-white font-sans selection:bg-blue-600 selection:text-white">
       {/* KIRI - Visual Foto Asli & Keterangan Ringkas (Sembunyi di Mobile) */}
@@ -215,13 +115,11 @@ export default function VerifyOtpPage() {
               Verifikasi Email Anda
             </h1>
             <p className="text-slate-500 text-sm">
-              Kami telah mengirimkan 6 digit kode OTP ke email pendaftaran Anda.
+              Masukkan 6 digit kode OTP yang telah dikirimkan ke email Anda.
             </p>
           </div>
 
-          <Suspense fallback={<div className="py-8 text-center text-slate-400 text-sm">Memuat form verifikasi...</div>}>
-            <OtpForm />
-          </Suspense>
+          <OtpForm email={email} maskedEmail={maskedEmail} />
 
           <p className="text-center text-sm text-slate-500 mt-6 pt-3 border-t border-slate-100">
             Salah memasukkan email?{" "}

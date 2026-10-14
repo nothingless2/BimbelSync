@@ -2,9 +2,39 @@
 
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
-import { validatePassword } from "@/lib/auth";
+import crypto from "crypto";
+import { validatePassword, encryptOtpPending } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { sendOtpEmail } from "@/lib/email";
+import { cookies } from "next/headers";
+import { z } from "zod";
+
+// Skema Validasi Input Ketat (OWASP Top 10 - A03: Injection & Input Validation)
+const registerSchema = z.object({
+  adminName: z
+    .string()
+    .trim()
+    .min(2, "Nama minimal 2 karakter.")
+    .max(100, "Nama maksimal 100 karakter.")
+    .regex(/^[a-zA-Z\s.,'-]+$/, "Nama hanya boleh mengandung huruf dan tanda baca nama."),
+  adminPhone: z
+    .string()
+    .trim()
+    .transform((val) => val.replace(/\D/g, ""))
+    .refine((val) => val.length >= 10 && val.length <= 15, {
+      message: "Nomor WhatsApp tidak valid (10-15 digit angka).",
+    }),
+  adminEmail: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .email("Format email tidak valid.")
+    .max(255, "Email maksimal 255 karakter."),
+  adminPassword: z
+    .string()
+    .min(8, "Password minimal 8 karakter.")
+    .max(128, "Password maksimal 128 karakter."),
+});
 
 export async function registerAcademyAction(prevState: any, formData: FormData) {
   // 1. Anti-bot Honeypot Check
@@ -13,37 +43,30 @@ export async function registerAcademyAction(prevState: any, formData: FormData) 
     return { error: "Akses tidak sah terdeteksi." };
   }
 
-  const adminName = (formData.get("adminName") as string)?.trim();
-  const adminPhone = (formData.get("adminPhone") as string)?.trim();
-  const adminEmail = (formData.get("adminEmail") as string)?.trim().toLowerCase();
-  const adminPassword = formData.get("adminPassword") as string;
+  // 2. Validasi Input melalui Zod Schema
+  const rawData = {
+    adminName: formData.get("adminName") as string,
+    adminPhone: formData.get("adminPhone") as string,
+    adminEmail: formData.get("adminEmail") as string,
+    adminPassword: formData.get("adminPassword") as string,
+  };
 
-  if (!adminName || !adminPhone || !adminEmail || !adminPassword) {
-    return { error: "Semua kolom wajib diisi." };
+  const validation = registerSchema.safeParse(rawData);
+  if (!validation.success) {
+    const firstIssue = validation.error.issues?.[0];
+    return { error: firstIssue?.message || "Input form pendaftaran tidak valid." };
   }
 
-  // 2. Validasi Nomor WhatsApp minimal 10 digit angka
-  const phoneDigits = adminPhone.replace(/\D/g, "");
-  if (phoneDigits.length < 10) {
-    return { error: "Nomor WhatsApp tidak valid (minimal 10 digit angka)." };
-  }
+  const { adminName, adminPhone, adminEmail, adminPassword } = validation.data;
 
-  // 3. Validasi Format Email
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(adminEmail)) {
-    return { error: "Format email tidak valid." };
-  }
-
-  // 4. Validasi Keamanan Password
+  // 3. Validasi Keamanan Password
   const passwordCheck = validatePassword(adminPassword);
   if (!passwordCheck.isValid) {
     return { error: passwordCheck.errorMsg };
   }
 
-  let targetRedirectEmail = "";
-
   try {
-    // 5. Cek apakah email sudah terdaftar
+    // 4. Cek apakah email sudah terdaftar
     const existingStaff = await prisma.staff.findFirst({
       where: {
         email: { equals: adminEmail, mode: "insensitive" },
@@ -51,9 +74,9 @@ export async function registerAcademyAction(prevState: any, formData: FormData) 
       },
     });
 
-    // Generate 6 Digit Kode OTP
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // Berlaku 10 menit
+    // Generate 6 Digit Kode OTP Kriptografis Aman (OWASP A02: Cryptographic Failures)
+    const otpCode = crypto.randomInt(100000, 1000000).toString();
+    const otpExpiresAt = new Date(Date.now() + 1 * 60 * 1000); // Tepat 1 Menit (60 detik)
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
     if (existingStaff) {
@@ -89,17 +112,26 @@ export async function registerAcademyAction(prevState: any, formData: FormData) 
       });
     }
 
-    // 6. Kirim Email Berisi Kode OTP
+    // 5. Kirim Email Berisi Kode OTP
     await sendOtpEmail(adminEmail, otpCode, adminName);
-    targetRedirectEmail = adminEmail;
+
+    // 6. Simpan Token Sesi Verifikasi Terenkripsi di HttpOnly Cookie
+    // (Mencegah kebocoran email di URL query string - OWASP PII Protection)
+    const pendingToken = await encryptOtpPending({ email: adminEmail, attempts: 0 });
+    const cookieStore = await cookies();
+    cookieStore.set("bimbelsync_otp_pending", pendingToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 10 * 60, // 10 menit sesi verifikasi
+    });
 
   } catch (error: any) {
     console.error("Register Account Error:", error);
     return { error: "Terjadi kesalahan internal. Silakan coba lagi." };
   }
 
-  // 7. Arahkan ke Halaman Verifikasi OTP Email
-  if (targetRedirectEmail) {
-    redirect(`/verify-otp?email=${encodeURIComponent(targetRedirectEmail)}`);
-  }
+  // 7. Arahkan ke /verify-otp secara bersih TANPA parameter email di URL
+  redirect("/verify-otp");
 }
