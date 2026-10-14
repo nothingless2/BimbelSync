@@ -144,10 +144,16 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
           let billingSuffix = "/bulan";
           
           if (billingCycle === "semester") {
-            displayPrice = Math.round(plan.price * 6 * (1 - (plan.discount_6_months || 0) / 100));
+            const rawSemesterPrice = plan.price * 6 * (1 - (plan.discount_6_months || 0) / 100);
+            // Bulatkan ke ribuan genap agar tidak ada embel ratusan di belakangnya
+            displayPrice = Math.floor(rawSemesterPrice / 1000) * 1000;
             billingSuffix = "/6 bulan";
           } else if (billingCycle === "yearly") {
-            displayPrice = Math.round(plan.price * 12 * (1 - (plan.discount_12_months || 0) / 100));
+            // Diskon tahunan: bayar 10 bulan (hemat 2 bulan) dibulatkan ke ribuan genap
+            const rawYearlyPrice = plan.discount_12_months === 17
+              ? plan.price * 10
+              : plan.price * 12 * (1 - (plan.discount_12_months || 0) / 100);
+            displayPrice = Math.round(rawYearlyPrice / 1000) * 1000;
             billingSuffix = "/tahun";
           }
 
@@ -181,7 +187,9 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
                 {billingCycle !== "monthly" && (
                   <div className="w-full mt-1">
                     <p className="text-xs text-emerald-600 font-semibold">
-                      Setara {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Math.round(displayPrice / (billingCycle === 'semester' ? 6 : 12))).replace(",00", "")}/bln
+                      Setara {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 })
+                        .format(Math.round(displayPrice / (billingCycle === 'semester' ? 6 : 12) / 1000) * 1000)
+                        .replace(",00", "")}/bln
                     </p>
                   </div>
                 )}
