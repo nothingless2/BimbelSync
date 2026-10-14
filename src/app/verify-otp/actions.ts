@@ -83,7 +83,7 @@ export async function verifyOtpAction(prevState: any, formData: FormData) {
 
       // Periksa masa berlaku kode OTP (1 menit)
       if (staff.otp_expires_at && new Date() > staff.otp_expires_at) {
-        return { error: "Kode OTP telah kadaluarsa (lebih dari 1 menit). Silakan klik 'Kirim Ulang Kode OTP'." };
+        return { error: "Kode OTP telah kadaluarsa. Silakan kirim Ulang Kode OTP." };
       }
 
       // Verifikasi berhasil
