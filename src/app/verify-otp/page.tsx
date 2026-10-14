@@ -120,13 +120,6 @@ export default async function VerifyOtpPage({
           </div>
 
           <OtpForm email={email} maskedEmail={maskedEmail} />
-
-          <p className="text-center text-sm text-slate-500 mt-6 pt-3 border-t border-slate-100">
-            Salah memasukkan email?{" "}
-            <Link href="/register" className="font-semibold text-blue-600 hover:text-blue-700 transition">
-              Daftar ulang di sini
-            </Link>
-          </p>
         </div>
       </div>
     </div>

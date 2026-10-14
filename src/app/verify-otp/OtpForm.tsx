@@ -71,13 +71,6 @@ export default function OtpForm({
   return (
     <div className="space-y-5">
       {/* Target Masked Email Banner (OWASP PII Protection) */}
-      {maskedEmail && (
-        <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-center">
-          <span className="text-xs text-slate-400 block mb-0.5">Kode verifikasi dikirimkan ke email:</span>
-          <span className="text-sm font-bold text-slate-800 tracking-wide font-mono">{maskedEmail}</span>
-        </div>
-      )}
-
       {/* Error Alert */}
       {state?.error && (
         <div className="bg-red-50 text-red-600 p-3.5 rounded-xl border border-red-100 text-sm font-medium flex items-start animate-fade-in shadow-xs">
