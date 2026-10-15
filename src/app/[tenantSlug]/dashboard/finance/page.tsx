@@ -64,8 +64,8 @@ export default async function FinancePage({
     ...(statusParam !== "ALL" ? { payment_status: statusParam as any } : {})
   };
 
-  // Fetch paginated invoices, total count, and active students concurrently
-  const [totalFiltered, invoices, students] = await Promise.all([
+  // Fetch paginated invoices, total count, active students, and academy bank info concurrently
+  const [totalFiltered, invoices, students, academy] = await Promise.all([
     prisma.invoice.count({ where: whereClause }),
     prisma.invoice.findMany({
       where: whereClause,
@@ -88,10 +88,20 @@ export default async function FinancePage({
       orderBy: {
         full_name: 'asc'
       }
+    }),
+    prisma.academy.findUnique({
+      where: { id: session.academy_id },
+      select: { bank_name: true, bank_account: true, name: true }
     })
   ]);
 
   const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
+
+  const bankInfo = {
+    bankName: academy?.bank_name || "",
+    bankAccount: academy?.bank_account || "",
+    academyName: academy?.name || "Bimbel"
+  };
 
   return (
     <div className="space-y-6">
@@ -141,6 +151,7 @@ export default async function FinancePage({
         totalItems={totalFiltered}
         initialQ={q}
         initialStatus={statusParam}
+        initialBankInfo={bankInfo}
       />
     </div>
   );

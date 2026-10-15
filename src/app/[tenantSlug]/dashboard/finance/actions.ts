@@ -256,3 +256,48 @@ export async function splitInstallmentsAction(
     return { error: "Terjadi kesalahan internal saat memecah cicilan." };
   }
 }
+
+export async function updateAcademyBankInfoAction(bankName: string, bankAccount: string) {
+  const result = await requireAdminSession();
+  if ('error' in result) return { error: result.error };
+  const session = result.session;
+
+  const trimmedName = bankName?.trim();
+  const trimmedAccount = bankAccount?.trim();
+
+  if (!trimmedName || !trimmedAccount) {
+    return { error: "Nama bank dan nomor rekening wajib diisi." };
+  }
+
+  try {
+    await prisma.academy.update({
+      where: { id: session.academy_id },
+      data: {
+        bank_name: trimmedName,
+        bank_account: trimmedAccount,
+      },
+    });
+
+    await createAuditLog({
+      academy_id: session.academy_id,
+      staff_id: session.id,
+      action: "UPDATE",
+      entity_type: "Academy",
+      entity_id: session.academy_id,
+      details: {
+        action: "UPDATE_ACADEMY_BANK_INFO",
+        bank_name: trimmedName,
+        bank_account: trimmedAccount,
+      },
+    });
+
+    revalidatePath(`/${session.tenant_slug}/dashboard/finance`);
+    revalidatePath(`/${session.tenant_slug}/student/dashboard`);
+    revalidatePath(`/${session.tenant_slug}/student/invoices`);
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating academy bank info:", error);
+    return { error: "Terjadi kesalahan internal saat menyimpan rekening bimbel." };
+  }
+}
+

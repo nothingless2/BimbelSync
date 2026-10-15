@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Receipt, User, MoreVertical, Trash2, CheckCircle2, DollarSign, Clock, Search, Filter } from "lucide-react";
+import { 
+  Receipt, User, MoreVertical, Trash2, CheckCircle2, DollarSign, Clock, Search, Filter,
+  Landmark, Edit3, X, Loader2
+} from "lucide-react";
 import { toast } from "@/components/ui/sonner";
-import { deleteInvoiceAction } from "./actions";
+import { deleteInvoiceAction, updateAcademyBankInfoAction } from "./actions";
 import { VerifyPaymentModal } from "@/components/modals/verify-payment-modal";
 import { Invoice, Student, InvoiceItem, Staff } from "@prisma/client";
 import { Pagination } from "@/components/ui/pagination";
@@ -22,18 +25,58 @@ export default function FinanceClientPage({
   totalPages,
   totalItems,
   initialQ,
-  initialStatus
+  initialStatus,
+  initialBankInfo
 }: { 
   invoices: InvoiceWithRelations[],
   currentPage: number,
   totalPages: number,
   totalItems: number,
   initialQ: string,
-  initialStatus: string
+  initialStatus: string,
+  initialBankInfo?: {
+    bankName: string;
+    bankAccount: string;
+    academyName: string;
+  }
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  // Academy Bank Settings State
+  const [bankInfo, setBankInfo] = useState(
+    initialBankInfo || { bankName: "", bankAccount: "", academyName: "Bimbel" }
+  );
+  const [bankModal, setBankModal] = useState(false);
+  const [bankForm, setBankForm] = useState({
+    bankName: initialBankInfo?.bankName || "",
+    bankAccount: initialBankInfo?.bankAccount || "",
+  });
+  const [isSavingBank, setIsSavingBank] = useState(false);
+
+  const handleBankSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bankForm.bankName.trim() || !bankForm.bankAccount.trim()) {
+      toast.error("Nama bank dan nomor rekening wajib diisi.");
+      return;
+    }
+    setIsSavingBank(true);
+    const res = await updateAcademyBankInfoAction(bankForm.bankName, bankForm.bankAccount);
+    setIsSavingBank(false);
+
+    if (res.error) {
+      toast.error(res.error);
+    } else {
+      toast.success("Rekening transfer bimbel berhasil diperbarui!");
+      setBankInfo(prev => ({
+        ...prev,
+        bankName: bankForm.bankName.trim(),
+        bankAccount: bankForm.bankAccount.trim(),
+      }));
+      setBankModal(false);
+    }
+  };
 
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [verifyingInvoice, setVerifyingInvoice] = useState<InvoiceWithRelations | null>(null);
@@ -94,6 +137,54 @@ export default function FinanceClientPage({
 
   return (
     <>
+      {/* Rekening Pembayaran SPP / Les Card */}
+      <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl shrink-0">
+            <Landmark size={22} />
+          </div>
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-sm font-bold text-slate-800 dark:text-white">Rekening Transfer Pembayaran SPP Siswa</h3>
+              {bankInfo.bankAccount ? (
+                <span className="text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 px-2 py-0.5 rounded-full">
+                  Aktif di Portal Siswa
+                </span>
+              ) : (
+                <span className="text-[10px] font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50 px-2 py-0.5 rounded-full">
+                  Belum Disetel
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Rekening ini otomatis ditampilkan pada banner notifikasi dashboard murid/siswa yang memiliki tagihan belum lunas.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+          {bankInfo.bankAccount ? (
+            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/60 text-xs">
+              <span className="font-semibold text-slate-700 dark:text-slate-300">{bankInfo.bankName || "Bank"}</span>
+              <span className="text-slate-300 dark:text-slate-600">•</span>
+              <span className="font-mono font-bold text-blue-600 dark:text-blue-400">{bankInfo.bankAccount}</span>
+            </div>
+          ) : (
+            <span className="text-xs text-slate-400 italic">Belum ada rekening disetel</span>
+          )}
+          <button
+            onClick={() => {
+              setBankForm({ bankName: bankInfo.bankName, bankAccount: bankInfo.bankAccount });
+              setBankModal(true);
+            }}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-xl text-xs font-semibold transition"
+          >
+            <Edit3 size={13} />
+            {bankInfo.bankAccount ? "Edit Rekening" : "Atur Rekening"}
+          </button>
+        </div>
+      </div>
+
       <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
         
         {/* Toolbar Filter */}
@@ -292,6 +383,103 @@ export default function FinanceClientPage({
           invoice={verifyingInvoice} 
           onClose={() => setVerifyingInvoice(null)} 
         />
+      )}
+
+      {/* Modal Edit Rekening Bimbel */}
+      {bankModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg">
+                  <Landmark size={18} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 dark:text-white text-base">Rekening Pembayaran SPP</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Atur rekening tujuan transfer untuk siswa/murid.</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setBankModal(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleBankSubmit} className="p-5 space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  Nama Bank & Atas Nama
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={bankForm.bankName}
+                  onChange={(e) => setBankForm({ ...bankForm, bankName: e.target.value })}
+                  placeholder={`Contoh: BCA a.n ${bankInfo.academyName || "Bimbel"}`}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                />
+                <p className="text-[11px] text-slate-500">
+                  Nama bank dan nama pemilik rekening resmi bimbel.
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  Nomor Rekening
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={bankForm.bankAccount}
+                  onChange={(e) => setBankForm({ ...bankForm, bankAccount: e.target.value })}
+                  placeholder="Contoh: 527-1234-567"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white tracking-wider"
+                />
+                <p className="text-[11px] text-slate-500">
+                  Nomor rekening yang dapat disalin dengan 1 klik oleh murid/orang tua.
+                </p>
+              </div>
+
+              {/* Preview Box */}
+              <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200/70 dark:border-slate-700/60 space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Preview di Portal Siswa</span>
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <span className="text-xs font-semibold bg-white dark:bg-slate-900 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700">
+                    {bankForm.bankName || "Nama Bank"}
+                  </span>
+                  <span className="text-xs font-bold font-mono px-2.5 py-1 bg-white dark:bg-slate-900 rounded-md border border-slate-200 dark:border-slate-700 text-blue-600 dark:text-blue-400">
+                    {bankForm.bankAccount || "000-000-0000"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setBankModal(false)}
+                  className="flex-1 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingBank}
+                  className="flex-1 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-70 shadow-sm shadow-blue-500/20"
+                >
+                  {isSavingBank ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" /> Menyimpan...
+                    </>
+                  ) : (
+                    "Simpan Perubahan"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </>
   );

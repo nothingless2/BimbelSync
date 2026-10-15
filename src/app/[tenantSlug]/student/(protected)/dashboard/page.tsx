@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import StudentSchedulesClientPage from '../schedules/client-page';
+import { StudentBillingBanner } from '@/components/student-billing-banner';
 
 // Helper format waktu (WIB) untuk Server Component di Vercel
 const formatTimeWIB = (date: Date | string) => {
@@ -27,7 +28,7 @@ export default async function StudentDashboardPage({
     redirect(`/${tenantSlug}/login`);
   }
 
-  const [student, allSchedules] = await Promise.all([
+  const [student, allSchedules, unpaidInvoices, academy] = await Promise.all([
     prisma.student.findUnique({
       where: { id: session.id },
       include: {
@@ -68,6 +69,17 @@ export default async function StudentDashboardPage({
       orderBy: {
         start_time: 'asc'
       }
+    }),
+    prisma.invoice.findMany({
+      where: {
+        student_id: session.id,
+        payment_status: { in: ['UNPAID', 'OVERDUE'] }
+      },
+      select: { total_amount: true }
+    }),
+    prisma.academy.findUnique({
+      where: { id: session.academy_id },
+      select: { bank_name: true, bank_account: true }
     })
   ]);
 
@@ -75,9 +87,21 @@ export default async function StudentDashboardPage({
     redirect(`/${tenantSlug}/login`);
   }
 
+  const totalDebt = unpaidInvoices.reduce((sum, inv) => sum + inv.total_amount, 0);
+  const hasUnpaid = unpaidInvoices.length > 0;
+
   return (
-    <div className="p-4 sm:p-8 md:pt-10 space-y-8">
+    <div className="p-4 sm:p-8 md:pt-10 space-y-6">
       
+      {/* Notifikasi Tagihan SPP Siswa */}
+      <StudentBillingBanner
+        hasUnpaid={hasUnpaid}
+        totalDebt={totalDebt}
+        bankName={academy?.bank_name}
+        bankAccount={academy?.bank_account}
+        tenantSlug={tenantSlug}
+      />
+
       {/* Welcome Card */}
       <div className="bg-blue-700 rounded-3xl p-6 sm:p-8 text-white">
         

@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { CreditCard, ArrowRight, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import Link from "next/link";
+import { StudentBillingBanner } from "@/components/student-billing-banner";
 
 export default async function StudentInvoicesPage({
   params
@@ -26,16 +27,25 @@ export default async function StudentInvoicesPage({
 
   const studentId = session.id as string;
 
-  const invoices = await prisma.invoice.findMany({
-    where: { student_id: studentId },
-    include: {
-      items: true,
-      installments: true
-    },
-    orderBy: {
-      id: 'desc'
-    }
-  });
+  const [invoices, academy] = await Promise.all([
+    prisma.invoice.findMany({
+      where: { student_id: studentId },
+      include: {
+        items: true,
+        installments: true
+      },
+      orderBy: {
+        id: 'desc'
+      }
+    }),
+    prisma.academy.findUnique({
+      where: { id: session.academy_id },
+      select: { bank_name: true, bank_account: true }
+    })
+  ]);
+
+  const unpaidInvoices = invoices.filter(i => i.payment_status === 'UNPAID' || i.payment_status === 'OVERDUE');
+  const totalDebt = unpaidInvoices.reduce((sum, i) => sum + i.total_amount, 0);
 
   const formatRupiah = (num: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
@@ -59,6 +69,13 @@ export default async function StudentInvoicesPage({
       </div>
 
       <div className="px-4 sm:px-8 -mt-16 relative z-20 space-y-4 max-w-lg mx-auto">
+        <StudentBillingBanner
+          hasUnpaid={unpaidInvoices.length > 0}
+          totalDebt={totalDebt}
+          bankName={academy?.bank_name}
+          bankAccount={academy?.bank_account}
+          tenantSlug={tenantSlug}
+        />
         {invoices.length === 0 ? (
           <div className="bg-white dark:bg-[#111827] rounded-2xl p-8 text-center border border-slate-200 dark:border-slate-800 shadow-sm mt-4">
             <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">

@@ -22,22 +22,34 @@ export default async function StudentInvoiceDetailPage({
     redirect(`/${tenantSlug}/student/login`);
   }
 
-  const invoice = await prisma.invoice.findUnique({
-    where: {
-      id: invoiceId,
-      student_id: session.id
-    },
-    include: {
-      items: true,
-      installments: {
-        orderBy: { installment_number: 'asc' }
+  const [invoice, academy] = await Promise.all([
+    prisma.invoice.findUnique({
+      where: {
+        id: invoiceId,
+        student_id: session.id
+      },
+      include: {
+        items: true,
+        installments: {
+          orderBy: { installment_number: 'asc' }
+        }
       }
-    }
-  });
+    }),
+    prisma.academy.findUnique({
+      where: { id: session.academy_id },
+      select: { name: true, bank_name: true, bank_account: true }
+    })
+  ]);
 
   if (!invoice) {
     redirect(`/${tenantSlug}/student/invoices`);
   }
 
-  return <StudentInvoiceDetailClient invoice={invoice} tenantSlug={tenantSlug} />;
+  const bankInfo = {
+    bankName: academy?.bank_name || "",
+    bankAccount: academy?.bank_account || "",
+    academyName: academy?.name || "Bimbel"
+  };
+
+  return <StudentInvoiceDetailClient invoice={invoice} tenantSlug={tenantSlug} bankInfo={bankInfo} />;
 }

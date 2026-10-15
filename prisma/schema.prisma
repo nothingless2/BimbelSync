@@ -79,6 +79,8 @@ model Academy {
   subscription_due_date        DateTime? @db.Date
   pending_plan_id              String?   @db.Uuid
   pending_plan_date            DateTime? @db.Date
+  bank_name                    String?
+  bank_account                 String?
   deleted_at                   DateTime?
 
   plan              Plan              @relation(fields: [plan_id], references: [id])

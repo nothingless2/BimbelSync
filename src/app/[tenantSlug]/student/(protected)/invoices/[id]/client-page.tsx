@@ -1,10 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Invoice, InvoiceItem, Installment } from "@prisma/client";
 import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
-import { ArrowLeft, CreditCard, Clock, CheckCircle2, AlertCircle, Calendar } from "lucide-react";
+import { ArrowLeft, CreditCard, Clock, CheckCircle2, AlertCircle, Calendar, Landmark, Copy } from "lucide-react";
 
 type InvoiceWithDetails = Invoice & {
   items: InvoiceItem[];
@@ -13,15 +14,29 @@ type InvoiceWithDetails = Invoice & {
 
 export default function StudentInvoiceDetailClient({
   invoice,
-  tenantSlug
+  tenantSlug,
+  bankInfo
 }: {
   invoice: InvoiceWithDetails;
   tenantSlug: string;
+  bankInfo?: {
+    bankName: string;
+    bankAccount: string;
+    academyName: string;
+  };
 }) {
   const router = useRouter();
+  const [copied, setCopied] = useState(false);
 
   const formatRupiah = (num: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+  };
+
+  const handleCopyBank = () => {
+    if (!bankInfo?.bankAccount) return;
+    navigator.clipboard.writeText(bankInfo.bankAccount);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const handlePay = () => {
@@ -108,6 +123,52 @@ export default function StudentInvoiceDetailClient({
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Rekening Transfer Bank Bimbel */}
+        {invoice.payment_status !== 'PAID' && (
+          <div className="bg-white dark:bg-[#111827] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+            <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-bold">
+              <Landmark size={18} className="text-blue-600 dark:text-blue-400" />
+              <h3>Rekening Transfer Pembayaran</h3>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Silakan lakukan transfer sesuai total tagihan ke rekening resmi bimbingan belajar berikut:
+            </p>
+            {bankInfo?.bankAccount ? (
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-900/80 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    {bankInfo.bankName || "Transfer Bank"}
+                  </p>
+                  <p className="text-base font-bold font-mono tracking-wider text-blue-600 dark:text-blue-400 mt-0.5">
+                    {bankInfo.bankAccount}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCopyBank}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 transition"
+                >
+                  {copied ? (
+                    <>
+                      <CheckCircle2 size={13} className="text-emerald-500" />
+                      Tersalin
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={13} />
+                      Salin
+                    </>
+                  )}
+                </button>
+              </div>
+            ) : (
+              <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 text-xs text-slate-500 italic">
+                Hubungi bagian administrasi bimbel untuk informasi nomor rekening pembayaran resmi.
+              </div>
+            )}
           </div>
         )}
 
