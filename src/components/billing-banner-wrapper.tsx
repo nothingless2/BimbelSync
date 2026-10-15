@@ -5,11 +5,12 @@ import { BillingBanner } from "./billing-banner";
 
 interface BillingBannerWrapperProps {
   status: string;
-  dueDate: Date | null;
+  dueDate: Date | string | null;
   hasUnpaid: boolean;
   totalDebt: number;
   bankName?: string;
   bankAccount?: string;
+  tenantSlug?: string;
 }
 
 export function BillingBannerWrapper({ 
@@ -18,16 +19,16 @@ export function BillingBannerWrapper({
   hasUnpaid, 
   totalDebt,
   bankName,
-  bankAccount
+  bankAccount,
+  tenantSlug
 }: BillingBannerWrapperProps) {
   const pathname = usePathname();
 
-  // Hanya tampilkan banner di halaman utama dashboard atau halaman billing
-  // pathname contoh: /bimbel-juara/dashboard atau /bimbel-juara/dashboard/billing
-  const isDashboardHome = pathname.endsWith("/dashboard");
-  const isBillingPage = pathname.endsWith("/dashboard/billing");
+  // Hanya tampilkan banner di halaman utama dashboard atau halaman subscription
+  const isDashboardHome = pathname ? (pathname.endsWith("/dashboard") || pathname.endsWith("/dashboard/")) : false;
+  const isSubscriptionPage = pathname ? (pathname.includes("/dashboard/subscription") || pathname.includes("/dashboard/billing")) : false;
 
-  if (!isDashboardHome && !isBillingPage) {
+  if (!isDashboardHome && !isSubscriptionPage) {
     return null;
   }
 
@@ -39,6 +40,7 @@ export function BillingBannerWrapper({
       totalDebt={totalDebt} 
       bankName={bankName}
       bankAccount={bankAccount}
+      tenantSlug={tenantSlug}
     />
   );
 }

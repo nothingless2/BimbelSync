@@ -46,6 +46,9 @@ export default async function StudentInvoicesPage({
 
   const unpaidInvoices = invoices.filter(i => i.payment_status === 'UNPAID' || i.payment_status === 'OVERDUE');
   const totalDebt = unpaidInvoices.reduce((sum, i) => sum + i.total_amount, 0);
+  const earliestDueDate = unpaidInvoices
+    .filter(i => i.due_date)
+    .sort((a, b) => new Date(a.due_date!).getTime() - new Date(b.due_date!).getTime())[0]?.due_date || null;
 
   const formatRupiah = (num: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
@@ -72,6 +75,7 @@ export default async function StudentInvoicesPage({
         <StudentBillingBanner
           hasUnpaid={unpaidInvoices.length > 0}
           totalDebt={totalDebt}
+          dueDate={earliestDueDate}
           bankName={academy?.bank_name}
           bankAccount={academy?.bank_account}
           tenantSlug={tenantSlug}

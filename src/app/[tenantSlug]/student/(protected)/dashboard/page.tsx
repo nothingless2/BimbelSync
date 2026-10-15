@@ -75,7 +75,8 @@ export default async function StudentDashboardPage({
         student_id: session.id,
         payment_status: { in: ['UNPAID', 'OVERDUE'] }
       },
-      select: { total_amount: true }
+      select: { total_amount: true, due_date: true },
+      orderBy: { due_date: 'asc' }
     }),
     prisma.academy.findUnique({
       where: { id: session.academy_id },
@@ -97,6 +98,7 @@ export default async function StudentDashboardPage({
       <StudentBillingBanner
         hasUnpaid={hasUnpaid}
         totalDebt={totalDebt}
+        dueDate={unpaidInvoices[0]?.due_date}
         bankName={academy?.bank_name}
         bankAccount={academy?.bank_account}
         tenantSlug={tenantSlug}

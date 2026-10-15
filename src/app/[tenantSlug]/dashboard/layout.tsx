@@ -48,7 +48,8 @@ export default async function DashboardLayout({
       where: { 
         academy_id: session.academy_id,
         payment_status: { in: ['UNPAID', 'OVERDUE'] }
-      }
+      },
+      orderBy: { due_date: 'asc' }
     }),
     getPlatformBankInfo()
   ]);
@@ -166,15 +167,16 @@ export default async function DashboardLayout({
         {/* Page Content */}
         <div className="flex-1 overflow-y-auto p-4 md:p-8 text-slate-900 dark:text-slate-100 transition-colors">
           <div className="max-w-7xl mx-auto">
-            {/* Banner Masa Aktif & Tagihan */}
-            {dbUser?.role !== 'TUTOR' && (academy.subscription_status === 'ACTIVE' || academy.subscription_status === 'TRIAL') && (
+            {/* Banner Tagihan Tertunda */}
+            {dbUser?.role !== 'TUTOR' && (
               <BillingBannerWrapper 
                 status={academy.subscription_status} 
-                dueDate={academy.subscription_due_date} 
+                dueDate={unpaidInvoices[0]?.due_date || academy.subscription_due_date} 
                 hasUnpaid={hasUnpaid} 
                 totalDebt={totalDebt} 
                 bankName={bankInfo.bankName}
                 bankAccount={bankInfo.bankAccount}
+                tenantSlug={tenantSlug}
               />
             )}
 

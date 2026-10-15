@@ -1,12 +1,13 @@
 "use client";
 
-import { AlertCircle, Copy, CheckCircle2, ArrowRight } from "lucide-react";
+import { AlertCircle, Copy, CheckCircle2, ArrowRight, Clock } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 
 interface StudentBillingBannerProps {
   hasUnpaid: boolean;
   totalDebt: number;
+  dueDate?: Date | string | null;
   bankName?: string | null;
   bankAccount?: string | null;
   tenantSlug: string;
@@ -24,6 +25,7 @@ const IDR = (n: number) =>
 export function StudentBillingBanner({
   hasUnpaid,
   totalDebt,
+  dueDate,
   bankName,
   bankAccount,
   tenantSlug,
@@ -39,6 +41,16 @@ export function StudentBillingBanner({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const formattedDate = dueDate ? (() => {
+    try {
+      const d = new Date(dueDate);
+      if (isNaN(d.getTime())) return null;
+      return new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(d);
+    } catch {
+      return null;
+    }
+  })() : null;
+
   return (
     <div className="p-4 sm:p-5 rounded-2xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/40 text-red-950 dark:text-red-100 shadow-sm animate-in fade-in duration-300">
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -47,15 +59,29 @@ export function StudentBillingBanner({
             <AlertCircle size={22} />
           </div>
           <div className="space-y-1">
-            <h4 className="text-sm font-bold text-red-900 dark:text-red-200">
-              Menunggu Pembayaran (Tagihan SPP Tertunda)
-            </h4>
+            <div className="flex flex-wrap items-center gap-2">
+              <h4 className="text-sm font-bold text-red-900 dark:text-red-200">
+                Menunggu Pembayaran (Tagihan SPP Tertunda)
+              </h4>
+              {formattedDate && (
+                <span className="text-[11px] font-semibold bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 px-2.5 py-0.5 rounded-full border border-red-200 dark:border-red-800/60 inline-flex items-center gap-1">
+                  <Clock size={12} />
+                  Batas Pembayaran: {formattedDate}
+                </span>
+              )}
+            </div>
+
             <p className="text-xs text-red-800 dark:text-red-300 leading-relaxed">
               Anda memiliki tagihan yang belum lunas sebesar{" "}
               <strong className="font-extrabold text-red-700 dark:text-red-300 text-sm">
                 {IDR(totalDebt)}
               </strong>
-              . {bankAccount ? "Silakan segera lakukan pembayaran melalui transfer bank ke:" : "Silakan segera selesaikan pembayaran ke pihak administrasi bimbel."}
+              {formattedDate ? (
+                <> dengan batas pembayaran hingga <strong className="font-bold text-red-900 dark:text-red-100">{formattedDate}</strong>. </>
+              ) : (
+                <>. </>
+              )}
+              {bankAccount ? "Silakan segera lakukan pembayaran melalui transfer bank ke:" : "Silakan segera selesaikan pembayaran ke pihak administrasi bimbel."}
             </p>
 
             {bankAccount && (
