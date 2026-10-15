@@ -8,6 +8,8 @@ interface Props {
   dueDate: Date | null;
   hasUnpaid: boolean;
   totalDebt: number;
+  bankName?: string;
+  bankAccount?: string;
 }
 
 const IDR = (n: number) =>
@@ -19,11 +21,15 @@ const IDR = (n: number) =>
     .format(n)
     .replace(",00", "");
 
-export function BillingBanner({ status, dueDate, hasUnpaid, totalDebt }: Props) {
+export function BillingBanner({ 
+  status, 
+  dueDate, 
+  hasUnpaid, 
+  totalDebt,
+  bankName = "BCA a.n PT BimbelSync Nusantara",
+  bankAccount = "123-456-7890"
+}: Props) {
   const [copied, setCopied] = useState(false);
-  
-  const bankAccount = "123-456-7890";
-  const bankName = "BCA a.n PT BimbelSync Nusantara";
 
   const handleCopy = () => {
     navigator.clipboard.writeText(bankAccount);

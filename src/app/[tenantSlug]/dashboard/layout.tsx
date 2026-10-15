@@ -9,6 +9,7 @@ import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { BillingBannerWrapper } from "@/components/billing-banner-wrapper";
 import { MobileSidebar } from "@/components/mobile-sidebar";
+import { getPlatformBankInfo } from "@/lib/platform-settings";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -33,8 +34,8 @@ export default async function DashboardLayout({
     redirect(`/${tenantSlug}/login`);
   }
 
-  // Fetch dbUser, academy, and unpaidInvoices concurrently to eliminate sequential DB round-trips
-  const [dbUser, academyInitial, unpaidInvoices] = await Promise.all([
+  // Fetch dbUser, academy, unpaidInvoices, and platform bank info concurrently
+  const [dbUser, academyInitial, unpaidInvoices, bankInfo] = await Promise.all([
     prisma.staff.findUnique({
       where: { id: session.id },
       select: { id: true, email: true, avatar_url: true, role: true }
@@ -48,7 +49,8 @@ export default async function DashboardLayout({
         academy_id: session.academy_id,
         payment_status: { in: ['UNPAID', 'OVERDUE'] }
       }
-    })
+    }),
+    getPlatformBankInfo()
   ]);
 
   if (!dbUser || session.role === 'STUDENT') {
@@ -171,6 +173,8 @@ export default async function DashboardLayout({
                 dueDate={academy.subscription_due_date} 
                 hasUnpaid={hasUnpaid} 
                 totalDebt={totalDebt} 
+                bankName={bankInfo.bankName}
+                bankAccount={bankInfo.bankAccount}
               />
             )}
 

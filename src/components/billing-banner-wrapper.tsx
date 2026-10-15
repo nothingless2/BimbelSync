@@ -8,9 +8,18 @@ interface BillingBannerWrapperProps {
   dueDate: Date | null;
   hasUnpaid: boolean;
   totalDebt: number;
+  bankName?: string;
+  bankAccount?: string;
 }
 
-export function BillingBannerWrapper({ status, dueDate, hasUnpaid, totalDebt }: BillingBannerWrapperProps) {
+export function BillingBannerWrapper({ 
+  status, 
+  dueDate, 
+  hasUnpaid, 
+  totalDebt,
+  bankName,
+  bankAccount
+}: BillingBannerWrapperProps) {
   const pathname = usePathname();
 
   // Hanya tampilkan banner di halaman utama dashboard atau halaman billing
@@ -28,6 +37,8 @@ export function BillingBannerWrapper({ status, dueDate, hasUnpaid, totalDebt }: 
       dueDate={dueDate} 
       hasUnpaid={hasUnpaid} 
       totalDebt={totalDebt} 
+      bankName={bankName}
+      bankAccount={bankAccount}
     />
   );
 }

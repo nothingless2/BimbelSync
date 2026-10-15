@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { decrypt } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import BillingClientPage from "./client-page";
+import { getPlatformBankInfo } from "@/lib/platform-settings";
 
 export default async function BillingPage() {
   const cookieStore = await cookies();
@@ -35,7 +36,7 @@ export default async function BillingPage() {
       ));
     }
 
-    const [invoices, academies, plans] = await Promise.all([
+    const [invoices, academies, plans, bankInfo] = await Promise.all([
       prisma.platformInvoice.findMany({
         where: { academy: { deleted_at: null } },
         include: {
@@ -54,6 +55,7 @@ export default async function BillingPage() {
         where: { deleted_at: null, is_active: true },
         orderBy: { price: "asc" },
       }),
+      getPlatformBankInfo(),
     ]);
 
     const serializedInvoices = invoices.map(inv => ({
@@ -77,7 +79,14 @@ export default async function BillingPage() {
       price: p.price,
     }));
 
-    return <BillingClientPage invoices={serializedInvoices} academies={serializedAcademies} plans={serializedPlans} />;
+    return (
+      <BillingClientPage 
+        invoices={serializedInvoices} 
+        academies={serializedAcademies} 
+        plans={serializedPlans} 
+        initialBankInfo={bankInfo}
+      />
+    );
   } catch (error) {
     console.error("BillingPage error:", error);
     return (

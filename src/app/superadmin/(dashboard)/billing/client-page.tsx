@@ -3,11 +3,19 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
   FileText, CheckCircle2, Clock, AlertTriangle, Check, Ban, ChevronDown,
-  Plus, Building2, Loader2, AlertCircle, X, Trash2, Search, Filter, Eye
+  Plus, Building2, Loader2, AlertCircle, X, Trash2, Search, Filter, Eye,
+  Landmark, Edit3
 } from "lucide-react";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { toast } from "@/components/ui/sonner";
-import { verifyInvoiceAction, markOverdueAction, voidInvoiceAction, createInvoiceAction, deleteInvoiceAction } from "./actions";
+import { 
+  verifyInvoiceAction, 
+  markOverdueAction, 
+  voidInvoiceAction, 
+  createInvoiceAction, 
+  deleteInvoiceAction,
+  updatePlatformBankInfoAction 
+} from "./actions";
 import { Pagination } from "@/components/ui/pagination";
 
 const IDR = (n: number) =>
@@ -185,12 +193,43 @@ interface Props {
   invoices: InvoiceItem[];
   academies: { id: string; name: string; subscription_due_date: string | null; plan: { id: string; name: string; price: number } }[];
   plans: { id: string; name: string; price: number }[];
+  initialBankInfo?: { bankName: string; bankAccount: string };
 }
 
-export default function BillingClientPage({ invoices, academies, plans }: Props) {
+export default function BillingClientPage({ invoices, academies, plans, initialBankInfo }: Props) {
   const [createModal, setCreateModal] = useState(false);
   const [form, setForm] = useState({ academyId: "", planId: "", billingPeriod: "", dueDate: "", amount: "", durationMonths: "1" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Bank Info state
+  const [bankInfo, setBankInfo] = useState(
+    initialBankInfo || { bankName: "BCA a.n PT BimbelSync Nusantara", bankAccount: "123-456-7890" }
+  );
+  const [bankModal, setBankModal] = useState(false);
+  const [bankForm, setBankForm] = useState({
+    bankName: initialBankInfo?.bankName || "BCA a.n PT BimbelSync Nusantara",
+    bankAccount: initialBankInfo?.bankAccount || "123-456-7890",
+  });
+  const [isSavingBank, setIsSavingBank] = useState(false);
+
+  const handleBankSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bankForm.bankName.trim() || !bankForm.bankAccount.trim()) {
+      toast.error("Nama bank dan nomor rekening wajib diisi.");
+      return;
+    }
+    setIsSavingBank(true);
+    const res = await updatePlatformBankInfoAction(bankForm.bankName, bankForm.bankAccount);
+    setIsSavingBank(false);
+
+    if (res.error) {
+      toast.error(res.error);
+    } else {
+      toast.success("Rekening transfer platform berhasil diperbarui!");
+      setBankInfo({ bankName: bankForm.bankName.trim(), bankAccount: bankForm.bankAccount.trim() });
+      setBankModal(false);
+    }
+  };
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<"ALL" | "UNPAID" | "PAID" | "OVERDUE" | "VOID">("ALL");
@@ -275,6 +314,16 @@ export default function BillingClientPage({ invoices, academies, plans }: Props)
         </div>
         <div className="flex items-center gap-2">
           <button
+            onClick={() => {
+              setBankForm({ bankName: bankInfo.bankName, bankAccount: bankInfo.bankAccount });
+              setBankModal(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-semibold text-sm transition"
+          >
+            <Landmark size={16} className="text-blue-600 dark:text-blue-400" />
+            Rekening Transfer
+          </button>
+          <button
             onClick={exportToCSV}
             className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-semibold text-sm transition"
           >
@@ -285,6 +334,43 @@ export default function BillingClientPage({ invoices, academies, plans }: Props)
             className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-sm transition shadow-sm shadow-blue-500/20"
           >
             <Plus size={16} /> Buat Invoice Baru
+          </button>
+        </div>
+      </div>
+
+      {/* Rekening Tujuan Transfer Platform */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-5 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl shrink-0">
+            <Landmark size={22} />
+          </div>
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-sm font-bold text-slate-800 dark:text-white">Rekening Tujuan Pembayaran BimbelSync</h3>
+              <span className="text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 px-2 py-0.5 rounded-full">
+                Aktif di Notifikasi Tenant
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Rekening ini otomatis ditampilkan pada notifikasi dashboard penyewa bimbel yang memiliki tagihan tertunda.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+          <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
+            <span className="font-semibold text-slate-700 dark:text-slate-300">{bankInfo.bankName}</span>
+            <span className="text-slate-300 dark:text-slate-600">•</span>
+            <span className="font-mono font-bold text-blue-600 dark:text-blue-400">{bankInfo.bankAccount}</span>
+          </div>
+          <button
+            onClick={() => {
+              setBankForm({ bankName: bankInfo.bankName, bankAccount: bankInfo.bankAccount });
+              setBankModal(true);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-xl text-xs font-semibold transition"
+          >
+            <Edit3 size={13} />
+            Edit Rekening
           </button>
         </div>
       </div>
@@ -592,6 +678,103 @@ export default function BillingClientPage({ invoices, academies, plans }: Props)
                 <button type="submit" disabled={isSubmitting}
                   className="flex-1 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-70">
                   {isSubmitting ? <><Loader2 size={16} className="animate-spin" /> Membuat...</> : "Buat Invoice"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Edit Rekening Bank Platform */}
+      {bankModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg">
+                  <Landmark size={18} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 dark:text-white text-base">Edit Rekening Pembayaran</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Pengaturan rekening tujuan transfer langganan BimbelSync.</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setBankModal(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleBankSubmit} className="p-5 space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  Nama Bank & Atas Nama
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={bankForm.bankName}
+                  onChange={(e) => setBankForm({ ...bankForm, bankName: e.target.value })}
+                  placeholder="Contoh: BCA a.n PT BimbelSync Nusantara"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                />
+                <p className="text-[11px] text-slate-500">
+                  Teks ini akan muncul sebagai nama bank penerima di notifikasi dashboard tenant.
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  Nomor Rekening
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={bankForm.bankAccount}
+                  onChange={(e) => setBankForm({ ...bankForm, bankAccount: e.target.value })}
+                  placeholder="Contoh: 123-456-7890"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none text-slate-900 dark:text-white tracking-wider"
+                />
+                <p className="text-[11px] text-slate-500">
+                  Nomor rekening yang dapat disalin dengan satu klik oleh penyewa.
+                </p>
+              </div>
+
+              {/* Preview Box */}
+              <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200/70 dark:border-slate-700/60 space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Preview di Notifikasi Tenant</span>
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <span className="text-xs font-semibold bg-white dark:bg-slate-900 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700">
+                    {bankForm.bankName || "Nama Bank"}
+                  </span>
+                  <span className="text-xs font-bold font-mono px-2.5 py-1 bg-white dark:bg-slate-900 rounded-md border border-slate-200 dark:border-slate-700 text-blue-600 dark:text-blue-400">
+                    {bankForm.bankAccount || "000-000-0000"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setBankModal(false)}
+                  className="flex-1 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingBank}
+                  className="flex-1 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-70 shadow-sm shadow-blue-500/20"
+                >
+                  {isSavingBank ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" /> Menyimpan...
+                    </>
+                  ) : (
+                    "Simpan Perubahan"
+                  )}
                 </button>
               </div>
             </form>

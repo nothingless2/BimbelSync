@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { decrypt } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { requireSuperadminSession } from "@/lib/session";
 
 async function getSuperadminId() {
   const cookieStore = await cookies();
@@ -211,3 +212,52 @@ export async function createInvoiceAction(academyId: string, planId: string, amo
     return { error: "Terjadi kesalahan saat membuat invoice." };
   }
 }
+
+export async function updatePlatformBankInfoAction(bankName: string, bankAccount: string) {
+  const auth = await requireSuperadminSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
+
+  const trimmedName = bankName?.trim();
+  const trimmedAccount = bankAccount?.trim();
+
+  if (!trimmedName || !trimmedAccount) {
+    return { error: "Nama bank dan nomor rekening wajib diisi." };
+  }
+
+  try {
+    await prisma.$transaction([
+      prisma.platformSetting.upsert({
+        where: { key: "bank_name" },
+        update: { value: trimmedName },
+        create: { key: "bank_name", value: trimmedName },
+      }),
+      prisma.platformSetting.upsert({
+        where: { key: "bank_account" },
+        update: { value: trimmedAccount },
+        create: { key: "bank_account", value: trimmedAccount },
+      }),
+    ]);
+
+    await prisma.auditLog.create({
+      data: {
+        superadmin_id: session.id,
+        action: "UPDATE_PLATFORM_SETTINGS",
+        entity_type: "PlatformSetting",
+        details: {
+          setting: "bank_account_info",
+          bank_name: trimmedName,
+          bank_account: trimmedAccount,
+        },
+      },
+    });
+
+    revalidatePath("/superadmin/billing");
+    revalidatePath("/[tenantSlug]/dashboard", "layout");
+    return { success: true };
+  } catch (error) {
+    console.error("updatePlatformBankInfoAction error:", error);
+    return { error: "Terjadi kesalahan saat menyimpan pengaturan rekening bank." };
+  }
+}
+

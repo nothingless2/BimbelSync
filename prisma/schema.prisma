@@ -409,3 +409,9 @@ model LoginRateLimit {
   locked_until    DateTime?
   updated_at      DateTime  @updatedAt
 }
+
+model PlatformSetting {
+  key        String   @id
+  value      String
+  updated_at DateTime @updatedAt
+}
