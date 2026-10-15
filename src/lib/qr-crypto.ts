@@ -1,9 +1,9 @@
 import crypto from 'crypto';
 
-// Secret key WAJIB diatur di .env
-const _qrKey = process.env.QR_SECRET_KEY;
+// Secret key untuk enkripsi QR dinamis (Fallback ke JWT_SECRET jika belum ada di .env)
+const _qrKey = process.env.QR_SECRET_KEY || process.env.JWT_SECRET;
 if (!_qrKey) {
-  throw new Error("CRITICAL: QR_SECRET_KEY belum diatur di file .env!");
+  throw new Error("CRITICAL: QR_SECRET_KEY atau JWT_SECRET belum diatur di file .env!");
 }
 const SECRET_KEY: string = _qrKey;
 

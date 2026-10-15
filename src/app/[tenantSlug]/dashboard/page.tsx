@@ -21,21 +21,18 @@ export default async function DashboardHome({ params }: { params: Promise<{ tena
     redirect(`/${tenantSlug}/login`);
   }
 
-  const dbUser = await prisma.staff.findUnique({
-    where: { id: session.id },
-    select: { role: true }
-  });
-
-  const isTutor = dbUser?.role === 'TUTOR';
-
+  // Gunakan session.role dari JWT cookie tanpa query ulang ke DB
+  const isTutor = session.role === 'TUTOR';
   const academyId = session.academy_id as string;
   const today = new Date();
   
-  const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-  const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+  const startOfDay = new Date(today);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(today);
+  endOfDay.setHours(23, 59, 59, 999);
 
-  // Menarik semua data yang dibutuhkan secara paralel
-  const [totalStudents, todaySchedules, invoices, thisMonthClassesCount, pendingAttendanceCount] = await Promise.all([
+  // Menarik semua data yang dibutuhkan secara paralel dengan query yang teroptimasi
+  const [totalStudents, todaySchedules, unpaidAgg, recentPayments, thisMonthClassesCount, pendingAttendanceCount] = await Promise.all([
     // 1. Total Siswa Aktif (Hanya ADMIN)
     !isTutor ? prisma.student.count({
       where: {
@@ -55,7 +52,7 @@ export default async function DashboardHome({ params }: { params: Promise<{ tena
           gte: startOfDay,
           lte: endOfDay
         },
-        status: 'SCHEDULED' // Only get scheduled ones
+        status: 'SCHEDULED'
       },
       include: {
         program: true,
@@ -67,20 +64,33 @@ export default async function DashboardHome({ params }: { params: Promise<{ tena
       }
     }),
 
-    // 3. Invoice untuk menghitung piutang (Hanya ADMIN)
+    // 3. Agregasi Tunggakan Piutang (O(1) memory & kalkulasi langsung di PostgreSQL)
+    !isTutor ? prisma.invoice.aggregate({
+      where: {
+        academy_id: academyId,
+        payment_status: { in: ['UNPAID', 'OVERDUE'] }
+      },
+      _sum: {
+        total_amount: true
+      }
+    }) : Promise.resolve({ _sum: { total_amount: 0 } }),
+
+    // 4. Ambil 5 Pembayaran Terakhir (PAID) secara spesifik (LIMIT 5)
     !isTutor ? prisma.invoice.findMany({
       where: {
         academy_id: academyId,
+        payment_status: 'PAID'
       },
       include: {
         student: true
       },
       orderBy: {
-        id: 'desc'
-      }
+        created_at: 'desc'
+      },
+      take: 5
     }) : Promise.resolve([]),
 
-    // 4. Total Kelas Bulan Ini (Hanya TUTOR)
+    // 5. Total Kelas Bulan Ini (Hanya TUTOR)
     isTutor ? prisma.schedule.count({
       where: {
         tutor_id: session.id,
@@ -92,7 +102,7 @@ export default async function DashboardHome({ params }: { params: Promise<{ tena
       }
     }) : Promise.resolve(0),
 
-    // 5. Absensi Tertunda (Hanya TUTOR)
+    // 6. Absensi Tertunda (Hanya TUTOR)
     isTutor ? prisma.schedule.count({
       where: {
         tutor_id: session.id,
@@ -103,20 +113,12 @@ export default async function DashboardHome({ params }: { params: Promise<{ tena
     }) : Promise.resolve(0)
   ]);
 
-  // Kalkulasi Tunggakan (UNPAID / OVERDUE)
-  const totalUnpaid = invoices
-    .filter(inv => inv.payment_status === 'UNPAID' || inv.payment_status === 'OVERDUE')
-    .reduce((sum, inv) => sum + inv.total_amount, 0);
-
-  // 5 Pembayaran Terakhir (PAID)
-  const recentPayments = invoices
-    .filter(inv => inv.payment_status === 'PAID')
-    .slice(0, 5);
+  const totalUnpaid = unpaidAgg._sum?.total_amount || 0;
 
   return (
     <DashboardClientPage 
       tenantSlug={tenantSlug}
-      userRole={dbUser?.role || 'ADMIN'}
+      userRole={session.role || 'ADMIN'}
       totalStudents={totalStudents}
       todayClassesCount={todaySchedules.length}
       totalUnpaid={totalUnpaid}

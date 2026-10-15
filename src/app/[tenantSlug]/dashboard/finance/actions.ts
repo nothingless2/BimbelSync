@@ -3,13 +3,13 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { createAuditLog } from "@/lib/audit";
-import { requireTenantSession } from "@/lib/session";
+import { requireAdminSession } from "@/lib/session";
 
 const VALID_PAYMENT_METHODS = ["GATEWAY", "MANUAL_TRANSFER", "CASH"] as const;
 type PaymentMethodType = typeof VALID_PAYMENT_METHODS[number];
 
 export async function createInvoiceAction(formData: FormData) {
-  const result = await requireTenantSession();
+  const result = await requireAdminSession();
   if ('error' in result) return { error: result.error };
   const session = result.session;
 
@@ -83,7 +83,7 @@ export async function createInvoiceAction(formData: FormData) {
 }
 
 export async function verifyPaymentAction(invoiceId: string, paymentMethod: string) {
-  const result = await requireTenantSession();
+  const result = await requireAdminSession();
   if ('error' in result) return { error: result.error };
   const session = result.session;
 
@@ -141,7 +141,7 @@ export async function verifyPaymentAction(invoiceId: string, paymentMethod: stri
 }
 
 export async function deleteInvoiceAction(invoiceId: string) {
-  const result = await requireTenantSession();
+  const result = await requireAdminSession();
   if ('error' in result) return { error: result.error };
   const session = result.session;
 
@@ -189,7 +189,7 @@ export async function splitInstallmentsAction(
   invoiceId: string, 
   installmentsData: { amount: number; due_date: string }[]
 ) {
-  const result = await requireTenantSession();
+  const result = await requireAdminSession();
   if ('error' in result) return { error: result.error };
   const session = result.session;
 

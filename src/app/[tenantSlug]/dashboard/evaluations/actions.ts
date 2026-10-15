@@ -1,16 +1,8 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { cookies } from "next/headers";
-import { decrypt } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
-
-async function getSession() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionCookie) return null;
-  return await decrypt(sessionCookie);
-}
+import { requireStaffSession, requireAdminSession } from "@/lib/session";
 
 export async function createEvaluationAction(data: {
   academyId: string;
@@ -22,15 +14,18 @@ export async function createEvaluationAction(data: {
   notes?: string;
   tenantSlug: string;
 }) {
-  const session = await getSession();
-  if (!session || !session.id || session.academy_id !== data.academyId) {
-    return { error: "Unauthorized" };
+  const auth = await requireStaffSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
+
+  if (session.academy_id !== data.academyId) {
+    return { error: "Akses ditolak." };
   }
 
   try {
     await prisma.studentEvaluation.create({
       data: {
-        academy_id: data.academyId,
+        academy_id: session.academy_id,
         student_id: data.studentId,
         program_id: data.programId,
         evaluator_id: session.id,
@@ -58,9 +53,12 @@ export async function bulkCreateEvaluationsAction(data: {
   evaluations: { studentId: string, score?: number, notes?: string }[];
   tenantSlug: string;
 }) {
-  const session = await getSession();
-  if (!session || !session.id || session.academy_id !== data.academyId) {
-    return { error: "Unauthorized" };
+  const auth = await requireStaffSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
+
+  if (session.academy_id !== data.academyId) {
+    return { error: "Akses ditolak." };
   }
 
   if (data.evaluations.length === 0) {
@@ -69,7 +67,7 @@ export async function bulkCreateEvaluationsAction(data: {
 
   try {
     const records = data.evaluations.map(ev => ({
-      academy_id: data.academyId,
+      academy_id: session.academy_id,
       student_id: ev.studentId,
       program_id: data.programId,
       evaluator_id: session.id,
@@ -93,13 +91,16 @@ export async function bulkCreateEvaluationsAction(data: {
 }
 
 export async function deleteEvaluationAction(id: string, tenantSlug: string) {
-  const session = await getSession();
-  if (!session || !session.id) return { error: "Unauthorized" };
+  const auth = await requireStaffSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   try {
-    const evaluation = await prisma.studentEvaluation.findUnique({ where: { id } });
-    if (!evaluation || evaluation.academy_id !== session.academy_id) {
-      return { error: "Evaluation not found or access denied" };
+    const evaluation = await prisma.studentEvaluation.findFirst({
+      where: { id, academy_id: session.academy_id }
+    });
+    if (!evaluation) {
+      return { error: "Evaluasi tidak ditemukan atau akses ditolak." };
     }
 
     await prisma.studentEvaluation.delete({
@@ -115,10 +116,18 @@ export async function deleteEvaluationAction(id: string, tenantSlug: string) {
 }
 
 export async function updateEvaluationScoreAction(id: string, score: number | null, tenantSlug: string) {
-  const session = await getSession();
-  if (!session || !session.id) return { error: "Unauthorized" };
+  const auth = await requireStaffSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   try {
+    const evaluation = await prisma.studentEvaluation.findFirst({
+      where: { id, academy_id: session.academy_id }
+    });
+    if (!evaluation) {
+      return { error: "Evaluasi tidak ditemukan atau akses ditolak." };
+    }
+
     await prisma.studentEvaluation.update({
       where: { id },
       data: { score }
@@ -131,13 +140,21 @@ export async function updateEvaluationScoreAction(id: string, score: number | nu
 }
 
 export async function deleteEvaluationColumnAction(programId: string, title: string, evaluationType: "EXAM" | "HOMEWORK" | "MONTHLY_REPORT", tenantSlug: string) {
-  const session = await getSession();
-  if (!session || !session.id) return { error: "Unauthorized" };
+  const auth = await requireStaffSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   try {
+    // Validasi program milik academy user
+    const program = await prisma.program.findFirst({
+      where: { id: programId, academy_id: session.academy_id }
+    });
+    if (!program) return { error: "Program tidak ditemukan atau akses ditolak." };
+
     await prisma.studentEvaluation.deleteMany({
       where: {
         program_id: programId,
+        academy_id: session.academy_id,
         title: title,
         evaluation_type: evaluationType
       }
@@ -150,10 +167,18 @@ export async function deleteEvaluationColumnAction(programId: string, title: str
 }
 
 export async function updateEvaluationNotesAction(id: string, notes: string | null, tenantSlug: string) {
-  const session = await getSession();
-  if (!session || !session.id) return { error: "Unauthorized" };
+  const auth = await requireStaffSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   try {
+    const evaluation = await prisma.studentEvaluation.findFirst({
+      where: { id, academy_id: session.academy_id }
+    });
+    if (!evaluation) {
+      return { error: "Evaluasi tidak ditemukan atau akses ditolak." };
+    }
+
     await prisma.studentEvaluation.update({
       where: { id },
       data: { notes }
@@ -166,13 +191,20 @@ export async function updateEvaluationNotesAction(id: string, notes: string | nu
 }
 
 export async function publishEvaluationColumnAction(programId: string, title: string, evaluationType: "EXAM" | "HOMEWORK" | "MONTHLY_REPORT", tenantSlug: string) {
-  const session = await getSession();
-  if (!session || !session.id) return { error: "Unauthorized" };
+  const auth = await requireStaffSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   try {
+    const program = await prisma.program.findFirst({
+      where: { id: programId, academy_id: session.academy_id }
+    });
+    if (!program) return { error: "Program tidak ditemukan atau akses ditolak." };
+
     await prisma.studentEvaluation.updateMany({
       where: {
         program_id: programId,
+        academy_id: session.academy_id,
         title: title,
         evaluation_type: evaluationType
       },
@@ -190,13 +222,20 @@ export async function publishEvaluationColumnAction(programId: string, title: st
 }
 
 export async function unpublishEvaluationColumnAction(programId: string, title: string, evaluationType: "EXAM" | "HOMEWORK" | "MONTHLY_REPORT", tenantSlug: string) {
-  const session = await getSession();
-  if (!session || !session.id) return { error: "Unauthorized" };
+  const auth = await requireStaffSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   try {
+    const program = await prisma.program.findFirst({
+      where: { id: programId, academy_id: session.academy_id }
+    });
+    if (!program) return { error: "Program tidak ditemukan atau akses ditolak." };
+
     await prisma.studentEvaluation.updateMany({
       where: {
         program_id: programId,
+        academy_id: session.academy_id,
         title: title,
         evaluation_type: evaluationType
       },
@@ -214,14 +253,20 @@ export async function unpublishEvaluationColumnAction(programId: string, title: 
 }
 
 export async function updateProgramWeightsAction(programId: string, weightExam: number, weightHomework: number, tenantSlug: string) {
-  const session = await getSession();
-  if (!session || !session.id) return { error: "Unauthorized" };
+  const auth = await requireAdminSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   if (weightExam + weightHomework !== 100) {
     return { error: "Total bobot harus 100%" };
   }
 
   try {
+    const program = await prisma.program.findFirst({
+      where: { id: programId, academy_id: session.academy_id }
+    });
+    if (!program) return { error: "Program tidak ditemukan atau akses ditolak." };
+
     await prisma.program.update({
       where: { id: programId },
       data: {

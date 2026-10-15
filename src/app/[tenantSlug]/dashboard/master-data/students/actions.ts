@@ -1,20 +1,17 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { decrypt, validatePassword } from "@/lib/auth";
-import { cookies } from "next/headers";
+import { validatePassword } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcrypt";
 import { WithdrawnReason } from "@prisma/client";
 import { createAuditLog } from "@/lib/audit";
+import { requireAdminSession } from "@/lib/session";
 
 export async function createStudentAction(formData: FormData) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) return { error: "Autentikasi diperlukan." };
-
-  const session = await decrypt(sessionToken);
-  if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
+  const auth = await requireAdminSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   const fullName = formData.get("full_name") as string;
   const username = formData.get("username") as string;
@@ -136,12 +133,9 @@ export async function createStudentAction(formData: FormData) {
 }
 
 export async function updateStudentAction(studentId: string, formData: FormData) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) return { error: "Autentikasi diperlukan." };
-
-  const session = await decrypt(sessionToken);
-  if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
+  const auth = await requireAdminSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   const fullName = formData.get("full_name") as string;
   const email = formData.get("email") as string;
@@ -197,12 +191,9 @@ export async function updateStudentAction(studentId: string, formData: FormData)
 }
 
 export async function deleteStudentAction(studentId: string) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) return { error: "Autentikasi diperlukan." };
-
-  const session = await decrypt(sessionToken);
-  if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
+  const auth = await requireAdminSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   try {
     const existing = await prisma.student.findFirst({
@@ -251,12 +242,9 @@ export async function deleteStudentAction(studentId: string) {
 }
 
 export async function enrollStudentAction(studentId: string, programId: string) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) return { error: "Autentikasi diperlukan." };
-
-  const session = await decrypt(sessionToken);
-  if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
+  const auth = await requireAdminSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   try {
     const existingEnrollment = await prisma.enrollment.findUnique({
@@ -302,12 +290,9 @@ export async function enrollStudentAction(studentId: string, programId: string) 
 }
 
 export async function withdrawEnrollmentAction(enrollmentId: string, reason: WithdrawnReason, notes?: string) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) return { error: "Autentikasi diperlukan." };
-
-  const session = await decrypt(sessionToken);
-  if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
+  const auth = await requireAdminSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   try {
     const enrollment = await prisma.enrollment.findUnique({
@@ -338,12 +323,9 @@ export async function withdrawEnrollmentAction(enrollmentId: string, reason: Wit
 }
 
 export async function bulkCreateStudentsAction(programId: string, studentsToImport: { full_name: string, username: string, email?: string, parent_whatsapp: string }[]) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) return { error: "Autentikasi diperlukan." };
-
-  const session = await decrypt(sessionToken);
-  if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
+  const auth = await requireAdminSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   if (!programId) {
     return { error: "Program harus dipilih." };

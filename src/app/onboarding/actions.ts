@@ -28,7 +28,7 @@ export async function setupAcademyAction(prevState: any, formData: FormData) {
     return { error: "URL Portal hanya boleh berisi huruf kecil, angka, dan tanda strip (-)." };
   }
 
-  const reservedPaths = ["superadmin", "api", "register", "login", "onboarding", "admin", "dashboard", "terms", "privacy"];
+  const reservedPaths = ["superadmin", "api", "register", "login", "onboarding", "admin", "dashboard", "terms", "privacy", "verify-otp", "internal"];
   if (reservedPaths.includes(pathUrl)) {
     return { error: "URL Portal tersebut tidak dapat digunakan (kata terlarang sistem)." };
   }

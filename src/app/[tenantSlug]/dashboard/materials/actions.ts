@@ -1,16 +1,8 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { cookies } from "next/headers";
-import { decrypt } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
-
-async function getSession() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionCookie) return null;
-  return await decrypt(sessionCookie);
-}
+import { requireStaffSession } from "@/lib/session";
 
 export async function createMaterialAction(data: {
   academyId: string;
@@ -21,15 +13,24 @@ export async function createMaterialAction(data: {
   url: string;
   tenantSlug: string;
 }) {
-  const session = await getSession();
-  if (!session || !session.id || session.academy_id !== data.academyId) {
-    return { error: "Unauthorized" };
+  const auth = await requireStaffSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
+
+  if (session.academy_id !== data.academyId) {
+    return { error: "Akses ditolak." };
   }
 
   try {
+    // Validasi program milik akademi
+    const program = await prisma.program.findFirst({
+      where: { id: data.programId, academy_id: session.academy_id, deleted_at: null }
+    });
+    if (!program) return { error: "Program tidak ditemukan." };
+
     await prisma.learningMaterial.create({
       data: {
-        academy_id: data.academyId,
+        academy_id: session.academy_id,
         program_id: data.programId,
         title: data.title,
         description: data.description || null,
@@ -48,13 +49,16 @@ export async function createMaterialAction(data: {
 }
 
 export async function deleteMaterialAction(id: string, tenantSlug: string) {
-  const session = await getSession();
-  if (!session || !session.id) return { error: "Unauthorized" };
+  const auth = await requireStaffSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   try {
-    const material = await prisma.learningMaterial.findUnique({ where: { id } });
-    if (!material || material.academy_id !== session.academy_id) {
-      return { error: "Material not found or access denied" };
+    const material = await prisma.learningMaterial.findFirst({
+      where: { id, academy_id: session.academy_id }
+    });
+    if (!material) {
+      return { error: "Materi belajar tidak ditemukan atau akses ditolak." };
     }
 
     await prisma.learningMaterial.delete({

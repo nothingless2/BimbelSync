@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { decrypt } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { redirect } from 'next/navigation';
-import { Calendar, Clock, MapPin, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import StudentSchedulesClientPage from '../schedules/client-page';
 
 // Helper format waktu (WIB) untuk Server Component di Vercel
@@ -11,9 +11,6 @@ const formatTimeWIB = (date: Date | string) => {
 };
 const formatDateWIB = (date: Date | string) => {
   return new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(date));
-};
-const formatFullDateWIB = (date: Date | string) => {
-  return new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(date));
 };
 
 export default async function StudentDashboardPage({
@@ -30,56 +27,53 @@ export default async function StudentDashboardPage({
     redirect(`/${tenantSlug}/login`);
   }
 
-  const student = await prisma.student.findUnique({
-    where: { id: session.id },
-    include: {
-      enrollments: {
-        include: {
-          program: true
-        }
-      },
-      attendances: {
-        orderBy: { scanned_at: 'desc' },
-        take: 5,
-        include: {
-          schedule: {
-            include: {
-              room: true,
-              tutor: true,
-              program: true,
+  const [student, allSchedules] = await Promise.all([
+    prisma.student.findUnique({
+      where: { id: session.id },
+      include: {
+        enrollments: {
+          include: {
+            program: true
+          }
+        },
+        attendances: {
+          orderBy: { scanned_at: 'desc' },
+          take: 5,
+          include: {
+            schedule: {
+              include: {
+                room: true,
+                tutor: true,
+                program: true,
+              }
             }
           }
         }
       }
-    }
-  });
+    }),
+    prisma.schedule.findMany({
+      where: {
+        program: {
+          academy_id: session.academy_id,
+          enrollments: {
+            some: { student_id: session.id, status: 'ACTIVE' }
+          }
+        }
+      },
+      include: {
+        room: true,
+        tutor: true,
+        program: true,
+      },
+      orderBy: {
+        start_time: 'asc'
+      }
+    })
+  ]);
 
   if (!student) {
     redirect(`/${tenantSlug}/login`);
   }
-
-  // Cari jadwal mendatang (mulai dari hari ini)
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const allSchedules = await prisma.schedule.findMany({
-    where: {
-      program: {
-        academy_id: session.academy_id,
-        enrollments: {
-          some: { student_id: session.id, status: 'ACTIVE' }
-        }
-      }
-    },
-    include: {
-      room: true,
-      tutor: true,
-      program: true,
-    },
-    orderBy: {
-      start_time: 'asc'
-    }
-  });
 
   return (
     <div className="p-4 sm:p-8 md:pt-10 space-y-8">

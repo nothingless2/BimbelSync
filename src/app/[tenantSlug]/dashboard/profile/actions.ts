@@ -1,19 +1,10 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { decrypt, encrypt, validatePassword } from "@/lib/auth";
-import { cookies } from "next/headers";
+import { validatePassword } from "@/lib/auth";
 import bcrypt from "bcrypt";
 import { revalidatePath } from "next/cache";
-
-async function getSession() {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) return null;
-  const session = await decrypt(sessionToken);
-  if (!session || !session.id) return null;
-  return session;
-}
+import { getSession } from "@/lib/session";
 
 export async function updateProfileAction(formData: FormData) {
   const session = await getSession();

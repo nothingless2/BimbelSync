@@ -1,21 +1,17 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { cookies } from "next/headers";
-import { decrypt, encrypt, validatePassword } from "@/lib/auth";
+import { validatePassword, encrypt } from "@/lib/auth";
 import bcrypt from "bcrypt";
 import { revalidatePath } from "next/cache";
-
-async function getSession() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("bimbelsync_session")?.value;
-  return sessionCookie ? await decrypt(sessionCookie) : null;
-}
+import { cookies } from "next/headers";
+import { requireSuperadminSession } from "@/lib/session";
 
 export async function updateProfileAction(formData: FormData) {
   try {
-    const session = await getSession();
-    if (!session || session.role !== "SUPERADMIN") return { error: "Unauthorized" };
+    const auth = await requireSuperadminSession();
+    if ('error' in auth) return { error: auth.error };
+    const session = auth.session;
 
     const name = formData.get("name") as string;
 
@@ -34,8 +30,9 @@ export async function updateProfileAction(formData: FormData) {
 
 export async function updateAvatarAction(base64Image: string) {
   try {
-    const session = await getSession();
-    if (!session || session.role !== "SUPERADMIN") return { error: "Unauthorized" };
+    const auth = await requireSuperadminSession();
+    if ('error' in auth) return { error: auth.error };
+    const session = auth.session;
 
     await prisma.superadmin.update({
       where: { id: session.id },
@@ -52,8 +49,9 @@ export async function updateAvatarAction(base64Image: string) {
 
 export async function changePasswordAction(formData: FormData) {
   try {
-    const session = await getSession();
-    if (!session || session.role !== "SUPERADMIN") return { error: "Unauthorized" };
+    const auth = await requireSuperadminSession();
+    if ('error' in auth) return { error: auth.error };
+    const session = auth.session;
 
     const oldPassword = formData.get("old_password") as string;
     const newPassword = formData.get("new_password") as string;

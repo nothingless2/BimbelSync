@@ -1,22 +1,17 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { cookies } from "next/headers";
-import { decrypt } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
-
-async function getAdminSession(tenantSlug: string) {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionCookie) return null;
-  const session = await decrypt(sessionCookie);
-  if (!session || session.role !== "ADMIN" || session.tenant_slug !== tenantSlug) return null;
-  return session;
-}
+import { requireAdminSession } from "@/lib/session";
 
 export async function uploadPlatformInvoiceProofAction(tenantSlug: string, invoiceId: string, base64Url: string) {
-  const session = await getAdminSession(tenantSlug);
-  if (!session) return { error: "Tidak terautentikasi." };
+  const auth = await requireAdminSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
+
+  if (session.tenant_slug && session.tenant_slug !== tenantSlug) {
+    return { error: "Akses ditolak." };
+  }
 
   try {
     const invoice = await prisma.platformInvoice.findUnique({

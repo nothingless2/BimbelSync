@@ -93,7 +93,7 @@ export async function middleware(req: NextRequest) {
   return NextResponse.next();
 }
 
-// Jalankan middleware di semua halaman, KECUALI API dan file gambar/sistem
+// Jalankan middleware di semua halaman, KECUALI API dan file gambar/sistem/manifest
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico)).*)'],
 };

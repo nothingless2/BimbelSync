@@ -4,10 +4,13 @@ import prisma from "@/lib/prisma";
 import { validatePassword } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcrypt";
+import { requireSuperadminSession } from "@/lib/session";
 
 // ==================== PLAN (PAKET BERLANGGANAN) ====================
 
 export async function createPlanAction(formData: FormData) {
+  const auth = await requireSuperadminSession();
+  if ('error' in auth) return { error: auth.error };
   const name = formData.get("name") as string;
   const price = parseInt(formData.get("price") as string, 10);
   const maxStudents = formData.get("max_students") ? parseInt(formData.get("max_students") as string, 10) : null;
@@ -55,6 +58,8 @@ export async function createPlanAction(formData: FormData) {
 }
 
 export async function updatePlanAction(formData: FormData) {
+  const auth = await requireSuperadminSession();
+  if ('error' in auth) return { error: auth.error };
   const id = formData.get("id") as string;
   const name = formData.get("name") as string;
   const price = parseInt(formData.get("price") as string, 10);
@@ -104,6 +109,8 @@ export async function updatePlanAction(formData: FormData) {
 }
 
 export async function deletePlanAction(id: string) {
+  const auth = await requireSuperadminSession();
+  if ('error' in auth) return { error: auth.error };
   try {
     await prisma.plan.update({
       where: { id },
@@ -121,6 +128,8 @@ export async function deletePlanAction(id: string) {
 // ==================== ACADEMY (BIMBEL) ====================
 
 export async function createAcademyAction(formData: FormData) {
+  const auth = await requireSuperadminSession();
+  if ('error' in auth) return { error: auth.error };
   const name = formData.get("name") as string;
   const pathUrl = formData.get("path_url") as string;
   const planId = formData.get("plan_id") as string;
@@ -187,6 +196,8 @@ export async function createAcademyAction(formData: FormData) {
 }
 
 export async function updateAcademyAction(formData: FormData) {
+  const auth = await requireSuperadminSession();
+  if ('error' in auth) return { error: auth.error };
   const id = formData.get("id") as string;
   const name = formData.get("name") as string;
   const pathUrl = formData.get("path_url") as string;
@@ -238,6 +249,8 @@ export async function updateAcademyAction(formData: FormData) {
 }
 
 export async function deleteAcademyAction(id: string) {
+  const auth = await requireSuperadminSession();
+  if ('error' in auth) return { error: auth.error };
   try {
     const academy = await prisma.academy.findUnique({ where: { id } });
     if (!academy) return { error: "Akademi tidak ditemukan." };
@@ -259,6 +272,8 @@ export async function deleteAcademyAction(id: string) {
 }
 
 export async function restoreAcademyAction(id: string) {
+  const auth = await requireSuperadminSession();
+  if ('error' in auth) return { error: auth.error };
   try {
     const academy = await prisma.academy.findUnique({ where: { id } });
     if (!academy) return { error: "Akademi tidak ditemukan." };
@@ -294,6 +309,8 @@ export async function restoreAcademyAction(id: string) {
 }
 
 export async function hardDeleteAcademyAction(id: string) {
+  const auth = await requireSuperadminSession();
+  if ('error' in auth) return { error: auth.error };
   try {
     // Karena kita tidak memakai onDelete: Cascade di schema, 
     // kita harus menghapus data secara manual dari child terdalam ke parent 
@@ -354,6 +371,8 @@ export async function hardDeleteAcademyAction(id: string) {
 // ==================== SYSTEM USERS (SUPERADMIN) ====================
 
 export async function createSuperadminAction(formData: FormData) {
+  const auth = await requireSuperadminSession();
+  if ('error' in auth) return { error: auth.error };
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
@@ -376,6 +395,8 @@ export async function createSuperadminAction(formData: FormData) {
 }
 
 export async function updateSuperadminAction(formData: FormData) {
+  const auth = await requireSuperadminSession();
+  if ('error' in auth) return { error: auth.error };
   const id = formData.get("id") as string;
   const password = formData.get("password") as string;
 
@@ -399,6 +420,8 @@ export async function updateSuperadminAction(formData: FormData) {
 }
 
 export async function deleteSuperadminAction(id: string) {
+  const auth = await requireSuperadminSession();
+  if ('error' in auth) return { error: auth.error };
   try {
     await prisma.superadmin.update({
       where: { id },
@@ -414,14 +437,17 @@ export async function deleteSuperadminAction(id: string) {
 
 // ==================== BILLING ====================
 
-export async function verifyPlatformInvoiceAction(invoiceId: string, superadminId: string) {
+export async function verifyPlatformInvoiceAction(invoiceId: string, superadminId?: string) {
+  const auth = await requireSuperadminSession();
+  if ('error' in auth) return { error: auth.error };
+
   try {
     await prisma.platformInvoice.update({
       where: { id: invoiceId },
       data: {
         payment_status: "PAID",
         paid_at: new Date(),
-        verified_by_superadmin_id: superadminId,
+        verified_by_superadmin_id: auth.session.id || superadminId,
       },
     });
     revalidatePath("/superadmin/billing");

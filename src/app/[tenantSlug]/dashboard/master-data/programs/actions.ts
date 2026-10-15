@@ -1,18 +1,14 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { decrypt } from "@/lib/auth";
-import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createAuditLog } from "@/lib/audit";
+import { requireAdminSession } from "@/lib/session";
 
 export async function createProgramAction(formData: FormData) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) return { error: "Autentikasi diperlukan." };
-
-  const session = await decrypt(sessionToken);
-  if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
+  const auth = await requireAdminSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   const name = formData.get("name") as string;
   const maxCapacity = parseInt(formData.get("max_capacity") as string, 10);
@@ -57,12 +53,9 @@ export async function createProgramAction(formData: FormData) {
 }
 
 export async function updateProgramAction(programId: string, formData: FormData) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) return { error: "Autentikasi diperlukan." };
-
-  const session = await decrypt(sessionToken);
-  if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
+  const auth = await requireAdminSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   const name = formData.get("name") as string;
   const maxCapacity = parseInt(formData.get("max_capacity") as string, 10);
@@ -114,12 +107,9 @@ export async function updateProgramAction(programId: string, formData: FormData)
 }
 
 export async function deleteProgramAction(programId: string) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) return { error: "Autentikasi diperlukan." };
-
-  const session = await decrypt(sessionToken);
-  if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
+  const auth = await requireAdminSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   try {
     const existing = await prisma.program.findFirst({

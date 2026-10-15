@@ -24,7 +24,7 @@ export async function requireTenantSession(): Promise<
 > {
   const session = await getSession();
   if (!session || !session.academy_id) {
-    return { error: "Sesi tidak valid atau sudah kadaluarsa." };
+    return { error: "Akses ditolak." };
   }
   return { session: session as SessionPayload & { academy_id: string } };
 }
@@ -38,9 +38,37 @@ export async function requireSuperadminSession(): Promise<
 > {
   const session = await getSession();
   if (!session || session.role !== "SUPERADMIN") {
-    return { error: "Akses ditolak. Hanya Superadmin." };
+    return { error: "Akses ditolak." };
   }
   return { session };
+}
+
+/**
+ * Helper untuk memastikan session adalah Admin Bimbel (Bukan Tutor/Siswa).
+ */
+export async function requireAdminSession(): Promise<
+  | { error: string; session?: never }
+  | { session: SessionPayload & { academy_id: string }; error?: never }
+> {
+  const session = await getSession();
+  if (!session || !session.academy_id || session.role !== "ADMIN") {
+    return { error: "Akses ditolak." };
+  }
+  return { session: session as SessionPayload & { academy_id: string } };
+}
+
+/**
+ * Helper untuk memastikan session adalah Staff Bimbel (Admin atau Tutor).
+ */
+export async function requireStaffSession(): Promise<
+  | { error: string; session?: never }
+  | { session: SessionPayload & { academy_id: string }; error?: never }
+> {
+  const session = await getSession();
+  if (!session || !session.academy_id || (session.role !== "ADMIN" && session.role !== "TUTOR")) {
+    return { error: "Akses ditolak." };
+  }
+  return { session: session as SessionPayload & { academy_id: string } };
 }
 
 /**

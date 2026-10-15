@@ -1,21 +1,14 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { decrypt } from "@/lib/auth";
-import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createAuditLog } from "@/lib/audit";
+import { requireAdminSession } from "@/lib/session";
 
 export async function createScheduleAction(formData: FormData) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) return { error: "Autentikasi diperlukan." };
-
-  const session = await decrypt(sessionToken);
-  if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
-
-  const staff = await prisma.staff.findUnique({ where: { id: session.id }, select: { role: true } });
-  if (staff?.role === 'TUTOR') return { error: "Akses ditolak untuk peran Tutor." };
+  const auth = await requireAdminSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   const programId = formData.get("program_id") as string;
   const tutorId = formData.get("tutor_id") as string;
@@ -120,15 +113,9 @@ export async function createScheduleAction(formData: FormData) {
 }
 
 export async function cancelScheduleAction(scheduleId: string, reason: string) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) return { error: "Autentikasi diperlukan." };
-
-  const session = await decrypt(sessionToken);
-  if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
-
-  const staff = await prisma.staff.findUnique({ where: { id: session.id }, select: { role: true } });
-  if (staff?.role === 'TUTOR') return { error: "Akses ditolak untuk peran Tutor." };
+  const auth = await requireAdminSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   if (!reason || reason.trim() === "") {
     return { error: "Alasan pembatalan wajib diisi." };
@@ -170,15 +157,9 @@ export async function cancelScheduleAction(scheduleId: string, reason: string) {
 }
 
 export async function deleteScheduleAction(scheduleId: string) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) return { error: "Autentikasi diperlukan." };
-
-  const session = await decrypt(sessionToken);
-  if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
-
-  const staff = await prisma.staff.findUnique({ where: { id: session.id }, select: { role: true } });
-  if (staff?.role === 'TUTOR') return { error: "Akses ditolak untuk peran Tutor." };
+  const auth = await requireAdminSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   try {
     const existing = await prisma.schedule.findUnique({
@@ -217,15 +198,9 @@ export async function deleteScheduleAction(scheduleId: string) {
 }
 
 export async function bulkDeleteSchedulesAction(scheduleIds: string[]) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) return { error: "Autentikasi diperlukan." };
-
-  const session = await decrypt(sessionToken);
-  if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
-
-  const staff = await prisma.staff.findUnique({ where: { id: session.id }, select: { role: true } });
-  if (staff?.role === 'TUTOR') return { error: "Akses ditolak untuk peran Tutor." };
+  const auth = await requireAdminSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   if (!scheduleIds || scheduleIds.length === 0) {
     return { error: "Tidak ada jadwal yang dipilih." };
@@ -272,15 +247,9 @@ export async function bulkDeleteSchedulesAction(scheduleIds: string[]) {
 }
 
 export async function rescheduleScheduleAction(formData: FormData) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) return { error: "Autentikasi diperlukan." };
-
-  const session = await decrypt(sessionToken);
-  if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
-
-  const staff = await prisma.staff.findUnique({ where: { id: session.id }, select: { role: true } });
-  if (staff?.role === 'TUTOR') return { error: "Akses ditolak untuk peran Tutor." };
+  const auth = await requireAdminSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   const scheduleId = formData.get("schedule_id") as string;
   const roomId = formData.get("room_id") as string;
@@ -411,15 +380,9 @@ const NATIONAL_HOLIDAYS = [
 ];
 
 export async function generateSchedulesAction(formData: FormData) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) return { error: "Autentikasi diperlukan." };
-
-  const session = await decrypt(sessionToken);
-  if (!session || !session.academy_id) return { error: "Sesi tidak valid." };
-
-  const staff = await prisma.staff.findUnique({ where: { id: session.id }, select: { role: true } });
-  if (staff?.role === 'TUTOR') return { error: "Akses ditolak untuk peran Tutor." };
+  const auth = await requireAdminSession();
+  if ('error' in auth) return { error: auth.error };
+  const session = auth.session;
 
   const programId = formData.get("program_id") as string;
   const tutorId = formData.get("tutor_id") as string;

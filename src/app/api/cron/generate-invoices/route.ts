@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { format, startOfMonth, addMonths, addDays } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
 import { createAuditLog } from "@/lib/audit";
 import { decrypt } from "@/lib/auth";
 import { cookies } from "next/headers";
@@ -93,7 +94,7 @@ export async function POST(request: Request) {
           const amount = enrollment.program.monthly_fee;
           totalAmount += amount;
           return {
-            description: `Tagihan SPP - ${enrollment.program.name} (${format(today, "MMMM yyyy", { locale: require('date-fns/locale').id })})`,
+            description: `Tagihan SPP - ${enrollment.program.name} (${format(today, "MMMM yyyy", { locale: idLocale })})`,
             amount: amount
           };
         });
