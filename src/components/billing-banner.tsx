@@ -81,12 +81,7 @@ export function BillingBanner({
               <strong className="font-extrabold text-red-700 dark:text-red-300 text-sm">
                 {IDR(totalDebt)}
               </strong>
-              {formattedDate ? (
-                <> dengan batas pembayaran hingga <strong className="font-bold text-red-800 dark:text-red-200">{formattedDate}</strong>. </>
-              ) : (
-                <>. </>
-              )}
-              Silakan segera lakukan pembayaran melalui transfer bank ke:
+              . Silakan segera lakukan pembayaran melalui transfer bank ke:
             </p>
 
             <div className="flex flex-wrap items-center gap-2 mt-2.5">

@@ -76,12 +76,7 @@ export function StudentBillingBanner({
               <strong className="font-extrabold text-red-700 dark:text-red-300 text-sm">
                 {IDR(totalDebt)}
               </strong>
-              {formattedDate ? (
-                <> dengan batas pembayaran hingga <strong className="font-bold text-red-900 dark:text-red-100">{formattedDate}</strong>. </>
-              ) : (
-                <>. </>
-              )}
-              {bankAccount ? "Silakan segera lakukan pembayaran melalui transfer bank ke:" : "Silakan segera selesaikan pembayaran ke pihak administrasi bimbel."}
+              . {bankAccount ? "Silakan segera lakukan pembayaran melalui transfer bank ke:" : "Silakan segera selesaikan pembayaran ke pihak administrasi bimbel."}
             </p>
 
             {bankAccount && (

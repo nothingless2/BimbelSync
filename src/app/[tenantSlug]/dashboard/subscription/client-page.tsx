@@ -106,19 +106,6 @@ export default function SubscriptionClientPage({ academy, tenantSlug }: Props) {
         </div>
       </div>
 
-      {unpaidInvoices.length > 0 && (
-        <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/50 rounded-2xl p-5 flex gap-4 items-start">
-          <AlertTriangle className="text-amber-600 dark:text-amber-500 shrink-0" size={24} />
-          <div>
-            <h3 className="font-bold text-amber-800 dark:text-amber-400">Tagihan Menunggu Pembayaran</h3>
-            <p className="text-sm text-amber-700 dark:text-amber-500/80 mt-1">
-              Anda memiliki {unpaidInvoices.length} tagihan yang belum dilunasi sejumlah total <span className="font-bold">{IDR(unpaidInvoices.reduce((sum, i) => sum + i.amount, 0))}</span>. 
-              Segera lakukan pembayaran dan konfirmasikan ke Admin Pusat untuk menghindari pemblokiran akses sistem.
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* Invoice History */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
         <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800">
