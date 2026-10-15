@@ -1,6 +1,5 @@
 import { cookies } from "next/headers";
 import { decrypt } from "@/lib/auth";
-import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 
 export default async function MasterDataLayout({
@@ -25,12 +24,7 @@ export default async function MasterDataLayout({
     redirect(`/${tenantSlug}/login`);
   }
 
-  const dbUser = await prisma.staff.findUnique({
-    where: { id: session.id },
-    select: { role: true }
-  });
-
-  if (dbUser?.role === 'TUTOR') {
+  if (session.role === 'TUTOR') {
     // Tutor tidak boleh akses master data, lempar ke dashboard
     redirect(`/${tenantSlug}/dashboard`);
   }

@@ -28,33 +28,33 @@ export default async function TenantReportsPage({
   try {
     const now = new Date();
     
-    // Fetch all paid invoices for this academy
-    const invoices = await prisma.invoice.findMany({
-      where: {
-        academy_id: session.academy_id,
-        payment_status: "PAID",
-      },
-      include: {
-        student: true,
-        items: true,
-        installments: true
-      },
-      orderBy: { created_at: "asc" }
-    });
-
-    const activeStudentsCount = await prisma.student.count({
-      where: { academy_id: session.academy_id, deleted_at: null }
-    });
-
-    const unpaidInvoices = await prisma.invoice.findMany({
-      where: {
-        academy_id: session.academy_id,
-        payment_status: { in: ["UNPAID", "OVERDUE"] }
-      },
-      select: {
-        total_amount: true
-      }
-    });
+    // Fetch all paid invoices, student count, and unpaid invoices concurrently
+    const [invoices, activeStudentsCount, unpaidInvoices] = await Promise.all([
+      prisma.invoice.findMany({
+        where: {
+          academy_id: session.academy_id,
+          payment_status: "PAID",
+        },
+        include: {
+          student: true,
+          items: true,
+          installments: true
+        },
+        orderBy: { created_at: "asc" }
+      }),
+      prisma.student.count({
+        where: { academy_id: session.academy_id, deleted_at: null }
+      }),
+      prisma.invoice.findMany({
+        where: {
+          academy_id: session.academy_id,
+          payment_status: { in: ["UNPAID", "OVERDUE"] }
+        },
+        select: {
+          total_amount: true
+        }
+      })
+    ]);
 
     const outstandingRevenue = unpaidInvoices.reduce((sum, inv) => sum + inv.total_amount, 0);
 

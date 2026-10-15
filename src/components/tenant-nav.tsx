@@ -149,6 +149,7 @@ function NavItem({ href, icon, label, active = false }: { href: string; icon: Re
   return (
     <Link
       href={href}
+      prefetch={true}
       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-medium text-sm ${
         active 
           ? "bg-blue-600 text-white shadow-md shadow-blue-500/20" 

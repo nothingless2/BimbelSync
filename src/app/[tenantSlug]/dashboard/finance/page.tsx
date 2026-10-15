@@ -64,34 +64,34 @@ export default async function FinancePage({
     ...(statusParam !== "ALL" ? { payment_status: statusParam as any } : {})
   };
 
-  const totalFiltered = await prisma.invoice.count({ where: whereClause });
+  // Fetch paginated invoices, total count, and active students concurrently
+  const [totalFiltered, invoices, students] = await Promise.all([
+    prisma.invoice.count({ where: whereClause }),
+    prisma.invoice.findMany({
+      where: whereClause,
+      include: {
+        student: true,
+        items: true,
+        verified_by: true
+      },
+      orderBy: {
+        created_at: 'desc'
+      },
+      take: PAGE_SIZE,
+      skip: (page - 1) * PAGE_SIZE
+    }),
+    prisma.student.findMany({
+      where: {
+        academy_id: session.academy_id,
+        deleted_at: null
+      },
+      orderBy: {
+        full_name: 'asc'
+      }
+    })
+  ]);
+
   const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
-
-  // Fetch paginated invoices
-  const invoices = await prisma.invoice.findMany({
-    where: whereClause,
-    include: {
-      student: true,
-      items: true,
-      verified_by: true
-    },
-    orderBy: {
-      created_at: 'desc'
-    },
-    take: PAGE_SIZE,
-    skip: (page - 1) * PAGE_SIZE
-  });
-
-  // Fetch active students for the AddInvoiceModal dropdown
-  const students = await prisma.student.findMany({
-    where: {
-      academy_id: session.academy_id,
-      deleted_at: null
-    },
-    orderBy: {
-      full_name: 'asc'
-    }
-  });
 
   return (
     <div className="space-y-6">

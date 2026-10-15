@@ -51,12 +51,7 @@ export default async function SchedulesPage({
     redirect(`/${tenantSlug}/login`);
   }
 
-  const dbUser = await prisma.staff.findUnique({
-    where: { id: session.id },
-    select: { role: true }
-  });
-
-  const isTutor = dbUser?.role === 'TUTOR';
+  const isTutor = session.role === 'TUTOR';
 
   // Fetch all schedules for this academy with their relations
   // Concurrent fetch for optimum performance

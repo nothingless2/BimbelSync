@@ -33,20 +33,29 @@ export default async function DashboardLayout({
     redirect(`/${tenantSlug}/login`);
   }
 
-  // Find the staff user (or superadmin if impersonating, but standard is staff)
-  const dbUser = await prisma.staff.findUnique({
-    where: { id: session.id },
-    select: { id: true, email: true, avatar_url: true, role: true }
-  });
+  // Fetch dbUser, academy, and unpaidInvoices concurrently to eliminate sequential DB round-trips
+  const [dbUser, academyInitial, unpaidInvoices] = await Promise.all([
+    prisma.staff.findUnique({
+      where: { id: session.id },
+      select: { id: true, email: true, avatar_url: true, role: true }
+    }),
+    prisma.academy.findUnique({
+      where: { id: session.academy_id },
+      select: { id: true, subscription_status: true, subscription_due_date: true, deleted_at: true, pending_plan_id: true, pending_plan_date: true }
+    }),
+    prisma.platformInvoice.findMany({
+      where: { 
+        academy_id: session.academy_id,
+        payment_status: { in: ['UNPAID', 'OVERDUE'] }
+      }
+    })
+  ]);
 
   if (!dbUser || session.role === 'STUDENT') {
     redirect(`/${tenantSlug}/login`);
   }
 
-  let academy = await prisma.academy.findUnique({
-    where: { id: session.academy_id },
-    select: { id: true, subscription_status: true, subscription_due_date: true, deleted_at: true, pending_plan_id: true, pending_plan_date: true }
-  });
+  let academy = academyInitial;
 
   // Jika akademi sudah dihapus (soft delete) atau tidak ada
   if (!academy || academy.deleted_at !== null) {
@@ -72,13 +81,6 @@ export default async function DashboardLayout({
       });
     }
   }
-
-  const unpaidInvoices = await prisma.platformInvoice.findMany({
-    where: { 
-      academy_id: session.academy_id,
-      payment_status: { in: ['UNPAID', 'OVERDUE'] }
-    }
-  });
   
   const hasUnpaid = unpaidInvoices.length > 0;
   const totalDebt = unpaidInvoices.reduce((sum, inv) => sum + inv.amount, 0);

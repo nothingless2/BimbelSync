@@ -1,5 +1,5 @@
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { DashboardSkeleton } from "@/components/ui/dashboard-skeleton";
 
 export default function StudentLoading() {
-  return <LoadingSpinner />;
+  return <DashboardSkeleton />;
 }

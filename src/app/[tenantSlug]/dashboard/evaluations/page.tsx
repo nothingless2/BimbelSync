@@ -16,51 +16,45 @@ export default async function EvaluationsPage({ params }: { params: Promise<{ te
   if (!sessionCookie) redirect(`/${tenantSlug}/login`);
 
   const session = await decrypt(sessionCookie);
-  if (!session || !session.id) redirect(`/${tenantSlug}/login`);
-
-  const dbUser = await prisma.staff.findUnique({
-    where: { id: session.id as string }
-  });
-
-  if (!dbUser || !dbUser.academy_id) redirect(`/${tenantSlug}/login`);
+  if (!session || !session.academy_id) redirect(`/${tenantSlug}/login`);
 
   // Admins see all evaluations, Tutors see evaluations for students in their programs or evaluations they created
-  const isAdmin = dbUser.role === 'ADMIN';
+  const isAdmin = session.role === 'ADMIN';
 
-  const evaluations = await prisma.studentEvaluation.findMany({
-    where: {
-      academy_id: dbUser.academy_id,
-      ...(isAdmin ? {} : { evaluator_id: dbUser.id }) // Simplify: tutors only see evaluations they created for now
-    },
-    include: {
-      student: true,
-      program: true,
-      evaluator: {
-        select: {
-          name: true,
-          email: true,
-          avatar_url: true,
+  const [evaluations, students, programs] = await Promise.all([
+    prisma.studentEvaluation.findMany({
+      where: {
+        academy_id: session.academy_id,
+        ...(isAdmin ? {} : { evaluator_id: session.id })
+      },
+      include: {
+        student: true,
+        program: true,
+        evaluator: {
+          select: {
+            name: true,
+            email: true,
+            avatar_url: true,
+          }
         }
-      }
-    },
-    orderBy: { created_at: "desc" },
-  });
-
-  const students = await prisma.student.findMany({
-    where: { academy_id: dbUser.academy_id, deleted_at: null },
-    include: {
-      enrollments: {
-        where: { status: 'ACTIVE' },
-        include: { program: true }
-      }
-    },
-    orderBy: { full_name: "asc" }
-  });
-
-  const programs = await prisma.program.findMany({
-    where: { academy_id: dbUser.academy_id, deleted_at: null },
-    orderBy: { name: "asc" }
-  });
+      },
+      orderBy: { created_at: "desc" },
+    }),
+    prisma.student.findMany({
+      where: { academy_id: session.academy_id, deleted_at: null },
+      include: {
+        enrollments: {
+          where: { status: 'ACTIVE' },
+          include: { program: true }
+        }
+      },
+      orderBy: { full_name: "asc" }
+    }),
+    prisma.program.findMany({
+      where: { academy_id: session.academy_id, deleted_at: null },
+      orderBy: { name: "asc" }
+    })
+  ]);
 
   const serializedEvaluations = evaluations.map(e => ({
     ...e,
@@ -74,8 +68,8 @@ export default async function EvaluationsPage({ params }: { params: Promise<{ te
         students={students}
         programs={programs} 
         tenantSlug={tenantSlug} 
-        academyId={dbUser.academy_id} 
-        userRole={dbUser.role}
+        academyId={session.academy_id} 
+        userRole={session.role}
       />
     </div>
   );

@@ -16,33 +16,28 @@ export default async function MaterialsPage({ params }: { params: Promise<{ tena
   if (!sessionCookie) redirect(`/${tenantSlug}/login`);
 
   const session = await decrypt(sessionCookie);
-  if (!session || !session.id) redirect(`/${tenantSlug}/login`);
+  if (!session || !session.academy_id) redirect(`/${tenantSlug}/login`);
 
-  const dbUser = await prisma.staff.findUnique({
-    where: { id: session.id }
-  });
-
-  if (!dbUser || !dbUser.academy_id) redirect(`/${tenantSlug}/login`);
-
-  const materials = await prisma.learningMaterial.findMany({
-    where: { academy_id: dbUser.academy_id, deleted_at: null },
-    include: {
-      program: true,
-      creator: {
-        select: {
-          name: true,
-          email: true,
-          avatar_url: true,
+  const [materials, programs] = await Promise.all([
+    prisma.learningMaterial.findMany({
+      where: { academy_id: session.academy_id, deleted_at: null },
+      include: {
+        program: true,
+        creator: {
+          select: {
+            name: true,
+            email: true,
+            avatar_url: true,
+          }
         }
-      }
-    },
-    orderBy: { created_at: "desc" },
-  });
-
-  const programs = await prisma.program.findMany({
-    where: { academy_id: dbUser.academy_id, deleted_at: null },
-    orderBy: { name: "asc" }
-  });
+      },
+      orderBy: { created_at: "desc" },
+    }),
+    prisma.program.findMany({
+      where: { academy_id: session.academy_id, deleted_at: null },
+      orderBy: { name: "asc" }
+    })
+  ]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -50,8 +45,8 @@ export default async function MaterialsPage({ params }: { params: Promise<{ tena
         materials={materials} 
         programs={programs} 
         tenantSlug={tenantSlug} 
-        academyId={dbUser.academy_id} 
-        userRole={dbUser.role}
+        academyId={session.academy_id} 
+        userRole={session.role}
       />
     </div>
   );
