@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireStaffSession, requireAdminSession } from "@/lib/session";
+import { assertFeatureAccess } from "@/lib/subscription";
 
 export async function createEvaluationAction(data: {
   academyId: string;
@@ -20,6 +21,12 @@ export async function createEvaluationAction(data: {
 
   if (session.academy_id !== data.academyId) {
     return { error: "Akses ditolak." };
+  }
+
+  // Feature Gating: E-Rapor & Evaluasi Siswa hanya untuk paket Growth dan Pro
+  const featureCheck = await assertFeatureAccess(session.academy_id, "erapor");
+  if (!featureCheck.allowed) {
+    return { error: featureCheck.error };
   }
 
   try {
@@ -61,6 +68,12 @@ export async function bulkCreateEvaluationsAction(data: {
     return { error: "Akses ditolak." };
   }
 
+  // Feature Gating: E-Rapor & Evaluasi Siswa hanya untuk paket Growth dan Pro
+  const featureCheck = await assertFeatureAccess(session.academy_id, "erapor");
+  if (!featureCheck.allowed) {
+    return { error: featureCheck.error };
+  }
+
   if (data.evaluations.length === 0) {
     return { error: "Tidak ada siswa untuk dinilai." };
   }
@@ -95,6 +108,11 @@ export async function deleteEvaluationAction(id: string, tenantSlug: string) {
   if ('error' in auth) return { error: auth.error };
   const session = auth.session;
 
+  const featureCheck = await assertFeatureAccess(session.academy_id, "erapor");
+  if (!featureCheck.allowed) {
+    return { error: featureCheck.error };
+  }
+
   try {
     const evaluation = await prisma.studentEvaluation.findFirst({
       where: { id, academy_id: session.academy_id }
@@ -120,6 +138,11 @@ export async function updateEvaluationScoreAction(id: string, score: number | nu
   if ('error' in auth) return { error: auth.error };
   const session = auth.session;
 
+  const featureCheck = await assertFeatureAccess(session.academy_id, "erapor");
+  if (!featureCheck.allowed) {
+    return { error: featureCheck.error };
+  }
+
   try {
     const evaluation = await prisma.studentEvaluation.findFirst({
       where: { id, academy_id: session.academy_id }
@@ -143,6 +166,11 @@ export async function deleteEvaluationColumnAction(programId: string, title: str
   const auth = await requireStaffSession();
   if ('error' in auth) return { error: auth.error };
   const session = auth.session;
+
+  const featureCheck = await assertFeatureAccess(session.academy_id, "erapor");
+  if (!featureCheck.allowed) {
+    return { error: featureCheck.error };
+  }
 
   try {
     // Validasi program milik academy user
@@ -171,6 +199,11 @@ export async function updateEvaluationNotesAction(id: string, notes: string | nu
   if ('error' in auth) return { error: auth.error };
   const session = auth.session;
 
+  const featureCheck = await assertFeatureAccess(session.academy_id, "erapor");
+  if (!featureCheck.allowed) {
+    return { error: featureCheck.error };
+  }
+
   try {
     const evaluation = await prisma.studentEvaluation.findFirst({
       where: { id, academy_id: session.academy_id }
@@ -194,6 +227,11 @@ export async function publishEvaluationColumnAction(programId: string, title: st
   const auth = await requireStaffSession();
   if ('error' in auth) return { error: auth.error };
   const session = auth.session;
+
+  const featureCheck = await assertFeatureAccess(session.academy_id, "erapor");
+  if (!featureCheck.allowed) {
+    return { error: featureCheck.error };
+  }
 
   try {
     const program = await prisma.program.findFirst({
@@ -226,6 +264,11 @@ export async function unpublishEvaluationColumnAction(programId: string, title: 
   if ('error' in auth) return { error: auth.error };
   const session = auth.session;
 
+  const featureCheck = await assertFeatureAccess(session.academy_id, "erapor");
+  if (!featureCheck.allowed) {
+    return { error: featureCheck.error };
+  }
+
   try {
     const program = await prisma.program.findFirst({
       where: { id: programId, academy_id: session.academy_id }
@@ -256,6 +299,11 @@ export async function updateProgramWeightsAction(programId: string, weightExam: 
   const auth = await requireAdminSession();
   if ('error' in auth) return { error: auth.error };
   const session = auth.session;
+
+  const featureCheck = await assertFeatureAccess(session.academy_id, "erapor");
+  if (!featureCheck.allowed) {
+    return { error: featureCheck.error };
+  }
 
   if (weightExam + weightHomework !== 100) {
     return { error: "Total bobot harus 100%" };

@@ -37,6 +37,32 @@ export default async function AuditLogsPage({
     redirect(`/${tenantSlug}/dashboard`);
   }
 
+  // Feature Gating: Audit Trail hanya untuk paket Pro
+  const { checkFeatureAccess } = await import("@/lib/subscription");
+  const { FeatureLockBanner } = await import("@/components/feature-lock-banner");
+  const access = await checkFeatureAccess(session.academy_id, "audit_trail");
+
+  if (!access.allowed) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Audit Logs</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Riwayat aktivitas dan mutasi data di dalam {tenantSlug}.
+          </p>
+        </div>
+
+        <FeatureLockBanner
+          title="Audit Trail Keamanan Tingkat Lanjut"
+          description={access.reason || "Fitur riwayat aktivitas dan mutasi data tingkat lanjut hanya tersedia pada paket Pro."}
+          requiredPlan="Pro"
+          tenantSlug={tenantSlug}
+          currentPlanName={access.planName}
+        />
+      </div>
+    );
+  }
+
   // Fetch audit logs for this academy
   const logs = await prisma.auditLog.findMany({
     where: {

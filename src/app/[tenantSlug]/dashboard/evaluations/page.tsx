@@ -61,8 +61,43 @@ export default async function EvaluationsPage({ params }: { params: Promise<{ te
     score: e.score ? Number(e.score) : null
   }));
 
+  // Feature Gating: E-Rapor & Evaluasi Siswa hanya untuk paket Growth dan Pro
+  const { checkFeatureAccess } = await import("@/lib/subscription");
+  const { FeatureLockBanner } = await import("@/components/feature-lock-banner");
+  const access = await checkFeatureAccess(session.academy_id, "erapor");
+
+  if (!access.allowed && serializedEvaluations.length === 0) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Evaluasi & E-Rapor</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Penilaian berkala, ujian, PR, dan pelaporan capaian belajar siswa.
+          </p>
+        </div>
+        <FeatureLockBanner
+          title="E-Rapor & Evaluasi Siswa Terkunci"
+          description={access.reason || "Fitur penilaian digital dan e-rapor siswa hanya tersedia pada paket Growth dan Pro."}
+          requiredPlan="Growth"
+          tenantSlug={tenantSlug}
+          currentPlanName={access.planName}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {!access.allowed && (
+        <FeatureLockBanner
+          title="Evaluasi Siswa (Mode Baca Saja)"
+          description="Paket Anda saat ini adalah Starter. Anda tetap dapat meninjau riwayat evaluasi yang sudah pernah dibuat, namun penambahan evaluasi baru dinonaktifkan."
+          requiredPlan="Growth"
+          tenantSlug={tenantSlug}
+          currentPlanName={access.planName}
+          readOnlyNotice={true}
+        />
+      )}
       <EvaluationsClientPage 
         evaluations={serializedEvaluations} 
         students={students}
@@ -70,6 +105,7 @@ export default async function EvaluationsPage({ params }: { params: Promise<{ te
         tenantSlug={tenantSlug} 
         academyId={session.academy_id} 
         userRole={session.role}
+        isReadOnly={!access.allowed}
       />
     </div>
   );

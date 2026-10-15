@@ -7,6 +7,7 @@ import bcrypt from "bcrypt";
 import { StaffRole } from "@prisma/client";
 import { createAuditLog } from "@/lib/audit";
 import { requireAdminSession } from "@/lib/session";
+import { executeWithQuotaLock, QuotaExceededError } from "@/lib/subscription";
 
 export async function createStaffAction(formData: FormData) {
   const auth = await requireAdminSession();
@@ -26,53 +27,34 @@ export async function createStaffAction(formData: FormData) {
     return { error: pwValidation.errorMsg };
   }
 
-  // Feature Gating: Check max_staff from Plan
-  const academy = await prisma.academy.findUnique({
-    where: { id: session.academy_id },
-    include: {
-      plan: true,
-      _count: {
-        select: { staff: { where: { deleted_at: null } } }
-      }
-    }
-  });
-
-  if (!academy) return { error: "Data akademi tidak ditemukan." };
-
-  const currentStaff = academy._count.staff;
-  const maxStaff = academy.plan.max_staff;
-
-  // max_staff === null berarti Unlimited
-  if (maxStaff !== null && currentStaff >= maxStaff) {
-    return { error: `Batas paket tercapai! Paket "${academy.plan.name}" hanya mengizinkan maksimal ${maxStaff} staff. Harap upgrade paket Anda untuk menambah staf lagi.` };
-  }
-
   try {
-    const existingStaff = await prisma.staff.findUnique({
-      where: {
-        academy_id_email: {
-          academy_id: session.academy_id,
-          email: email
-        }
-      }
-    });
-
-    if (existingStaff) {
-      if (existingStaff.deleted_at) {
-        return { error: "Email ini terdaftar pada staf yang sudah dihapus. Harap gunakan email lain." };
-      }
-      return { error: "Email ini sudah digunakan oleh staf lain." };
-    }
-
     const passwordHash = await bcrypt.hash(password, 10);
 
-    await prisma.staff.create({
-      data: {
-        academy_id: session.academy_id,
-        email,
-        password_hash: passwordHash,
-        role,
+    await executeWithQuotaLock(session.academy_id, "staff", 1, async (tx) => {
+      const existingStaff = await tx.staff.findUnique({
+        where: {
+          academy_id_email: {
+            academy_id: session.academy_id as string,
+            email: email
+          }
+        }
+      });
+
+      if (existingStaff) {
+        if (existingStaff.deleted_at) {
+          throw new Error("Email ini terdaftar pada staf yang sudah dihapus. Harap gunakan email lain.");
+        }
+        throw new Error("Email ini sudah digunakan oleh staf lain.");
       }
+
+      await tx.staff.create({
+        data: {
+          academy_id: session.academy_id as string,
+          email,
+          password_hash: passwordHash,
+          role,
+        }
+      });
     });
 
     await createAuditLog({
@@ -85,9 +67,12 @@ export async function createStaffAction(formData: FormData) {
 
     revalidatePath(`/${session.tenant_slug}/dashboard/master-data/staff`);
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
+    if (error instanceof QuotaExceededError) {
+      return { error: error.message };
+    }
     console.error("Error creating staff:", error);
-    return { error: "Terjadi kesalahan internal pada server saat menyimpan staf." };
+    return { error: error.message || "Terjadi kesalahan internal pada server saat menyimpan staf." };
   }
 }
 

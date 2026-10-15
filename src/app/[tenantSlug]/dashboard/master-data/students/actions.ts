@@ -7,6 +7,7 @@ import bcrypt from "bcrypt";
 import { WithdrawnReason } from "@prisma/client";
 import { createAuditLog } from "@/lib/audit";
 import { requireAdminSession } from "@/lib/session";
+import { executeWithQuotaLock, QuotaExceededError } from "@/lib/subscription";
 
 export async function createStudentAction(formData: FormData) {
   const auth = await requireAdminSession();
@@ -29,54 +30,31 @@ export async function createStudentAction(formData: FormData) {
     return { error: pwValidation.errorMsg };
   }
 
-  // Feature Gating: Check max_students from Plan
-  const academy = await prisma.academy.findUnique({
-    where: { id: session.academy_id },
-    include: {
-      plan: true,
-      _count: {
-        select: { students: { where: { deleted_at: null } } }
-      }
-    }
-  });
-
-  if (!academy) return { error: "Data akademi tidak ditemukan." };
-
-  const currentStudents = academy._count.students;
-  const maxStudents = academy.plan.max_students;
-
-  // max_students === null berarti Unlimited
-  if (maxStudents !== null && currentStudents >= maxStudents) {
-    return { error: `Batas paket tercapai! Paket "${academy.plan.name}" hanya mengizinkan maksimal ${maxStudents} siswa aktif. Harap upgrade paket Anda untuk mendaftarkan siswa lagi.` };
-  }
-
   try {
-    const existingStudent = await prisma.student.findUnique({
-      where: {
-        academy_id_username: {
-          academy_id: session.academy_id,
-          username: username
-        }
-      }
+    const program = await prisma.program.findFirst({
+      where: { id: programId, academy_id: session.academy_id, deleted_at: null }
     });
-
-    if (existingStudent) {
-      if (existingStudent.deleted_at) {
-        return { error: "Username ini terdaftar pada siswa yang sudah dihapus. Harap gunakan username lain." };
-      }
-      return { error: "Username ini sudah digunakan oleh siswa lain." };
-    }
+    if (!program) return { error: "Program tidak ditemukan." };
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const program = await prisma.program.findUnique({
-      where: { id: programId }
-    });
-    
-    if (!program) return { error: "Program tidak ditemukan." };
+    await executeWithQuotaLock(session.academy_id, "students", 1, async (tx) => {
+      const existingStudent = await tx.student.findUnique({
+        where: {
+          academy_id_username: {
+            academy_id: session.academy_id as string,
+            username: username
+          }
+        }
+      });
 
-    // Create Student, Enrollment, and Invoice in a transaction
-    await prisma.$transaction(async (tx) => {
+      if (existingStudent) {
+        if (existingStudent.deleted_at) {
+          throw new Error("Username ini terdaftar pada siswa yang sudah dihapus. Harap gunakan username lain.");
+        }
+        throw new Error("Username ini sudah digunakan oleh siswa lain.");
+      }
+
       const student = await tx.student.create({
         data: {
           academy_id: session.academy_id as string,
@@ -95,9 +73,8 @@ export async function createStudentAction(formData: FormData) {
         }
       });
 
-      const currentMonthPeriod = new Date().toISOString().substring(0, 7); // e.g. "2026-09"
+      const currentMonthPeriod = new Date().toISOString().substring(0, 7);
 
-      // Auto-generate invoice for the program fee
       await tx.invoice.create({
         data: {
           academy_id: session.academy_id as string,
@@ -126,9 +103,12 @@ export async function createStudentAction(formData: FormData) {
 
     revalidatePath(`/${session.tenant_slug}/dashboard/master-data/students`);
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
+    if (error instanceof QuotaExceededError) {
+      return { error: error.message };
+    }
     console.error("Error creating student:", error);
-    return { error: "Terjadi kesalahan internal pada server saat menyimpan siswa." };
+    return { error: error.message || "Terjadi kesalahan internal pada server saat menyimpan siswa." };
   }
 }
 
@@ -335,58 +315,37 @@ export async function bulkCreateStudentsAction(programId: string, studentsToImpo
     return { error: "Data siswa kosong." };
   }
 
-  // Feature Gating: Check max_students from Plan
-  const academy = await prisma.academy.findUnique({
-    where: { id: session.academy_id },
-    include: {
-      plan: true,
-      _count: {
-        select: { students: { where: { deleted_at: null } } }
-      }
-    }
-  });
-
-  if (!academy) return { error: "Data akademi tidak ditemukan." };
-
-  const currentStudents = academy._count.students;
-  const maxStudents = academy.plan.max_students;
   const amountToImport = studentsToImport.length;
 
-  if (maxStudents !== null && (currentStudents + amountToImport) > maxStudents) {
-    return { error: `Batas paket tidak mencukupi! Anda mencoba mengimpor ${amountToImport} siswa, tapi kuota tersisa hanya ${maxStudents - currentStudents}. Harap upgrade paket.` };
-  }
-
   try {
-    const program = await prisma.program.findUnique({
-      where: { id: programId }
+    const program = await prisma.program.findFirst({
+      where: { id: programId, academy_id: session.academy_id, deleted_at: null }
     });
-    
     if (!program) return { error: "Program tidak ditemukan." };
 
-    // Get all existing usernames to check for duplicates
-    const incomingUsernames = studentsToImport.map(s => s.username);
-    const existingStudents = await prisma.student.findMany({
-      where: {
-        academy_id: session.academy_id,
-        username: { in: incomingUsernames }
-      }
-    });
-
-    if (existingStudents.length > 0) {
-      const existingNames = existingStudents.map(s => s.username).join(", ");
-      return { error: `Username berikut sudah digunakan atau pernah dihapus: ${existingNames}.` };
-    }
-
     // Default password: username + "123!"
-    // Calculate hashes
+    // Pre-calculate hashes outside transaction to keep lock duration as short as possible
     const studentsWithHashes = await Promise.all(studentsToImport.map(async (s) => {
       const defaultPassword = `${s.username}123!`;
       const hash = await bcrypt.hash(defaultPassword, 10);
       return { ...s, password_hash: hash };
     }));
 
-    // Perform bulk operations in a transaction
-    await prisma.$transaction(async (tx) => {
+    await executeWithQuotaLock(session.academy_id, "students", amountToImport, async (tx) => {
+      // Get all existing usernames to check for duplicates inside transaction
+      const incomingUsernames = studentsToImport.map(s => s.username);
+      const existingStudents = await tx.student.findMany({
+        where: {
+          academy_id: session.academy_id as string,
+          username: { in: incomingUsernames }
+        }
+      });
+
+      if (existingStudents.length > 0) {
+        const existingNames = existingStudents.map(s => s.username).join(", ");
+        throw new Error(`Username berikut sudah digunakan atau pernah dihapus: ${existingNames}.`);
+      }
+
       const currentMonthPeriod = new Date().toISOString().substring(0, 7);
       
       for (const s of studentsWithHashes) {
@@ -438,8 +397,11 @@ export async function bulkCreateStudentsAction(programId: string, studentsToImpo
 
     revalidatePath(`/${session.tenant_slug}/dashboard/master-data/students`);
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
+    if (error instanceof QuotaExceededError) {
+      return { error: error.message };
+    }
     console.error("Error bulk creating students:", error);
-    return { error: "Terjadi kesalahan internal pada server saat melakukan impor." };
+    return { error: error.message || "Terjadi kesalahan internal pada server saat melakukan impor." };
   }
 }

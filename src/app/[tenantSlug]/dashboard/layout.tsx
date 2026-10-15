@@ -10,6 +10,7 @@ import { redirect } from "next/navigation";
 import { BillingBannerWrapper } from "@/components/billing-banner-wrapper";
 import { MobileSidebar } from "@/components/mobile-sidebar";
 import { getPlatformBankInfo } from "@/lib/platform-settings";
+import { getAcademySubscription } from "@/lib/subscription";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -34,16 +35,13 @@ export default async function DashboardLayout({
     redirect(`/${tenantSlug}/login`);
   }
 
-  // Fetch dbUser, academy, unpaidInvoices, and platform bank info concurrently
-  const [dbUser, academyInitial, unpaidInvoices, bankInfo] = await Promise.all([
+  // Fetch dbUser, subscription, unpaidInvoices, and platform bank info concurrently
+  const [dbUser, sub, unpaidInvoices, bankInfo] = await Promise.all([
     prisma.staff.findUnique({
       where: { id: session.id },
       select: { id: true, email: true, avatar_url: true, role: true }
     }),
-    prisma.academy.findUnique({
-      where: { id: session.academy_id },
-      select: { id: true, subscription_status: true, subscription_due_date: true, deleted_at: true, pending_plan_id: true, pending_plan_date: true }
-    }),
+    getAcademySubscription(session.academy_id),
     prisma.platformInvoice.findMany({
       where: { 
         academy_id: session.academy_id,
@@ -58,50 +56,16 @@ export default async function DashboardLayout({
     redirect(`/${tenantSlug}/login`);
   }
 
-  let academy = academyInitial;
-
   // Jika akademi sudah dihapus (soft delete) atau tidak ada
-  if (!academy || academy.deleted_at !== null) {
+  if (!sub) {
     redirect(`/${tenantSlug}/login`);
   }
 
-  // Cek apakah ada jadwal upgrade otomatis yang sudah tiba waktunya
-  if (academy.pending_plan_id && academy.pending_plan_date) {
-    const todayForActivation = new Date();
-    todayForActivation.setHours(0, 0, 0, 0);
-    const activationDate = new Date(academy.pending_plan_date);
-    activationDate.setHours(0, 0, 0, 0);
-    
-    if (todayForActivation >= activationDate) {
-      academy = await prisma.academy.update({
-        where: { id: academy.id },
-        data: {
-          plan_id: academy.pending_plan_id,
-          pending_plan_id: null,
-          pending_plan_date: null
-        },
-        select: { id: true, subscription_status: true, subscription_due_date: true, deleted_at: true, pending_plan_id: true, pending_plan_date: true }
-      });
-    }
-  }
-  
   const hasUnpaid = unpaidInvoices.length > 0;
-  const totalDebt = unpaidInvoices.reduce((sum, inv) => sum + inv.amount, 0);
+  const totalDebt = unpaidInvoices.reduce((sum: number, inv: { amount: number }) => sum + inv.amount, 0);
 
-  // academy pasti ada di sini
-  const isSuspended = academy.subscription_status === 'SUSPENDED';
-  const isExpiredTrial = academy.subscription_status === 'EXPIRED_TRIAL';
-  // Gunakan setHours(0,0,0,0) agar membandingkan harinya, bukan jam saat ini persis.
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const dueDate = academy.subscription_due_date ? new Date(academy.subscription_due_date) : null;
-  if (dueDate) dueDate.setHours(0,0,0,0);
-  
-  const isPastDue = dueDate && dueDate < today;
-  
-  // Periksa jika sudah lewat tanggal tapi belum ter-update di database oleh background job
-  const effectiveIsExpiredTrial = isExpiredTrial || (isPastDue && academy.subscription_status === 'TRIAL');
-  const effectiveIsSuspended = isSuspended || (isPastDue && academy.subscription_status === 'ACTIVE');
+  const effectiveIsExpiredTrial = sub.effectiveStatus === 'EXPIRED_TRIAL';
+  const effectiveIsSuspended = sub.effectiveStatus === 'SUSPENDED';
 
   if (effectiveIsSuspended || effectiveIsExpiredTrial) {
     return (
@@ -170,8 +134,8 @@ export default async function DashboardLayout({
             {/* Banner Tagihan Tertunda */}
             {dbUser?.role !== 'TUTOR' && (
               <BillingBannerWrapper 
-                status={academy.subscription_status} 
-                dueDate={unpaidInvoices[0]?.due_date || academy.subscription_due_date} 
+                status={sub.status} 
+                dueDate={unpaidInvoices[0]?.due_date || sub.dueDate} 
                 hasUnpaid={hasUnpaid} 
                 totalDebt={totalDebt} 
                 bankName={bankInfo.bankName}

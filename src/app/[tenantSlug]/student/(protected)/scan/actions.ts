@@ -56,6 +56,13 @@ export async function processQrScanAction(tenantSlug: string, qrDataRaw: string)
       return { error: 'Jadwal tidak ditemukan.' };
     }
 
+    // Feature Gating: Absensi QR dinamis hanya untuk paket Growth dan Pro
+    const { assertFeatureAccess } = await import("@/lib/subscription");
+    const featureCheck = await assertFeatureAccess(schedule.program.academy_id, "qr_attendance");
+    if (!featureCheck.allowed) {
+      return { error: "Fitur absensi QR dinamis tidak aktif pada paket bimbel ini. Silakan hubungi tutor untuk absensi manual." };
+    }
+
     if (schedule.status !== 'SCHEDULED') {
       return { error: 'Sesi kelas ini belum dimulai atau sudah dibatalkan.' };
     }

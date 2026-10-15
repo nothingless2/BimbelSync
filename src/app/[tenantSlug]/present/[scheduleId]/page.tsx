@@ -38,6 +38,31 @@ export default async function PresentSchedulePage({
     notFound();
   }
 
+  // Feature Gating: Absensi QR dinamis hanya untuk paket Growth dan Pro
+  const { checkFeatureAccess } = await import("@/lib/subscription");
+  const { FeatureLockBanner } = await import("@/components/feature-lock-banner");
+  const access = await checkFeatureAccess(schedule.program.academy_id, "qr_attendance");
+
+  if (!access.allowed) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-6">
+        <FeatureLockBanner
+          title="Absensi QR Dinamis Terkunci"
+          description={access.reason || "Fitur absensi QR dinamis hanya tersedia pada paket Growth dan Pro. Silakan gunakan absensi manual."}
+          requiredPlan="Growth"
+          tenantSlug={tenantSlug}
+          currentPlanName={access.planName}
+        />
+        <a 
+          href={`/${tenantSlug}/dashboard/schedules/${scheduleId}`}
+          className="mt-4 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+        >
+          &larr; Kembali ke Detail Jadwal (Absensi Manual)
+        </a>
+      </div>
+    );
+  }
+
   return (
     <PresentClientPage 
       schedule={schedule}

@@ -21,6 +21,13 @@ export async function createMaterialAction(data: {
     return { error: "Akses ditolak." };
   }
 
+  // Feature Gating: Pengelolaan materi pembelajaran mulai dari paket Growth
+  const { assertFeatureAccess } = await import("@/lib/subscription");
+  const featureCheck = await assertFeatureAccess(session.academy_id, "learning_materials");
+  if (!featureCheck.allowed) {
+    return { error: featureCheck.error };
+  }
+
   try {
     // Validasi program milik akademi
     const program = await prisma.program.findFirst({
@@ -52,6 +59,12 @@ export async function deleteMaterialAction(id: string, tenantSlug: string) {
   const auth = await requireStaffSession();
   if ('error' in auth) return { error: auth.error };
   const session = auth.session;
+
+  const { assertFeatureAccess } = await import("@/lib/subscription");
+  const featureCheck = await assertFeatureAccess(session.academy_id, "learning_materials");
+  if (!featureCheck.allowed) {
+    return { error: featureCheck.error };
+  }
 
   try {
     const material = await prisma.learningMaterial.findFirst({

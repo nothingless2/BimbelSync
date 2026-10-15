@@ -87,9 +87,9 @@ async function main() {
     where: { id: '00000000-0000-0000-0000-000000000003' },
     update: {
       price: 399000,
-      max_students: null, // Unlimited
-      max_staff: null,    // Unlimited
-      max_rooms: null,    // Unlimited
+      max_students: 500,
+      max_staff: 25,
+      max_rooms: 15,
       allows_installment: true,
       allows_automated_email: true,
       allows_qr_attendance: true,
@@ -106,9 +106,9 @@ async function main() {
       id: '00000000-0000-0000-0000-000000000003',
       name: 'Pro',
       price: 399000,
-      max_students: null, // Unlimited
-      max_staff: null,    // Unlimited
-      max_rooms: null,    // Unlimited
+      max_students: 500,
+      max_staff: 25,
+      max_rooms: 15,
       allows_installment: true,
       allows_automated_email: true,
       allows_qr_attendance: true,

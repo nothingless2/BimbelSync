@@ -207,8 +207,11 @@ export async function splitInstallmentsAction(
       return { error: "Tagihan sudah lunas, tidak bisa dipecah." };
     }
 
-    if (!invoice.academy.plan?.allows_installment) {
-      return { error: "Fitur cicilan tidak tersedia untuk paket Anda." };
+    // Feature Gating: Tagihan Cicilan hanya untuk paket Pro
+    const { assertFeatureAccess } = await import("@/lib/subscription");
+    const featureCheck = await assertFeatureAccess(session.academy_id, "installment");
+    if (!featureCheck.allowed) {
+      return { error: featureCheck.error };
     }
 
     const totalAssigned = installmentsData.reduce((acc, curr) => acc + curr.amount, 0);

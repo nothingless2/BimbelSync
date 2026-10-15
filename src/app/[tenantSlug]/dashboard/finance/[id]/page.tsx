@@ -43,13 +43,10 @@ export default async function InvoiceDetailPage({
     redirect(`/${tenantSlug}/dashboard/finance`);
   }
 
-  // Cek fitur cicilan (hanya untuk Growth & Pro)
-  const academy = await prisma.academy.findUnique({
-    where: { id: session.academy_id },
-    include: { plan: true }
-  });
-  
-  const canSplitInstallments = academy?.plan?.allows_installment || false;
+  // Cek fitur cicilan menggunakan sentralisasi subscription helper
+  const { checkFeatureAccess } = await import("@/lib/subscription");
+  const installmentAccess = await checkFeatureAccess(session.academy_id, "installment");
+  const canSplitInstallments = installmentAccess.allowed;
 
   return (
     <FinanceDetailClient 

@@ -92,13 +92,46 @@ export default async function GradebookPage({ params, searchParams }: any) {
     }
   });
 
+  // Feature Gating: E-Rapor & Evaluasi Siswa hanya untuk paket Growth dan Pro
+  const { checkFeatureAccess } = await import("@/lib/subscription");
+  const { FeatureLockBanner } = await import("@/components/feature-lock-banner");
+  const access = await checkFeatureAccess(academy.id, "erapor");
+
+  if (!access.allowed && evaluations.length === 0) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        <FeatureLockBanner
+          title="Gradebook Akhir & E-Rapor Terkunci"
+          description={access.reason || "Fitur rekap nilai akhir dan e-rapor siswa hanya tersedia pada paket Growth dan Pro."}
+          requiredPlan="Growth"
+          tenantSlug={tenantSlug}
+          currentPlanName={access.planName}
+        />
+      </div>
+    );
+  }
+
   return (
-    <GradebookClientPage
-      tenantSlug={tenantSlug}
-      program={program}
-      students={students}
-      evaluations={evaluations}
-      userRole={userRole}
-    />
+    <div>
+      {!access.allowed && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+          <FeatureLockBanner
+            title="Gradebook (Mode Baca Saja)"
+            description="Paket Anda saat ini adalah Starter. Anda tetap dapat meninjau nilai rapor historis, namun penerbitan nilai baru dinonaktifkan."
+            requiredPlan="Growth"
+            tenantSlug={tenantSlug}
+            currentPlanName={access.planName}
+            readOnlyNotice={true}
+          />
+        </div>
+      )}
+      <GradebookClientPage
+        tenantSlug={tenantSlug}
+        program={program}
+        students={students}
+        evaluations={evaluations}
+        userRole={userRole}
+      />
+    </div>
   );
 }

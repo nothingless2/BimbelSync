@@ -81,9 +81,9 @@ export async function setupAcademyAction(prevState: any, formData: FormData) {
         data: {
           name: "Pro",
           price: 399000,
-          max_students: null,
-          max_staff: null,
-          max_rooms: null,
+          max_students: 500,
+          max_staff: 25,
+          max_rooms: 15,
           allows_installment: true,
           allows_automated_email: true,
           allows_qr_attendance: true,

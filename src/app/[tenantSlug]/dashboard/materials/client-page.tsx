@@ -8,7 +8,7 @@ import { deleteMaterialAction } from "./actions";
 import { toast } from "@/components/ui/sonner";
 import { CustomSelect } from "@/components/ui/custom-select";
 
-export default function MaterialsClientPage({ materials, programs, tenantSlug, academyId, userRole }: any) {
+export default function MaterialsClientPage({ materials, programs, tenantSlug, academyId, userRole, isReadOnly = false }: any) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterProgram, setFilterProgram] = useState("ALL");
@@ -22,6 +22,10 @@ export default function MaterialsClientPage({ materials, programs, tenantSlug, a
   });
 
   const handleDelete = async (id: string) => {
+    if (isReadOnly) {
+      toast.error("Paket aktif Anda dalam mode baca-saja. Upgrade paket untuk mengelola materi.");
+      return;
+    }
     if (!confirm("Apakah Anda yakin ingin menghapus materi ini?")) return;
     try {
       setDeletingId(id);
@@ -48,7 +52,7 @@ export default function MaterialsClientPage({ materials, programs, tenantSlug, a
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Learning Materials</h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">Bank soal, modul, dan materi pembelajaran untuk tutor.</p>
         </div>
-        {userRole === 'TUTOR' && (
+        {userRole === 'TUTOR' && !isReadOnly && (
           <button 
             onClick={() => setIsAddModalOpen(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition shadow-sm flex items-center gap-2"

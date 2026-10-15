@@ -11,7 +11,7 @@ import { SearchableSelect } from "@/components/ui/searchable-select";
 import { publishEvaluationColumnAction, unpublishEvaluationColumnAction } from "./actions";
 import Link from "next/link";
 
-export default function EvaluationsClientPage({ evaluations, students, programs, tenantSlug, academyId, userRole }: any) {
+export default function EvaluationsClientPage({ evaluations, students, programs, tenantSlug, academyId, userRole, isReadOnly = false }: any) {
   const [selectedProgramId, setSelectedProgramId] = useState<string>("");
   
   // Modal State
@@ -223,7 +223,7 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
               </div>
             </div>
             
-            {userRole === "TUTOR" && (
+            {userRole === "TUTOR" && !isReadOnly && (
               <button
                 onClick={() => setIsAddModalOpen(true)}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 shadow-sm w-full sm:w-auto justify-center"
@@ -248,7 +248,7 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
                     </th>
                     {columns.length === 0 && (
                       <th className="px-3 py-3 sm:px-4 sm:py-4 font-normal text-slate-400 border-b border-slate-200 dark:border-slate-800 text-center italic text-xs">
-                        Belum ada tugas/evaluasi. Klik "Tambah Tugas Baru".
+                        {isReadOnly ? "Belum ada riwayat tugas/evaluasi." : 'Belum ada tugas/evaluasi. Klik "Tambah Tugas Baru".'}
                       </th>
                     )}
                     {columns.map((col, idx) => (
@@ -263,7 +263,7 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
                           </span>
                           
                           {/* Dropdown Menu untuk Status & Hapus */}
-                          {userRole === "TUTOR" && (
+                          {userRole === "TUTOR" && !isReadOnly && (
                             <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-all flex flex-col gap-1">
                               <button
                                 onClick={() => handleTogglePublish(col.title, col.type, col.status)}
@@ -325,9 +325,12 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
                                 type="number"
                                 placeholder="--"
                                 value={inputValue}
+                                disabled={isReadOnly}
                                 onChange={(e) => setLocalScores(prev => ({ ...prev, [ev.id]: e.target.value }))}
                                 onBlur={(e) => handleScoreBlur(ev.id, ev.score, e.target.value)}
                                 className={`w-12 sm:w-16 h-8 text-center text-xs sm:text-sm font-semibold rounded-lg border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                                  isReadOnly ? "cursor-not-allowed opacity-80" : ""
+                                } ${
                                   inputValue !== "" 
                                     ? "bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-900/20 dark:border-emerald-800/50 dark:text-emerald-400" 
                                     : "bg-white border-slate-200 text-slate-900 dark:bg-slate-900 dark:border-slate-700 dark:text-white"
@@ -338,9 +341,11 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
                                 className={`p-1.5 rounded-lg transition-colors ${
                                   hasNote 
                                     ? "text-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100" 
-                                    : "text-slate-300 hover:text-slate-500 hover:bg-slate-100 dark:text-slate-600 dark:hover:text-slate-400 dark:hover:bg-slate-800 opacity-0 group-hover/cell:opacity-100"
+                                    : isReadOnly 
+                                      ? "hidden"
+                                      : "text-slate-300 hover:text-slate-500 hover:bg-slate-100 dark:text-slate-600 dark:hover:text-slate-400 dark:hover:bg-slate-800 opacity-0 group-hover/cell:opacity-100"
                                 }`}
-                                title={hasNote ? "Edit Catatan" : "Tambah Catatan"}
+                                title={isReadOnly ? "Lihat Catatan" : (hasNote ? "Edit Catatan" : "Tambah Catatan")}
                               >
                                 <MessageSquare size={12} />
                               </button>
@@ -429,11 +434,14 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
             </div>
             <form onSubmit={handleSaveNotes} className="p-4 space-y-4">
               <textarea
-                autoFocus
-                placeholder="Tuliskan catatan opsional tentang murid ini (Misal: Telat 5 menit mengumpulkan tugas)"
+                autoFocus={!isReadOnly}
+                readOnly={isReadOnly}
+                placeholder={isReadOnly ? "Tidak ada catatan." : "Tuliskan catatan opsional tentang murid ini (Misal: Telat 5 menit mengumpulkan tugas)"}
                 value={noteModal.notes}
-                onChange={e => setNoteModal({ ...noteModal, notes: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all min-h-[100px] text-sm resize-none"
+                onChange={e => !isReadOnly && setNoteModal({ ...noteModal, notes: e.target.value })}
+                className={`w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all min-h-[100px] text-sm resize-none ${
+                  isReadOnly ? "cursor-not-allowed bg-slate-50 dark:bg-slate-900/40" : ""
+                }`}
               />
               <div className="pt-2 flex justify-end gap-2">
                 <button
@@ -443,13 +451,15 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
                 >
                   Tutup
                 </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50"
-                >
-                  {isSubmitting ? "Menyimpan..." : "Simpan"}
-                </button>
+                {!isReadOnly && (
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50"
+                  >
+                    {isSubmitting ? "Menyimpan..." : "Simpan"}
+                  </button>
+                )}
               </div>
             </form>
           </div>
