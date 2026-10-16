@@ -72,15 +72,15 @@ export default function PlansClientPage({ plans }: { plans: any[] }) {
                 <ul className="space-y-3">
                   <li className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
                     <Check className="w-5 h-5 text-emerald-500 shrink-0" />
-                    <span>Maks <strong className="font-semibold">{plan.max_students === null ? 'Unlimited' : plan.max_students}</strong> Siswa</span>
+                    <span>Maks <strong className="font-semibold">{plan.max_students ?? (plan.name.toLowerCase() === 'pro' ? 500 : 'Belum diatur')}</strong> Siswa</span>
                   </li>
                   <li className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
                     <Check className="w-5 h-5 text-emerald-500 shrink-0" />
-                    <span>Maks <strong className="font-semibold">{plan.max_staff === null ? 'Unlimited' : plan.max_staff}</strong> Staff/Tutor</span>
+                    <span>Maks <strong className="font-semibold">{plan.max_staff ?? (plan.name.toLowerCase() === 'pro' ? 25 : 'Belum diatur')}</strong> Staff/Tutor</span>
                   </li>
                   <li className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300">
                     <Check className="w-5 h-5 text-emerald-500 shrink-0" />
-                    <span>Maks <strong className="font-semibold">{plan.max_rooms === null ? 'Unlimited' : plan.max_rooms}</strong> Ruangan</span>
+                    <span>Maks <strong className="font-semibold">{plan.max_rooms ?? (plan.name.toLowerCase() === 'pro' ? 15 : 'Belum diatur')}</strong> Ruangan</span>
                   </li>
                   <li className={`flex items-center gap-3 text-sm ${plan.allows_qr_attendance ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500 opacity-60'}`}>
                     {plan.allows_qr_attendance ? <Check className="w-5 h-5 text-emerald-500 shrink-0" /> : <X className="w-5 h-5 shrink-0" />}

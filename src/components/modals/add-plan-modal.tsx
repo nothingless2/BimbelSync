@@ -55,16 +55,16 @@ export function AddPlanModal() {
                   <input type="number" name="price" required min="0" placeholder="99000" className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Maks. Siswa <span className="text-slate-400 font-normal">(kosong = ∞)</span></label>
-                  <input type="number" name="max_students" min="1" placeholder="50" className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Maks. Siswa *</label>
+                  <input type="number" name="max_students" required min="1" step="1" placeholder="50" className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Maks. Staff <span className="text-slate-400 font-normal">(kosong = ∞)</span></label>
-                  <input type="number" name="max_staff" min="1" placeholder="3" className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Maks. Staff *</label>
+                  <input type="number" name="max_staff" required min="1" step="1" placeholder="3" className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Maks. Ruangan <span className="text-slate-400 font-normal">(kosong = ∞)</span></label>
-                  <input type="number" name="max_rooms" min="1" placeholder="2" className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Maks. Ruangan *</label>
+                  <input type="number" name="max_rooms" required min="1" step="1" placeholder="2" className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                 </div>
               </div>
 

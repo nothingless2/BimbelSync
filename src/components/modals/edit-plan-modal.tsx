@@ -94,37 +94,46 @@ export function EditPlanModal({ isOpen, onClose, plan }: EditPlanModalProps) {
             </div>
 
             <div className="border-t border-slate-100 dark:border-slate-800/60 pt-4">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Batasan (Limits)</h3>
-              <p className="text-xs text-slate-500 mb-4">Kosongkan jika ingin Unlimited.</p>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1">Batasan Kuota (Limits)</h3>
+              <p className="text-xs text-slate-500 mb-4">Wajib diisi bilangan bulat positif (contoh: 50, 10, 2). Sistem BimbelSync tidak menggunakan kuota tanpa batas.</p>
               
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Maks Siswa</label>
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Maks Siswa *</label>
                   <input 
                     type="number" 
                     name="max_students"
                     defaultValue={plan.max_students || ""}
-                    placeholder="Unlimited"
+                    placeholder="Contoh: 50"
+                    required
+                    min="1"
+                    step="1"
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition text-slate-900 dark:text-white text-sm"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Maks Tutor</label>
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Maks Tutor *</label>
                   <input 
                     type="number" 
                     name="max_staff"
                     defaultValue={plan.max_staff || ""}
-                    placeholder="Unlimited"
+                    placeholder="Contoh: 3"
+                    required
+                    min="1"
+                    step="1"
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition text-slate-900 dark:text-white text-sm"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Maks Ruangan</label>
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Maks Ruangan *</label>
                   <input 
                     type="number" 
                     name="max_rooms"
                     defaultValue={plan.max_rooms || ""}
-                    placeholder="Unlimited"
+                    placeholder="Contoh: 2"
+                    required
+                    min="1"
+                    step="1"
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition text-slate-900 dark:text-white text-sm"
                   />
                 </div>

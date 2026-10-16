@@ -6,16 +6,30 @@ import { revalidatePath } from "next/cache";
 import bcrypt from "bcrypt";
 import { requireSuperadminSession } from "@/lib/session";
 
+import { parsePositiveQuotaLimit, parsePlanPrice } from "@/lib/plan-validation";
+
 // ==================== PLAN (PAKET BERLANGGANAN) ====================
 
 export async function createPlanAction(formData: FormData) {
   const auth = await requireSuperadminSession();
   if ('error' in auth) return { error: auth.error };
-  const name = formData.get("name") as string;
-  const price = parseInt(formData.get("price") as string, 10);
-  const maxStudents = formData.get("max_students") ? parseInt(formData.get("max_students") as string, 10) : null;
-  const maxStaff = formData.get("max_staff") ? parseInt(formData.get("max_staff") as string, 10) : null;
-  const maxRooms = formData.get("max_rooms") ? parseInt(formData.get("max_rooms") as string, 10) : null;
+
+  const rawName = formData.get("name") as string;
+  const name = rawName?.trim();
+  if (!name) return { error: "Nama paket wajib diisi." };
+
+  const priceResult = parsePlanPrice(formData.get("price"));
+  if (!priceResult.success) return { error: priceResult.error };
+
+  const studentsResult = parsePositiveQuotaLimit(formData.get("max_students"), "Batas siswa");
+  if (!studentsResult.success) return { error: studentsResult.error };
+
+  const staffResult = parsePositiveQuotaLimit(formData.get("max_staff"), "Batas staf");
+  if (!staffResult.success) return { error: staffResult.error };
+
+  const roomsResult = parsePositiveQuotaLimit(formData.get("max_rooms"), "Batas ruangan");
+  if (!roomsResult.success) return { error: roomsResult.error };
+
   const allowsInstallment = formData.get("allows_installment") === "on";
   const allowsAutomatedEmail = formData.get("allows_automated_email") === "on";
   const allowsQrAttendance = formData.get("allows_qr_attendance") === "on";
@@ -28,23 +42,21 @@ export async function createPlanAction(formData: FormData) {
   // Extract all dynamic features
   const additionalFeatures = formData.getAll("additional_features[]").filter(f => f.toString().trim() !== "") as string[];
 
-  if (!name || isNaN(price)) return { error: "Nama dan harga paket wajib diisi." };
-
   try {
     await prisma.plan.create({
       data: { 
         name, 
-        price, 
-        max_students: maxStudents, 
-        max_staff: maxStaff, 
-        max_rooms: maxRooms, 
+        price: priceResult.value, 
+        max_students: studentsResult.value, 
+        max_staff: staffResult.value, 
+        max_rooms: roomsResult.value, 
         allows_installment: allowsInstallment,
         allows_automated_email: allowsAutomatedEmail,
         allows_qr_attendance: allowsQrAttendance,
         allows_erapor: allowsErapor,
         allows_audit_trail: allowsAuditTrail,
-        discount_6_months: discount6Months,
-        discount_12_months: discount12Months,
+        discount_6_months: isNaN(discount6Months) ? 10 : Math.max(0, Math.min(100, discount6Months)),
+        discount_12_months: isNaN(discount12Months) ? 17 : Math.max(0, Math.min(100, discount12Months)),
         additional_features: additionalFeatures
       },
     });
@@ -60,12 +72,25 @@ export async function createPlanAction(formData: FormData) {
 export async function updatePlanAction(formData: FormData) {
   const auth = await requireSuperadminSession();
   if ('error' in auth) return { error: auth.error };
+
   const id = formData.get("id") as string;
-  const name = formData.get("name") as string;
-  const price = parseInt(formData.get("price") as string, 10);
-  const maxStudents = formData.get("max_students") ? parseInt(formData.get("max_students") as string, 10) : null;
-  const maxStaff = formData.get("max_staff") ? parseInt(formData.get("max_staff") as string, 10) : null;
-  const maxRooms = formData.get("max_rooms") ? parseInt(formData.get("max_rooms") as string, 10) : null;
+  const rawName = formData.get("name") as string;
+  const name = rawName?.trim();
+
+  if (!id || !name) return { error: "ID dan Nama paket wajib diisi." };
+
+  const priceResult = parsePlanPrice(formData.get("price"));
+  if (!priceResult.success) return { error: priceResult.error };
+
+  const studentsResult = parsePositiveQuotaLimit(formData.get("max_students"), "Batas siswa");
+  if (!studentsResult.success) return { error: studentsResult.error };
+
+  const staffResult = parsePositiveQuotaLimit(formData.get("max_staff"), "Batas staf");
+  if (!staffResult.success) return { error: staffResult.error };
+
+  const roomsResult = parsePositiveQuotaLimit(formData.get("max_rooms"), "Batas ruangan");
+  if (!roomsResult.success) return { error: roomsResult.error };
+
   const allowsInstallment = formData.get("allows_installment") === "on";
   const allowsAutomatedEmail = formData.get("allows_automated_email") === "on";
   const allowsQrAttendance = formData.get("allows_qr_attendance") === "on";
@@ -78,24 +103,22 @@ export async function updatePlanAction(formData: FormData) {
   // Extract all dynamic features
   const additionalFeatures = formData.getAll("additional_features[]").filter(f => f.toString().trim() !== "") as string[];
 
-  if (!id || !name || isNaN(price)) return { error: "ID, Nama dan harga paket wajib diisi." };
-
   try {
     await prisma.plan.update({
       where: { id },
       data: { 
         name, 
-        price, 
-        max_students: maxStudents, 
-        max_staff: maxStaff, 
-        max_rooms: maxRooms, 
+        price: priceResult.value, 
+        max_students: studentsResult.value, 
+        max_staff: staffResult.value, 
+        max_rooms: roomsResult.value, 
         allows_installment: allowsInstallment,
         allows_automated_email: allowsAutomatedEmail,
         allows_qr_attendance: allowsQrAttendance,
         allows_erapor: allowsErapor,
         allows_audit_trail: allowsAuditTrail,
-        discount_6_months: discount6Months,
-        discount_12_months: discount12Months,
+        discount_6_months: isNaN(discount6Months) ? 10 : Math.max(0, Math.min(100, discount6Months)),
+        discount_12_months: isNaN(discount12Months) ? 17 : Math.max(0, Math.min(100, discount12Months)),
         additional_features: additionalFeatures
       },
     });

@@ -67,9 +67,9 @@ const DEFAULT_PLANS: Plan[] = [
     id: "plan-pro",
     name: "Pro",
     price: 399000,
-    max_students: null,
-    max_staff: null,
-    max_rooms: null,
+    max_students: 500,
+    max_staff: 25,
+    max_rooms: 15,
     allows_installment: true,
     allows_automated_email: true,
     allows_qr_attendance: true,
@@ -89,7 +89,19 @@ const DEFAULT_PLANS: Plan[] = [
 export function PricingSection({ plans }: { plans: Plan[] }) {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "semester" | "yearly">("monthly");
   
-  const displayPlans = plans && plans.length > 0 ? plans : DEFAULT_PLANS;
+  const rawPlans = plans && plans.length > 0 ? plans : DEFAULT_PLANS;
+  
+  // Sanitasi kontrak kuota Pro: Jika database live belum dimutasi (Gate 3), 
+  // tampilkan nilai kanonikal kontrak resmi: 500 siswa, 25 staff, 15 ruangan.
+  const displayPlans = rawPlans.map((p) => {
+    const isPro = p.name.trim().toLowerCase() === "pro";
+    return {
+      ...p,
+      max_students: p.max_students ?? (isPro ? 500 : p.max_students),
+      max_staff: p.max_staff ?? (isPro ? 25 : p.max_staff),
+      max_rooms: p.max_rooms ?? (isPro ? 15 : p.max_rooms),
+    };
+  });
   
   // Replace with actual WA URL
   const WA_URL = "https://wa.me/6281234567890?text=Halo%20tim%20BimbelSync,%20saya%20ingin%20berlangganan%20paket%20BimbelSync.";
@@ -232,11 +244,11 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
                     {/* 1. Kapasitas & Limit */}
                     <li className="flex items-center gap-3 text-sm text-slate-700 font-medium">
                       <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/> 
-                      Maks {plan.max_students === null ? "Unlimited" : plan.max_students} Siswa
+                      Maks {plan.max_students ?? (isPro ? 500 : "Unlimited")} Siswa
                     </li>
                     <li className="flex items-center gap-3 text-sm text-slate-700 font-medium pb-2 border-b border-slate-100">
                       <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/> 
-                      Maks {plan.max_staff === null ? "Unlimited" : plan.max_staff} Staff & {plan.max_rooms === null ? "Unlimited" : plan.max_rooms} Ruang
+                      Maks {plan.max_staff ?? (isPro ? 25 : "Unlimited")} Staff & {plan.max_rooms ?? (isPro ? 15 : "Unlimited")} Ruang
                     </li>
 
                     {/* 2. Fitur Dasar & Tambahan yang Aktif */}
@@ -316,21 +328,33 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
               <tbody className="text-slate-600 text-xs md:text-sm font-medium">
                 <tr className="border-b border-slate-100">
                   <td className="py-3 px-2 md:py-5 md:px-8">Kapasitas Siswa</td>
-                  {displayPlans.map((p) => (
-                    <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">{p.max_students === null ? '∞' : p.max_students}</td>
-                  ))}
+                  {displayPlans.map((p) => {
+                    const isPro = p.name.trim().toLowerCase() === "pro";
+                    const val = p.max_students ?? (isPro ? 500 : null);
+                    return (
+                      <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">{val === null ? '∞' : val}</td>
+                    );
+                  })}
                 </tr>
                 <tr className="border-b border-slate-100">
                   <td className="py-3 px-2 md:py-5 md:px-8">Kapasitas Staff/Tutor</td>
-                  {displayPlans.map((p) => (
-                    <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">{p.max_staff === null ? '∞' : p.max_staff}</td>
-                  ))}
+                  {displayPlans.map((p) => {
+                    const isPro = p.name.trim().toLowerCase() === "pro";
+                    const val = p.max_staff ?? (isPro ? 25 : null);
+                    return (
+                      <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">{val === null ? '∞' : val}</td>
+                    );
+                  })}
                 </tr>
                 <tr className="border-b border-slate-100">
                   <td className="py-3 px-2 md:py-5 md:px-8">Kapasitas Ruangan</td>
-                  {displayPlans.map((p) => (
-                    <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">{p.max_rooms === null ? '∞' : p.max_rooms}</td>
-                  ))}
+                  {displayPlans.map((p) => {
+                    const isPro = p.name.trim().toLowerCase() === "pro";
+                    const val = p.max_rooms ?? (isPro ? 15 : null);
+                    return (
+                      <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">{val === null ? '∞' : val}</td>
+                    );
+                  })}
                 </tr>
                 <tr className="border-b border-slate-100">
                   <td className="py-3 px-2 md:py-5 md:px-8">Jadwal Kelas & Kalender</td>
