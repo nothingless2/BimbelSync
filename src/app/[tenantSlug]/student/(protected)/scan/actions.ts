@@ -1,23 +1,19 @@
 'use server';
 
 import prisma from '@/lib/prisma';
-import { cookies } from 'next/headers';
-import { decrypt } from '@/lib/auth';
+import { requireStudentSession } from '@/lib/session';
 import { decryptQrData } from '@/lib/qr-crypto';
 
 export async function processQrScanAction(tenantSlug: string, qrDataRaw: string) {
   try {
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get('bimbelsync_session')?.value;
-    
-    if (!sessionToken) {
-      return { error: 'Sesi tidak valid.' };
+    const auth = await requireStudentSession();
+    if ('error' in auth) {
+      return { error: auth.error };
     }
+    const session = auth.session;
 
-    const session = await decrypt(sessionToken);
-    
-    if (!session || session.role !== 'STUDENT') {
-      return { error: 'Akses ditolak.' };
+    if (session.tenant_slug !== tenantSlug) {
+      return { error: 'Akses ditolak. Sesi tidak sesuai dengan bimbel ini.' };
     }
 
     // 1. Parse & Decrypt QR Data
@@ -67,8 +63,12 @@ export async function processQrScanAction(tenantSlug: string, qrDataRaw: string)
       return { error: 'Sesi kelas ini belum dimulai atau sudah dibatalkan.' };
     }
 
-    const student = await prisma.student.findUnique({
-      where: { id: session.id },
+    const student = await prisma.student.findFirst({
+      where: {
+        id: session.id,
+        academy_id: session.academy_id,
+        deleted_at: null,
+      },
       include: {
         enrollments: true
       }

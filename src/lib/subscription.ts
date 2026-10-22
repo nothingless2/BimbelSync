@@ -128,26 +128,14 @@ export async function getAcademySubscription(
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // 1. Eksekusi upgrade otomatis jika pending_plan sudah tiba waktunya
+  // 1. Eksekusi upgrade/perubahan otomatis jika pending_plan sudah tiba waktunya
   if (academy.pending_plan_id && academy.pending_plan_date) {
     const activationDate = new Date(academy.pending_plan_date);
     activationDate.setHours(0, 0, 0, 0);
 
     if (today >= activationDate) {
-      // Gunakan client db yang sama (tx jika dalam lock) dan filter guard untuk atomisitas
-      const updateResult = await db.academy.updateMany({
-        where: {
-          id: academy.id,
-          pending_plan_id: academy.pending_plan_id,
-        },
-        data: {
-          plan_id: academy.pending_plan_id,
-          pending_plan_id: null,
-          pending_plan_date: null,
-        },
-      });
-
-      if (updateResult.count > 0 || tx) {
+      const actResult = await activatePendingPlan(academy.id, tx);
+      if (actResult.activated) {
         const refreshed = await db.academy.findUnique({
           where: { id: academy.id },
           include: {
@@ -285,15 +273,50 @@ export interface UsageLimitContract {
 }
 
 /**
+ * Definisi batas kuota kanonikal untuk paket standar BimbelSync:
+ * - Starter: 50 siswa, 3 staf, 2 ruangan, 1 cabang
+ * - Growth: 200 siswa, 10 staf, 6 ruangan, 1 cabang
+ * - Pro: 500 siswa, 25 staf, 15 ruangan, 1 cabang
+ */
+export const CANONICAL_PLAN_LIMITS: Record<
+  "starter" | "growth" | "pro",
+  Record<UsageResource, number>
+> = {
+  starter: {
+    students: 50,
+    staff: 3,
+    rooms: 2,
+    branches: 1,
+  },
+  growth: {
+    students: 200,
+    staff: 10,
+    rooms: 6,
+    branches: 1,
+  },
+  pro: {
+    students: 500,
+    staff: 25,
+    rooms: 15,
+    branches: 1,
+  },
+};
+
+/**
  * Mengambil batas maksimal resource berdasarkan konfigurasi paket aktual dan aturan kuota standar BimbelSync:
  * - Starter: 50 siswa, 3 staf, 2 ruangan, 1 cabang
  * - Growth: 200 siswa, 10 staf, 6 ruangan, 1 cabang
  * - Pro: 500 siswa, 25 staf, 15 ruangan, 1 cabang
  *
- * Perilaku Nilai Kuota:
- * - number (terbatas): batas kuota numerik aktual.
- * - null (eksplisit di database): kuota UNLIMITED (tidak terbatas).
- * - undefined (field tidak di-load / parsial): gunakan batas kanonikal tier standar BimbelSync.
+ * Perilaku Penanganan Nilai Kuota (Hardened via Gate 4B & 4B.1):
+ * 1. Angka non-negatif valid (>= 0): digunakan sebagai batas kuota aktual (termasuk angka 0).
+ * 2. Paket Standar (Starter, Growth, Pro):
+ *    - Nilai null atau undefined: TIDAK PERNAH dianggap unlimited; selalu fallback ke batas kanonikal tier standar.
+ *    - Nilai tidak valid (< 0 atau NaN): selalu fallback ke batas kanonikal tier standar.
+ * 3. Paket Custom / Non-Standar (misal Enterprise):
+ *    - null: kuota UNLIMITED (tidak terbatas) secara eksplisit dari database.
+ *    - undefined: field tidak disediakan/di-load, fail-closed ke 0 (mencegah fail-open / unlimited tak terduga).
+ *    - Nilai tidak valid (< 0 atau NaN): failsafe ke 0 (terkunci aman, tidak menjadi unlimited).
  */
 export function getPlanResourceLimit(
   plan: {
@@ -308,40 +331,36 @@ export function getPlanResourceLimit(
     return 1;
   }
 
+  const planName = (plan?.name || "").trim().toLowerCase();
+  const isStandardPlan = planName === "starter" || planName === "growth" || planName === "pro";
+
   let rawValue: number | null | undefined;
   if (resource === "students") rawValue = plan.max_students;
   else if (resource === "staff") rawValue = plan.max_staff;
   else if (resource === "rooms") rawValue = plan.max_rooms;
 
-  // 1. Jika field eksplisit tersedia dari database:
-  // - number: batas numerik aktual.
-  // - null: UNLIMITED (tanpa batas).
-  if (rawValue !== undefined) {
+  // 1. Jika nilai adalah bilangan bulat / angka non-negatif yang valid (termasuk angka 0)
+  if (typeof rawValue === "number" && !Number.isNaN(rawValue) && rawValue >= 0) {
     return rawValue;
   }
 
-  // 2. Jika field undefined (misal query tidak menyertakan kolom kuota),
-  // gunakan nilai batas kanonikal berdasarkan nama paket:
-  const planName = plan.name.trim().toLowerCase();
-  switch (resource) {
-    case "students":
-      if (planName === "starter") return 50;
-      if (planName === "growth") return 200;
-      if (planName === "pro") return 500;
-      return null;
-    case "staff":
-      if (planName === "starter") return 3;
-      if (planName === "growth") return 10;
-      if (planName === "pro") return 25;
-      return null;
-    case "rooms":
-      if (planName === "starter") return 2;
-      if (planName === "growth") return 6;
-      if (planName === "pro") return 15;
-      return null;
-    default:
-      return null;
+  // 2. Untuk paket standar (Starter, Growth, Pro):
+  // Nilai null, undefined, negatif, atau NaN TIDAK BOLEH menjadi unlimited!
+  // Harus selalu menggunakan batas kuota kanonikal paket standar tersebut.
+  if (isStandardPlan) {
+    return CANONICAL_PLAN_LIMITS[planName as "starter" | "growth" | "pro"][resource];
   }
+
+  // 3. Untuk paket custom / non-standar:
+  // Hanya nilai NULL eksplisit dari database yang diakui sebagai kuota UNLIMITED.
+  if (rawValue === null) {
+    return null;
+  }
+
+  // 4. Fail-closed untuk paket custom (undefined, angka negatif, NaN, atau nilai tidak valid lainnya):
+  // Field yang tidak disediakan (undefined) atau tidak valid TIDAK BOLEH dianggap unlimited.
+  // Gunakan batas 0 (Fail-Closed) agar sumber daya terkunci aman dan mencegah over-allocation tak disengaja.
+  return 0;
 }
 
 /**
@@ -536,4 +555,277 @@ export async function executeWithQuotaLock<T>(
       throw error;
     }
   }
+}
+
+// ============================================================================
+// PERUBAHAN PAKET & INTEGRITAS KUOTA (GATE 5C - OPSI B)
+// ============================================================================
+
+export interface ChangePlanOptions {
+  academyId: string;
+  targetPlanId: string;
+  name?: string;
+  pathUrl?: string;
+  subscriptionStatus?: SubscriptionStatus;
+  subscriptionDueDate?: Date | null;
+  clearPendingPlan?: boolean;
+  tx?: Prisma.TransactionClient;
+  maxRetries?: number;
+  timeoutMs?: number;
+}
+
+export interface ResourceQuotaStatus {
+  current: number;
+  maxLimit: number | null;
+  isExceeded: boolean;
+}
+
+export interface ChangePlanResult {
+  success: boolean;
+  academyId: string;
+  previousPlanId: string;
+  previousPlanName: string;
+  newPlanId: string;
+  newPlanName: string;
+  isDowngrade: boolean;
+  resourceStatus: {
+    students: ResourceQuotaStatus;
+    staff: ResourceQuotaStatus;
+    rooms: ResourceQuotaStatus;
+  };
+  hasExceededQuota: boolean;
+  warningMessage?: string;
+}
+
+/**
+ * Mengubah paket akademi secara atomik dan aman terhadap race condition.
+ * 
+ * Implementasi Kebijakan Downgrade: OPSI B (Allow downgrade with restrictions)
+ * - Baris Academy dikunci dengan SELECT ... FOR UPDATE (konsisten dengan executeWithQuotaLock).
+ * - Paket target diverifikasi dari database.
+ * - Resource aktif (students, staff, rooms) dihitung secara real-time di dalam transaksi.
+ * - Jika jumlah resource aktif saat ini melampaui kuota paket target:
+ *   1. Perubahan paket tetap DIIZINKAN (downgrade berhasil).
+ *   2. Data historis/existing TIDAK DIHAPUS.
+ *   3. Menghasilkan pesan peringatan yang menjelaskan resource mana yang melampaui batas.
+ *   4. Penambahan resource baru berikutnya secara otomatis diblokir oleh executeWithQuotaLock
+ *      karena currentCount >= maxLimit.
+ */
+export async function changeAcademyPlan(
+  options: ChangePlanOptions
+): Promise<ChangePlanResult> {
+  const maxRetries = options.maxRetries ?? 3;
+  let attempt = 0;
+
+  const executeInsideTx = async (tx: Prisma.TransactionClient): Promise<ChangePlanResult> => {
+    // 1. Kunci baris Academy secara eksklusif (Row-Level Lock)
+    const lockedAcademies = await tx.$queryRaw<Array<{ id: string; plan_id: string }>>`
+      SELECT id, plan_id FROM "Academy" 
+      WHERE id = ${options.academyId}::uuid AND deleted_at IS NULL 
+      FOR UPDATE
+    `;
+
+    if (lockedAcademies.length === 0) {
+      throw new Error("Akademi tidak ditemukan atau telah dinonaktifkan.");
+    }
+
+    const currentPlanId = lockedAcademies[0].plan_id;
+
+    // 2. Ambil paket saat ini & paket target dari database
+    const [previousPlan, targetPlan] = await Promise.all([
+      tx.plan.findUnique({ where: { id: currentPlanId } }),
+      tx.plan.findUnique({ where: { id: options.targetPlanId } })
+    ]);
+
+    if (!targetPlan || targetPlan.deleted_at !== null) {
+      throw new Error("Paket langganan target tidak ditemukan atau tidak aktif.");
+    }
+
+    // 3. Hitung jumlah record aktif saat ini dalam isolasi transaksi terkunci
+    const [studentCount, staffCount, roomCount] = await Promise.all([
+      tx.student.count({ where: { academy_id: options.academyId, deleted_at: null } }),
+      tx.staff.count({ where: { academy_id: options.academyId, deleted_at: null } }),
+      tx.room.count({ where: { academy_id: options.academyId, deleted_at: null } }),
+    ]);
+
+    // 4. Hitung limit kanonikal paket target & paket sebelumnya
+    const targetStudentLimit = getPlanResourceLimit(targetPlan, "students");
+    const targetStaffLimit = getPlanResourceLimit(targetPlan, "staff");
+    const targetRoomLimit = getPlanResourceLimit(targetPlan, "rooms");
+
+    const prevStudentLimit = previousPlan ? getPlanResourceLimit(previousPlan, "students") : null;
+    const prevStaffLimit = previousPlan ? getPlanResourceLimit(previousPlan, "staff") : null;
+    const prevRoomLimit = previousPlan ? getPlanResourceLimit(previousPlan, "rooms") : null;
+
+    // Evaluasi apakah perubahan ini merupakan downgrade kapasitas
+    const isDowngrade = Boolean(
+      (targetStudentLimit !== null && prevStudentLimit !== null && targetStudentLimit < prevStudentLimit) ||
+      (targetStaffLimit !== null && prevStaffLimit !== null && targetStaffLimit < prevStaffLimit) ||
+      (targetRoomLimit !== null && prevRoomLimit !== null && targetRoomLimit < prevRoomLimit)
+    );
+
+    // Evaluasi status kelebihan kuota (Opsi B: izinkan perubahan, batasi penambahan baru)
+    const studentExceeded = targetStudentLimit !== null && studentCount > targetStudentLimit;
+    const staffExceeded = targetStaffLimit !== null && staffCount > targetStaffLimit;
+    const roomExceeded = targetRoomLimit !== null && roomCount > targetRoomLimit;
+    const hasExceededQuota = studentExceeded || staffExceeded || roomExceeded;
+
+    const exceededDetails: string[] = [];
+    if (studentExceeded) exceededDetails.push(`siswa (${studentCount}/${targetStudentLimit})`);
+    if (staffExceeded) exceededDetails.push(`staf (${staffCount}/${targetStaffLimit})`);
+    if (roomExceeded) exceededDetails.push(`ruangan (${roomCount}/${targetRoomLimit})`);
+
+    let warningMessage: string | undefined;
+    if (hasExceededQuota) {
+      warningMessage = `Paket berhasil diubah ke ${targetPlan.name}. Perhatian: jumlah ${exceededDetails.join(", ")} saat ini melampaui kuota paket baru. Penambahan data baru akan diblokir hingga jumlah resource kembali berada di bawah batas kuota. Seluruh data historis yang sudah ada tetap aman dan dipertahankan.`;
+    }
+
+    // 5. Update data Academy secara atomik
+    await tx.academy.update({
+      where: { id: options.academyId },
+      data: {
+        plan_id: options.targetPlanId,
+        ...(options.name ? { name: options.name.trim() } : {}),
+        ...(options.pathUrl ? { path_url: options.pathUrl.trim() } : {}),
+        ...(options.subscriptionStatus ? { subscription_status: options.subscriptionStatus } : {}),
+        ...(options.subscriptionDueDate !== undefined ? { subscription_due_date: options.subscriptionDueDate } : {}),
+        ...(options.clearPendingPlan !== false ? { pending_plan_id: null, pending_plan_date: null } : {}),
+      }
+    });
+
+    return {
+      success: true,
+      academyId: options.academyId,
+      previousPlanId: currentPlanId,
+      previousPlanName: previousPlan?.name || "Unknown",
+      newPlanId: targetPlan.id,
+      newPlanName: targetPlan.name,
+      isDowngrade,
+      resourceStatus: {
+        students: { current: studentCount, maxLimit: targetStudentLimit, isExceeded: studentExceeded },
+        staff: { current: staffCount, maxLimit: targetStaffLimit, isExceeded: staffExceeded },
+        rooms: { current: roomCount, maxLimit: targetRoomLimit, isExceeded: roomExceeded },
+      },
+      hasExceededQuota,
+      warningMessage,
+    };
+  };
+
+  // Jika tx sudah diberikan oleh pemanggil, gunakan langsung tanpa membuka transaksi baru
+  if (options.tx) {
+    return await executeInsideTx(options.tx);
+  }
+
+  // Jika belum dalam transaksi, jalankan dalam prisma.$transaction dengan retry backoff
+  while (true) {
+    try {
+      return await prisma.$transaction(
+        async (tx) => executeInsideTx(tx),
+        { timeout: options.timeoutMs ?? 15000 }
+      );
+    } catch (error: any) {
+      const isTransient =
+        error.code === "40001" ||
+        error.code === "40P01" ||
+        error.code === "P2034";
+
+      attempt++;
+      if (isTransient && attempt <= maxRetries) {
+        const backoff = Math.min(250, 50 * Math.pow(2, attempt)) + Math.floor(Math.random() * 25);
+        await new Promise((res) => setTimeout(res, backoff));
+        continue;
+      }
+      throw error;
+    }
+  }
+}
+
+/**
+ * Mengaktifkan paket terjadwal (pending_plan) untuk satu akademi secara atomik.
+ */
+export async function activatePendingPlan(
+  academyId: string,
+  tx?: Prisma.TransactionClient
+): Promise<{ activated: boolean; planName?: string; warningMessage?: string }> {
+  const executeInsideTx = async (client: Prisma.TransactionClient) => {
+    const locked = await client.$queryRaw<Array<{
+      id: string;
+      plan_id: string;
+      pending_plan_id: string | null;
+      pending_plan_date: Date | null;
+    }>>`
+      SELECT id, plan_id, pending_plan_id, pending_plan_date 
+      FROM "Academy" 
+      WHERE id = ${academyId}::uuid AND deleted_at IS NULL 
+      FOR UPDATE
+    `;
+
+    if (locked.length === 0) return { activated: false };
+    const acad = locked[0];
+
+    if (!acad.pending_plan_id || !acad.pending_plan_date) {
+      return { activated: false };
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const activationDate = new Date(acad.pending_plan_date);
+    activationDate.setHours(0, 0, 0, 0);
+
+    if (today < activationDate) {
+      return { activated: false };
+    }
+
+    const result = await changeAcademyPlan({
+      academyId,
+      targetPlanId: acad.pending_plan_id,
+      clearPendingPlan: true,
+      tx: client,
+    });
+
+    return {
+      activated: true,
+      planName: result.newPlanName,
+      warningMessage: result.warningMessage,
+    };
+  };
+
+  if (tx) {
+    return await executeInsideTx(tx);
+  }
+
+  return await prisma.$transaction(
+    async (client) => executeInsideTx(client),
+    { timeout: 15000 }
+  );
+}
+
+/**
+ * Mengaktifkan seluruh pending plan yang sudah tiba tanggal aktivasinya.
+ * Digunakan oleh halaman billing superadmin dan cron aktivasi.
+ */
+export async function activateAllDuePendingPlans(): Promise<{ processed: number; activated: number }> {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const pendingAcademies = await prisma.academy.findMany({
+    where: {
+      deleted_at: null,
+      pending_plan_id: { not: null },
+      pending_plan_date: { lte: today },
+    },
+    select: { id: true },
+  });
+
+  let activatedCount = 0;
+  for (const acad of pendingAcademies) {
+    try {
+      const res = await activatePendingPlan(acad.id);
+      if (res.activated) activatedCount++;
+    } catch (err) {
+      console.error(`Gagal mengaktifkan pending plan untuk akademi ${acad.id}:`, err);
+    }
+  }
+
+  return { processed: pendingAcademies.length, activated: activatedCount };
 }

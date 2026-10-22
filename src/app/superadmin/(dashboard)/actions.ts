@@ -5,6 +5,7 @@ import { validatePassword } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcrypt";
 import { requireSuperadminSession } from "@/lib/session";
+import { changeAcademyPlan } from "@/lib/subscription";
 
 import { parsePositiveQuotaLimit, parsePlanPrice } from "@/lib/plan-validation";
 
@@ -174,6 +175,11 @@ export async function createAcademyAction(formData: FormData) {
   }
 
   try {
+    const targetPlan = await prisma.plan.findUnique({ where: { id: planId } });
+    if (!targetPlan || targetPlan.deleted_at !== null) {
+      return { error: "Paket langganan yang dipilih tidak valid atau sudah tidak aktif." };
+    }
+
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
     const academy = await prisma.academy.create({
       data: {
@@ -188,25 +194,22 @@ export async function createAcademyAction(formData: FormData) {
 
     // Otomatisasi: Jika status langsung diset ACTIVE, buatkan Invoice bulan pertama
     if (status === "ACTIVE") {
-      const plan = await prisma.plan.findUnique({ where: { id: planId } });
-      if (plan) {
-        const today = new Date();
-        // Jadikan tanggal awal bulan ini sebagai billing period
-        const billingPeriod = new Date(today.getFullYear(), today.getMonth(), 1); 
-        
-        await prisma.platformInvoice.create({
-          data: {
-            academy_id: academy.id,
-            plan_id: plan.id,
-            amount: plan.price * durationMonths,
-            billing_period: billingPeriod,
-            due_date: calculatedDueDate || today,
-            duration_months: durationMonths,
-            payment_status: isPaid ? "PAID" : "UNPAID",
-            paid_at: isPaid ? new Date() : null,
-          }
-        });
-      }
+      const today = new Date();
+      // Jadikan tanggal awal bulan ini sebagai billing period
+      const billingPeriod = new Date(today.getFullYear(), today.getMonth(), 1); 
+      
+      await prisma.platformInvoice.create({
+        data: {
+          academy_id: academy.id,
+          plan_id: targetPlan.id,
+          amount: targetPlan.price * durationMonths,
+          billing_period: billingPeriod,
+          due_date: calculatedDueDate || today,
+          duration_months: durationMonths,
+          payment_status: isPaid ? "PAID" : "UNPAID",
+          paid_at: isPaid ? new Date() : null,
+        }
+      });
     }
 
     revalidatePath("/superadmin/academies");
@@ -251,23 +254,24 @@ export async function updateAcademyAction(formData: FormData) {
   }
 
   try {
-    await prisma.academy.update({
-      where: { id },
-      data: { 
-        name,
-        path_url: pathUrl, 
-        plan_id: planId, 
-        subscription_status: status,
-        subscription_due_date: parsedDueDate
-      },
+    const result = await changeAcademyPlan({
+      academyId: id,
+      targetPlanId: planId,
+      name,
+      pathUrl,
+      subscriptionStatus: status,
+      subscriptionDueDate: parsedDueDate,
+      clearPendingPlan: true,
     });
+
     revalidatePath("/superadmin/academies");
     revalidatePath("/superadmin/dashboard");
-    return { success: true };
+    revalidatePath(`/superadmin/academies/${id}`);
+    return { success: true, warning: result.warningMessage };
   } catch (error: any) {
     console.error(error);
     if (error?.code === "P2002") return { error: `Path URL "${pathUrl}" sudah digunakan oleh orang lain.` };
-    return { error: "Gagal memperbarui akademi." };
+    return { error: error.message || "Gagal memperbarui akademi." };
   }
 }
 

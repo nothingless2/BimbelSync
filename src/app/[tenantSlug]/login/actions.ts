@@ -23,7 +23,8 @@ export async function loginTenantAction(tenantSlug: string, formData: FormData) 
     const staff = await prisma.staff.findFirst({
       where: {
         email: identifier,
-        academy_id: academy.id
+        academy_id: academy.id,
+        deleted_at: null,
       }
     });
 
@@ -50,7 +51,8 @@ export async function loginTenantAction(tenantSlug: string, formData: FormData) 
     const student = await prisma.student.findFirst({
       where: {
         username: identifier,
-        academy_id: academy.id
+        academy_id: academy.id,
+        deleted_at: null,
       }
     });
 

@@ -1,6 +1,5 @@
 import prisma from "@/lib/prisma";
-import { cookies } from "next/headers";
-import { decrypt } from "@/lib/auth";
+import { requireStudentSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
 import StudentAttendancesClientPage from "./client-page";
@@ -12,14 +11,12 @@ export const metadata = {
 export default async function StudentAttendancesPage({ params }: { params: Promise<{ tenantSlug: string }> }) {
   const { tenantSlug } = await params;
 
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) redirect(`/${tenantSlug}/login`);
-
-  const session = await decrypt(sessionToken);
-  if (!session || !session.id || session.role !== 'STUDENT') {
-    redirect(`/${tenantSlug}/login`);
+  const auth = await requireStudentSession();
+  if ('error' in auth) {
+    redirect(`/${tenantSlug}/student/login`);
   }
+
+  const session = auth.session;
 
   const attendances = await prisma.attendance.findMany({
     where: { student_id: session.id as string },

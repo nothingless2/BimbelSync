@@ -1,21 +1,13 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { cookies } from "next/headers";
-import { decrypt } from "@/lib/auth";
-
-async function getSuperadminId() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("bimbelsync_session")?.value;
-  const session = sessionCookie ? await decrypt(sessionCookie) : null;
-  if (!session || session.role !== "SUPERADMIN") return null;
-  return session.id as string;
-}
+import { requireSuperadminSession } from "@/lib/session";
 
 export async function logAuditAction(action: string, entityType: string, entityId?: string, details?: any) {
   try {
-    const superadminId = await getSuperadminId();
-    if (!superadminId) return;
+    const auth = await requireSuperadminSession();
+    if ("error" in auth) return;
+    const superadminId = auth.session.id;
 
     await prisma.auditLog.create({
       data: {
@@ -33,8 +25,8 @@ export async function logAuditAction(action: string, entityType: string, entityI
 
 export async function searchTenantsAction(query: string) {
   try {
-    const superadminId = await getSuperadminId();
-    if (!superadminId) return { error: "Unauthorized" };
+    const auth = await requireSuperadminSession();
+    if ("error" in auth) return { error: auth.error };
 
     if (!query || query.trim() === "") return { data: [] };
 

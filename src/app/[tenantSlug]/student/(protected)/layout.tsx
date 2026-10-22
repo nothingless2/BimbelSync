@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
-import { decrypt } from '@/lib/auth';
+import { requireStudentSession } from '@/lib/session';
 import { StudentMobileNav } from './mobile-nav';
 import { StudentDesktopNav } from './desktop-nav';
 
@@ -11,14 +10,14 @@ export default async function StudentDashboardLayout({
   children: React.ReactNode;
   params: Promise<{ tenantSlug: string }>;
 }) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get('bimbelsync_session')?.value;
-  const session = sessionToken ? await decrypt(sessionToken) : null;
   const { tenantSlug } = await params;
+  const auth = await requireStudentSession();
 
-  if (!session || session.role !== 'STUDENT') {
+  if ('error' in auth) {
     redirect(`/${tenantSlug}/student/login`);
   }
+
+  const session = auth.session;
 
   if (session.tenant_slug !== tenantSlug) {
     redirect(`/${session.tenant_slug}/student/dashboard`);

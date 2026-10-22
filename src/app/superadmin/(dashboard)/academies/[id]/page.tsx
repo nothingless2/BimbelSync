@@ -3,6 +3,7 @@ import { decrypt } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import TenantDetailClientPage from "./client-page";
+import { activatePendingPlan } from "@/lib/subscription";
 
 export default async function TenantDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const cookieStore = await cookies();
@@ -14,6 +15,9 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
   }
 
   const { id } = await params;
+
+  // Pastikan pending plan yang sudah jatuh tempo diaktifkan secara aman
+  await activatePendingPlan(id);
 
   const [academy, plans, invoices, auditLogs, totalStudentUnpaid] = await Promise.all([
     prisma.academy.findUnique({

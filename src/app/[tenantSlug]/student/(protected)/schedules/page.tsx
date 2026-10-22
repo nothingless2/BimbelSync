@@ -1,6 +1,5 @@
 import prisma from "@/lib/prisma";
-import { cookies } from "next/headers";
-import { decrypt } from "@/lib/auth";
+import { requireStudentSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import StudentSchedulesClientPage from "./client-page";
 
@@ -13,17 +12,19 @@ export const metadata = {
 export default async function StudentSchedulesPage({ params }: { params: Promise<{ tenantSlug: string }> }) {
   const { tenantSlug } = await params;
 
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) redirect(`/${tenantSlug}/login`);
-
-  const session = await decrypt(sessionToken);
-  if (!session || session.role !== "STUDENT") {
-    redirect(`/${tenantSlug}/login`);
+  const auth = await requireStudentSession();
+  if ('error' in auth) {
+    redirect(`/${tenantSlug}/student/login`);
   }
 
-  const student = await prisma.student.findUnique({
-    where: { id: session.id as string },
+  const session = auth.session;
+
+  const student = await prisma.student.findFirst({
+    where: {
+      id: session.id,
+      academy_id: session.academy_id,
+      deleted_at: null,
+    },
     include: {
       enrollments: {
         where: { status: 'ACTIVE' },
@@ -32,7 +33,7 @@ export default async function StudentSchedulesPage({ params }: { params: Promise
     }
   });
 
-  if (!student) redirect(`/${tenantSlug}/login`);
+  if (!student) redirect(`/${tenantSlug}/student/login`);
 
   const programIds = student.enrollments.map(e => e.program_id);
 

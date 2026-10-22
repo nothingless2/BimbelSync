@@ -1,5 +1,4 @@
-import { cookies } from 'next/headers';
-import { decrypt } from '@/lib/auth';
+import { requireStudentSession } from '@/lib/session';
 import prisma from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
@@ -19,18 +18,22 @@ export default async function StudentDashboardPage({
 }: {
   params: Promise<{ tenantSlug: string }>;
 }) {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get('bimbelsync_session')?.value;
-  const session = sessionToken ? await decrypt(sessionToken) : null;
   const { tenantSlug } = await params;
+  const auth = await requireStudentSession();
 
-  if (!session || session.role !== 'STUDENT') {
-    redirect(`/${tenantSlug}/login`);
+  if ('error' in auth) {
+    redirect(`/${tenantSlug}/student/login`);
   }
 
+  const session = auth.session;
+
   const [student, allSchedules, unpaidInvoices, academy] = await Promise.all([
-    prisma.student.findUnique({
-      where: { id: session.id },
+    prisma.student.findFirst({
+      where: {
+        id: session.id,
+        academy_id: session.academy_id,
+        deleted_at: null,
+      },
       include: {
         enrollments: {
           include: {

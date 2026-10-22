@@ -1,5 +1,4 @@
-import { cookies } from "next/headers";
-import { decrypt } from "@/lib/auth";
+import { requireStudentSession } from "@/lib/session";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { format } from "date-fns";
@@ -16,20 +15,20 @@ export default async function StudentInvoicesPage({
   const resolvedParams = await params;
   const tenantSlug = resolvedParams.tenantSlug;
 
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) redirect(`/${tenantSlug}/student/login`);
-
-  const session = await decrypt(sessionToken);
-  if (!session || session.role !== "STUDENT") {
+  const auth = await requireStudentSession();
+  if ('error' in auth) {
     redirect(`/${tenantSlug}/student/login`);
   }
 
-  const studentId = session.id as string;
+  const session = auth.session;
+  const studentId = session.id;
 
   const [invoices, academy] = await Promise.all([
     prisma.invoice.findMany({
-      where: { student_id: studentId },
+      where: {
+        student_id: studentId,
+        academy_id: session.academy_id,
+      },
       include: {
         items: true,
         installments: true

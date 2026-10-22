@@ -3,8 +3,7 @@ import Image from "next/image";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { TenantNav } from "@/components/tenant-nav";
 import { UserAvatar } from "@/components/user-avatar";
-import { cookies } from "next/headers";
-import { decrypt } from "@/lib/auth";
+import { requireStaffSession } from "@/lib/session";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { BillingBannerWrapper } from "@/components/billing-banner-wrapper";
@@ -27,20 +26,19 @@ export default async function DashboardLayout({
   const resolvedParams = await params;
   const tenantSlug = resolvedParams.tenantSlug || "Bimbel";
 
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get('bimbelsync_session')?.value;
-  const session = sessionCookie ? await decrypt(sessionCookie) : null;
-
-  if (!session || !session.academy_id) {
+  const auth = await requireStaffSession();
+  if ('error' in auth) {
     redirect(`/${tenantSlug}/login`);
   }
+  const session = auth.session;
 
-  // Fetch dbUser, subscription, unpaidInvoices, and platform bank info concurrently
-  const [dbUser, sub, unpaidInvoices, bankInfo] = await Promise.all([
-    prisma.staff.findUnique({
-      where: { id: session.id },
-      select: { id: true, email: true, avatar_url: true, role: true }
-    }),
+  // Validasi kecocokan URL tenantSlug dengan akademi staf yang terverifikasi
+  if (session.tenant_slug !== tenantSlug) {
+    redirect(`/${session.tenant_slug}/dashboard`);
+  }
+
+  // Fetch subscription, unpaidInvoices, and platform bank info concurrently
+  const [sub, unpaidInvoices, bankInfo] = await Promise.all([
     getAcademySubscription(session.academy_id),
     prisma.platformInvoice.findMany({
       where: { 
@@ -52,9 +50,7 @@ export default async function DashboardLayout({
     getPlatformBankInfo()
   ]);
 
-  if (!dbUser || session.role === 'STUDENT') {
-    redirect(`/${tenantSlug}/login`);
-  }
+  const dbUser = session.staff;
 
   // Jika akademi sudah dihapus (soft delete) atau tidak ada
   if (!sub) {

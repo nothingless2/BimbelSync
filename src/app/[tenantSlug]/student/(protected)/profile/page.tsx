@@ -1,5 +1,4 @@
-import { cookies } from "next/headers";
-import { decrypt } from "@/lib/auth";
+import { requireStudentSession } from "@/lib/session";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { UserCircle, LogOut, KeyRound, Phone, BookOpen, GraduationCap } from "lucide-react";
@@ -14,17 +13,19 @@ export default async function StudentProfilePage({
   const resolvedParams = await params;
   const tenantSlug = resolvedParams.tenantSlug;
 
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) redirect(`/${tenantSlug}/login`);
-
-  const session = await decrypt(sessionToken);
-  if (!session || session.role !== "STUDENT") {
-    redirect(`/${tenantSlug}/login`);
+  const auth = await requireStudentSession();
+  if ('error' in auth) {
+    redirect(`/${tenantSlug}/student/login`);
   }
 
-  const student = await prisma.student.findUnique({
-    where: { id: session.id as string },
+  const session = auth.session;
+
+  const student = await prisma.student.findFirst({
+    where: {
+      id: session.id,
+      academy_id: session.academy_id,
+      deleted_at: null,
+    },
     include: {
       academy: true,
       enrollments: {
@@ -33,7 +34,7 @@ export default async function StudentProfilePage({
     }
   });
 
-  if (!student) redirect(`/${tenantSlug}/login`);
+  if (!student) redirect(`/${tenantSlug}/student/login`);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">

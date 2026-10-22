@@ -4,6 +4,7 @@ import { decrypt } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import BillingClientPage from "./client-page";
 import { getPlatformBankInfo } from "@/lib/platform-settings";
+import { activateAllDuePendingPlans } from "@/lib/subscription";
 
 export default async function BillingPage() {
   const cookieStore = await cookies();
@@ -12,29 +13,8 @@ export default async function BillingPage() {
   if (!session || session.role !== "SUPERADMIN") redirect("/superadmin/login");
 
   try {
-    // Process auto-activations
-    const todayForActivation = new Date();
-    todayForActivation.setHours(0, 0, 0, 0);
-
-    const pendingAcademies = await prisma.academy.findMany({
-      where: {
-        pending_plan_id: { not: null },
-        pending_plan_date: { lte: todayForActivation }
-      }
-    });
-
-    if (pendingAcademies.length > 0) {
-      await Promise.all(pendingAcademies.map(acad => 
-        prisma.academy.update({
-          where: { id: acad.id },
-          data: {
-            plan_id: acad.pending_plan_id!,
-            pending_plan_id: null,
-            pending_plan_date: null
-          }
-        })
-      ));
-    }
+    // Process auto-activations safely with atomic locks and quota verification
+    await activateAllDuePendingPlans();
 
     const [invoices, academies, plans, bankInfo] = await Promise.all([
       prisma.platformInvoice.findMany({

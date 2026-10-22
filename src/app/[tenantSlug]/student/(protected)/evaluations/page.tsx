@@ -1,6 +1,5 @@
 import prisma from "@/lib/prisma";
-import { cookies } from "next/headers";
-import { decrypt } from "@/lib/auth";
+import { requireStudentSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import StudentEvaluationsClientPage from "./client-page";
 import { BarChart } from "lucide-react";
@@ -17,14 +16,12 @@ export default async function StudentEvaluationsPage({
   const resolvedParams = await params;
   const tenantSlug = resolvedParams.tenantSlug;
 
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  if (!sessionToken) redirect(`/${tenantSlug}/login`);
-
-  const session = await decrypt(sessionToken);
-  if (!session || session.role !== "STUDENT") {
-    redirect(`/${tenantSlug}/login`);
+  const auth = await requireStudentSession();
+  if ('error' in auth) {
+    redirect(`/${tenantSlug}/student/login`);
   }
+
+  const session = auth.session;
 
   // Fetch all evaluations for this student
   const rawEvaluations = await prisma.studentEvaluation.findMany({

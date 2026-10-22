@@ -1,51 +1,128 @@
 # Design System & Architecture - BimbelSync
 
+Dokumen ini mendefinisikan arsitektur sistem, strategi rendering, model keamanan multi-tenant, dan panduan desain antarmuka (Design System) yang diterapkan pada platform BimbelSync.
+
+---
+
 ## 1. Arsitektur Teknis & Infrastruktur
-- **Framework Utama:** Next.js (menggunakan App Router) dengan TypeScript. Pendekatan Nested Layout sangat cocok untuk memisahkan 3 lingkungan kerja utama:
-  - `/internal` (Superadmin Panel)
-  - `/dashboard` (Admin & Tutor Portal)
-  - `/siswa` (Portal Siswa)
-- **Strategi Rendering (Per Rute):**
-  - **SSR (Dynamic Rendering):** Halaman Dashboard Admin/Tutor, Portal Siswa, dan halaman internal Superadmin WAJIB di-render secara dinamis. Hal ini memastikan isolasi tenant dan mencegah caching yang dapat melayani data satu akademi ke pengguna akademi lain.
-  - **Client Component:** Digunakan khusus pada layar QR Presensi dengan implementasi interval polling per 3 detik.
-  - **SSG / ISR:** Digunakan pada Landing Page publik BimbelSync (termasuk halaman paket harga).
-- **State Management:** Zustand untuk state lokal di sisi client.
-- **ORM & Database:** Prisma ORM dengan database PostgreSQL.
-- **Infrastruktur API:** Vercel Serverless Functions.
-- **Notifikasi & Pesan:** WhatsApp Gateway (WAG) untuk tagihan, cicilan, password generator siswa. Email via Resend (untuk undangan Tutor dan reset password Staff).
-- **Payment Gateway:** Midtrans / Xendit dengan model BYOK (Bring Your Own Key) untuk pembayaran Siswa ke Bimbel, serta key milik platform untuk pembayaran berlangganan Bimbel ke BimbelSync.
 
-## 2. Pendekatan Multi-Tenant
-- **Isolasi Tenant:** 
-  - Middleware Next.js bertugas membaca subdomain atau `path_url` akademi.
-  - Middleware mencocokkan URL dengan `academy_id` dan menyuntikkannya ke dalam request header untuk pengamanan di layer API/Server Action.
-- **Skema Database:** Multi-tenant shared-database, shared-schema. Isolasi data ditangani secara ketat di tingkat basis data menggunakan fitur **PostgreSQL Row-Level Security (RLS)**.
-- **Otentikasi (Sesi Terpisah):** JWT via HTTP-Only Cookies (SameSite=Lax) dengan masa kedaluwarsa 8 jam. Sesi dibedakan secara tegas antara Staff, Superadmin, dan Siswa.
+### 1.1. Teknologi Utama
+- **Framework Aplikasi:** Next.js 16 (App Router) dengan React 19 dan TypeScript.
+- **Styling & CSS:** Tailwind CSS v4 (`@tailwindcss/postcss`) dengan konfigurasi CSS Variable-first di `src/app/globals.css`.
+- **Database & ORM:** PostgreSQL 17 (dihosting di Supabase) dengan Prisma ORM 6.12.0.
+  - Port 6543: Supabase PgBouncer Transaction Pooler (`DATABASE_URL`).
+  - Port 5432: PostgreSQL Direct Connection (`DIRECT_URL`) untuk migrasi dan sesi transaksi panjang.
+- **PWA & Offline Capability:** `@serwist/next` & `serwist` untuk service worker (`public/sw.js`) dan web app manifest (`src/app/manifest.ts`).
+- **State Management & UI Utilities:**
+  - `lucide-react` untuk iconography modern.
+  - `framer-motion` untuk mikro-animasi transisi halaman dan kartu harga.
+  - `recharts` untuk visualisasi grafik omset dan laporan piutang.
+  - `sweetalert2` untuk dialog konfirmasi tindakan kritis.
+  - `@yudiel/react-qr-scanner` & `qrcode.react` untuk modul presensi digital.
 
-## 3. Design System & Branding
-Tampilan platform ditargetkan bernuansa B2B modern, padat informasi (data-centric), namun tidak mengorbankan estetika dan kemudahan navigasi.
+### 1.2. Struktur Rute (Route Segregation)
+Arsitektur direktori `src/app` memisahkan empat domain pengguna utama melalui nested layouts:
 
-### 3.1. Palet Warna (Wajib Dipatuhi)
-- **Primary Blue (`#2563EB`):** Digunakan untuk header utama, link aktif, dan CTA primer (Tombol Simpan, dll).
-- **Accent Green (`#16A34A`):** Indikator positif (Status Lunas, QR berhasil dipindai, alert sukses).
-- **Accent Red (`#DC2626`):** Indikator negatif/peringatan (Status Tunggakan/Overdue, Jadwal Bentrok, alert gagal/alpa).
-- **Neutral White (`#FFFFFF`):** Warna latar belakang utama halaman.
-- **Soft Gray (`#F3F4F6`):** Digunakan untuk background panel/kartu, baris tabel alternate, serta pembatas (border).
+```
+src/app/
+├── page.tsx                             # Landing page publik & pricing section
+├── superadmin/                          # Portal Internal Platform
+│   ├── (dashboard)/                     # Modul Superadmin (Academies, Plans, Billing, Settings)
+│   ├── login/ & logout/                 # Otentikasi Superadmin
+├── [tenantSlug]/                        # Lingkup Tenant Bimbel (Multi-Tenant Path)
+│   ├── dashboard/                       # Portal Admin & Tutor
+│   │   ├── master-data/                 # Siswa, Staf, Ruangan, Program
+│   │   ├── schedules/                   # Kalender jadwal & layar QR
+│   │   ├── evaluations/                 # Evaluasi nilai & E-Rapor
+│   │   ├── materials/                   # Repositori materi belajar
+│   │   ├── finance/                     # Invoices & manajemen kas
+│   │   ├── subscription/                # Kuota paket & tagihan platform
+│   │   └── audit-logs/                  # Log audit keamanan (Tier Pro)
+│   ├── student/(protected)/             # Portal Siswa (Mobile-First PWA)
+│   │   ├── dashboard/                   # Ringkasan siswa
+│   │   ├── scan/                        # Kamera pemindai QR presensi
+│   │   ├── attendances/                 # Riwayat kehadiran
+│   │   ├── schedules/                   # Jadwal bimbingan aktif
+│   │   ├── materials/                   # Materi belajar terdaftar
+│   │   ├── evaluations/                 # Rekap nilai E-Rapor
+│   │   └── invoices/                    # Tagihan & pembayaran cicilan
+│   └── login/                           # Login staf & siswa per akademi
+└── api/
+    └── cron/generate-invoices/          # Automasi penagihan bulanan terproteksi token
+```
 
-### 3.2. Tipografi
-- **Font Utama:** Sans-serif modern (direkomendasikan **Inter** atau **Roboto** dari Google Fonts) agar terbaca jelas pada tabel berisi angka/uang.
+### 1.3. Strategi Rendering & Caching
+1. **Full Dynamic SSR (Server-Side Rendering):**  
+   Seluruh halaman internal tenant (`/[tenantSlug]/dashboard` dan `/[tenantSlug]/student`) serta panel `superadmin` WAJIB di-render secara dinamis dengan header `Cache-Control: no-store, no-cache, must-revalidate`. Hal ini menghilangkan risiko data satu akademi bocor ke pengguna akademi lain akibat caching CDN atau browser.
+2. **Client Components Terisolasi:**  
+   Digunakan hanya pada komponen yang membutuhkan interaktivitas peramban:
+   - Layar QR presensi dinamis (timer countdown dan refresh otomatis).
+   - Kamera pemindai QR presensi mandiri siswa.
+   - Saklar siklus pembayaran landing page (Bulanan, Semester, Tahunan).
+3. **PWA Static Asset Caching:**  
+   Service worker Serwist melakukan precache pada aset statis (font, icon, shell UI) sehingga portal siswa dapat terbuka secara instan di smartphone.
 
-### 3.3. Prinsip Layout & Breakpoints
-- **Mobile (`≤640px`):** Tabel responsif dengan horizontal scrolling atau stack cards.
-- **Tablet (`≤1024px`):** Layout penyesuaian sidebar (collapsible).
-- **Desktop (`>1024px`):** Mode penuh dengan navigasi tetap (fixed sidebar) di sisi kiri.
+---
 
-## 4. Pola Manajemen Data (Status vs Soft Delete)
+## 2. Pendekatan Multi-Tenant, Keamanan & Transaksi
 
-BimbelSync menggunakan dua pendekatan berbeda dalam menangani "penghapusan" atau pembatalan data, agar integritas rekam jejak tetap terjaga:
+### 2.1. Isolasi Tenant (Tenant Isolation)
+- **Path-Based Routing:** Sub-jalur pertama URL `/[tenantSlug]/...` menjadi identifier tenant.
+- **Middleware Guard (`middleware.ts`):**  
+  Middleware membaca token JWT dari cookie `bimbelsync_session`, memvalidasi apakah `session.tenant_slug` sesuai dengan `tenantSlug` di URL. Jika ada upaya melintasi batas akademi (*Cross-Tenant IDOR*), pengguna langsung dialihkan kembali ke tenant asalnya.
+- **Server Action Validation (`requireTenantSession`):**  
+  Setiap mutasi server memanggil helper `requireTenantSession()`. Helper ini memverifikasi bahwa akun staf di database masih aktif (`deleted_at IS NULL`), akademi tidak dinonaktifkan, dan `session.academy_id` cocok 100% dengan database.
 
-| Kategori | Contoh Entitas | Pendekatan | Penjelasan |
-|---|---|---|---|
-| **Master Data & Identitas** | Superadmin, Academy, Staff, Students, Programs, Rooms, Plans | **Soft Delete** (`deleted_at`) | Data tetap di database, namun di-filter dari query aktif. Mencegah error foreign key. |
-| **Transaksional & Event** | Schedules, Enrollments, Invoices, Installments, Platform_Invoices | **Status Eksplisit** (Enum) | Tidak dihapus. Jadwal dibatalkan diubah statusnya menjadi `CANCELLED`. Tagihan batal menjadi `VOID`. Enrollment batal menjadi `WITHDRAWN`. |
-| **Append-Only Log** | Attendances (Kehadiran) | **Immutable** | Data presensi tidak pernah bisa diubah atau dihapus secara langsung. |
+### 2.2. Otentikasi & Sesi
+- **Teknologi:** JSON Web Token (JWT) yang dienkripsi menggunakan library `jose` (algoritma HS256).
+- **Penyimpanan:** Disimpan dalam HTTP-Only Cookie (`bimbelsync_session`) dengan flag `SameSite=Lax`, `Secure`, dan masa kedaluwarsa 8 jam.
+- **Session Revocation:** Integer `session_version` pada tabel `Superadmin` digunakan untuk membatalkan seluruh sesi login lama secara instan saat terjadi pergantian password.
+- **Anti-PII Leak pada Verifikasi OTP:**  
+  Alur verifikasi OTP login staf atau reset password menggunakan token terenkripsi dalam cookie terpisah (`bimbelsync_otp_pending`) yang berdurasi 10 menit. Hal ini memastikan parameter sensitif (email, nomor telepon) tidak pernah terpapar di query string URL peramban.
+- **Brute-Force Protection:**  
+  Pencatatan frekuensi gagal login pada tabel `LoginRateLimit` berbasis alamat IP. Jika ambang batas terlampaui, akun diisolasi sementara hingga waktu `locked_until`.
+
+### 2.3. Transaksi Atomik & Quota Concurrency
+- Penegakan batas kuota siswa, staf, dan ruangan menggunakan utilitas `executeWithQuotaLock` di `src/lib/subscription.ts`.
+- Fungsi ini mengunci baris `Academy` menggunakan query PostgreSQL `SELECT ... FOR UPDATE` di dalam transaksi Prisma. Mekanisme ini menjamin bahwa pendaftaran siswa atau penambahan staf yang terjadi secara bersamaan (konkuren) tidak akan menembus batas kuota paket.
+
+---
+
+## 3. Design System & Panduan Visual
+
+### 3.1. Palet Warna (Tailwind Semantic Colors)
+
+| Peran Warna | Kode Warna / Token | Penggunaan UI |
+| :--- | :--- | :--- |
+| **Primary Blue** | `#2563EB` (`blue-600`) | Tombol aksi primer (CTA), header aktif, link navigasi, brand logo. |
+| **Accent Emerald** | `#059669` (`emerald-600`) | Indikator status Lunas (`PAID`), presensi Hadir (`PRESENT`), alert sukses. |
+| **Accent Amber** | `#D97706` (`amber-600`) | Status Menunggu Pembayaran (`UNPAID`), Izin (`EXCUSED`), peringatan jatuh tempo. |
+| **Accent Rose/Red** | `#DC2626` (`red-600`) | Status Jatuh Tempo (`OVERDUE`), Alpa (`ABSENT`), pembatalan, bentrok jadwal. |
+| **Accent Indigo** | `#6366F1` (`indigo-500`) | Identitas paket Pro, kartu E-Rapor siswa, highlight evaluasi nilai. |
+| **Neutral Slate** | `#0F172A` s.d. `#F8FAFC` | Latar belakang, kartu panel, teks judul, pembatas tabel (*borders*). |
+
+### 3.2. Tipografi & Representasi Data
+- **Font Utama:** Sans-serif modern (Inter / Roboto) dari Google Fonts.
+- **Tabular Figures:** Seluruh kolom angka finansial (harga, sisa kuota, nominal tagihan) menggunakan font monospace atau `tabular-nums` agar sejajar secara vertikal pada tabel data.
+- **Format Mata Uang:** Standar Rupiah Indonesia dengan pemisah ribuan titik (contoh: `Rp 199.000`).
+
+### 3.3. Komponen UI Standar
+1. **Sidebar Navigation (Desktop):**  
+   Navigasi tetap di sebelah kiri dengan indikator badge status langganan bimbel dan pembeda visual antara mode Admin dan mode Tutor.
+2. **Bottom Navigation Bar (Portal Siswa Mobile):**  
+   Navigasi bawah yang ramah sentuhan jempol (*thumb-friendly*) pada perangkat smartphone dengan pintasan cepat ke: Beranda, Scan QR, Jadwal, Nilai, dan Tagihan.
+3. **Action Menu Overlay:**  
+   Dropdown aksi tabel menggunakan modal / floating overlay dengan z-index tinggi guna mencegah terpotong oleh batas kontainer tabel (*anti-clipping container overflow*).
+4. **Modal Konfirmasi Destruktif:**  
+   Menggunakan dialog `sweetalert2` yang di-styling selaras dengan palet tema untuk konfirmasi pembatalan sesi, penonaktifan siswa, atau penghapusan ruangan.
+
+---
+
+## 4. Pola Retensi & Manajemen Data
+
+| Kategori Entitas | Contoh Model Prisma | Pendekatan Database | Rationale & Penanganan |
+| :--- | :--- | :--- | :--- |
+| **Master & Identitas** | `Superadmin`, `Academy`, `Staff`, `Student`, `Program`, `Room`, `Plan` | **Soft Delete** (`deleted_at`) | Baris data tidak dihapus secara fisik (`DELETE`). Query aktif selalu menyertakan filter `deleted_at: null`. Menjaga integritas foreign key pada laporan historis. |
+| **Transaksional & Event** | `Schedule`, `Enrollment`, `Invoice`, `Installment`, `PlatformInvoice` | **Status Eksplisit** (Enum) | Tidak dihapus. Perubahan status menggunakan status terstruktur: `CANCELLED` (jadwal), `WITHDRAWN` (pendaftaran), `VOID` (tagihan batal). |
+| **Asesmen & Akademik** | `StudentEvaluation` | **Draft-to-Publish Lifecycle** | Nilai dibuat dalam status `DRAFT` sebelum dipublikasikan (`PUBLISHED`) untuk verifikasi tutor. |
+| **Append-Only Logs** | `Attendance`, `AuditLog` | **Immutable (Tidak Dapat Diubah)** | Data presensi dan log audit keamanan dicatat secara kronologis dan tidak menyediakan antarmuka edit/hapus. |

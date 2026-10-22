@@ -1,18 +1,10 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { cookies } from "next/headers";
-import { decrypt } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { requireSuperadminSession } from "@/lib/session";
-
-async function getSuperadminId() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("bimbelsync_session")?.value;
-  const session = sessionCookie ? await decrypt(sessionCookie) : null;
-  if (!session || session.role !== "SUPERADMIN") return null;
-  return session.id as string;
-}
+import { changeAcademyPlan, activateAllDuePendingPlans } from "@/lib/subscription";
+import { SubscriptionStatus } from "@prisma/client";
 
 async function logAction(superadminId: string, action: string, entityId: string, details: object) {
   await prisma.auditLog.create({
@@ -27,8 +19,9 @@ async function logAction(superadminId: string, action: string, entityId: string,
 }
 
 export async function deleteInvoiceAction(invoiceId: string) {
-  const superadminId = await getSuperadminId();
-  if (!superadminId) return { error: "Tidak terautentikasi." };
+  const auth = await requireSuperadminSession();
+  if ('error' in auth) return { error: auth.error };
+  const superadminId = auth.session.id;
 
   try {
     const invoice = await prisma.platformInvoice.findUnique({ where: { id: invoiceId } });
@@ -53,8 +46,9 @@ export async function deleteInvoiceAction(invoiceId: string) {
 }
 
 export async function verifyInvoiceAction(invoiceId: string) {
-  const superadminId = await getSuperadminId();
-  if (!superadminId) return { error: "Tidak terautentikasi." };
+  const auth = await requireSuperadminSession();
+  if ('error' in auth) return { error: auth.error };
+  const superadminId = auth.session.id;
 
   try {
     const invoice = await prisma.platformInvoice.findUnique({ where: { id: invoiceId } });
@@ -62,46 +56,86 @@ export async function verifyInvoiceAction(invoiceId: string) {
     if (invoice.payment_status === "PAID") return { error: "Invoice ini sudah berstatus Lunas." };
     if (invoice.payment_status === "VOID") return { error: "Invoice ini sudah di-void." };
 
-    const academy = await prisma.academy.findUnique({ where: { id: invoice.academy_id } });
-    if (!academy) return { error: "Akademi tidak ditemukan." };
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    // Kalkulasi jatuh tempo baru: jika sudah punya jatuh tempo, tambah X bulan (sesuai durasi tagihan). Jika belum, tambah X bulan dari hari ini.
-    let newDueDate = new Date();
-    if (academy.subscription_due_date) {
-      newDueDate = new Date(academy.subscription_due_date);
-    }
-    // Tambahkan sesuai durasi yang dibayar, dengan fallback jika Prisma Client belum ter-refresh
-    const duration = invoice.duration_months || 1;
-    newDueDate.setMonth(newDueDate.getMonth() + duration);
+    let warningMessage: string | undefined;
 
-    // Cek apakah ada perubahan paket
-    const isPlanUpgrade = invoice.plan_id !== academy.plan_id;
-    const pendingPlanId = isPlanUpgrade ? invoice.plan_id : null;
-    // Jika tidak ada due date sebelumnya, berarti dia langsung aktif ke plan tersebut hari ini juga, tidak perlu ditunda
-    const pendingPlanDate = (isPlanUpgrade && academy.subscription_due_date) ? new Date(academy.subscription_due_date) : null;
+    await prisma.$transaction(async (tx) => {
+      // 1. Kunci baris Academy secara eksklusif (Row-Level Lock)
+      const lockedAcademies = await tx.$queryRaw<Array<{
+        id: string;
+        plan_id: string;
+        subscription_status: SubscriptionStatus;
+        subscription_due_date: Date | null;
+      }>>`
+        SELECT id, plan_id, subscription_status, subscription_due_date
+        FROM "Academy"
+        WHERE id = ${invoice.academy_id}::uuid AND deleted_at IS NULL
+        FOR UPDATE
+      `;
 
-    await prisma.$transaction([
-      prisma.platformInvoice.update({
+      if (lockedAcademies.length === 0) {
+        throw new Error("Akademi tidak ditemukan atau telah dinonaktifkan.");
+      }
+
+      const academy = lockedAcademies[0];
+
+      // 2. Kalkulasi jatuh tempo baru
+      let newDueDate = new Date();
+      if (academy.subscription_due_date && new Date(academy.subscription_due_date) > today) {
+        newDueDate = new Date(academy.subscription_due_date);
+      }
+      const duration = invoice.duration_months || 1;
+      newDueDate.setMonth(newDueDate.getMonth() + duration);
+
+      // 3. Update invoice menjadi PAID
+      await tx.platformInvoice.update({
         where: { id: invoiceId },
         data: {
           payment_status: "PAID",
           paid_at: new Date(),
           verified_by_superadmin_id: superadminId,
         },
-      }),
-      prisma.academy.update({
-        where: { id: invoice.academy_id },
-        data: {
-          subscription_status: "ACTIVE",
-          subscription_due_date: newDueDate,
-          ...(isPlanUpgrade && !academy.subscription_due_date && { plan_id: invoice.plan_id }),
-          ...(isPlanUpgrade && academy.subscription_due_date && { 
-            pending_plan_id: pendingPlanId,
-            pending_plan_date: pendingPlanDate
-          })
-        }
-      })
-    ]);
+      });
+
+      // 4. Evaluasi pergantian paket atau perpanjangan
+      const isPlanChange = invoice.plan_id !== academy.plan_id;
+      const isDueDateInFuture = academy.subscription_due_date && new Date(academy.subscription_due_date) > today;
+
+      if (isPlanChange && !isDueDateInFuture) {
+        // Langsung terapkan paket baru hari ini karena belum ada jatuh tempo aktif di masa depan
+        const changeResult = await changeAcademyPlan({
+          academyId: invoice.academy_id,
+          targetPlanId: invoice.plan_id,
+          subscriptionStatus: "ACTIVE",
+          subscriptionDueDate: newDueDate,
+          clearPendingPlan: true,
+          tx,
+        });
+        warningMessage = changeResult.warningMessage;
+      } else if (isPlanChange && isDueDateInFuture) {
+        // Jadwalkan perubahan paket saat masa aktif paket lama habis
+        await tx.academy.update({
+          where: { id: invoice.academy_id },
+          data: {
+            subscription_status: "ACTIVE",
+            subscription_due_date: newDueDate,
+            pending_plan_id: invoice.plan_id,
+            pending_plan_date: academy.subscription_due_date,
+          },
+        });
+      } else {
+        // Perpanjangan paket yang sama
+        await tx.academy.update({
+          where: { id: invoice.academy_id },
+          data: {
+            subscription_status: "ACTIVE",
+            subscription_due_date: newDueDate,
+          },
+        });
+      }
+    });
 
     await logAction(superadminId, "VERIFY_PLATFORM_INVOICE", invoiceId, {
       invoice_id: invoiceId,
@@ -111,17 +145,18 @@ export async function verifyInvoiceAction(invoiceId: string) {
 
     revalidatePath("/superadmin/billing");
     revalidatePath(`/superadmin/academies/${invoice.academy_id}`);
-    return { success: true };
-  } catch (error) {
+    return { success: true, warning: warningMessage };
+  } catch (error: any) {
     console.error("verifyInvoiceAction error:", error);
-    return { error: "Terjadi kesalahan saat memverifikasi invoice." };
+    return { error: error.message || "Terjadi kesalahan saat memverifikasi invoice." };
   }
 }
 
 
 export async function markOverdueAction(invoiceId: string) {
-  const superadminId = await getSuperadminId();
-  if (!superadminId) return { error: "Tidak terautentikasi." };
+  const auth = await requireSuperadminSession();
+  if ('error' in auth) return { error: auth.error };
+  const superadminId = auth.session.id;
 
   try {
     const invoice = await prisma.platformInvoice.findUnique({ where: { id: invoiceId } });
@@ -148,8 +183,9 @@ export async function markOverdueAction(invoiceId: string) {
 }
 
 export async function voidInvoiceAction(invoiceId: string) {
-  const superadminId = await getSuperadminId();
-  if (!superadminId) return { error: "Tidak terautentikasi." };
+  const auth = await requireSuperadminSession();
+  if ('error' in auth) return { error: auth.error };
+  const superadminId = auth.session.id;
 
   try {
     const invoice = await prisma.platformInvoice.findUnique({ where: { id: invoiceId } });
@@ -176,13 +212,17 @@ export async function voidInvoiceAction(invoiceId: string) {
 }
 
 export async function createInvoiceAction(academyId: string, planId: string, amount: number, billingPeriod: string, dueDate: string, durationMonths: number = 1) {
-  const superadminId = await getSuperadminId();
-  if (!superadminId) return { error: "Tidak terautentikasi." };
+  const auth = await requireSuperadminSession();
+  if ('error' in auth) return { error: auth.error };
+  const superadminId = auth.session.id;
 
   try {
     const academy = await prisma.academy.findUnique({ where: { id: academyId } });
     if (!academy) return { error: "Akademi tidak ditemukan." };
     if (academy.subscription_status === "TRIAL") return { error: "Tidak dapat membuat invoice untuk akademi berstatus TRIAL." };
+
+    const plan = await prisma.plan.findUnique({ where: { id: planId } });
+    if (!plan || plan.deleted_at !== null) return { error: "Paket langganan tidak valid atau telah dinonaktifkan." };
 
     const newInvoice = await prisma.platformInvoice.create({
       data: {
@@ -202,14 +242,27 @@ export async function createInvoiceAction(academyId: string, planId: string, amo
       billing_period: billingPeriod,
     });
 
-
-
     revalidatePath("/superadmin/billing");
     revalidatePath(`/superadmin/academies/${academyId}`);
     return { success: true, invoiceId: newInvoice.id };
   } catch (error) {
     console.error("createInvoiceAction error:", error);
     return { error: "Terjadi kesalahan saat membuat invoice." };
+  }
+}
+
+export async function triggerPendingPlansActivationAction() {
+  const auth = await requireSuperadminSession();
+  if ('error' in auth) return { error: auth.error };
+
+  try {
+    const result = await activateAllDuePendingPlans();
+    revalidatePath("/superadmin/billing");
+    revalidatePath("/superadmin/academies");
+    return { success: true, ...result };
+  } catch (error: any) {
+    console.error("triggerPendingPlansActivationAction error:", error);
+    return { error: error.message || "Gagal memproses aktivasi paket tertunda." };
   }
 }
 

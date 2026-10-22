@@ -1,5 +1,4 @@
-import { cookies } from "next/headers";
-import { decrypt } from "@/lib/auth";
+import { requireStaffSession } from "@/lib/session";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { startOfMonth, endOfMonth } from "date-fns";
@@ -9,21 +8,19 @@ export default async function DashboardHome({ params }: { params: Promise<{ tena
   const resolvedParams = await params;
   const tenantSlug = resolvedParams.tenantSlug;
 
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
-  
-  if (!sessionToken) {
+  const auth = await requireStaffSession();
+  if ('error' in auth) {
     redirect(`/${tenantSlug}/login`);
   }
+  const session = auth.session;
 
-  const session = await decrypt(sessionToken);
-  if (!session || !session.academy_id) {
-    redirect(`/${tenantSlug}/login`);
+  if (session.tenant_slug !== tenantSlug) {
+    redirect(`/${session.tenant_slug}/dashboard`);
   }
 
-  // Gunakan session.role dari JWT cookie tanpa query ulang ke DB
+  // Gunakan session.role terverifikasi dari DB (ter-cache per request)
   const isTutor = session.role === 'TUTOR';
-  const academyId = session.academy_id as string;
+  const academyId = session.academy_id;
   const today = new Date();
   
   const startOfDay = new Date(today);

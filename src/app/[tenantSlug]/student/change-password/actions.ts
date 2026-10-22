@@ -3,7 +3,8 @@
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcrypt';
 import { cookies } from 'next/headers';
-import { decrypt, encrypt } from '@/lib/auth';
+import { encrypt } from '@/lib/auth';
+import { requireStudentSession } from '@/lib/session';
 
 export async function changePasswordAction(tenantSlug: string, formData: FormData) {
   const newPassword = formData.get('new_password') as string;
@@ -18,17 +19,14 @@ export async function changePasswordAction(tenantSlug: string, formData: FormDat
   }
 
   try {
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get('bimbelsync_session')?.value;
-    
-    if (!sessionToken) {
-      return { error: 'Sesi tidak ditemukan. Silakan login kembali.' };
+    const auth = await requireStudentSession();
+    if ('error' in auth) {
+      return { error: auth.error };
     }
+    const session = auth.session;
 
-    const session = await decrypt(sessionToken);
-    
-    if (!session || session.role !== 'STUDENT') {
-      return { error: 'Sesi tidak valid.' };
+    if (session.tenant_slug !== tenantSlug) {
+      return { error: 'Akses ditolak. Sesi tidak sesuai dengan bimbel ini.' };
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -49,6 +47,7 @@ export async function changePasswordAction(tenantSlug: string, formData: FormDat
       tenant_slug: session.tenant_slug
     });
 
+    const cookieStore = await cookies();
     cookieStore.set('bimbelsync_session', newSessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

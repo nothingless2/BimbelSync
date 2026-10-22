@@ -1,6 +1,5 @@
 import prisma from '@/lib/prisma';
-import { cookies } from 'next/headers';
-import { decrypt } from '@/lib/auth';
+import { requireStudentSession } from '@/lib/session';
 import { redirect } from 'next/navigation';
 import { CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -17,18 +16,12 @@ export default async function DirectQrScanPage({
   const resolvedSearchParams = await searchParams;
   const timestampStr = resolvedSearchParams?.t as string;
 
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get('bimbelsync_session')?.value;
-  
-  if (!sessionToken) {
+  const auth = await requireStudentSession();
+  if ('error' in auth) {
     redirect(`/${tenantSlug}/student/login?redirect=/student/scan/${scheduleId}?t=${timestampStr}`);
   }
 
-  const session = await decrypt(sessionToken);
-  
-  if (!session || session.role !== 'STUDENT') {
-    redirect(`/${tenantSlug}/student/login`);
-  }
+  const session = auth.session;
 
   let isSuccess = false;
   let message = "";
@@ -68,8 +61,12 @@ export default async function DirectQrScanPage({
       throw new Error('Sesi kelas ini belum dimulai atau sudah dibatalkan.');
     }
 
-    const student = await prisma.student.findUnique({
-      where: { id: session.id },
+    const student = await prisma.student.findFirst({
+      where: {
+        id: session.id,
+        academy_id: session.academy_id,
+        deleted_at: null,
+      },
       include: {
         enrollments: true
       }
