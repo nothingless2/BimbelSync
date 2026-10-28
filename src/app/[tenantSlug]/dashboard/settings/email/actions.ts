@@ -54,16 +54,30 @@ export async function saveSmtpConfigAction(data: SmtpConfigInput) {
   const secure = Boolean(data.secure);
   const isActive = Boolean(data.isActive);
 
+  // Jika password menggunakan host Gmail, bersihkan spasi bawaan Google
+  if (host.toLowerCase().includes("gmail")) {
+    pass = pass.replace(/\s+/g, "");
+  }
+
   // Jika password tidak diisi ulang saat edit, pertahankan password lama
   if (!pass && academy.smtp_pass) {
     pass = academy.smtp_pass;
   }
 
-  // Jika admin mengaktifkan SMTP, pastikan kredensial wajib terisi
+  // Jika admin mengaktifkan SMTP, pastikan kredensial wajib terisi dan valid
   if (isActive) {
     if (!host) return { error: "Host SMTP wajib diisi sebelum mengaktifkan pengiriman email." };
+    if (!port || isNaN(port) || port < 1 || port > 65535) {
+      return { error: "Port SMTP tidak valid (harus berada di rentang 1 - 65535)." };
+    }
     if (!user) return { error: "Username atau email SMTP wajib diisi." };
     if (!pass) return { error: "Password atau App Password SMTP wajib diisi." };
+
+    if (host.toLowerCase().includes("gmail") && pass.length !== 16) {
+      return { 
+        error: `App Password Gmail harus terdiri dari 16 digit karakter tanpa spasi (saat ini ${pass.length} karakter).` 
+      };
+    }
   }
 
   try {
@@ -136,12 +150,22 @@ export async function testSmtpConfigAction(data: SmtpConfigInput & { targetEmail
   let pass = (data.pass || "").trim();
   const targetEmail = (data.targetEmail || "").trim() || (session.staff?.email || "");
 
+  if (host.toLowerCase().includes("gmail")) {
+    pass = pass.replace(/\s+/g, "");
+  }
+
   if (!pass && academy.smtp_pass) {
     pass = academy.smtp_pass;
   }
 
   if (!host || !user || !pass) {
     return { error: "Mohon lengkapi Host, Username, dan Password SMTP sebelum melakukan uji coba." };
+  }
+
+  if (host.toLowerCase().includes("gmail") && pass.length !== 16) {
+    return { 
+      error: `App Password Gmail harus terdiri dari 16 digit karakter tanpa spasi (saat ini ${pass.length} karakter).` 
+    };
   }
 
   if (!targetEmail) {

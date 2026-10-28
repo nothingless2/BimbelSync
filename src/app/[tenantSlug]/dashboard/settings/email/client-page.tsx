@@ -214,15 +214,59 @@ export default function EmailSettingsClientPage({
   // Handle Save
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validasi Manual Sisi Client
+    if (isActive) {
+      const cleanHost = (host || "").trim();
+      const numPort = Number(port);
+      const cleanUser = (user || "").trim();
+      const cleanPass = (pass || "").replace(/\s+/g, "");
+
+      if (!cleanHost) {
+        toast.error("Host Server SMTP wajib diisi sebelum mengaktifkan layanan.");
+        return;
+      }
+
+      if (!numPort || isNaN(numPort) || numPort < 1 || numPort > 65535) {
+        toast.error("Port SMTP tidak valid. Harap masukkan nomor port antara 1 s.d. 65535.");
+        return;
+      }
+
+      if (!cleanUser) {
+        toast.error("Username atau email login SMTP wajib diisi.");
+        return;
+      }
+
+      if (!initialConfig.hasPassword && !cleanPass) {
+        toast.error("Password atau App Password SMTP wajib diisi.");
+        return;
+      }
+
+      if (cleanHost.toLowerCase().includes("gmail") && cleanPass) {
+        if (cleanPass.length !== 16) {
+          toast.error(`App Password Gmail harus tepat 16 karakter tanpa spasi (saat ini ${cleanPass.length} karakter).`);
+          return;
+        }
+      }
+
+      if (fromEmail.trim()) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(fromEmail.trim())) {
+          toast.error("Format Email Pengirim (From Email) tidak valid.");
+          return;
+        }
+      }
+    }
+
     setIsSaving(true);
 
     const payload: SmtpConfigInput = {
-      host,
+      host: host.trim(),
       port: Number(port),
-      user,
-      pass,
-      fromName,
-      fromEmail,
+      user: user.trim(),
+      pass: host.toLowerCase().includes("gmail") ? pass.replace(/\s+/g, "") : pass,
+      fromName: fromName.trim(),
+      fromEmail: fromEmail.trim(),
       secure,
       isActive,
     };
@@ -243,6 +287,34 @@ export default function EmailSettingsClientPage({
   const handleTestConnection = async () => {
     if (!testTargetEmail) {
       toast.error("Alamat email penerima uji coba wajib diisi.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(testTargetEmail.trim())) {
+      toast.error("Format alamat email penerima uji coba tidak valid.");
+      return;
+    }
+
+    const cleanHost = (host || "").trim();
+    const cleanUser = (user || "").trim();
+    const cleanPass = (pass || "").replace(/\s+/g, "");
+
+    if (!cleanHost) {
+      toast.error("Host SMTP belum diisi.");
+      return;
+    }
+    if (!cleanUser) {
+      toast.error("Username SMTP belum diisi.");
+      return;
+    }
+    if (!cleanPass && !initialConfig.hasPassword) {
+      toast.error("Password SMTP belum diisi.");
+      return;
+    }
+
+    if (cleanHost.toLowerCase().includes("gmail") && cleanPass && cleanPass.length !== 16) {
+      toast.error(`App Password Gmail harus tepat 16 karakter (saat ini ${cleanPass.length} karakter).`);
       return;
     }
 
@@ -499,10 +571,18 @@ export default function EmailSettingsClientPage({
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
+                    required={isActive && !initialConfig.hasPassword}
                     value={pass}
-                    onChange={(e) => setPass(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (host.toLowerCase().includes("gmail")) {
+                        setPass(val.replace(/\s+/g, ""));
+                      } else {
+                        setPass(val);
+                      }
+                    }}
                     placeholder={initialConfig.hasPassword ? "•••••••• (Biarkan kosong jika tidak diubah)" : "Masukkan kata sandi atau App Password"}
-                    className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                   />
                   <button
                     type="button"
@@ -512,7 +592,25 @@ export default function EmailSettingsClientPage({
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
-                <span className="text-[11px] text-slate-400">Untuk Gmail, gunakan 16 digit App Password dari Akun Google Anda.</span>
+                {host.toLowerCase().includes("gmail") ? (
+                  pass.length === 16 ? (
+                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                      <Check size={12} /> Format 16 digit App Password Google sesuai.
+                    </span>
+                  ) : pass.length > 0 ? (
+                    <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+                      App Password Google harus tepat 16 karakter tanpa spasi ({pass.length}/16 karakter).
+                    </span>
+                  ) : (
+                    <span className="text-[11px] text-slate-400">
+                      Untuk Gmail, gunakan 16 digit App Password dari Akun Google Anda (spasi otomatis dibersihkan).
+                    </span>
+                  )
+                ) : (
+                  <span className="text-[11px] text-slate-400">
+                    Kata sandi akun email atau API Key server SMTP Anda.
+                  </span>
+                )}
               </div>
 
               {/* Sender Name */}
