@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { 
   Mail, Server, CheckCircle2, AlertCircle, Send, Save, 
   Eye, EyeOff, ShieldCheck, Sparkles, RefreshCw, 
-  HelpCircle, Megaphone, Users, Info, ChevronRight, Check
+  HelpCircle, Megaphone, Users, Info, ChevronRight, Check, FileText
 } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { 
@@ -14,6 +14,127 @@ import {
   broadcastAnnouncementEmailAction,
   SmtpConfigInput 
 } from "./actions";
+
+interface AnnouncementTemplate {
+  id: string;
+  name: string;
+  tag: string;
+  title: string;
+  message: string;
+}
+
+const ANNOUNCEMENT_TEMPLATES: AnnouncementTemplate[] = [
+  {
+    id: "libur",
+    name: "Libur & Cuti Bersama",
+    tag: "Kalender Akademik",
+    title: "Pemberitahuan Libur Kegiatan Belajar Mengajar & Jadwal Pengganti",
+    message: `Yth. Siswa dan Orang Tua / Wali Murid,
+
+Sehubungan dengan adanya hari libur nasional / cuti bersama, kami informasikan bahwa seluruh kegiatan pembelajaran di bimbel diliburkan pada:
+
+Hari / Tanggal  : [Contoh: Senin, 17 Agustus 2026]
+Kegiatan        : Diliburkan (Tidak ada kelas tatap muka)
+
+Kegiatan bimbingan belajar akan kembali aktif normal mulai:
+Hari / Tanggal  : [Contoh: Selasa, 18 Agustus 2026]
+
+Untuk penyesuaian materi atau kelas pengganti (make-up class), pengajar/admin akan menginformasikan lebih lanjut melalui kalender di Portal Siswa.
+
+Atas perhatian dan kerja samanya, kami ucapkan terima kasih.
+
+Hormat kami,
+Manajemen Bimbel`,
+  },
+  {
+    id: "tryout",
+    name: "Jadwal Try Out / Ujian",
+    tag: "Ujian & Evaluasi",
+    title: "Jadwal Pelaksanaan Ujian Simulasi & Try Out Akbar Siswa",
+    message: `Yth. Siswa dan Orang Tua / Wali Murid,
+
+Dalam rangka mengukur capaian pembelajaran serta persiapan menghadapi ujian sekolah/seleksi nasional, bimbel akan mengadakan simulasi ujian dengan rincian sebagai berikut:
+
+Agenda          : Ujian Simulasi / Try Out Semester
+Hari / Tanggal  : [Sebutkan Hari & Tanggal Pelaksanaan]
+Waktu           : [Contoh: 08.00 - 11.30 WIB]
+Tempat / Ruang  : [Contoh: Ruang Belajar Bimbel / Daring via Portal Siswa]
+
+Ketentuan dan Tata Tertib Peserta:
+1. Hadir di lokasi bimbingan 15 menit sebelum ujian dimulai.
+2. Membawa perlengkapan alat tulis lengkap dan kartu tanda peserta.
+3. Menjaga ketertiban dan fokus selama ujian berlangsung.
+
+Hasil analisis skor dan grafik capaian nilai dapat diakses melalui menu Evaluasi di Portal Siswa setelah ujian diperiksa oleh tim pengajar.
+
+Semangat belajar dan raih hasil terbaik!
+
+Hormat kami,
+Tim Akademik Bimbel`,
+  },
+  {
+    id: "spp",
+    name: "Pengingat Tagihan SPP",
+    tag: "Administrasi",
+    title: "Pengingat Batas Waktu Pembayaran Biaya Pendidikan (SPP)",
+    message: `Yth. Orang Tua / Wali Murid dan Siswa,
+
+Melalui pemberitahuan ini, kami ingin mengingatkan kembali mengenai batas waktu (jatuh tempo) pembayaran administrasi bimbingan belajar (SPP) untuk periode berjalan:
+
+Batas Waktu     : Tanggal 10 setiap bulannya
+Metode          : Transfer Bank Resmi Bimbel / Tunai ke Kasir Bimbel
+
+Rincian tagihan dapat dicek secara transparan melalui menu Keuangan di Portal Siswa. Bagi Bapak/Ibu yang telah melakukan pembayaran dan menyelesaikan administrasi, silakan abaikan pengumuman ini.
+
+Terima kasih atas komitmen dan kerja sama Bapak/Ibu dalam mempercayakan pendidikan putra/putri bersama kami.
+
+Hormat kami,
+Bagian Keuangan Bimbel`,
+  },
+  {
+    id: "jadwal",
+    name: "Perubahan Jadwal Kelas",
+    tag: "Operasional",
+    title: "Pemberitahuan Penyesuaian Jadwal & Ruang Belajar Kelas",
+    message: `Yth. Siswa dan Orang Tua / Wali Murid,
+
+Kami menginformasikan adanya penyesuaian jadwal dan ruangan kegiatan bimbingan belajar untuk kelas berikut:
+
+Nama Kelas      : [Sebutkan Nama Program / Kelas]
+Mulai Berlaku   : [Sebutkan Tanggal Efektif]
+Jadwal Semula   : [Contoh: Senin, 15.30 - 17.00 WIB]
+Jadwal Baru     : [Contoh: Senin, 16.00 - 17.30 WIB]
+Ruangan         : [Sebutkan Ruangan]
+
+Mohon siswa dapat mencatat perubahan ini dan hadir tepat waktu sesuai jadwal terbaru. Kalender pembelajaran di Portal Siswa juga telah diperbarui secara otomatis.
+
+Terima kasih atas pengertian dan kerja sama adik-adik siswa serta Bapak/Ibu sekalian.
+
+Hormat kami,
+Pengelola Operasional Bimbel`,
+  },
+  {
+    id: "temu_wali",
+    name: "Temu Wali & Konsultasi",
+    tag: "Konseling",
+    title: "Undangan Pertemuan Konsultasi & Evaluasi Perkembangan Belajar Siswa",
+    message: `Yth. Orang Tua / Wali Murid,
+
+Kami mengundang Bapak/Ibu untuk menghadiri agenda Pertemuan Konsultasi & Evaluasi Belajar Siswa guna mendiskusikan capaian akademik serta strategi belajar putra/putri tercinta:
+
+Agenda          : Temu Wali & Konsultasi Akademik Siswa
+Hari / Tanggal  : [Sebutkan Hari & Tanggal]
+Waktu           : [Sebutkan Sesi Waktu]
+Tempat / Moda   : Kantor Bimbel / Daring via Google Meet
+
+Pada pertemuan ini, tim tutor akan menyampaikan grafik evaluasi nilai, catatan presensi kehadiran, serta rekomendasi pemetaan target belajar siswa ke depan.
+
+Kehadiran Bapak/Ibu sangat berarti dalam mendampingi langkah sukses pendidikan anak.
+
+Hormat kami,
+Tim Bimbingan & Konseling Bimbel`,
+  },
+];
 
 interface InitialConfig {
   host: string;
@@ -178,25 +299,13 @@ export default function EmailSettingsClientPage({
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12">
       
-      {/* Breadcrumb & Header */}
+      {/* Header */}
       <div>
-        <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-2">
-          <span>Dashboard</span>
-          <ChevronRight size={14} />
-          <span>Pengaturan</span>
-          <ChevronRight size={14} />
-          <span className="text-slate-900 dark:text-slate-100 font-semibold">Email & SMTP</span>
-        </div>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                Email & Layanan SMTP
-              </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800/40">
-                Paket {planName}
-              </span>
-            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Email & Layanan SMTP
+            </h1>
             <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
               Gunakan server email bimbel Anda sendiri (BYO SMTP) untuk mengirimkan notifikasi invoice dan pengumuman secara otomatis.
             </p>
@@ -525,6 +634,52 @@ export default function EmailSettingsClientPage({
               <span className="text-lg font-extrabold text-blue-600 dark:text-blue-400">
                 {activeStudentCount} Siswa
               </span>
+            </div>
+
+            {/* Quick Announcement Templates */}
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200">
+                  <FileText size={16} className="text-blue-600 dark:text-blue-400" />
+                  <span>Template Pengumuman Siaran Cepat</span>
+                </div>
+                {(broadcastTitle || broadcastMessage) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBroadcastTitle("");
+                      setBroadcastMessage("");
+                      toast.info("Form pengumuman dikosongkan.");
+                    }}
+                    className="text-[11px] font-semibold text-slate-500 hover:text-red-600 transition-colors cursor-pointer"
+                  >
+                    Kosongkan Form
+                  </button>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Pilih salah satu draf di bawah untuk mengisi subjek dan isi pesan secara otomatis, lalu sesuaikan bagian dalam tanda kurung [ ]:
+              </p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                {ANNOUNCEMENT_TEMPLATES.map((tmpl) => (
+                  <button
+                    key={tmpl.id}
+                    type="button"
+                    onClick={() => {
+                      setBroadcastTitle(tmpl.title);
+                      setBroadcastMessage(tmpl.message);
+                      toast.success(`Template "${tmpl.name}" diterapkan.`);
+                    }}
+                    className="group flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-950/30 text-xs font-medium text-slate-700 dark:text-slate-300 transition-all text-left shadow-2xs cursor-pointer"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 group-hover:scale-125 transition-transform" />
+                    <span>{tmpl.name}</span>
+                    <span className="text-[10px] text-slate-400 group-hover:text-blue-500 font-normal">
+                      ({tmpl.tag})
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Title */}
