@@ -153,9 +153,83 @@ export async function POST(request: Request) {
       }
     }
 
+    // 8. Kirimkan email otomatis jika diminta dan SMTP aktif
+    let emailSentCount = 0;
+    if (totalInvoicesCreated > 0 && (body.send_email || body.sendEmail) && academy_id) {
+      try {
+        const { getTenantSmtpConfig, sendTenantEmail, renderInvoiceEmailTemplate } = await import("@/lib/tenant-mailer");
+        const smtpCheck = await getTenantSmtpConfig(academy_id);
+        
+        if (smtpCheck.isAllowed && smtpCheck.isConfigured && smtpCheck.isActive) {
+          const freshInvoices = await prisma.invoice.findMany({
+            where: {
+              academy_id: academy_id,
+              billing_period: currentMonthPeriod,
+              payment_status: "UNPAID",
+            },
+            include: {
+              student: true,
+              items: true,
+              academy: true,
+              installments: true,
+            }
+          });
+
+          const appBaseUrl = process.env.NEXTAUTH_URL || "https://bimbelsync.com";
+          const tenantSlug = freshInvoices[0]?.academy.path_url || "";
+          const portalUrl = `${appBaseUrl}/${tenantSlug}/login`;
+
+          for (const inv of freshInvoices) {
+            if (!inv.student?.email) continue;
+
+            const formattedDueDate = inv.due_date 
+              ? format(new Date(inv.due_date), "d MMMM yyyy", { locale: idLocale })
+              : format(new Date(inv.created_at), "d MMMM yyyy", { locale: idLocale });
+
+            const html = renderInvoiceEmailTemplate({
+              academyName: inv.academy.name,
+              studentName: inv.student.full_name,
+              invoiceNumber: "INV-" + inv.id.slice(0, 8).toUpperCase(),
+              amount: inv.total_amount,
+              dueDate: formattedDueDate,
+              paymentOption: inv.payment_option,
+              installments: inv.installments.map(i => ({
+                term: i.installment_number,
+                amount: i.amount,
+                dueDate: format(new Date(i.due_date), "d MMM yyyy", { locale: idLocale }),
+                isPaid: i.status === "PAID",
+              })),
+              bankName: inv.academy.bank_name || undefined,
+              bankAccount: inv.academy.bank_account || undefined,
+              portalUrl,
+              reminderType: "ISSUED",
+            });
+
+            const sendRes = await sendTenantEmail({
+              academyId: academy_id,
+              to: inv.student.email,
+              subject: `[Tagihan SPP] INV-${inv.id.slice(0, 8).toUpperCase()} - ${inv.academy.name}`,
+              html,
+            });
+
+            if (sendRes.success) {
+              emailSentCount++;
+            }
+
+            await new Promise(r => setTimeout(r, 200));
+          }
+        }
+      } catch (mailErr) {
+        console.error("Error sending emails during invoice generation:", mailErr);
+      }
+    }
+
+    const extraMsg = emailSentCount > 0 ? ` serta mengirimkan ${emailSentCount} email notifikasi tagihan ke siswa.` : ".";
     return NextResponse.json({ 
       success: true, 
-      message: `Berhasil menerbitkan ${totalInvoicesCreated} tagihan otomatis untuk periode ${currentMonthPeriod}.` 
+      message: `Berhasil menerbitkan ${totalInvoicesCreated} tagihan otomatis untuk periode ${currentMonthPeriod}${extraMsg}`,
+      invoicesCreated: totalInvoicesCreated,
+      emailsSent: emailSentCount,
     });
 
   } catch (error) {

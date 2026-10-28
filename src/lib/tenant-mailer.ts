@@ -197,6 +197,7 @@ export function renderInvoiceEmailTemplate({
   bankName,
   bankAccount,
   portalUrl,
+  reminderType = "ISSUED",
 }: {
   academyName: string;
   studentName: string;
@@ -208,9 +209,31 @@ export function renderInvoiceEmailTemplate({
   bankName?: string | null;
   bankAccount?: string | null;
   portalUrl: string;
+  reminderType?: "ISSUED" | "DUE_H3" | "DUE_H1";
 }): string {
   const formatRupiah = (num: number) =>
     new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(num);
+
+  const headerBg = 
+    reminderType === "DUE_H1" 
+      ? "#ea580c" 
+      : reminderType === "DUE_H3" 
+      ? "#d97706" 
+      : "#2563eb";
+
+  const headerTitle =
+    reminderType === "DUE_H1"
+      ? "Peringatan: Tagihan SPP Jatuh Tempo Besok"
+      : reminderType === "DUE_H3"
+      ? "Pengingat: Tagihan SPP Jatuh Tempo dalam 3 Hari"
+      : "Pemberitahuan Tagihan Pembayaran Siswa";
+
+  const introText =
+    reminderType === "DUE_H1"
+      ? "Kami mengingatkan bahwa tagihan biaya bimbingan belajar Anda akan jatuh tempo <strong>BESOK</strong>. Mohon segera melakukan pembayaran untuk menghindari kendala absensi kelas:"
+      : reminderType === "DUE_H3"
+      ? "Berikut kami informasikan pengingat tagihan biaya bimbingan belajar yang akan jatuh tempo dalam <strong>3 hari ke depan</strong>:"
+      : "Berikut rincian tagihan biaya bimbingan belajar yang diterbitkan untuk periode berjalan:";
 
   const installmentRows =
     installments && installments.length > 0
@@ -237,9 +260,9 @@ export function renderInvoiceEmailTemplate({
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden;">
       
       <!-- Header -->
-      <div style="background-color: #2563eb; padding: 28px 24px; text-align: center; color: #ffffff;">
+      <div style="background-color: ${headerBg}; padding: 28px 24px; text-align: center; color: #ffffff;">
         <h1 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.3px;">${academyName}</h1>
-        <p style="margin: 6px 0 0 0; font-size: 13px; opacity: 0.9;">Pemberitahuan Tagihan Pembayaran Siswa</p>
+        <p style="margin: 6px 0 0 0; font-size: 13px; opacity: 0.95;">${headerTitle}</p>
       </div>
 
       <!-- Content -->
@@ -248,7 +271,7 @@ export function renderInvoiceEmailTemplate({
           Yth. <strong>${studentName}</strong>,
         </p>
         <p style="font-size: 14px; color: #64748b; line-height: 1.6; margin-bottom: 24px;">
-          Berikut rincian tagihan biaya bimbingan belajar yang diterbitkan untuk periode berjalan:
+          ${introText}
         </p>
 
         <!-- Invoice Summary Box -->

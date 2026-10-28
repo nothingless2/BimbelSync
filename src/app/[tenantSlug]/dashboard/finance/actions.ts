@@ -542,3 +542,134 @@ export async function sendInvoiceEmailAction(invoiceId: string) {
   };
 }
 
+/**
+ * Mengirimkan email notifikasi tagihan secara massal (batch)
+ * untuk seluruh tagihan yang berstatus UNPAID pada periode berjalan.
+ */
+export async function sendBulkInvoiceEmailsAction(options?: { 
+  billingPeriod?: string; 
+  invoiceIds?: string[];
+}) {
+  const result = await requireAdminSession();
+  if ('error' in result) return { error: result.error };
+  const session = result.session;
+
+  const smtpCheck = await getTenantSmtpConfig(session.academy_id);
+  if ('error' in smtpCheck) return { error: smtpCheck.error };
+
+  if (!smtpCheck.isAllowed) {
+    return { error: "Fitur pengiriman email tagihan massal hanya tersedia pada paket Growth dan Pro." };
+  }
+
+  if (!smtpCheck.isConfigured || !smtpCheck.isActive) {
+    return { error: "Layanan SMTP bimbel belum aktif atau belum dikonfigurasi di menu Pengaturan Email." };
+  }
+
+  // Cari tagihan UNPAID yang sesuai kriteria
+  const invoices = await prisma.invoice.findMany({
+    where: {
+      academy_id: session.academy_id,
+      payment_status: "UNPAID",
+      ...(options?.invoiceIds && options.invoiceIds.length > 0 
+        ? { id: { in: options.invoiceIds } } 
+        : options?.billingPeriod 
+        ? { billing_period: options.billingPeriod } 
+        : {}),
+    },
+    include: {
+      student: true,
+      items: true,
+      installments: {
+        orderBy: { installment_number: 'asc' }
+      },
+      academy: true,
+    },
+    orderBy: { created_at: "desc" }
+  });
+
+  if (invoices.length === 0) {
+    return { error: "Tidak ada tagihan berstatus Belum Bayar yang perlu dikirimi email." };
+  }
+
+  const eligibleInvoices = invoices.filter(inv => inv.student?.email && inv.student.email.trim().length > 0);
+  const skippedCount = invoices.length - eligibleInvoices.length;
+
+  if (eligibleInvoices.length === 0) {
+    return { 
+      error: `Ditemukan ${invoices.length} tagihan belum lunas, namun tidak ada siswa yang memiliki email terdaftar.` 
+    };
+  }
+
+  const appBaseUrl = process.env.NEXTAUTH_URL || "https://bimbelsync.com";
+  const portalUrl = `${appBaseUrl}/${session.tenant_slug}/login`;
+
+  let sentCount = 0;
+  let failedCount = 0;
+
+  for (const inv of eligibleInvoices) {
+    const formattedDueDate = inv.due_date 
+      ? new Date(inv.due_date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
+      : new Date(inv.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+
+    const html = renderInvoiceEmailTemplate({
+      academyName: inv.academy.name,
+      studentName: inv.student.full_name,
+      invoiceNumber: "INV-" + inv.id.slice(0, 8).toUpperCase(),
+      amount: inv.total_amount,
+      dueDate: formattedDueDate,
+      paymentOption: inv.payment_option,
+      installments: inv.installments.map(i => ({
+        term: i.installment_number,
+        amount: i.amount,
+        dueDate: new Date(i.due_date).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }),
+        isPaid: i.status === "PAID",
+      })),
+      bankName: inv.academy.bank_name || undefined,
+      bankAccount: inv.academy.bank_account || undefined,
+      portalUrl,
+      reminderType: "ISSUED",
+    });
+
+    const sendRes = await sendTenantEmail({
+      academyId: session.academy_id,
+      to: inv.student.email!,
+      subject: `[Tagihan SPP] INV-${inv.id.slice(0, 8).toUpperCase()} - ${inv.academy.name}`,
+      html,
+    });
+
+    if (sendRes.success) {
+      sentCount++;
+    } else {
+      failedCount++;
+    }
+
+    // Jeda 200ms antar pengiriman untuk menghindari pemblokiran rate limit SMTP Google/Brevo
+    await new Promise(resolve => setTimeout(resolve, 200));
+  }
+
+  await createAuditLog({
+    academy_id: session.academy_id,
+    staff_id: session.id,
+    action: "UPDATE",
+    entity_type: "Invoice (Bulk Send)",
+    details: {
+      action: "SEND_BULK_INVOICE_EMAILS",
+      total_invoices: invoices.length,
+      sent_count: sentCount,
+      failed_count: failedCount,
+      skipped_no_email: skippedCount,
+    },
+  });
+
+  revalidatePath(`/${session.tenant_slug}/dashboard/finance`);
+
+  return {
+    success: true,
+    sentCount,
+    skippedCount,
+    failedCount,
+    totalCount: invoices.length,
+    message: `Berhasil mengirimkan ${sentCount} email tagihan.${skippedCount > 0 ? ` (${skippedCount} siswa dilewati karena belum memiliki email).` : ""}${failedCount > 0 ? ` (${failedCount} gagal).` : ""}`
+  };
+}
+

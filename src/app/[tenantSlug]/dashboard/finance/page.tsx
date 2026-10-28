@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import FinanceClientPage from "./client-page";
 import { AddInvoiceModal } from "@/components/modals/add-invoice-modal";
 import { GenerateInvoicesButton } from "./generate-button";
+import { BulkEmailInvoicesButton } from "./bulk-email-button";
 import { Prisma } from "@prisma/client";
 import { formatRupiah } from "@/lib/session";
 
@@ -91,7 +92,7 @@ export default async function FinancePage({
     }),
     prisma.academy.findUnique({
       where: { id: session.academy_id },
-      select: { bank_name: true, bank_account: true, name: true }
+      select: { bank_name: true, bank_account: true, name: true, is_smtp_active: true }
     })
   ]);
 
@@ -113,8 +114,17 @@ export default async function FinancePage({
           </p>
         </div>
         
-        <div className="flex items-center gap-2">
-          <GenerateInvoicesButton academyId={session.academy_id} />
+        <div className="flex items-center gap-2 flex-wrap">
+          <BulkEmailInvoicesButton 
+            unpaidCount={unpaidCount}
+            isSmtpActive={Boolean(academy?.is_smtp_active)}
+            tenantSlug={tenantSlug}
+          />
+          <GenerateInvoicesButton 
+            academyId={session.academy_id} 
+            isSmtpActive={Boolean(academy?.is_smtp_active)}
+            tenantSlug={tenantSlug}
+          />
           <AddInvoiceModal students={students} />
         </div>
       </div>

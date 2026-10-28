@@ -526,6 +526,30 @@ export default function EmailSettingsClientPage({
               </label>
             </div>
 
+            {/* Integrated Billing Automation Highlights */}
+            {isActive && (
+              <div className="p-4 rounded-xl bg-blue-50/70 dark:bg-blue-950/20 border border-blue-200/70 dark:border-blue-900/40 space-y-2.5">
+                <div className="flex items-center gap-2 text-xs font-bold text-blue-900 dark:text-blue-200">
+                  <Sparkles size={14} className="text-blue-600 dark:text-blue-400" />
+                  <span>Fitur Otomasi Tagihan Terintegrasi di Menu Keuangan:</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] text-slate-600 dark:text-slate-300">
+                  <div className="flex items-start gap-1.5 p-2 rounded-lg bg-white/70 dark:bg-slate-900/50 border border-blue-100 dark:border-blue-900/30">
+                    <CheckCircle2 size={13} className="text-blue-600 shrink-0 mt-0.5" />
+                    <span>Kirim otomatis saat Generate Tagihan Bulanan</span>
+                  </div>
+                  <div className="flex items-start gap-1.5 p-2 rounded-lg bg-white/70 dark:bg-slate-900/50 border border-blue-100 dark:border-blue-900/30">
+                    <CheckCircle2 size={13} className="text-blue-600 shrink-0 mt-0.5" />
+                    <span>Tombol kirim massal tagihan belum lunas di Finance</span>
+                  </div>
+                  <div className="flex items-start gap-1.5 p-2 rounded-lg bg-white/70 dark:bg-slate-900/50 border border-blue-100 dark:border-blue-900/30">
+                    <CheckCircle2 size={13} className="text-blue-600 shrink-0 mt-0.5" />
+                    <span>Pengingat jatuh tempo otomatis (H-3 dan H-1)</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Grid Form Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
