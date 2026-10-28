@@ -736,7 +736,7 @@ export default function EmailSettingsClientPage({
           {!isPro ? (
             <FeatureLockBanner
               title="Broadcast Pengumuman Massal via Email"
-              description={`Fitur broadcast email serentak ke seluruh siswa dan wali murid (info libur, ujian, edaran resmi) hanya tersedia pada paket Pro. Paket Anda saat ini (${planName || "Growth"}) belum mencakup siaran massal.`}
+              description="Fitur broadcast email massal ke seluruh siswa dan wali murid hanya tersedia pada paket Pro."
               requiredPlan="Pro"
               tenantSlug={tenantSlug}
               currentPlanName={planName}
