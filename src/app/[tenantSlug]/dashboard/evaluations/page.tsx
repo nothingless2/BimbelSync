@@ -66,7 +66,7 @@ export default async function EvaluationsPage({ params }: { params: Promise<{ te
   const { FeatureLockBanner } = await import("@/components/feature-lock-banner");
   const access = await checkFeatureAccess(session.academy_id, "erapor");
 
-  if (!access.allowed && serializedEvaluations.length === 0) {
+  if (!access.allowed) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         <div>
@@ -76,8 +76,8 @@ export default async function EvaluationsPage({ params }: { params: Promise<{ te
           </p>
         </div>
         <FeatureLockBanner
-          title="E-Rapor & Evaluasi Siswa Terkunci"
-          description={access.reason || "Fitur penilaian digital dan e-rapor siswa hanya tersedia pada paket Growth dan Pro."}
+          title="Fitur Evaluasi & E-Rapor Memerlukan Paket Growth"
+          description={access.reason || "Fitur rekapitulasi nilai digital, pembobotan ujian, dan penerbitan e-rapor siswa hanya tersedia pada paket Growth dan Pro."}
           requiredPlan="Growth"
           tenantSlug={tenantSlug}
           currentPlanName={access.planName}
@@ -88,16 +88,6 @@ export default async function EvaluationsPage({ params }: { params: Promise<{ te
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {!access.allowed && (
-        <FeatureLockBanner
-          title="Evaluasi Siswa (Mode Baca Saja)"
-          description="Paket Anda saat ini adalah Starter. Anda tetap dapat meninjau riwayat evaluasi yang sudah pernah dibuat, namun penambahan evaluasi baru dinonaktifkan."
-          requiredPlan="Growth"
-          tenantSlug={tenantSlug}
-          currentPlanName={access.planName}
-          readOnlyNotice={true}
-        />
-      )}
       <EvaluationsClientPage 
         evaluations={serializedEvaluations} 
         students={students}
@@ -105,7 +95,7 @@ export default async function EvaluationsPage({ params }: { params: Promise<{ te
         tenantSlug={tenantSlug} 
         academyId={session.academy_id} 
         userRole={session.role}
-        isReadOnly={!access.allowed}
+        isReadOnly={false}
       />
     </div>
   );

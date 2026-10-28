@@ -117,14 +117,12 @@ export function TenantNav({
                 System
               </p>
             </div>
-            {allowsAutomatedEmail && (
-              <NavItem 
-                href={`/${tenantSlug}/dashboard/settings/email`} 
-                icon={<Mail size={18} />} 
-                label="Email & SMTP" 
-                active={isRouteActive(`/${tenantSlug}/dashboard/settings/email`)} 
-              />
-            )}
+            <NavItem 
+              href={`/${tenantSlug}/dashboard/settings/email`} 
+              icon={<Mail size={18} />} 
+              label="Email & SMTP" 
+              active={isRouteActive(`/${tenantSlug}/dashboard/settings/email`)} 
+            />
             <NavItem 
               href={`/${tenantSlug}/dashboard/audit-logs`} 
               icon={<FileText size={18} />} 

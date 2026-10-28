@@ -92,7 +92,7 @@ export async function testTenantSmtpConnection(
             <div style="display: inline-block; width: 44px; height: 44px; line-height: 44px; border-radius: 50%; background-color: #22c55e; color: #ffffff; font-size: 20px; font-weight: bold; margin-bottom: 12px;">✓</div>
             <h3 style="color: #15803d; font-size: 16px; font-weight: 700; margin: 0 0 8px 0;">Koneksi SMTP Berhasil!</h3>
             <p style="color: #334155; font-size: 14px; margin: 0; line-height: 1.5;">
-              Server email bimbel Anda telah terhubung dengan sukses. Sistem kini siap mengirimkan notifikasi tagihan dan pengumuman secara otomatis ke siswa dan wali murid.
+              Server email bimbel Anda telah terhubung dengan sukses. Sistem kini siap mengirimkan notifikasi tagihan dan pengumuman secara otomatis ke siswa.
             </p>
           </div>
 
@@ -245,7 +245,7 @@ export function renderInvoiceEmailTemplate({
       <!-- Content -->
       <div style="padding: 28px 24px;">
         <p style="font-size: 15px; color: #334155; margin-top: 0;">
-          Yth. Siswa/Wali Murid dari <strong>${studentName}</strong>,
+          Yth. <strong>${studentName}</strong>,
         </p>
         <p style="font-size: 14px; color: #64748b; line-height: 1.6; margin-bottom: 24px;">
           Berikut rincian tagihan biaya bimbingan belajar yang diterbitkan untuk periode berjalan:

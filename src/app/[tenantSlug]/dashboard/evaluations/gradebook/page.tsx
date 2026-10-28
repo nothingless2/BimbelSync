@@ -97,9 +97,15 @@ export default async function GradebookPage({ params, searchParams }: any) {
   const { FeatureLockBanner } = await import("@/components/feature-lock-banner");
   const access = await checkFeatureAccess(academy.id, "erapor");
 
-  if (!access.allowed && evaluations.length === 0) {
+  if (!access.allowed) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Gradebook Akhir</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Rekapitulasi akumulasi nilai berbobot dan status kelulusan siswa.
+          </p>
+        </div>
         <FeatureLockBanner
           title="Gradebook Akhir & E-Rapor Terkunci"
           description={access.reason || "Fitur rekap nilai akhir dan e-rapor siswa hanya tersedia pada paket Growth dan Pro."}
@@ -113,18 +119,6 @@ export default async function GradebookPage({ params, searchParams }: any) {
 
   return (
     <div>
-      {!access.allowed && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-          <FeatureLockBanner
-            title="Gradebook (Mode Baca Saja)"
-            description="Paket Anda saat ini adalah Starter. Anda tetap dapat meninjau nilai rapor historis, namun penerbitan nilai baru dinonaktifkan."
-            requiredPlan="Growth"
-            tenantSlug={tenantSlug}
-            currentPlanName={access.planName}
-            readOnlyNotice={true}
-          />
-        </div>
-      )}
       <GradebookClientPage
         tenantSlug={tenantSlug}
         program={program}

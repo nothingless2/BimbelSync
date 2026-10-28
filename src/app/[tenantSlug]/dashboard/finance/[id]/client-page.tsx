@@ -8,7 +8,7 @@ import { id as localeId } from "date-fns/locale";
 import { 
   ArrowLeft, CheckCircle2, AlertCircle, Clock, 
   CreditCard, Banknote, RefreshCcw, Loader2, Calendar,
-  PieChart, CheckCircle, Mail, Send
+  Mail, Send, Copy, Check, MessageSquare, ExternalLink, Lock
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "@/components/ui/sonner";
@@ -40,15 +40,25 @@ export default function FinanceDetailClient({
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [verifyingInstallmentId, setVerifyingInstallmentId] = useState<string | null>(null);
   const [isSplitModalOpen, setIsSplitModalOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const formatRupiah = (num: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
   };
 
+  const invoiceNumber = `INV-${invoice.id.split('-')[0].toUpperCase()}`;
+
+  const handleCopyInvoiceNumber = () => {
+    navigator.clipboard.writeText(invoiceNumber);
+    setCopied(true);
+    toast.success("Nomor tagihan disalin ke clipboard");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   // Verifikasi pelunasan seluruh invoice sekaligus
   const handleVerify = async (method: "CASH" | "MANUAL_TRANSFER") => {
     const methodLabel = method === 'CASH' ? 'Tunai' : 'Transfer Manual';
-    if (!confirm(`Konfirmasi pelunasan seluruh tagihan ini via ${methodLabel}?`)) return;
+    if (!confirm(`Konfirmasi pelunasan tagihan ${invoiceNumber} via ${methodLabel}?`)) return;
     
     setIsVerifying(true);
     const result = await verifyPaymentAction(invoice.id, method);
@@ -82,11 +92,11 @@ export default function FinanceDetailClient({
   // Kirim notifikasi email tagihan ke siswa/wali
   const handleSendEmail = async () => {
     if (!invoice.student.email) {
-      toast.error("Siswa ini belum memiliki alamat email yang terdaftar di sistem.");
+      toast.error("Siswa ini belum memiliki alamat email yang terdaftar.");
       return;
     }
 
-    if (!confirm(`Kirim notifikasi email tagihan ke ${invoice.student.email}?`)) return;
+    if (!confirm(`Kirim notifikasi rincian tagihan ke ${invoice.student.email}?`)) return;
 
     setIsSendingEmail(true);
     const res = await sendInvoiceEmailAction(invoice.id);
@@ -95,8 +105,19 @@ export default function FinanceDetailClient({
     if (res.error) {
       toast.error(res.error);
     } else {
-      toast.success(res.message || "Notifikasi tagihan berhasil dikirim ke email siswa.");
+      toast.success(res.message || "Email rincian tagihan berhasil dikirim.");
     }
+  };
+
+  // Kirim pengingat tagihan via WhatsApp
+  const handleOpenWhatsApp = () => {
+    if (!invoice.student.parent_whatsapp) return;
+    let phone = invoice.student.parent_whatsapp.replace(/[^0-9]/g, '');
+    if (phone.startsWith('0')) phone = '62' + phone.slice(1);
+    
+    const message = `Halo Bpk/Ibu wali dari ${invoice.student.full_name},\n\nKami menginformasikan tagihan bimbingan belajar dengan rincian berikut:\n- No. Tagihan: ${invoiceNumber}\n- Total: ${formatRupiah(invoice.total_amount)}\n- Status: ${invoice.payment_status === 'PAID' ? 'LUNAS' : 'Belum Lunas'}\n\nTerima kasih atas kerja samanya.`;
+    
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   // Kalkulasi statistik cicilan
@@ -109,152 +130,210 @@ export default function FinanceDetailClient({
   const totalTermsCount = isInstallment ? invoice.installments.length : 0;
   const progressPercentage = invoice.total_amount > 0 ? Math.round((totalPaidInstallments / invoice.total_amount) * 100) : 0;
 
+  const isPaid = invoice.payment_status === 'PAID';
+  const isOverdue = invoice.payment_status === 'OVERDUE';
+
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-4 max-w-5xl mx-auto pb-6">
       
-      {/* Header & Back Button */}
-      <div className="flex items-center gap-4">
-        <button 
-          onClick={() => router.push(`/${tenantSlug}/dashboard/finance`)}
-          className="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full transition-colors"
-          title="Kembali ke Daftar Tagihan"
-        >
-          <ArrowLeft size={20} className="text-slate-600 dark:text-slate-300" />
-        </button>
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Detail Tagihan</h2>
-            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-              isInstallment 
-                ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40' 
-                : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40'
-            }`}>
-              {isInstallment ? 'CICILAN (TERMIN)' : 'LUNAS PENUH'}
-            </span>
+      {/* Header Bar */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => router.push(`/${tenantSlug}/dashboard/finance`)}
+            className="p-2 bg-white hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-xl transition-colors shadow-2xs cursor-pointer text-slate-600 dark:text-slate-300"
+            title="Kembali ke Daftar Tagihan"
+          >
+            <ArrowLeft size={16} />
+          </button>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">Detail Tagihan</h1>
+              <span className={`text-[11px] font-medium px-2 py-0.5 rounded-md ${
+                isInstallment 
+                  ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/50' 
+                  : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+              }`}>
+                {isInstallment ? `Skema Cicilan (${totalTermsCount} Termin)` : 'Sekali Bayar'}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="font-mono text-xs text-slate-500 dark:text-slate-400 font-semibold">{invoiceNumber}</span>
+              <button
+                onClick={handleCopyInvoiceNumber}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
+                title="Salin Nomor Tagihan"
+              >
+                {copied ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
+              </button>
+            </div>
           </div>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">INV-{invoice.id.split('-')[0].toUpperCase()}</p>
+        </div>
+
+        {/* Status Badge Tagihan */}
+        <div className="flex items-center gap-2">
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+            isPaid 
+              ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/40' 
+              : isOverdue
+              ? 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-200/80 dark:border-red-800/40'
+              : 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200/80 dark:border-amber-800/40'
+          }`}>
+            {isPaid ? <CheckCircle2 size={13} /> : isOverdue ? <AlertCircle size={13} /> : <Clock size={13} />}
+            {isPaid ? 'Lunas' : isOverdue ? 'Jatuh Tempo' : 'Belum Lunas'}
+          </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         
-        {/* Kolom Kiri: Rincian & Siswa */}
-        <div className="md:col-span-2 space-y-6">
+        {/* Kolom Kiri: Dokumen Tagihan & Rincian Item (8 Cols) */}
+        <div className="lg:col-span-7 space-y-4">
           
-          <div className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4">Informasi Siswa</h3>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-slate-500 mb-1">Nama Lengkap</p>
-                <p className="font-medium text-slate-900 dark:text-white">{invoice.student.full_name}</p>
-              </div>
-              <div>
-                <p className="text-slate-500 mb-1">Username / ID</p>
-                <p className="font-medium text-slate-900 dark:text-white">@{invoice.student.username}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4">Rincian Tagihan</h3>
+          <div className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xs overflow-hidden">
             
-            <div className="space-y-3 mb-6">
-              {invoice.items.map((item, idx) => (
-                <div key={idx} className="flex justify-between items-center text-sm">
-                  <span className="text-slate-600 dark:text-slate-300">{item.description}</span>
-                  <span className="font-medium text-slate-900 dark:text-white">{formatRupiah(item.amount)}</span>
+            {/* Header Informasi Siswa & Dokumen */}
+            <div className="p-4 bg-slate-50/70 dark:bg-slate-900/40 border-b border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-4 text-xs">
+              <div>
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Penerima Tagihan</span>
+                <p className="font-bold text-slate-900 dark:text-white mt-0.5 text-sm">{invoice.student.full_name}</p>
+                <p className="text-slate-500 font-mono text-[11px]">@{invoice.student.username}</p>
+                {invoice.student.email && (
+                  <p className="text-slate-400 text-[11px] truncate mt-0.5">{invoice.student.email}</p>
+                )}
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Tanggal Penerbitan</span>
+                <p className="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
+                  {format(new Date(invoice.created_at), 'd MMMM yyyy', { locale: localeId })}
+                </p>
+                <div className="mt-1">
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Periode</span>
+                  <p className="text-slate-600 dark:text-slate-400 text-[11px]">
+                    {invoice.billing_period || 'Tagihan Reguler'}
+                  </p>
                 </div>
-              ))}
+              </div>
             </div>
 
-            <div className="flex justify-between items-center pt-4 border-t border-slate-100 dark:border-slate-800 mt-2">
-              <span className="text-sm font-bold text-slate-900 dark:text-slate-100">Total Keseluruhan</span>
-              <span className="text-lg font-bold text-blue-600 dark:text-blue-400">{formatRupiah(invoice.total_amount)}</span>
+            {/* Tabel Item Tagihan */}
+            <div className="p-4">
+              <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 uppercase tracking-wider pb-2 border-b border-slate-100 dark:border-slate-800">
+                <span>Rincian Item</span>
+                <span>Nominal</span>
+              </div>
+
+              <div className="divide-y divide-slate-50 dark:divide-slate-800/60">
+                {invoice.items.map((item, idx) => (
+                  <div key={idx} className="py-2.5 flex justify-between items-center text-xs">
+                    <span className="text-slate-700 dark:text-slate-300 font-medium">{item.description}</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">{formatRupiah(item.amount)}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Total Keseluruhan */}
+              <div className="flex justify-between items-center pt-3 border-t border-slate-200 dark:border-slate-700 mt-2">
+                <div>
+                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100">Total Keseluruhan</span>
+                  {isInstallment && (
+                    <span className="text-[10px] text-slate-400 block">Dibagi dalam {totalTermsCount} termin</span>
+                  )}
+                </div>
+                <span className="text-base font-extrabold text-blue-600 dark:text-blue-400">{formatRupiah(invoice.total_amount)}</span>
+              </div>
             </div>
+
+            {/* Riwayat Verifikasi jika Tagihan Sudah Lunas Penuh */}
+            {isPaid && invoice.verified_by && (
+              <div className="px-4 py-2.5 bg-emerald-50/40 dark:bg-emerald-950/20 border-t border-emerald-100/60 dark:border-emerald-900/30 flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
+                <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 font-medium">
+                  <CheckCircle2 size={13} />
+                  <span>Diverifikasi oleh <strong>{invoice.verified_by.name}</strong></span>
+                </span>
+                <span className="text-[11px] font-semibold bg-emerald-100/60 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded">
+                  {invoice.payment_method === 'CASH' ? 'Tunai' : invoice.payment_method === 'MANUAL_TRANSFER' ? 'Transfer' : invoice.payment_method || 'Lunas'}
+                </span>
+              </div>
+            )}
+
           </div>
 
-          {/* Tabel Cicilan jika payment_option === INSTALLMENT */}
+          {/* Rincian Termin Cicilan jika payment_option === INSTALLMENT */}
           {isInstallment && invoice.installments.length > 0 && (
-            <div className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
+            <div className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200 dark:border-slate-800 p-4 shadow-2xs space-y-3">
+              <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Jadwal Cicilan & Verifikasi Termin</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Admin dapat menandai lunas masing-masing termin saat siswa membayar.</p>
+                  <h2 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">Jadwal Termin Pembayaran</h2>
+                  <p className="text-[11px] text-slate-500">Verifikasi penerimaan pembayaran per termin dari siswa.</p>
                 </div>
-                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md">
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
                   {paidTermsCount}/{totalTermsCount} Lunas
                 </span>
               </div>
 
               <div className="divide-y divide-slate-100 dark:divide-slate-800">
                 {invoice.installments.map((inst) => {
-                  const isPaid = inst.status === 'PAID';
+                  const instPaid = inst.status === 'PAID';
                   const isProcessing = verifyingInstallmentId === inst.id;
 
                   return (
-                    <div key={inst.id} className="py-4 first:pt-0 last:pb-0">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div key={inst.id} className="py-2.5 first:pt-1 last:pb-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div>
                           <div className="flex items-center gap-2">
-                            <p className="text-sm font-bold text-slate-900 dark:text-slate-100">Termin {inst.installment_number}</p>
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider ${
-                              isPaid ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40' :
-                              inst.status === 'OVERDUE' ? 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-800/40' :
-                              'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40'
+                            <span className="text-xs font-bold text-slate-900 dark:text-slate-100">Termin {inst.installment_number}</span>
+                            <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded uppercase tracking-wider ${
+                              instPaid ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40' :
+                              inst.status === 'OVERDUE' ? 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-200 dark:border-red-800/40' :
+                              'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40'
                             }`}>
-                              {isPaid ? 'LUNAS' : inst.status === 'OVERDUE' ? 'JATUH TEMPO' : 'BELUM BAYAR'}
+                              {instPaid ? 'Lunas' : inst.status === 'OVERDUE' ? 'Jatuh Tempo' : 'Menunggu'}
                             </span>
                           </div>
                           
-                          <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1">
-                            <Calendar size={13} className="text-slate-400" />
-                            <span>Jatuh tempo: {format(new Date(inst.due_date), 'd MMMM yyyy', { locale: localeId })}</span>
+                          <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mt-0.5">
+                            <Calendar size={11} className="text-slate-400" />
+                            <span>Jatuh tempo: {format(new Date(inst.due_date), 'd MMM yyyy', { locale: localeId })}</span>
                           </div>
 
-                          {isPaid && (
-                            <div className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 flex flex-wrap items-center gap-2">
-                              <span>Lunas: {inst.paid_at ? format(new Date(inst.paid_at), 'd MMM yyyy, HH:mm', { locale: localeId }) : '-'}</span>
+                          {instPaid && (
+                            <div className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5 flex flex-wrap items-center gap-1.5">
+                              <span>Lunas: {inst.paid_at ? format(new Date(inst.paid_at), 'd MMM yyyy', { locale: localeId }) : '-'}</span>
                               {inst.payment_method && (
-                                <span className="bg-emerald-100/60 dark:bg-emerald-950/40 px-1.5 py-0.2 rounded font-medium">
-                                  via {inst.payment_method}
+                                <span className="bg-emerald-100/60 dark:bg-emerald-950/40 px-1 rounded font-medium">
+                                  {inst.payment_method}
                                 </span>
                               )}
                               {inst.verified_by?.name && (
-                                <span>• Oleh: {inst.verified_by.name}</span>
+                                <span>• oleh {inst.verified_by.name}</span>
                               )}
                             </div>
                           )}
                         </div>
 
-                        <div className="flex items-center sm:flex-col sm:items-end justify-between sm:justify-center gap-2">
-                          <p className="text-base font-bold text-slate-900 dark:text-white">{formatRupiah(inst.amount)}</p>
+                        <div className="flex items-center sm:flex-col sm:items-end justify-between sm:justify-center gap-1.5">
+                          <p className="text-xs font-bold text-slate-900 dark:text-white">{formatRupiah(inst.amount)}</p>
 
-                          {!isPaid && (
-                            <div className="flex items-center gap-1.5">
+                          {!instPaid && (
+                            <div className="flex items-center gap-1">
                               <button
                                 onClick={() => handleVerifyInstallment(inst.id, inst.installment_number, "CASH")}
                                 disabled={isProcessing || isVerifying}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-md transition-colors disabled:opacity-50 shadow-xs"
+                                className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-md transition-colors disabled:opacity-50 cursor-pointer shadow-2xs"
                                 title="Tandai Lunas via Pembayaran Tunai"
                               >
-                                {isProcessing ? (
-                                  <Loader2 size={12} className="animate-spin" />
-                                ) : (
-                                  <Banknote size={12} />
-                                )}
+                                {isProcessing ? <Loader2 size={10} className="animate-spin" /> : <Banknote size={10} />}
                                 Tunai
                               </button>
                               <button
                                 onClick={() => handleVerifyInstallment(inst.id, inst.installment_number, "MANUAL_TRANSFER")}
                                 disabled={isProcessing || isVerifying}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors disabled:opacity-50 shadow-xs"
+                                className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors disabled:opacity-50 cursor-pointer shadow-2xs"
                                 title="Tandai Lunas via Transfer Bank"
                               >
-                                {isProcessing ? (
-                                  <Loader2 size={12} className="animate-spin" />
-                                ) : (
-                                  <CreditCard size={12} />
-                                )}
+                                {isProcessing ? <Loader2 size={10} className="animate-spin" /> : <CreditCard size={10} />}
                                 Transfer
                               </button>
                             </div>
@@ -270,200 +349,203 @@ export default function FinanceDetailClient({
 
         </div>
 
-        {/* Kolom Kanan: Status & Panel Aksi */}
-        <div className="space-y-6">
-          <div className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col items-center text-center shadow-sm">
+        {/* Kolom Kanan: Aksi & Integrasi (5 Cols - Ringkas & Presisi) */}
+        <div className="lg:col-span-5 space-y-3">
+          
+          <div className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200 dark:border-slate-800 p-4 shadow-2xs space-y-3.5">
             
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
-              invoice.payment_status === 'PAID' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400' :
-              invoice.payment_status === 'OVERDUE' ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400' :
-              'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400'
-            }`}>
-              {invoice.payment_status === 'PAID' ? <CheckCircle2 size={24} /> :
-               invoice.payment_status === 'OVERDUE' ? <AlertCircle size={24} /> :
-               <Clock size={24} />}
+            {/* Ringkasan Nominal & Status */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div>
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Total Tagihan</span>
+                <p className="text-lg font-bold text-slate-900 dark:text-white">
+                  {formatRupiah(invoice.total_amount)}
+                </p>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Status</span>
+                <span className={`inline-block text-xs font-bold ${
+                  isPaid ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
+                }`}>
+                  {isPaid ? 'Telah Lunas' : 'Belum Lunas'}
+                </span>
+              </div>
             </div>
 
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">{invoice.payment_status}</h3>
-            <p className="text-xs text-slate-500 mt-1 uppercase tracking-wide">Status Tagihan Induk</p>
-
-            {invoice.payment_status === 'PAID' && invoice.verified_by && (
-              <div className="mt-5 w-full pt-4 border-t border-slate-100 dark:border-slate-800 text-xs text-left grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-slate-500 mb-1">Diverifikasi Oleh</p>
-                  <p className="font-medium text-slate-700 dark:text-slate-300">{invoice.verified_by.name}</p>
-                </div>
-                <div>
-                  <p className="text-slate-500 mb-1">Metode</p>
-                  <p className="font-medium text-slate-700 dark:text-slate-300">{invoice.payment_method}</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Kartu Ringkasan Progres Cicilan (Hanya jika tipe cicilan) */}
-          {isInstallment && (
-            <div className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-4">
-              <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-sm">
-                <PieChart size={18} className="text-blue-600 dark:text-blue-400" />
-                <h4>Ringkasan Pelunasan Cicilan</h4>
-              </div>
-
-              {/* Progress Bar */}
+            {/* Progres Pelunasan jika Cicilan */}
+            {isInstallment && (
               <div className="space-y-1.5">
-                <div className="flex justify-between text-xs font-semibold text-slate-600 dark:text-slate-400">
+                <div className="flex justify-between text-[11px] font-semibold text-slate-500">
                   <span>Progres Pembayaran</span>
-                  <span className="text-blue-600 dark:text-blue-400">{progressPercentage}%</span>
+                  <span className="text-blue-600 dark:text-blue-400 font-bold">{progressPercentage}%</span>
                 </div>
-                <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
                   <div 
-                    className="bg-blue-600 h-full rounded-full transition-all duration-500" 
+                    className="bg-blue-600 h-full rounded-full transition-all duration-300" 
                     style={{ width: `${progressPercentage}%` }}
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 pt-2 text-xs">
-                <div className="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-lg border border-slate-100 dark:border-slate-800">
-                  <p className="text-slate-500 mb-1">Sudah Dibayar</p>
-                  <p className="font-bold text-emerald-600 dark:text-emerald-400">{formatRupiah(totalPaidInstallments)}</p>
-                </div>
-                <div className="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-lg border border-slate-100 dark:border-slate-800">
-                  <p className="text-slate-500 mb-1">Sisa Piutang</p>
-                  <p className="font-bold text-slate-900 dark:text-white">{formatRupiah(remainingInstallmentDebt)}</p>
-                </div>
-              </div>
-
-              {/* Opsi Lunasi Sekaligus Semua Termin */}
-              {invoice.payment_status !== 'PAID' && (
-                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
-                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    Opsi: Lunasi Semua Termin Sekaligus
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => handleVerify("CASH")}
-                      disabled={isVerifying}
-                      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs rounded-lg transition-colors disabled:opacity-50"
-                    >
-                      {isVerifying ? <Loader2 size={14} className="animate-spin" /> : <Banknote size={14} />}
-                      Tunai (Semua)
-                    </button>
-                    <button
-                      onClick={() => handleVerify("MANUAL_TRANSFER")}
-                      disabled={isVerifying}
-                      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs rounded-lg transition-colors disabled:opacity-50"
-                    >
-                      {isVerifying ? <Loader2 size={14} className="animate-spin" /> : <CreditCard size={14} />}
-                      Transfer (Semua)
-                    </button>
+                <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
+                  <div className="p-1.5 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800">
+                    <span className="text-[10px] text-slate-400 block">Terbayar</span>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatRupiah(totalPaidInstallments)}</span>
+                  </div>
+                  <div className="p-1.5 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800">
+                    <span className="text-[10px] text-slate-400 block">Sisa Piutang</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{formatRupiah(remainingInstallmentDebt)}</span>
                   </div>
                 </div>
-              )}
-
-              {/* Tombol Atur Ulang Cicilan (hanya jika belum ada yang dibayar) */}
-              {totalPaidInstallments === 0 && canSplitInstallments && (
-                <button
-                  onClick={() => setIsSplitModalOpen(true)}
-                  className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors"
-                >
-                  <RefreshCcw size={14} />
-                  Atur Ulang Termin Cicilan
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Aksi Manual untuk Tagihan Pembayaran Penuh (FULL) */}
-          {invoice.payment_status !== 'PAID' && invoice.payment_option === 'FULL' && (
-            <div className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4">Aksi Manual</h3>
-              <div className="space-y-3">
-                <button
-                  onClick={() => handleVerify("CASH")}
-                  disabled={isVerifying}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm rounded-lg transition-colors disabled:opacity-50 shadow-xs"
-                >
-                  {isVerifying ? <Loader2 size={16} className="animate-spin" /> : <Banknote size={16} />}
-                  Tandai Lunas (Tunai)
-                </button>
-                <button
-                  onClick={() => handleVerify("MANUAL_TRANSFER")}
-                  disabled={isVerifying}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg transition-colors disabled:opacity-50 shadow-xs"
-                >
-                  {isVerifying ? <Loader2 size={16} className="animate-spin" /> : <CreditCard size={16} />}
-                  Tandai Lunas (Transfer)
-                </button>
-                
-                {canSplitInstallments && (
-                  <>
-                    <div className="relative py-3">
-                      <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100 dark:border-slate-800"></div></div>
-                      <div className="relative flex justify-center text-[11px]"><span className="bg-white dark:bg-[#111827] px-2 text-slate-400">Atau</span></div>
-                    </div>
-                    <button
-                      onClick={() => setIsSplitModalOpen(true)}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-medium text-sm rounded-lg transition-colors shadow-xs"
-                    >
-                      <RefreshCcw size={16} />
-                      Ubah ke Cicilan (Termin)
-                    </button>
-                  </>
-                )}
               </div>
-            </div>
-          )}
+            )}
 
-          {canSplitInstallments === false && invoice.payment_status !== 'PAID' && (
-            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 rounded-xl text-sm border border-blue-100 dark:border-blue-800/30">
-              Paket langganan Anda saat ini tidak mendukung fitur <strong>Cicilan Bertahap</strong>. Silakan upgrade paket Anda untuk menikmati fitur ini.
-            </div>
-          )}
-
-          {/* Card Notifikasi Email Siswa (Khusus paket dengan fitur automated_email) */}
-          {emailInfo?.allowed && (
-            <div className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-3">
-              <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-sm">
-                <Mail size={18} className="text-blue-600 dark:text-blue-400" />
-                <h4>Notifikasi Email Siswa</h4>
+            {/* Aksi Verifikasi Pembayaran (Jika belum lunas) */}
+            {!isPaid && (
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
+                  {isInstallment ? "Lunasi Seluruh Sisa Sekaligus" : "Aksi Pembayaran Manual"}
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => handleVerify("CASH")}
+                    disabled={isVerifying}
+                    className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs rounded-lg transition-colors shadow-2xs disabled:opacity-50 cursor-pointer"
+                  >
+                    {isVerifying ? <Loader2 size={13} className="animate-spin" /> : <Banknote size={13} />}
+                    Tunai
+                  </button>
+                  <button
+                    onClick={() => handleVerify("MANUAL_TRANSFER")}
+                    disabled={isVerifying}
+                    className="flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs rounded-lg transition-colors shadow-2xs disabled:opacity-50 cursor-pointer"
+                  >
+                    {isVerifying ? <Loader2 size={13} className="animate-spin" /> : <CreditCard size={13} />}
+                    Transfer
+                  </button>
+                </div>
               </div>
+            )}
 
-              {emailInfo.active ? (
-                <>
-                  <div className="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-lg border border-slate-100 dark:border-slate-800 text-xs space-y-1">
-                    <p className="text-slate-500">Penerima Notifikasi:</p>
-                    <p className="font-semibold text-slate-800 dark:text-slate-200 truncate">
-                      {invoice.student.email || "(Email siswa belum diset)"}
-                    </p>
-                  </div>
+            {/* Opsi & Integrasi Tambahan (List Baris Kompak) */}
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-1.5">
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
+                Opsi & Notifikasi
+              </span>
 
+              {/* Baris Email */}
+              {emailInfo?.allowed ? (
+                emailInfo.active ? (
                   <button
                     onClick={handleSendEmail}
                     disabled={isSendingEmail || !invoice.student.email}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs rounded-lg transition-colors disabled:opacity-50 shadow-xs"
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs text-slate-700 dark:text-slate-300 transition-colors disabled:opacity-50 cursor-pointer"
                   >
-                    {isSendingEmail ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-                    {isSendingEmail ? "Mengirimkan Email..." : "Kirim Tagihan via Email"}
+                    <span className="flex items-center gap-2">
+                      <Mail size={13} className="text-blue-600 dark:text-blue-400" />
+                      <span>Kirim Tagihan via Email</span>
+                    </span>
+                    {isSendingEmail ? (
+                      <Loader2 size={12} className="animate-spin text-blue-600" />
+                    ) : (
+                      <Send size={12} className="text-slate-400" />
+                    )}
                   </button>
-                </>
+                ) : (
+                  <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40 text-xs">
+                    <span className="text-amber-800 dark:text-amber-300 flex items-center gap-1.5 text-[11px]">
+                      <Mail size={12} className="text-amber-600" />
+                      <span>SMTP Belum Aktif</span>
+                    </span>
+                    <Link
+                      href={`/${tenantSlug}/dashboard/settings/email`}
+                      className="font-semibold text-blue-600 dark:text-blue-400 hover:underline text-[11px]"
+                    >
+                      Atur SMTP &rarr;
+                    </Link>
+                  </div>
+                )
               ) : (
-                <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800/40 text-xs text-amber-800 dark:text-amber-300 space-y-2">
-                  <p>Layanan SMTP bimbel belum aktif.</p>
+                <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 text-xs">
+                  <span className="text-slate-600 dark:text-slate-400 flex items-center gap-1.5 text-[11px]">
+                    <Mail size={12} className="text-slate-400" />
+                    <span>Email Tagihan Siswa</span>
+                  </span>
                   <Link
-                    href={`/${tenantSlug}/dashboard/settings/email`}
-                    className="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                    href={`/${tenantSlug}/dashboard/subscription`}
+                    className="font-semibold text-blue-600 dark:text-blue-400 hover:underline text-[11px] flex items-center gap-0.5"
                   >
-                    Konfigurasi SMTP Sekarang &rarr;
+                    <span>Paket Growth</span>
+                    <ExternalLink size={10} />
                   </Link>
                 </div>
               )}
+
+              {/* Baris Pengingat WhatsApp */}
+              {invoice.student.parent_whatsapp ? (
+                <button
+                  onClick={handleOpenWhatsApp}
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                  title="Kirim pengingat tagihan ke nomor WhatsApp orang tua"
+                >
+                  <span className="flex items-center gap-2">
+                    <MessageSquare size={13} className="text-emerald-600 dark:text-emerald-400" />
+                    <span>Kirim Pengingat WhatsApp</span>
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-mono">
+                    {invoice.student.parent_whatsapp}
+                  </span>
+                </button>
+              ) : null}
+
+              {/* Baris Cicilan / Split Installment */}
+              {!isInstallment && (
+                canSplitInstallments ? (
+                  <button
+                    onClick={() => setIsSplitModalOpen(true)}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                  >
+                    <span className="flex items-center gap-2">
+                      <RefreshCcw size={13} className="text-blue-600 dark:text-blue-400" />
+                      <span>Ubah ke Skema Cicilan</span>
+                    </span>
+                    <span className="text-[10px] text-slate-400">Maks {maxTerms || "bebas"}x</span>
+                  </button>
+                ) : (
+                  <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 text-xs">
+                    <span className="text-slate-600 dark:text-slate-400 flex items-center gap-1.5 text-[11px]">
+                      <RefreshCcw size={12} className="text-slate-400" />
+                      <span>Cicilan Bertahap</span>
+                    </span>
+                    <Link
+                      href={`/${tenantSlug}/dashboard/subscription`}
+                      className="font-semibold text-blue-600 dark:text-blue-400 hover:underline text-[11px] flex items-center gap-0.5"
+                    >
+                      <span>Paket Growth</span>
+                      <ExternalLink size={10} />
+                    </Link>
+                  </div>
+                )
+              )}
+
+              {/* Atur Ulang Cicilan (jika cicilan dan belum ada termin terbayar) */}
+              {isInstallment && totalPaidInstallments === 0 && canSplitInstallments && (
+                <button
+                  onClick={() => setIsSplitModalOpen(true)}
+                  className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                >
+                  <RefreshCcw size={11} />
+                  <span>Atur Ulang Termin</span>
+                </button>
+              )}
+
             </div>
-          )}
+
+          </div>
 
         </div>
+
       </div>
 
+      {/* Modal Split Termin Cicilan */}
       {isSplitModalOpen && (
         <SplitInstallmentModal 
           invoice={invoice} 
@@ -476,4 +558,3 @@ export default function FinanceDetailClient({
     </div>
   );
 }
-

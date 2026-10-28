@@ -365,7 +365,7 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
           <BookOpen size={48} className="mx-auto text-slate-300 dark:text-slate-700 mb-4" />
           <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200">Pilih Program</h3>
           <p className="text-slate-500 dark:text-slate-400 mt-2 max-w-md mx-auto">
-            Silakan pilih program dari dropdown di pojok kanan atas untuk melihat dan mengisi rekapitulasi nilai kelas.
+            Silakan pilih program dari dropdown di atas untuk melihat dan mengelola rekapitulasi nilai kelas.
           </p>
         </div>
       )}

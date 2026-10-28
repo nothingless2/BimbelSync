@@ -29,7 +29,7 @@ const ANNOUNCEMENT_TEMPLATES: AnnouncementTemplate[] = [
     name: "Libur & Cuti Bersama",
     tag: "Kalender Akademik",
     title: "Pemberitahuan Libur Kegiatan Belajar Mengajar & Jadwal Pengganti",
-    message: `Yth. Siswa dan Orang Tua / Wali Murid,
+    message: `Yth. Siswa dan Orang Tua,
 
 Sehubungan dengan adanya hari libur nasional / cuti bersama, kami informasikan bahwa seluruh kegiatan pembelajaran di bimbel diliburkan pada:
 
@@ -51,7 +51,7 @@ Manajemen Bimbel`,
     name: "Jadwal Try Out / Ujian",
     tag: "Ujian & Evaluasi",
     title: "Jadwal Pelaksanaan Ujian Simulasi & Try Out Akbar Siswa",
-    message: `Yth. Siswa dan Orang Tua / Wali Murid,
+    message: `Yth. Siswa dan Orang Tua,
 
 Dalam rangka mengukur capaian pembelajaran serta persiapan menghadapi ujian sekolah/seleksi nasional, bimbel akan mengadakan simulasi ujian dengan rincian sebagai berikut:
 
@@ -77,7 +77,7 @@ Tim Akademik Bimbel`,
     name: "Pengingat Tagihan SPP",
     tag: "Administrasi",
     title: "Pengingat Batas Waktu Pembayaran Biaya Pendidikan (SPP)",
-    message: `Yth. Orang Tua / Wali Murid dan Siswa,
+    message: `Yth. Orang Tua dan Siswa,
 
 Melalui pemberitahuan ini, kami ingin mengingatkan kembali mengenai batas waktu (jatuh tempo) pembayaran administrasi bimbingan belajar (SPP) untuk periode berjalan:
 
@@ -96,7 +96,7 @@ Bagian Keuangan Bimbel`,
     name: "Perubahan Jadwal Kelas",
     tag: "Operasional",
     title: "Pemberitahuan Penyesuaian Jadwal & Ruang Belajar Kelas",
-    message: `Yth. Siswa dan Orang Tua / Wali Murid,
+    message: `Yth. Siswa dan Orang Tua,
 
 Kami menginformasikan adanya penyesuaian jadwal dan ruangan kegiatan bimbingan belajar untuk kelas berikut:
 
@@ -115,14 +115,14 @@ Pengelola Operasional Bimbel`,
   },
   {
     id: "temu_wali",
-    name: "Temu Wali & Konsultasi",
+    name: "Pertemuan Konsultasi",
     tag: "Konseling",
     title: "Undangan Pertemuan Konsultasi & Evaluasi Perkembangan Belajar Siswa",
-    message: `Yth. Orang Tua / Wali Murid,
+    message: `Yth. Orang Tua Siswa,
 
 Kami mengundang Bapak/Ibu untuk menghadiri agenda Pertemuan Konsultasi & Evaluasi Belajar Siswa guna mendiskusikan capaian akademik serta strategi belajar putra/putri tercinta:
 
-Agenda          : Temu Wali & Konsultasi Akademik Siswa
+Agenda          : Pertemuan Konsultasi Akademik Siswa
 Hari / Tanggal  : [Sebutkan Hari & Tanggal]
 Waktu           : [Sebutkan Sesi Waktu]
 Tempat / Moda   : Kantor Bimbel / Daring via Google Meet
