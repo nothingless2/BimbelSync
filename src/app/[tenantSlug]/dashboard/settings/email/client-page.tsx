@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { 
   Mail, Server, CheckCircle2, AlertCircle, Send, Save, 
   Eye, EyeOff, ShieldCheck, Sparkles, RefreshCw, 
@@ -164,6 +165,7 @@ export default function EmailSettingsClientPage({
 }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"smtp" | "broadcast">("smtp");
+  const isPro = (planName || "").trim().toLowerCase() === "pro";
 
   // Form State
   const [host, setHost] = useState(initialConfig.host);
@@ -602,8 +604,31 @@ export default function EmailSettingsClientPage({
       {/* TAB 2: BROADCAST PENGUMUMAN */}
       {activeTab === "broadcast" && (
         <div className="space-y-6">
-          
-          {!isActive && (
+          {!isPro ? (
+            <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm text-center max-w-xl mx-auto space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto">
+                <Megaphone size={24} />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  Siaran Pengumuman Massal Memerlukan Paket Pro
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-md mx-auto">
+                  Fitur broadcast email serentak ke seluruh wali murid (info libur, ujian, edaran resmi) hanya tersedia pada paket Pro. Paket Anda saat ini ({planName}) mencakup pengiriman email tagihan dan kwitansi otomatis.
+                </p>
+              </div>
+              <div className="pt-2">
+                <Link
+                  href={`/${tenantSlug}/dashboard/settings/billing`}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-sm transition"
+                >
+                  Upgrade ke Paket Pro
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <>
+              {!isActive && (
             <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/40 text-amber-800 dark:text-amber-300 text-xs flex items-center gap-3">
               <AlertCircle size={18} className="shrink-0 text-amber-600 dark:text-amber-400" />
               <span>
@@ -724,6 +749,8 @@ export default function EmailSettingsClientPage({
             </div>
 
           </div>
+            </>
+          )}
 
         </div>
       )}

@@ -57,7 +57,7 @@ async function main() {
       allows_installment: true,
       allows_automated_email: true,
       allows_qr_attendance: true,
-      allows_erapor: true,
+      allows_erapor: false,
       allows_audit_trail: false,
       additional_features: [
         "Jadwal Kelas & Kalender",
@@ -76,7 +76,7 @@ async function main() {
       allows_installment: true,
       allows_automated_email: true,
       allows_qr_attendance: true,
-      allows_erapor: true,
+      allows_erapor: false,
       allows_audit_trail: false,
       additional_features: [
         "Jadwal Kelas & Kalender",

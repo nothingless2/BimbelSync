@@ -39,3 +39,32 @@ div:has(> textarea[required]) > label::after {
   content: " *";
   color: #ef4444; /* tailwind text-red-500 */
 }
+
+/* Styling Khusus Cetak / Print Faktur */
+@media print {
+  @page {
+    size: auto;
+    margin: 0mm; /* Menghilangkan URL, judul, dan footer bawaan browser */
+  }
+
+  aside,
+  header,
+  nav,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  body {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    margin: 15mm !important; /* Margin aman konten faktur di kertas */
+    padding: 0 !important;
+  }
+
+  main {
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+

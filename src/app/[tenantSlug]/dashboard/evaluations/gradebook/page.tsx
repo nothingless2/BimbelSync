@@ -92,7 +92,7 @@ export default async function GradebookPage({ params, searchParams }: any) {
     }
   });
 
-  // Feature Gating: E-Rapor & Evaluasi Siswa hanya untuk paket Growth dan Pro
+  // Feature Gating: E-Rapor & Evaluasi Siswa hanya untuk paket Pro
   const { checkFeatureAccess } = await import("@/lib/subscription");
   const { FeatureLockBanner } = await import("@/components/feature-lock-banner");
   const access = await checkFeatureAccess(academy.id, "erapor");
@@ -108,8 +108,8 @@ export default async function GradebookPage({ params, searchParams }: any) {
         </div>
         <FeatureLockBanner
           title="Gradebook Akhir & E-Rapor Terkunci"
-          description={access.reason || "Fitur rekap nilai akhir dan e-rapor siswa hanya tersedia pada paket Growth dan Pro."}
-          requiredPlan="Growth"
+          description={access.reason || "Fitur rekap nilai akhir dan e-rapor siswa hanya tersedia pada paket Pro."}
+          requiredPlan="Pro"
           tenantSlug={tenantSlug}
           currentPlanName={access.planName}
         />

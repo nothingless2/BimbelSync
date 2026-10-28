@@ -11,8 +11,7 @@ export type FeatureKey =
   | "installment"
   | "audit_trail"
   | "automated_email"
-  | "learning_materials"
-  | "tutor_payroll";
+  | "learning_materials";
 
 export interface EffectiveSubscription {
   academyId: string;
@@ -70,7 +69,7 @@ export function getFeatureLockMessage(feature: FeatureKey, planName: string): st
     case "qr_attendance":
       return `Fitur Absensi QR Dinamis hanya tersedia pada paket Growth dan Pro. Paket Anda saat ini (${planName}) menggunakan absensi manual.`;
     case "erapor":
-      return `Fitur E-Rapor & Evaluasi Siswa hanya tersedia pada paket Growth dan Pro. Paket Anda saat ini (${planName}) belum mendukung e-rapor.`;
+      return `Fitur E-Rapor & Evaluasi Siswa hanya tersedia pada paket Pro. Paket Anda saat ini (${planName}) belum mendukung e-rapor.`;
     case "installment":
       return `Fitur Pemecahan Tagihan Cicilan hanya tersedia pada paket Growth (maks. 3 termin) dan Pro. Paket Anda saat ini (${planName}) hanya mendukung pembayaran lunas penuh.`;
     case "audit_trail":
@@ -79,8 +78,6 @@ export function getFeatureLockMessage(feature: FeatureKey, planName: string): st
       return `Fitur Pengingat Email Otomatis tersedia pada paket Growth dan Pro. Paket Anda saat ini (${planName}) belum mendukung pengiriman email otomatis.`;
     case "learning_materials":
       return `Fitur Pengelolaan Materi Pembelajaran tersedia untuk semua paket (maksimal 15 modul di Starter, 50 modul di Growth, unlimited di Pro).`;
-    case "tutor_payroll":
-      return `Fitur Kalkulator Honor & Slip Gaji Tutor hanya tersedia pada paket Pro. Paket Anda saat ini (${planName}) belum mendukung fitur ini.`;
     default:
       return `Fitur ini tidak tersedia pada paket ${planName}. Silakan upgrade paket Anda.`;
   }
@@ -95,7 +92,6 @@ export function getFeatureLockMessage(feature: FeatureKey, planName: string): st
  * - allows_audit_trail
  * - allows_automated_email
  * - learning_materials: Starter didukung hingga 15 modul; Growth dan Pro unlimited.
- * - tutor_payroll: Khusus paket Pro.
  */
 export function isFeatureAllowedByPlan(
   plan: {
@@ -125,9 +121,6 @@ export function isFeatureAllowedByPlan(
     case "learning_materials":
       // Seluruh paket diizinkan; Starter dibatasi kuota 15 modul di level action
       return true;
-    case "tutor_payroll":
-      // Khusus paket Pro
-      return planName === "pro";
     default:
       return false;
   }

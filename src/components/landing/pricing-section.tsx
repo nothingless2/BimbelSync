@@ -54,7 +54,7 @@ const DEFAULT_PLANS: Plan[] = [
     allows_installment: true,
     allows_automated_email: true,
     allows_qr_attendance: true,
-    allows_erapor: true,
+    allows_erapor: false,
     allows_audit_trail: false,
     discount_6_months: 10,
     discount_12_months: 17,
@@ -144,6 +144,7 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
       max_staff: p.max_staff ?? (isPro ? 25 : p.max_staff),
       max_rooms: p.max_rooms ?? (isPro ? 15 : isStarter ? 3 : p.max_rooms),
       allows_installment: isGrowth || isPro ? true : p.allows_installment,
+      allows_erapor: isPro ? true : false,
       additional_features: sanitizedAdditional,
     };
   });
@@ -268,17 +269,18 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
 
                 const growthAdditions: string[] = [
                   "Presensi Absensi QR Dinamis di Kelas",
-                  "E-Rapor & Evaluasi Belajar Siswa",
-                  "Email & Pengingat Tagihan Otomatis",
+                  "Email & Notifikasi Tagihan Otomatis",
+                  "Manajemen Cicilan Tagihan (Maks. 3 Termin)",
                   "Materi Belajar hingga 50 Modul",
-                  "Cicilan Tagihan (Maks. 3 Termin)",
+                  "Kwitansi Digital & Pengingat SPP",
                 ];
 
                 const proAdditions: string[] = [
-                  "Kalkulator Honor & Gaji Tutor (Payroll)",
+                  "Sistem E-Rapor & Evaluasi Belajar Siswa",
+                  "Broadcast Pengumuman Masal via Email",
+                  "Audit Trail Keamanan & Multi-Akses",
                   "Materi Belajar Bebas (Unlimited Modul)",
                   "Cicilan Tagihan Bebas (Unlimited Termin)",
-                  "Audit Trail Keamanan & Multi-Akses",
                   "Prioritas Dukungan Teknis 24/7",
                 ];
 
@@ -443,12 +445,23 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
                   ))}
                 </tr>
                 <tr className="border-b border-slate-100">
-                  <td className="py-3 px-2 md:py-5 md:px-8">Email Tagihan Otomatis</td>
+                  <td className="py-3 px-2 md:py-5 md:px-8">Email Tagihan & Kwitansi Otomatis</td>
                   {displayPlans.map((p) => (
                     <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
                       {p.allows_automated_email ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-slate-300 mx-auto" />}
                     </td>
                   ))}
+                </tr>
+                <tr className="border-b border-slate-100">
+                  <td className="py-3 px-2 md:py-5 md:px-8">Broadcast Pengumuman Masal Email</td>
+                  {displayPlans.map((p) => {
+                    const isPro = p.name.trim().toLowerCase() === "pro";
+                    return (
+                      <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
+                        {isPro ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-slate-300 mx-auto" />}
+                      </td>
+                    );
+                  })}
                 </tr>
                 <tr className="border-b border-slate-100">
                   <td className="py-3 px-2 md:py-5 md:px-8">E-Rapor & Evaluasi Belajar</td>
@@ -488,7 +501,15 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
                   })}
                 </tr>
                 <tr className="border-b border-slate-100">
-                  <td className="py-3 px-2 md:py-5 md:px-8">Kalkulator Honor & Gaji Tutor</td>
+                  <td className="py-3 px-2 md:py-5 md:px-8">Audit Trail Keamanan Data</td>
+                  {displayPlans.map((p) => (
+                    <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
+                      {p.allows_audit_trail ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-slate-300 mx-auto" />}
+                    </td>
+                  ))}
+                </tr>
+                <tr>
+                  <td className="py-3 px-2 md:py-5 md:px-8">Prioritas Dukungan Teknis 24/7</td>
                   {displayPlans.map((p) => {
                     const isPro = p.name.trim().toLowerCase() === "pro";
                     return (
@@ -497,14 +518,6 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
                       </td>
                     );
                   })}
-                </tr>
-                <tr>
-                  <td className="py-3 px-2 md:py-5 md:px-8">Audit Trail Keamanan Data</td>
-                  {displayPlans.map((p) => (
-                    <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
-                      {p.allows_audit_trail ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-slate-300 mx-auto" />}
-                    </td>
-                  ))}
                 </tr>
               </tbody>
             </table>

@@ -201,8 +201,10 @@ export async function broadcastAnnouncementEmailAction({
     return { error: "Akademi tidak ditemukan." };
   }
 
-  if (!isFeatureAllowedByPlan(academy.plan, "automated_email")) {
-    return { error: "Fitur email pengumuman hanya tersedia pada paket Growth dan Pro." };
+  const planName = (academy.plan?.name || "").trim().toLowerCase();
+  const isPro = planName === "pro" || !!academy.plan?.allows_audit_trail;
+  if (!isPro) {
+    return { error: "Fitur broadcast pengumuman massal via email hanya tersedia pada paket Pro." };
   }
 
   if (!academy.is_smtp_active || !academy.smtp_host || !academy.smtp_user || !academy.smtp_pass) {

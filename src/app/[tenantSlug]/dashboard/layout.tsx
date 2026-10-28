@@ -87,9 +87,9 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 font-sans">
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 font-sans print:h-auto print:bg-white">
       {/* Sidebar Desktop */}
-      <aside className="hidden md:flex w-64 flex-col h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-20 transition-colors">
+      <aside className="hidden md:flex w-64 flex-col h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-20 transition-colors print:hidden">
         <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-800 transition-colors">
           <div className="flex items-center gap-3">
             <Image src="/logo.png" alt="BimbelSync Logo" width={28} height={28} className="object-contain rounded-md" />
@@ -107,9 +107,9 @@ export default async function DashboardLayout({
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative print:overflow-visible print:h-auto">
         {/* Header */}
-        <header className="h-16 border-b border-slate-200 dark:border-slate-800/60 flex items-center justify-between px-4 md:px-8 bg-white dark:bg-slate-900 z-10 sticky top-0 transition-colors">
+        <header className="h-16 border-b border-slate-200 dark:border-slate-800/60 flex items-center justify-between px-4 md:px-8 bg-white dark:bg-slate-900 z-10 sticky top-0 transition-colors print:hidden">
           <div className="flex items-center gap-2 text-sm">
             <MobileSidebar 
               tenantSlug={tenantSlug} 
@@ -133,19 +133,21 @@ export default async function DashboardLayout({
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 text-slate-900 dark:text-slate-100 transition-colors">
-          <div className="max-w-7xl mx-auto">
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 text-slate-900 dark:text-slate-100 transition-colors print:overflow-visible print:p-0 print:h-auto">
+          <div className="max-w-7xl mx-auto print:max-w-none print:w-full print:m-0 print:p-0">
             {/* Banner Tagihan Tertunda */}
             {dbUser?.role !== 'TUTOR' && (
-              <BillingBannerWrapper 
-                status={sub.status} 
-                dueDate={unpaidInvoices[0]?.due_date || sub.dueDate} 
-                hasUnpaid={hasUnpaid} 
-                totalDebt={totalDebt} 
-                bankName={bankInfo.bankName}
-                bankAccount={bankInfo.bankAccount}
-                tenantSlug={tenantSlug}
-              />
+              <div className="print:hidden">
+                <BillingBannerWrapper 
+                  status={sub.status} 
+                  dueDate={unpaidInvoices[0]?.due_date || sub.dueDate} 
+                  hasUnpaid={hasUnpaid} 
+                  totalDebt={totalDebt} 
+                  bankName={bankInfo.bankName}
+                  bankAccount={bankInfo.bankAccount}
+                  tenantSlug={tenantSlug}
+                />
+              </div>
             )}
 
             {children}

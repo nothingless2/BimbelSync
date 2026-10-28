@@ -30,6 +30,13 @@ export default async function InvoiceDetailPage({
       academy_id: session.academy_id
     },
     include: {
+      academy: {
+        select: {
+          name: true,
+          bank_name: true,
+          bank_account: true,
+        }
+      },
       student: true,
       items: true,
       installments: {
