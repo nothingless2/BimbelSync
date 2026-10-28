@@ -33,7 +33,10 @@ export default async function InvoiceDetailPage({
       student: true,
       items: true,
       installments: {
-        orderBy: { installment_number: 'asc' }
+        orderBy: { installment_number: 'asc' },
+        include: {
+          verified_by: true
+        }
       },
       verified_by: true
     }
@@ -43,16 +46,29 @@ export default async function InvoiceDetailPage({
     redirect(`/${tenantSlug}/dashboard/finance`);
   }
 
-  // Cek fitur cicilan menggunakan sentralisasi subscription helper
-  const { checkFeatureAccess } = await import("@/lib/subscription");
+  // Cek fitur cicilan dan batasan termin menggunakan sentralisasi subscription helper
+  const { checkFeatureAccess, getAcademySubscription, getMaxInstallmentTerms } = await import("@/lib/subscription");
   const installmentAccess = await checkFeatureAccess(session.academy_id, "installment");
   const canSplitInstallments = installmentAccess.allowed;
+
+  const sub = await getAcademySubscription(session.academy_id);
+  const maxTerms = sub ? getMaxInstallmentTerms(sub.planName) : null;
+
+  const { getTenantSmtpConfig } = await import("@/lib/tenant-mailer");
+  const smtpData = await getTenantSmtpConfig(session.academy_id);
+  const emailInfo = {
+    allowed: !('error' in smtpData) && smtpData.isAllowed,
+    configured: !('error' in smtpData) && smtpData.isConfigured,
+    active: !('error' in smtpData) && smtpData.isActive,
+  };
 
   return (
     <FinanceDetailClient 
       invoice={invoice} 
       tenantSlug={tenantSlug} 
       canSplitInstallments={canSplitInstallments} 
+      maxTerms={maxTerms}
+      emailInfo={emailInfo}
     />
   );
 }

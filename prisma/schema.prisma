@@ -83,6 +83,16 @@ model Academy {
   bank_account                 String?
   deleted_at                   DateTime?
 
+  // Custom SMTP Configuration (BYO SMTP - Growth & Pro)
+  smtp_host                    String?
+  smtp_port                    Int?      @default(587)
+  smtp_user                    String?
+  smtp_pass                    String?
+  smtp_from_name               String?
+  smtp_from_email              String?
+  smtp_secure                  Boolean   @default(false)
+  is_smtp_active               Boolean   @default(false)
+
   plan              Plan              @relation(fields: [plan_id], references: [id])
   pending_plan      Plan?             @relation("PendingPlan", fields: [pending_plan_id], references: [id])
   staff             Staff[]

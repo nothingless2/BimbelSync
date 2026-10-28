@@ -2,9 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, UserCog, Calendar, CreditCard, Box, BookOpen, HelpCircle, LogOut, FileText, Library, BarChart } from "lucide-react";
+import { LayoutDashboard, Users, UserCog, Calendar, CreditCard, Box, BookOpen, HelpCircle, LogOut, FileText, Library, BarChart, Mail } from "lucide-react";
 
-export function TenantNav({ tenantSlug, userRole }: { tenantSlug: string, userRole?: string }) {
+export function TenantNav({ 
+  tenantSlug, 
+  userRole, 
+  allowsAutomatedEmail = false 
+}: { 
+  tenantSlug: string; 
+  userRole?: string; 
+  allowsAutomatedEmail?: boolean; 
+}) {
   const pathname = usePathname();
 
   const isRouteActive = (route: string) => {
@@ -109,6 +117,14 @@ export function TenantNav({ tenantSlug, userRole }: { tenantSlug: string, userRo
                 System
               </p>
             </div>
+            {allowsAutomatedEmail && (
+              <NavItem 
+                href={`/${tenantSlug}/dashboard/settings/email`} 
+                icon={<Mail size={18} />} 
+                label="Email & SMTP" 
+                active={isRouteActive(`/${tenantSlug}/dashboard/settings/email`)} 
+              />
+            )}
             <NavItem 
               href={`/${tenantSlug}/dashboard/audit-logs`} 
               icon={<FileText size={18} />} 

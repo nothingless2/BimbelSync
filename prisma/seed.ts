@@ -13,7 +13,7 @@ async function main() {
       price: 99000,
       max_students: 50,
       max_staff: 3,
-      max_rooms: 2,
+      max_rooms: 3,
       allows_installment: false,
       allows_automated_email: false,
       allows_qr_attendance: false,
@@ -21,8 +21,9 @@ async function main() {
       allows_audit_trail: false,
       additional_features: [
         "Jadwal Kelas & Kalender",
-        "Portal Siswa & Wali Murid",
-        "Cetak Rekap Laporan PDF"
+        "Portal Siswa",
+        "Cetak Rekap Laporan PDF",
+        "Materi Belajar (Maks. 15 Modul)"
       ]
     },
     create: {
@@ -31,7 +32,7 @@ async function main() {
       price: 99000,
       max_students: 50,
       max_staff: 3,
-      max_rooms: 2,
+      max_rooms: 3,
       allows_installment: false,
       allows_automated_email: false,
       allows_qr_attendance: false,
@@ -39,8 +40,9 @@ async function main() {
       allows_audit_trail: false,
       additional_features: [
         "Jadwal Kelas & Kalender",
-        "Portal Siswa & Wali Murid",
-        "Cetak Rekap Laporan PDF"
+        "Portal Siswa",
+        "Cetak Rekap Laporan PDF",
+        "Materi Belajar (Maks. 15 Modul)"
       ]
     },
   });
@@ -52,15 +54,16 @@ async function main() {
       max_students: 200,
       max_staff: 10,
       max_rooms: 6,
-      allows_installment: false,
+      allows_installment: true,
       allows_automated_email: true,
       allows_qr_attendance: true,
       allows_erapor: true,
       allows_audit_trail: false,
       additional_features: [
         "Jadwal Kelas & Kalender",
-        "Portal Siswa & Wali Murid",
-        "Cetak Rekap Laporan PDF"
+        "Portal Siswa",
+        "Cetak Rekap Laporan PDF",
+        "Materi Belajar (Maks. 50 Modul)"
       ]
     },
     create: {
@@ -70,15 +73,16 @@ async function main() {
       max_students: 200,
       max_staff: 10,
       max_rooms: 6,
-      allows_installment: false,
+      allows_installment: true,
       allows_automated_email: true,
       allows_qr_attendance: true,
       allows_erapor: true,
       allows_audit_trail: false,
       additional_features: [
         "Jadwal Kelas & Kalender",
-        "Portal Siswa & Wali Murid",
-        "Cetak Rekap Laporan PDF"
+        "Portal Siswa",
+        "Cetak Rekap Laporan PDF",
+        "Materi Belajar (Maks. 50 Modul)"
       ]
     },
   });
@@ -97,8 +101,9 @@ async function main() {
       allows_audit_trail: true,
       additional_features: [
         "Jadwal Kelas & Kalender",
-        "Portal Siswa & Wali Murid",
+        "Portal Siswa",
         "Cetak Rekap Laporan PDF",
+        "Materi Belajar (Unlimited Modul)",
         "Prioritas Dukungan Teknis"
       ]
     },
@@ -116,11 +121,58 @@ async function main() {
       allows_audit_trail: true,
       additional_features: [
         "Jadwal Kelas & Kalender",
-        "Portal Siswa & Wali Murid",
+        "Portal Siswa",
         "Cetak Rekap Laporan PDF",
+        "Materi Belajar (Unlimited Modul)",
         "Prioritas Dukungan Teknis"
       ]
     },
+  });
+
+  // Sinkronkan seluruh row Plan yang ada di database agar konsisten
+  await prisma.plan.updateMany({
+    where: { name: { equals: 'Starter', mode: 'insensitive' } },
+    data: {
+      max_rooms: 3,
+      additional_features: [
+        "Jadwal Kelas & Kalender",
+        "Portal Siswa",
+        "Cetak Rekap Laporan PDF",
+        "Materi Belajar (Maks. 15 Modul)"
+      ]
+    }
+  });
+
+  await prisma.plan.updateMany({
+    where: { name: { equals: 'Growth', mode: 'insensitive' } },
+    data: {
+      max_rooms: 6,
+      allows_installment: true,
+      additional_features: [
+        "Jadwal Kelas & Kalender",
+        "Portal Siswa",
+        "Cetak Rekap Laporan PDF",
+        "Materi Belajar (Maks. 50 Modul)"
+      ]
+    }
+  });
+
+  await prisma.plan.updateMany({
+    where: { name: { equals: 'Pro', mode: 'insensitive' } },
+    data: {
+      max_students: 500,
+      max_staff: 25,
+      max_rooms: 15,
+      allows_installment: true,
+      allows_audit_trail: true,
+      additional_features: [
+        "Jadwal Kelas & Kalender",
+        "Portal Siswa",
+        "Cetak Rekap Laporan PDF",
+        "Materi Belajar (Unlimited Modul)",
+        "Prioritas Dukungan Teknis"
+      ]
+    }
   });
 
   // 2. Buat Akademi (Bimbel) - gunakan Growth Plan

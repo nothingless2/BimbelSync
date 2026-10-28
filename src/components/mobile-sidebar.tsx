@@ -7,7 +7,15 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { createPortal } from "react-dom";
 
-export function MobileSidebar({ tenantSlug, userRole }: { tenantSlug: string, userRole?: string }) {
+export function MobileSidebar({ 
+  tenantSlug, 
+  userRole,
+  allowsAutomatedEmail,
+}: { 
+  tenantSlug: string; 
+  userRole?: string;
+  allowsAutomatedEmail?: boolean;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
@@ -77,7 +85,7 @@ export function MobileSidebar({ tenantSlug, userRole }: { tenantSlug: string, us
             </div>
 
             {/* Navigation Content */}
-            <TenantNav tenantSlug={tenantSlug} userRole={userRole} />
+            <TenantNav tenantSlug={tenantSlug} userRole={userRole} allowsAutomatedEmail={allowsAutomatedEmail} />
           </div>
         </>,
         document.body

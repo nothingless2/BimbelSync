@@ -11,7 +11,8 @@ export type FeatureKey =
   | "installment"
   | "audit_trail"
   | "automated_email"
-  | "learning_materials";
+  | "learning_materials"
+  | "tutor_payroll";
 
 export interface EffectiveSubscription {
   academyId: string;
@@ -36,6 +37,32 @@ export interface FeatureAccessResult {
 }
 
 /**
+ * Batas maksimal termin cicilan berdasarkan paket:
+ * - Starter: 0 (tidak mendukung cicilan)
+ * - Growth: 3 (maksimal 3 termin)
+ * - Pro: null (tanpa batas termin / unlimited)
+ */
+export function getMaxInstallmentTerms(planName: string): number | null {
+  const name = planName.trim().toLowerCase();
+  if (name === "starter") return 0;
+  if (name === "growth") return 3;
+  return null; // Pro unlimited
+}
+
+/**
+ * Batas maksimal materi belajar berdasarkan paket:
+ * - Starter: 15 modul (kuota dasar)
+ * - Growth: 50 modul (kuota menengah)
+ * - Pro: null (tanpa batas / unlimited)
+ */
+export function getMaxLearningMaterials(planName: string): number | null {
+  const name = planName.trim().toLowerCase();
+  if (name === "starter") return 15;
+  if (name === "growth") return 50;
+  return null; // Pro unlimited
+}
+
+/**
  * Pesan human-readable untuk setiap fitur saat terkunci.
  */
 export function getFeatureLockMessage(feature: FeatureKey, planName: string): string {
@@ -45,13 +72,15 @@ export function getFeatureLockMessage(feature: FeatureKey, planName: string): st
     case "erapor":
       return `Fitur E-Rapor & Evaluasi Siswa hanya tersedia pada paket Growth dan Pro. Paket Anda saat ini (${planName}) belum mendukung e-rapor.`;
     case "installment":
-      return `Fitur Pemecahan Tagihan Cicilan hanya tersedia pada paket Pro. Paket Anda saat ini (${planName}) hanya mendukung pembayaran lunas penuh.`;
+      return `Fitur Pemecahan Tagihan Cicilan hanya tersedia pada paket Growth (maks. 3 termin) dan Pro. Paket Anda saat ini (${planName}) hanya mendukung pembayaran lunas penuh.`;
     case "audit_trail":
       return `Fitur Audit Trail Keamanan hanya tersedia pada paket Pro. Paket Anda saat ini (${planName}) belum mencakup riwayat log audit.`;
     case "automated_email":
       return `Fitur Pengingat Email Otomatis tersedia pada paket Growth dan Pro. Paket Anda saat ini (${planName}) belum mendukung pengiriman email otomatis.`;
     case "learning_materials":
-      return `Fitur Pengelolaan Materi Pembelajaran tersedia mulai dari paket Growth. Paket Anda saat ini (${planName}) belum mendukung repositori materi.`;
+      return `Fitur Pengelolaan Materi Pembelajaran tersedia untuk semua paket (maksimal 15 modul di Starter, 50 modul di Growth, unlimited di Pro).`;
+    case "tutor_payroll":
+      return `Fitur Kalkulator Honor & Slip Gaji Tutor hanya tersedia pada paket Pro. Paket Anda saat ini (${planName}) belum mendukung fitur ini.`;
     default:
       return `Fitur ini tidak tersedia pada paket ${planName}. Silakan upgrade paket Anda.`;
   }
@@ -62,10 +91,11 @@ export function getFeatureLockMessage(feature: FeatureKey, planName: string): st
  * Menggunakan field aktual yang tersedia pada model Plan di schema.prisma:
  * - allows_qr_attendance
  * - allows_erapor
- * - allows_installment
+ * - allows_installment: Starter tidak boleh; Growth (maks. 3 termin) dan Pro (unlimited) boleh.
  * - allows_audit_trail
  * - allows_automated_email
- * - learning_materials: Starter tidak termasuk; Growth dan Pro termasuk.
+ * - learning_materials: Starter didukung hingga 15 modul; Growth dan Pro unlimited.
+ * - tutor_payroll: Khusus paket Pro.
  */
 export function isFeatureAllowedByPlan(
   plan: {
@@ -79,20 +109,25 @@ export function isFeatureAllowedByPlan(
   },
   feature: FeatureKey
 ): boolean {
+  const planName = (plan.name || "").trim().toLowerCase();
   switch (feature) {
     case "qr_attendance":
       return !!plan.allows_qr_attendance;
     case "erapor":
       return !!plan.allows_erapor;
     case "installment":
-      return !!plan.allows_installment;
+      // Growth dan Pro mengizinkan fitur cicilan (Starter tetap terkunci)
+      return !!plan.allows_installment || planName === "growth" || planName === "pro";
     case "audit_trail":
       return !!plan.allows_audit_trail;
     case "automated_email":
       return !!plan.allows_automated_email;
     case "learning_materials":
-      // Starter tidak mengizinkan materi belajar; Growth dan Pro mengizinkan.
-      return plan.name.trim().toLowerCase() !== "starter";
+      // Seluruh paket diizinkan; Starter dibatasi kuota 15 modul di level action
+      return true;
+    case "tutor_payroll":
+      // Khusus paket Pro
+      return planName === "pro";
     default:
       return false;
   }
@@ -274,7 +309,7 @@ export interface UsageLimitContract {
 
 /**
  * Definisi batas kuota kanonikal untuk paket standar BimbelSync:
- * - Starter: 50 siswa, 3 staf, 2 ruangan, 1 cabang
+ * - Starter: 50 siswa, 3 staf, 3 ruangan, 1 cabang
  * - Growth: 200 siswa, 10 staf, 6 ruangan, 1 cabang
  * - Pro: 500 siswa, 25 staf, 15 ruangan, 1 cabang
  */
@@ -285,7 +320,7 @@ export const CANONICAL_PLAN_LIMITS: Record<
   starter: {
     students: 50,
     staff: 3,
-    rooms: 2,
+    rooms: 3,
     branches: 1,
   },
   growth: {
@@ -304,7 +339,7 @@ export const CANONICAL_PLAN_LIMITS: Record<
 
 /**
  * Mengambil batas maksimal resource berdasarkan konfigurasi paket aktual dan aturan kuota standar BimbelSync:
- * - Starter: 50 siswa, 3 staf, 2 ruangan, 1 cabang
+ * - Starter: 50 siswa, 3 staf, 3 ruangan, 1 cabang
  * - Growth: 200 siswa, 10 staf, 6 ruangan, 1 cabang
  * - Pro: 500 siswa, 25 staf, 15 ruangan, 1 cabang
  *

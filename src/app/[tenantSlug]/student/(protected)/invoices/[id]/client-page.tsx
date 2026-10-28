@@ -107,7 +107,13 @@ export default function StudentInvoiceDetailClient({
                     <p className="font-bold text-sm text-slate-800 dark:text-slate-200 mb-1">Termin {inst.installment_number}</p>
                     <div className="flex items-center gap-1.5 text-xs text-slate-500">
                       <Calendar size={12} />
-                      {format(new Date(inst.due_date), 'd MMM yyyy', { locale: localeId })}
+                      {inst.status === 'PAID' && inst.paid_at ? (
+                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                          Lunas {format(new Date(inst.paid_at), 'd MMM yyyy', { locale: localeId })}{inst.payment_method ? ` (${inst.payment_method})` : ''}
+                        </span>
+                      ) : (
+                        <span>Jatuh tempo: {format(new Date(inst.due_date), 'd MMM yyyy', { locale: localeId })}</span>
+                      )}
                     </div>
                   </div>
                   <div className="text-right">

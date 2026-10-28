@@ -29,7 +29,7 @@ const DEFAULT_PLANS: Plan[] = [
     price: 99000,
     max_students: 50,
     max_staff: 3,
-    max_rooms: 2,
+    max_rooms: 3,
     allows_installment: false,
     allows_automated_email: false,
     allows_qr_attendance: false,
@@ -39,8 +39,9 @@ const DEFAULT_PLANS: Plan[] = [
     discount_12_months: 17,
     additional_features: [
       "Jadwal Kelas & Kalender",
-      "Portal Siswa & Orang Tua",
+      "Portal Siswa",
       "Cetak Rekap Laporan PDF",
+      "Materi Belajar (Maks. 15 Modul)",
     ],
   },
   {
@@ -50,7 +51,7 @@ const DEFAULT_PLANS: Plan[] = [
     max_students: 200,
     max_staff: 10,
     max_rooms: 6,
-    allows_installment: false,
+    allows_installment: true,
     allows_automated_email: true,
     allows_qr_attendance: true,
     allows_erapor: true,
@@ -59,8 +60,9 @@ const DEFAULT_PLANS: Plan[] = [
     discount_12_months: 17,
     additional_features: [
       "Jadwal Kelas & Kalender",
-      "Portal Siswa & Orang Tua",
+      "Portal Siswa",
       "Cetak Rekap Laporan PDF",
+      "Materi Belajar (Maks. 50 Modul)",
     ],
   },
   {
@@ -79,8 +81,9 @@ const DEFAULT_PLANS: Plan[] = [
     discount_12_months: 17,
     additional_features: [
       "Jadwal Kelas & Kalender",
-      "Portal Siswa & Orang Tua",
+      "Portal Siswa",
       "Cetak Rekap Laporan PDF",
+      "Materi Belajar (Unlimited Modul)",
       "Prioritas Dukungan Teknis",
     ],
   },
@@ -91,15 +94,57 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
   
   const rawPlans = plans && plans.length > 0 ? plans : DEFAULT_PLANS;
   
-  // Sanitasi kontrak kuota Pro: Jika database live belum dimutasi (Gate 3), 
-  // tampilkan nilai kanonikal kontrak resmi: 500 siswa, 25 staff, 15 ruangan.
+  // Sanitasi kontrak kuota dan fitur kanonikal (mencegah duplikasi visual)
   const displayPlans = rawPlans.map((p) => {
-    const isPro = p.name.trim().toLowerCase() === "pro";
+    const name = p.name.trim().toLowerCase();
+    const isPro = name === "pro";
+    const isGrowth = name === "growth";
+    const isStarter = name === "starter";
+
+    const defaultFeatures = isStarter
+      ? [
+          "Jadwal Kelas & Kalender",
+          "Portal Siswa",
+          "Cetak Rekap Laporan PDF",
+          "Materi Belajar (Maks. 15 Modul)",
+        ]
+      : isGrowth
+      ? [
+          "Jadwal Kelas & Kalender",
+          "Portal Siswa",
+          "Cetak Rekap Laporan PDF",
+          "Materi Belajar (Maks. 50 Modul)",
+        ]
+      : [
+          "Jadwal Kelas & Kalender",
+          "Portal Siswa",
+          "Cetak Rekap Laporan PDF",
+          "Materi Belajar (Unlimited Modul)",
+          "Prioritas Dukungan Teknis",
+        ];
+
+    // Filter fitur dari additional_features yang bentrok/duplikat dengan toggleableFeatures
+    const rawList = p.additional_features && p.additional_features.length > 0 ? p.additional_features : defaultFeatures;
+    const sanitizedAdditional = rawList.filter((feat) => {
+      const lower = feat.toLowerCase();
+      return (
+        !lower.includes("absensi qr") &&
+        !lower.includes("e-rapor") &&
+        !lower.includes("cicilan") &&
+        !lower.includes("audit trail") &&
+        !lower.includes("email") &&
+        !lower.includes("honor") &&
+        !lower.includes("payroll")
+      );
+    });
+
     return {
       ...p,
       max_students: p.max_students ?? (isPro ? 500 : p.max_students),
       max_staff: p.max_staff ?? (isPro ? 25 : p.max_staff),
-      max_rooms: p.max_rooms ?? (isPro ? 15 : p.max_rooms),
+      max_rooms: p.max_rooms ?? (isPro ? 15 : isStarter ? 3 : p.max_rooms),
+      allows_installment: isGrowth || isPro ? true : p.allows_installment,
+      additional_features: sanitizedAdditional,
     };
   });
   
@@ -208,75 +253,84 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
               </div>
               
               {(() => {
-                const toggleableFeatures = [
-                  {
-                    name: "Email & Pengingat Otomatis",
-                    enabled: plan.allows_automated_email,
-                    bold: isPopular && plan.allows_automated_email,
-                  },
-                  {
-                    name: "Absensi QR Dinamis",
-                    enabled: plan.allows_qr_attendance,
-                    bold: isPopular && plan.allows_qr_attendance,
-                  },
-                  {
-                    name: "E-Rapor & Evaluasi Siswa",
-                    enabled: plan.allows_erapor,
-                    bold: false,
-                  },
-                  {
-                    name: "Sistem Tagihan Cicilan",
-                    enabled: plan.allows_installment,
-                    bold: isPro && plan.allows_installment,
-                  },
-                  {
-                    name: "Audit Trail Keamanan",
-                    enabled: plan.allows_audit_trail,
-                    bold: isPro && plan.allows_audit_trail,
-                  },
+                const name = plan.name.trim().toLowerCase();
+                const isStarter = name === "starter";
+                const isGrowth = name === "growth";
+                const isPro = name === "pro";
+
+                const starterFeatures: string[] = [
+                  "Jadwal Kelas & Kalender Interaktif",
+                  "Portal Siswa",
+                  "Cetak Rekap Laporan PDF",
+                  "Materi Belajar (Maks. 15 Modul)",
+                  "Presensi Manual & Pembayaran Lunas",
                 ];
 
-                const activeToggles = toggleableFeatures.filter((f) => f.enabled);
-                const inactiveToggles = toggleableFeatures.filter((f) => !f.enabled);
+                const growthAdditions: string[] = [
+                  "Presensi Absensi QR Dinamis di Kelas",
+                  "E-Rapor & Evaluasi Belajar Siswa",
+                  "Email & Pengingat Tagihan Otomatis",
+                  "Materi Belajar hingga 50 Modul",
+                  "Cicilan Tagihan (Maks. 3 Termin)",
+                ];
+
+                const proAdditions: string[] = [
+                  "Kalkulator Honor & Gaji Tutor (Payroll)",
+                  "Materi Belajar Bebas (Unlimited Modul)",
+                  "Cicilan Tagihan Bebas (Unlimited Termin)",
+                  "Audit Trail Keamanan & Multi-Akses",
+                  "Prioritas Dukungan Teknis 24/7",
+                ];
+
+                const activeList: string[] = isStarter ? starterFeatures : isGrowth ? growthAdditions : proAdditions;
 
                 return (
-                  <ul className="space-y-4 mb-8 flex-1">
-                    {/* 1. Kapasitas & Limit */}
-                    <li className="flex items-center gap-3 text-sm text-slate-700 font-medium">
-                      <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/> 
-                      Maks {plan.max_students ?? (isPro ? 500 : "Unlimited")} Siswa
-                    </li>
-                    <li className="flex items-center gap-3 text-sm text-slate-700 font-medium pb-2 border-b border-slate-100">
-                      <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/> 
-                      Maks {plan.max_staff ?? (isPro ? 25 : "Unlimited")} Staff & {plan.max_rooms ?? (isPro ? 15 : "Unlimited")} Ruang
-                    </li>
+                  <div className="flex-1 flex flex-col justify-between mb-8">
+                    <ul className="space-y-3.5">
+                      {/* 1. Banner Hirarki Fitur di Paling Atas */}
+                      {isStarter && (
+                        <li className="pb-1">
+                          <div className="w-full py-1.5 px-3 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 text-xs font-semibold flex items-center">
+                            <span>Fitur esensial operasional bimbel:</span>
+                          </div>
+                        </li>
+                      )}
 
-                    {/* 2. Fitur Dasar & Tambahan yang Aktif */}
-                    {plan.additional_features && plan.additional_features.map((feat, i) => (
-                      <li key={`add-${i}`} className="flex items-center gap-3 text-sm text-slate-700">
-                        <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/>
-                        <span>{feat}</span>
-                      </li>
-                    ))}
+                      {isGrowth && (
+                        <li className="pb-1">
+                          <div className="w-full py-1.5 px-3 rounded-lg bg-blue-50 border border-blue-100 text-blue-700 text-xs font-semibold flex items-center">
+                            <span>Termasuk semua fitur Starter, ditambah:</span>
+                          </div>
+                        </li>
+                      )}
 
-                    {/* 3. Fitur Utama yang Aktif (Centang Hijau/Biru) */}
-                    {activeToggles.map((feat, i) => (
-                      <li key={`act-${i}`} className="flex items-center gap-3 text-sm text-slate-700">
-                        <CheckCircle2 className={`w-5 h-5 ${isPopular ? "text-blue-600" : "text-green-500"}`}/>
-                        <span className={feat.bold ? "font-bold text-slate-900" : ""}>
-                          {feat.name}
-                        </span>
-                      </li>
-                    ))}
+                      {isPro && (
+                        <li className="pb-1">
+                          <div className="w-full py-1.5 px-3 rounded-lg bg-slate-100 border border-slate-200 text-slate-800 text-xs font-semibold flex items-center">
+                            <span>Termasuk semua fitur Growth, ditambah:</span>
+                          </div>
+                        </li>
+                      )}
 
-                    {/* 4. Fitur yang Tidak Tersedia (X) Ditaruh di Paling Bawah */}
-                    {inactiveToggles.map((feat, i) => (
-                      <li key={`inact-${i}`} className="flex items-center gap-3 text-sm text-slate-400 opacity-60">
-                        <X className="w-5 h-5 text-slate-300 shrink-0"/>
-                        <span>{feat.name}</span>
+                      {/* 2. Kapasitas & Limit */}
+                      <li className="flex items-center gap-3 text-sm text-slate-700 font-medium pt-1">
+                        <CheckCircle2 className={`w-5 h-5 shrink-0 ${isPopular ? "text-blue-600" : "text-emerald-500"}`}/> 
+                        <span>Maks. <strong>{plan.max_students ?? (isPro ? 500 : isGrowth ? 200 : 50)}</strong> Siswa</span>
                       </li>
-                    ))}
-                  </ul>
+                      <li className="flex items-center gap-3 text-sm text-slate-700 font-medium pb-3 border-b border-slate-100">
+                        <CheckCircle2 className={`w-5 h-5 shrink-0 ${isPopular ? "text-blue-600" : "text-emerald-500"}`}/> 
+                        <span>Maks. <strong>{plan.max_staff ?? (isPro ? 25 : isGrowth ? 10 : 3)}</strong> Staff & <strong>{plan.max_rooms ?? (isPro ? 15 : isGrowth ? 6 : 3)}</strong> Ruang</span>
+                      </li>
+
+                      {/* 3. Daftar Fitur Unggulan */}
+                      {activeList.map((text, i) => (
+                        <li key={i} className="flex items-start gap-3 text-sm text-slate-700 leading-snug">
+                          <CheckCircle2 className={`w-5 h-5 shrink-0 mt-0.5 ${isPopular ? "text-blue-600" : "text-emerald-500"}`}/>
+                          <span>{text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 );
               })()}
               <div className="space-y-3">
@@ -365,7 +419,7 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
                   ))}
                 </tr>
                 <tr className="border-b border-slate-100">
-                  <td className="py-3 px-2 md:py-5 md:px-8">Portal Siswa & Wali Murid</td>
+                  <td className="py-3 px-2 md:py-5 md:px-8">Portal Siswa</td>
                   {displayPlans.map((p) => (
                     <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
                       <Check className="w-5 h-5 text-green-500 mx-auto" />
@@ -405,12 +459,44 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
                   ))}
                 </tr>
                 <tr className="border-b border-slate-100">
-                  <td className="py-3 px-2 md:py-5 md:px-8">Manajemen Cicilan Bertahap (Termin)</td>
-                  {displayPlans.map((p) => (
-                    <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
-                      {p.allows_installment ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-slate-300 mx-auto" />}
-                    </td>
-                  ))}
+                  <td className="py-3 px-2 md:py-5 md:px-8">Materi Pembelajaran Digital</td>
+                  {displayPlans.map((p) => {
+                    const name = p.name.trim().toLowerCase();
+                    return (
+                      <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center font-medium text-xs md:text-sm text-slate-700">
+                        {name === "starter" ? "Maks. 15 Modul" : name === "growth" ? "Maks. 50 Modul" : "Unlimited Modul"}
+                      </td>
+                    );
+                  })}
+                </tr>
+                <tr className="border-b border-slate-100">
+                  <td className="py-3 px-2 md:py-5 md:px-8">Manajemen Cicilan Tagihan (Termin)</td>
+                  {displayPlans.map((p) => {
+                    const name = p.name.trim().toLowerCase();
+                    if (name === "starter") {
+                      return (
+                        <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
+                          <X className="w-4 h-4 text-slate-300 mx-auto" />
+                        </td>
+                      );
+                    }
+                    return (
+                      <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center font-medium text-xs md:text-sm text-slate-700">
+                        {name === "growth" ? "Maks. 3 Termin" : "Unlimited"}
+                      </td>
+                    );
+                  })}
+                </tr>
+                <tr className="border-b border-slate-100">
+                  <td className="py-3 px-2 md:py-5 md:px-8">Kalkulator Honor & Gaji Tutor</td>
+                  {displayPlans.map((p) => {
+                    const isPro = p.name.trim().toLowerCase() === "pro";
+                    return (
+                      <td key={p.id} className="py-3 px-2 md:py-5 md:px-8 text-center">
+                        {isPro ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-4 h-4 text-slate-300 mx-auto" />}
+                      </td>
+                    );
+                  })}
                 </tr>
                 <tr>
                   <td className="py-3 px-2 md:py-5 md:px-8">Audit Trail Keamanan Data</td>

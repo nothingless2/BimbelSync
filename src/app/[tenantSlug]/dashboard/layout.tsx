@@ -99,7 +99,11 @@ export default async function DashboardLayout({
           </div>
         </div>
 
-        <TenantNav tenantSlug={tenantSlug} userRole={dbUser?.role} />
+        <TenantNav 
+          tenantSlug={tenantSlug} 
+          userRole={dbUser?.role} 
+          allowsAutomatedEmail={!!sub.plan.allows_automated_email} 
+        />
       </aside>
 
       {/* Main Content */}
@@ -107,7 +111,11 @@ export default async function DashboardLayout({
         {/* Header */}
         <header className="h-16 border-b border-slate-200 dark:border-slate-800/60 flex items-center justify-between px-4 md:px-8 bg-white dark:bg-slate-900 z-10 sticky top-0 transition-colors">
           <div className="flex items-center gap-2 text-sm">
-            <MobileSidebar tenantSlug={tenantSlug} userRole={dbUser?.role} />
+            <MobileSidebar 
+              tenantSlug={tenantSlug} 
+              userRole={dbUser?.role} 
+              allowsAutomatedEmail={!!sub.plan.allows_automated_email} 
+            />
             <span className="text-xs md:text-sm font-medium text-slate-500">
               {dbUser?.role === 'TUTOR' ? 'Tutor Portal' : 'Admin Portal'}
             </span>

@@ -65,7 +65,7 @@ export function AddStudentModal({ tenantSlug, programs }: { tenantSlug: string, 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label htmlFor="full_name" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                    Nama Lengkap <span className="text-red-500">*</span>
+                    Nama Lengkap
                   </label>
                   <input
                     type="text"

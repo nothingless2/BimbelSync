@@ -24,19 +24,18 @@ export function CustomCursor() {
   useEffect(() => {
     // Only show on large desktop screens with a pointing device (mouse)
     const checkVisibility = () => {
-      if (window.matchMedia("(min-width: 1024px) and (pointer: fine)").matches) {
-        setIsVisible(true);
-      } else {
+      if (!window.matchMedia("(min-width: 1024px) and (pointer: fine)").matches) {
         setIsVisible(false);
       }
     };
 
-    checkVisibility();
     window.addEventListener("resize", checkVisibility);
 
     const moveCursor = (e: MouseEvent) => {
+      if (!window.matchMedia("(min-width: 1024px) and (pointer: fine)").matches) return;
       cursorX.set(e.clientX);
       cursorY.set(e.clientY);
+      setIsVisible(true);
       
       // Check if hovering over clickable element
       const target = e.target as HTMLElement;
@@ -45,7 +44,11 @@ export function CustomCursor() {
     };
 
     const handleMouseLeave = () => setIsVisible(false);
-    const handleMouseEnter = () => setIsVisible(true);
+    const handleMouseEnter = (e: MouseEvent) => {
+      cursorX.set(e.clientX);
+      cursorY.set(e.clientY);
+      setIsVisible(true);
+    };
 
     window.addEventListener("mousemove", moveCursor);
     document.documentElement.addEventListener("mouseleave", handleMouseLeave);

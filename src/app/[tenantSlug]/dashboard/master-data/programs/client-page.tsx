@@ -7,7 +7,6 @@ import { deleteProgramAction } from "./actions";
 import { EditProgramModal } from "@/components/modals/edit-program-modal";
 import { Program } from "@prisma/client";
 import { Pagination } from "@/components/ui/pagination";
-import { CustomSelect } from "@/components/ui/custom-select";
 import Link from "next/link";
 
 import { AutoSchedulerModal } from "@/components/modals/auto-scheduler-modal";
@@ -27,15 +26,11 @@ export default function ProgramsClientPage({
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState<"ALL" | "REGULER" | "INTENSIF" | "PRIVATE" | "WORKSHOP">("ALL");
 
   // Filtering
-  const filteredPrograms = programs.filter(program => {
-    const matchSearch = program.name.toLowerCase().includes(searchQuery.toLowerCase());
-    if (filterType === "REGULER") return matchSearch && program.duration_months === null;
-    if (filterType === "INTENSIF") return matchSearch && program.duration_months !== null;
-    return matchSearch;
-  });
+  const filteredPrograms = programs.filter(program =>
+    program.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -83,22 +78,6 @@ export default function ProgramsClientPage({
                 setCurrentPage(1);
               }}
               className="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200"
-            />
-          </div>
-          <div className="relative w-full sm:w-auto">
-            <CustomSelect
-              value={filterType}
-              onChange={(value) => {
-                setFilterType(value as any);
-                setCurrentPage(1);
-              }}
-              options={[
-                { value: "ALL", label: "Semua Tipe" },
-                { value: "REGULER", label: "Program Reguler" },
-                { value: "INTENSIF", label: "Paket Intensif" },
-                { value: "PRIVATE", label: "Kelas Privat" },
-                { value: "WORKSHOP", label: "Workshop/Seminar" }
-              ]}
             />
           </div>
         </div>

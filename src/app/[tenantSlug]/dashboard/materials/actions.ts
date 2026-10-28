@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireStaffSession } from "@/lib/session";
+import { assertFeatureAccess, getAcademySubscription, getMaxLearningMaterials } from "@/lib/subscription";
 
 export async function createMaterialAction(data: {
   academyId: string;
@@ -21,14 +22,35 @@ export async function createMaterialAction(data: {
     return { error: "Akses ditolak." };
   }
 
-  // Feature Gating: Pengelolaan materi pembelajaran mulai dari paket Growth
-  const { assertFeatureAccess } = await import("@/lib/subscription");
+  // Feature Gating: Pengelolaan materi pembelajaran
   const featureCheck = await assertFeatureAccess(session.academy_id, "learning_materials");
   if (!featureCheck.allowed) {
     return { error: featureCheck.error };
   }
 
+  // Validasi URL
+  const trimmedUrl = data.url?.trim() || "";
+  if (!/^https?:\/\//i.test(trimmedUrl)) {
+    return { error: "URL harus berupa link valid yang diawali dengan http:// atau https://" };
+  }
+
   try {
+    // Validasi kuota modul belajar (misal Starter: maks 15 modul)
+    const sub = await getAcademySubscription(session.academy_id);
+    if (sub) {
+      const maxMaterials = getMaxLearningMaterials(sub.planName);
+      if (maxMaterials !== null) {
+        const currentCount = await prisma.learningMaterial.count({
+          where: { academy_id: session.academy_id }
+        });
+        if (currentCount >= maxMaterials) {
+          return {
+            error: `Batas kuota materi belajar untuk paket ${sub.planName} (${maxMaterials} modul) telah tercapai. Silakan upgrade ke paket Growth atau Pro untuk mengunggah materi tanpa batas.`
+          };
+        }
+      }
+    }
+
     // Validasi program milik akademi
     const program = await prisma.program.findFirst({
       where: { id: data.programId, academy_id: session.academy_id, deleted_at: null }
@@ -39,15 +61,16 @@ export async function createMaterialAction(data: {
       data: {
         academy_id: session.academy_id,
         program_id: data.programId,
-        title: data.title,
-        description: data.description || null,
+        title: data.title.trim(),
+        description: data.description?.trim() || null,
         material_type: data.materialType,
-        url: data.url,
+        url: trimmedUrl,
         created_by_staff_id: session.id,
       },
     });
 
     revalidatePath(`/${data.tenantSlug}/dashboard/materials`);
+    revalidatePath(`/${data.tenantSlug}/student/materials`);
     return { success: true };
   } catch (error: any) {
     console.error("Failed to create material:", error);
@@ -60,7 +83,6 @@ export async function deleteMaterialAction(id: string, tenantSlug: string) {
   if ('error' in auth) return { error: auth.error };
   const session = auth.session;
 
-  const { assertFeatureAccess } = await import("@/lib/subscription");
   const featureCheck = await assertFeatureAccess(session.academy_id, "learning_materials");
   if (!featureCheck.allowed) {
     return { error: featureCheck.error };
@@ -79,6 +101,7 @@ export async function deleteMaterialAction(id: string, tenantSlug: string) {
     });
 
     revalidatePath(`/${tenantSlug}/dashboard/materials`);
+    revalidatePath(`/${tenantSlug}/student/materials`);
     return { success: true };
   } catch (error: any) {
     return { error: error.message || "Failed to delete learning material" };

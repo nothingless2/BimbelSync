@@ -108,7 +108,7 @@ export function AddProgramModal({ tenantSlug }: { tenantSlug: string }) {
                     id="total_meetings"
                     name="total_meetings"
                     min="1"
-                    placeholder="Kosongkan = Tak Terbatas"
+                    placeholder="Opsional"
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                   />
                 </div>
