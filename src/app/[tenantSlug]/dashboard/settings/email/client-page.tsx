@@ -176,6 +176,8 @@ export default function EmailSettingsClientPage({
   const [fromEmail, setFromEmail] = useState(initialConfig.fromEmail);
   const [secure, setSecure] = useState(initialConfig.secure);
   const [isActive, setIsActive] = useState(initialConfig.isActive);
+  const [savedActive, setSavedActive] = useState(initialConfig.isActive);
+  const [hasPassword, setHasPassword] = useState(initialConfig.hasPassword);
 
   // UI State
   const [showPassword, setShowPassword] = useState(false);
@@ -212,11 +214,17 @@ export default function EmailSettingsClientPage({
   };
 
   // Handle Save
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Validasi Manual Sisi Client
+    // 1. Jalankan validasi HTML5 bawaan browser (otomatis arahkan & fokus ke kolom yang belum diisi)
+    const form = e.currentTarget;
     if (isActive) {
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
       const cleanHost = (host || "").trim();
       const numPort = Number(port);
       const cleanUser = (user || "").trim();
@@ -224,27 +232,32 @@ export default function EmailSettingsClientPage({
 
       if (!cleanHost) {
         toast.error("Host Server SMTP wajib diisi sebelum mengaktifkan layanan.");
+        document.getElementById("smtp_host")?.focus();
         return;
       }
 
       if (!numPort || isNaN(numPort) || numPort < 1 || numPort > 65535) {
         toast.error("Port SMTP tidak valid. Harap masukkan nomor port antara 1 s.d. 65535.");
+        document.getElementById("smtp_port")?.focus();
         return;
       }
 
       if (!cleanUser) {
         toast.error("Username atau email login SMTP wajib diisi.");
+        document.getElementById("smtp_user")?.focus();
         return;
       }
 
-      if (!initialConfig.hasPassword && !cleanPass) {
+      if (!hasPassword && !cleanPass) {
         toast.error("Password atau App Password SMTP wajib diisi.");
+        document.getElementById("smtp_pass")?.focus();
         return;
       }
 
       if (cleanHost.toLowerCase().includes("gmail") && cleanPass) {
         if (cleanPass.length !== 16) {
           toast.error(`App Password Gmail harus tepat 16 karakter tanpa spasi (saat ini ${cleanPass.length} karakter).`);
+          document.getElementById("smtp_pass")?.focus();
           return;
         }
       }
@@ -253,6 +266,7 @@ export default function EmailSettingsClientPage({
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(fromEmail.trim())) {
           toast.error("Format Email Pengirim (From Email) tidak valid.");
+          document.getElementById("smtp_from_email")?.focus();
           return;
         }
       }
@@ -278,6 +292,10 @@ export default function EmailSettingsClientPage({
       toast.error(res.error);
     } else {
       toast.success(res.message || "Pengaturan SMTP berhasil disimpan.");
+      setSavedActive(isActive);
+      if (pass.trim()) {
+        setHasPassword(true);
+      }
       setPass(""); // Kosongkan input password setelah simpan demi keamanan
       router.refresh();
     }
@@ -308,7 +326,7 @@ export default function EmailSettingsClientPage({
       toast.error("Username SMTP belum diisi.");
       return;
     }
-    if (!cleanPass && !initialConfig.hasPassword) {
+    if (!cleanPass && !hasPassword) {
       toast.error("Password SMTP belum diisi.");
       return;
     }
@@ -368,7 +386,7 @@ export default function EmailSettingsClientPage({
     }
   };
 
-  const isConfigured = !!(initialConfig.host && initialConfig.user && initialConfig.hasPassword);
+  const isConfigured = !!(host.trim() && user.trim() && (pass || hasPassword));
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12">
@@ -387,7 +405,7 @@ export default function EmailSettingsClientPage({
 
           {/* Status Badge */}
           <div className="flex items-center gap-2 shrink-0">
-            {isActive ? (
+            {savedActive ? (
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40 text-xs font-semibold">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 Layanan Email Aktif
@@ -512,10 +530,12 @@ export default function EmailSettingsClientPage({
               
               {/* Host SMTP */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Host Server SMTP <span className="text-red-500">*</span>
+                <label htmlFor="smtp_host" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  Host Server SMTP {isActive && <span className="text-red-500">*</span>}
                 </label>
                 <input
+                  id="smtp_host"
+                  name="smtp_host"
                   type="text"
                   required={isActive}
                   value={host}
@@ -527,10 +547,12 @@ export default function EmailSettingsClientPage({
 
               {/* Port SMTP */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Port SMTP <span className="text-red-500">*</span>
+                <label htmlFor="smtp_port" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  Port SMTP {isActive && <span className="text-red-500">*</span>}
                 </label>
                 <input
+                  id="smtp_port"
+                  name="smtp_port"
                   type="number"
                   required={isActive}
                   value={port}
@@ -543,10 +565,12 @@ export default function EmailSettingsClientPage({
 
               {/* Username SMTP */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Username / Email Login SMTP <span className="text-red-500">*</span>
+                <label htmlFor="smtp_user" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  Username / Email Login SMTP {isActive && <span className="text-red-500">*</span>}
                 </label>
                 <input
+                  id="smtp_user"
+                  name="smtp_user"
                   type="text"
                   required={isActive}
                   value={user}
@@ -559,10 +583,10 @@ export default function EmailSettingsClientPage({
               {/* Password / App Key */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    Password / App Password <span className="text-red-500">*</span>
+                  <label htmlFor="smtp_pass" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Password / App Password {isActive && !hasPassword && <span className="text-red-500">*</span>}
                   </label>
-                  {initialConfig.hasPassword && (
+                  {hasPassword && (
                     <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
                       Password tersimpan
                     </span>
@@ -570,8 +594,10 @@ export default function EmailSettingsClientPage({
                 </div>
                 <div className="relative">
                   <input
+                    id="smtp_pass"
+                    name="smtp_pass"
                     type={showPassword ? "text" : "password"}
-                    required={isActive && !initialConfig.hasPassword}
+                    required={isActive && !hasPassword}
                     value={pass}
                     onChange={(e) => {
                       const val = e.target.value;
@@ -581,7 +607,7 @@ export default function EmailSettingsClientPage({
                         setPass(val);
                       }
                     }}
-                    placeholder={initialConfig.hasPassword ? "•••••••• (Biarkan kosong jika tidak diubah)" : "Masukkan kata sandi atau App Password"}
+                    placeholder={hasPassword ? "•••••••• (Biarkan kosong jika tidak diubah)" : "Masukkan kata sandi atau App Password"}
                     className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                   />
                   <button
@@ -615,10 +641,12 @@ export default function EmailSettingsClientPage({
 
               {/* Sender Name */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <label htmlFor="smtp_from_name" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Nama Tampilan Pengirim (From Name)
                 </label>
                 <input
+                  id="smtp_from_name"
+                  name="smtp_from_name"
                   type="text"
                   value={fromName}
                   onChange={(e) => setFromName(e.target.value)}
@@ -629,10 +657,12 @@ export default function EmailSettingsClientPage({
 
               {/* Sender Email */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <label htmlFor="smtp_from_email" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Email Pengirim (From Email)
                 </label>
                 <input
+                  id="smtp_from_email"
+                  name="smtp_from_email"
                   type="email"
                   value={fromEmail}
                   onChange={(e) => setFromEmail(e.target.value)}
