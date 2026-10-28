@@ -504,21 +504,29 @@ export default function FinanceDetailClient({
               {/* Notifikasi Email */}
               {emailInfo?.allowed ? (
                 emailInfo.active ? (
-                  <button
-                    onClick={handleSendEmail}
-                    disabled={isSendingEmail || !invoice.student.email}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors disabled:opacity-50 cursor-pointer"
-                  >
-                    <span className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-medium">
-                      <Mail size={14} className="text-blue-600 dark:text-blue-400" />
-                      <span>Kirim Rincian via Email</span>
-                    </span>
-                    {isSendingEmail ? (
-                      <Loader2 size={13} className="animate-spin text-blue-600" />
-                    ) : (
-                      <Send size={13} className="text-slate-400" />
+                  <div className="space-y-1">
+                    <button
+                      onClick={handleSendEmail}
+                      disabled={isSendingEmail || !invoice.student.email}
+                      title={!invoice.student.email ? "Siswa belum memiliki alamat email yang terdaftar" : "Kirim rincian faktur ke email siswa"}
+                      className="w-full flex items-center justify-between p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      <span className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-medium">
+                        <Mail size={14} className="text-blue-600 dark:text-blue-400" />
+                        <span>Kirim Rincian via Email</span>
+                      </span>
+                      {isSendingEmail ? (
+                        <Loader2 size={13} className="animate-spin text-blue-600" />
+                      ) : (
+                        <Send size={13} className="text-slate-400" />
+                      )}
+                    </button>
+                    {!invoice.student.email && (
+                      <p className="text-[10px] text-amber-600 dark:text-amber-400 px-1 font-medium">
+                        * Tombol dinonaktifkan karena siswa ini belum memiliki email terdaftar.
+                      </p>
                     )}
-                  </button>
+                  </div>
                 ) : (
                   <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                     <span className="flex items-center gap-2 text-slate-500">

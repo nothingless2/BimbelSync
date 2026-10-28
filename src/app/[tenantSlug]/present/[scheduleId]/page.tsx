@@ -47,7 +47,7 @@ export default async function PresentSchedulePage({
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-6">
         <FeatureLockBanner
-          title="Absensi QR Dinamis Terkunci"
+          title="Absensi QR Dinamis"
           description={access.reason || "Fitur absensi QR dinamis hanya tersedia pada paket Growth dan Pro. Silakan gunakan absensi manual."}
           requiredPlan="Growth"
           tenantSlug={tenantSlug}

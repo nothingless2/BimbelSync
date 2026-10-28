@@ -107,7 +107,7 @@ export default async function GradebookPage({ params, searchParams }: any) {
           </p>
         </div>
         <FeatureLockBanner
-          title="Gradebook Akhir & E-Rapor Terkunci"
+          title="Gradebook & Rekap Nilai Akhir"
           description={access.reason || "Fitur rekap nilai akhir dan e-rapor siswa hanya tersedia pada paket Pro."}
           requiredPlan="Pro"
           tenantSlug={tenantSlug}

@@ -54,7 +54,7 @@ export default async function MaterialsPage({ params }: { params: Promise<{ tena
           </p>
         </div>
         <FeatureLockBanner
-          title="Pengelolaan Materi Pembelajaran Terkunci"
+          title="Pengelolaan Materi Pembelajaran"
           description={access.reason || "Pengelolaan dan pembagian materi pembelajaran tersedia mulai dari paket Growth."}
           requiredPlan="Growth"
           tenantSlug={tenantSlug}

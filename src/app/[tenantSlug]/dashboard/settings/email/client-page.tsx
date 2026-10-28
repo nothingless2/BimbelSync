@@ -9,6 +9,7 @@ import {
   HelpCircle, Megaphone, Users, Info, ChevronRight, Check, FileText
 } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
+import { FeatureLockBanner } from "@/components/feature-lock-banner";
 import { 
   saveSmtpConfigAction, 
   testSmtpConfigAction, 
@@ -733,27 +734,13 @@ export default function EmailSettingsClientPage({
       {activeTab === "broadcast" && (
         <div className="space-y-6">
           {!isPro ? (
-            <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm text-center max-w-xl mx-auto space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto">
-                <Megaphone size={24} />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                  Siaran Pengumuman Massal Memerlukan Paket Pro
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-md mx-auto">
-                  Fitur broadcast email serentak ke seluruh wali murid (info libur, ujian, edaran resmi) hanya tersedia pada paket Pro. Paket Anda saat ini ({planName}) mencakup pengiriman email tagihan dan kwitansi otomatis.
-                </p>
-              </div>
-              <div className="pt-2">
-                <Link
-                  href={`/${tenantSlug}/dashboard/settings/billing`}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-sm transition"
-                >
-                  Upgrade ke Paket Pro
-                </Link>
-              </div>
-            </div>
+            <FeatureLockBanner
+              title="Broadcast Pengumuman Massal via Email"
+              description={`Fitur broadcast email serentak ke seluruh siswa dan wali murid (info libur, ujian, edaran resmi) hanya tersedia pada paket Pro. Paket Anda saat ini (${planName || "Growth"}) belum mencakup siaran massal.`}
+              requiredPlan="Pro"
+              tenantSlug={tenantSlug}
+              currentPlanName={planName}
+            />
           ) : (
             <>
               {!isActive && (

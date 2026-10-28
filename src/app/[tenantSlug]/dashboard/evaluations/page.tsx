@@ -76,7 +76,7 @@ export default async function EvaluationsPage({ params }: { params: Promise<{ te
           </p>
         </div>
         <FeatureLockBanner
-          title="Fitur Evaluasi & E-Rapor Memerlukan Paket Pro"
+          title="Evaluasi Siswa & E-Rapor Digital"
           description={access.reason || "Fitur rekapitulasi nilai digital, pembobotan ujian, dan penerbitan e-rapor siswa hanya tersedia pada paket Pro."}
           requiredPlan="Pro"
           tenantSlug={tenantSlug}
