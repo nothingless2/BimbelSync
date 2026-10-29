@@ -262,7 +262,7 @@ export async function broadcastAnnouncementEmailAction({
     return { error: "Tidak ada siswa aktif yang memiliki alamat email valid di sistem." };
   }
 
-  const appBaseUrl = process.env.NEXTAUTH_URL || "https://bimbelsync.com";
+  const appBaseUrl = process.env.NEXTAUTH_URL || "https://bimbelsync.web.id";
   const portalUrl = `${appBaseUrl}/${academy.path_url}/login`;
 
   let successCount = 0;

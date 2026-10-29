@@ -100,7 +100,7 @@ export default function SubscriptionClientPage({ academy, tenantSlug }: Props) {
             <h3 className="text-lg font-bold">Butuh Bantuan?</h3>
             <p className="text-blue-100 text-sm">Untuk mengubah paket, perpanjangan massal, atau pertanyaan tagihan, hubungi tim dukungan BimbelSync.</p>
           </div>
-          <a href="mailto:support@bimbelsync.com" className="relative z-10 mt-6 inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-white text-blue-700 hover:bg-blue-50 rounded-xl font-bold text-sm transition">
+          <a href="mailto:support@bimbelsync.web.id" className="relative z-10 mt-6 inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-white text-blue-700 hover:bg-blue-50 rounded-xl font-bold text-sm transition">
             Hubungi Support
           </a>
         </div>

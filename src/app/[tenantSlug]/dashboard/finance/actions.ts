@@ -484,7 +484,7 @@ export async function sendInvoiceEmailAction(invoiceId: string) {
     return { error: "Layanan SMTP bimbel belum aktif atau belum dikonfigurasi di menu Pengaturan Email." };
   }
 
-  const appBaseUrl = process.env.NEXTAUTH_URL || "https://bimbelsync.com";
+  const appBaseUrl = process.env.NEXTAUTH_URL || "https://bimbelsync.web.id";
   const portalUrl = `${appBaseUrl}/${session.tenant_slug}/login`;
 
   const formattedDueDate = new Date(invoice.created_at).toLocaleDateString("id-ID", {
@@ -600,7 +600,7 @@ export async function sendBulkInvoiceEmailsAction(options?: {
     };
   }
 
-  const appBaseUrl = process.env.NEXTAUTH_URL || "https://bimbelsync.com";
+  const appBaseUrl = process.env.NEXTAUTH_URL || "https://bimbelsync.web.id";
   const portalUrl = `${appBaseUrl}/${session.tenant_slug}/login`;
 
   let sentCount = 0;

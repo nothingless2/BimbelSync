@@ -694,6 +694,16 @@ export default function EmailSettingsClientPage({
                   placeholder="Contoh: billing@bimbelanda.com (Opsional, default sama dengan User)"
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+                {host.toLowerCase().includes("gmail") && fromEmail && user && fromEmail.trim().toLowerCase() !== user.trim().toLowerCase() && (
+                  <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 text-[11px] text-amber-800 dark:text-amber-300 space-y-1">
+                    <p className="font-semibold flex items-center gap-1">
+                      Catatan Keamanan Google SMTP:
+                    </p>
+                    <p className="leading-relaxed">
+                      Server Gmail (<code>smtp.gmail.com</code>) akan otomatis menimpa email pengirim dengan akun login Anda (<strong>{user}</strong>), kecuali alamat <strong>{fromEmail}</strong> sudah didaftarkan dan diverifikasi sebagai alias di setelan <em>Gmail &rarr; Setelan &rarr; Akun dan Impor &rarr; Kirim email sebagai</em>.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 

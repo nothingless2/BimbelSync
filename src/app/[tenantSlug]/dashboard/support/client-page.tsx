@@ -66,7 +66,7 @@ export default function SupportClientPage({ tenantSlug, staffEmail }: { tenantSl
               <div className="p-2 bg-white/20 rounded-lg"><Mail size={18} /></div>
               <div>
                 <p className="text-xs text-blue-200">Email Support</p>
-                <p className="font-semibold">bantuan@bimbelsync.com</p>
+                <p className="font-semibold">bantuan@bimbelsync.web.id</p>
               </div>
             </div>
           </div>

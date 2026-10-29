@@ -75,10 +75,12 @@ export async function testTenantSmtpConnection(
     await transporter.verify();
 
     const senderDisplay = `"${config.fromName || academyName}" <${config.fromEmail || config.user}>`;
+    const replyToDisplay = config.fromEmail ? `"${config.fromName || academyName}" <${config.fromEmail}>` : undefined;
 
     // 2. Kirim email pengujian
     await transporter.sendMail({
       from: senderDisplay,
+      replyTo: replyToDisplay,
       to: targetEmail,
       subject: `[Uji Coba SMTP] Verifikasi Pengaturan Email - ${academyName}`,
       html: `
@@ -167,9 +169,11 @@ export async function sendTenantEmail({
     });
 
     const senderDisplay = `"${config.fromName || smtpData.academyName}" <${config.fromEmail || config.user}>`;
+    const replyToDisplay = config.fromEmail ? `"${config.fromName || smtpData.academyName}" <${config.fromEmail}>` : undefined;
 
     await transporter.sendMail({
       from: senderDisplay,
+      replyTo: replyToDisplay,
       to,
       subject,
       html,

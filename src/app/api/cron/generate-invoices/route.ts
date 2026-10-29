@@ -175,7 +175,7 @@ export async function POST(request: Request) {
             }
           });
 
-          const appBaseUrl = process.env.NEXTAUTH_URL || "https://bimbelsync.com";
+          const appBaseUrl = process.env.NEXTAUTH_URL || "https://bimbelsync.web.id";
           const tenantSlug = freshInvoices[0]?.academy.path_url || "";
           const portalUrl = `${appBaseUrl}/${tenantSlug}/login`;
 

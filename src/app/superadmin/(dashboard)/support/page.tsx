@@ -34,7 +34,7 @@ export default function SupportPage() {
             Hubungi tim Developer untuk melaporkan bug atau meminta bantuan teknis tingkat lanjut.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
-            <a href="mailto:dev@bimbelsync.com" className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold transition">
+            <a href="mailto:dev@bimbelsync.web.id" className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold transition">
               <Mail size={16} /> Email Tim
             </a>
             <a href="#" className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-emerald-100 dark:bg-emerald-900/30 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 rounded-lg text-sm font-semibold transition">

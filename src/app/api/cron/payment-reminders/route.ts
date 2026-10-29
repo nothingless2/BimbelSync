@@ -86,7 +86,7 @@ export async function POST(request: Request) {
 
       if (dueInvoices.length === 0) continue;
 
-      const appBaseUrl = process.env.NEXTAUTH_URL || "https://bimbelsync.com";
+      const appBaseUrl = process.env.NEXTAUTH_URL || "https://bimbelsync.web.id";
       const portalUrl = `${appBaseUrl}/${academy.path_url}/login`;
 
       for (const inv of dueInvoices) {
