@@ -6,7 +6,7 @@ import Link from "next/link";
 import { 
   Mail, Server, CheckCircle2, AlertCircle, Send, Save, 
   Eye, EyeOff, ShieldCheck, Sparkles, RefreshCw, 
-  HelpCircle, Megaphone, Users, Info, ChevronRight, Check, FileText
+  HelpCircle, Megaphone, Users, Info, ChevronRight, Check, FileText, Key
 } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { FeatureLockBanner } from "@/components/feature-lock-banner";
@@ -747,18 +747,68 @@ export default function EmailSettingsClientPage({
 
           </form>
 
-          {/* Panduan Bantuan Akun Google */}
-          <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-3 text-xs text-slate-600 dark:text-slate-400">
-            <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-sm">
-              <Info size={16} className="text-blue-500" />
-              Petunjuk Penggunaan Akun Gmail / Google Workspace
-            </h4>
-            <ol className="list-decimal list-inside space-y-1.5 leading-relaxed pl-1">
-              <li>Aktifkan <strong>Verifikasi 2 Langkah (2-Step Verification)</strong> pada akun Google Anda.</li>
-              <li>Buka menu <strong>Keamanan Akun Google &gt; Sandi Aplikasi (App Passwords)</strong>.</li>
-              <li>Buat sandi baru untuk aplikasi &quot;BimbelSync Mailer&quot;.</li>
-              <li>Salin kode 16 digit yang dihasilkan ke kolom <strong>Password / App Password</strong> di atas tanpa spasi.</li>
-            </ol>
+          {/* Kartu Bantuan & Panduan Konfigurasi */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs text-slate-600 dark:text-slate-400">
+            {/* Card 1: App Password Gmail */}
+            <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-3.5 shadow-sm">
+              <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-sm">
+                <Key size={16} className="text-blue-500 shrink-0" />
+                Petunjuk Akun Gmail / Google Workspace
+              </h4>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Google mewajibkan penggunaan <strong>Sandi Aplikasi (App Password)</strong> 16 digit alih-alih password akun utama:
+              </p>
+              <ol className="list-decimal list-inside space-y-2 leading-relaxed pl-1 text-[11px]">
+                <li>
+                  Aktifkan <strong>Verifikasi 2 Langkah (2-Step Verification)</strong> pada Akun Google Anda.
+                </li>
+                <li>
+                  Buka menu <strong>Keamanan Akun Google &gt; Sandi Aplikasi (App Passwords)</strong>.
+                </li>
+                <li>
+                  Buat sandi baru untuk aplikasi &quot;<strong>BimbelSync Mailer</strong>&quot;.
+                </li>
+                <li>
+                  Salin kode 16 digit yang dihasilkan ke kolom <strong>Password / App Password</strong> di atas tanpa spasi.
+                </li>
+              </ol>
+            </div>
+
+            {/* Card 2: Custom From Email & Alias */}
+            <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-3.5 shadow-sm">
+              <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-sm">
+                <Mail size={16} className="text-indigo-500 shrink-0" />
+                Petunjuk Email Pengirim Kustom (Alias / Domain Sendiri)
+              </h4>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                Jika Anda ingin email keluar menggunakan alamat domain sendiri (misal: <em>billing@merdeka.com</em> atau domain bimbel Anda):
+              </p>
+              <div className="space-y-3 text-[11px] leading-relaxed">
+                <div className="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-1.5">
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">
+                    Opsi 1: Daftarkan sebagai Alias di Akun Gmail
+                  </p>
+                  <p className="text-slate-500 dark:text-slate-400">
+                    Agar server Gmail (<code>smtp.gmail.com</code>) tidak menimpa email pengirim dengan akun login Anda:
+                  </p>
+                  <ol className="list-decimal list-inside space-y-1 text-slate-600 dark:text-slate-400 pl-1">
+                    <li>Buka Gmail &gt; <strong>Setelan</strong> (ikon gerigi) &gt; <strong>Lihat semua setelan</strong>.</li>
+                    <li>Buka tab <strong>Akun dan Impor</strong> &gt; bagian <strong>Kirim email sebagai (Send mail as)</strong>.</li>
+                    <li>Klik <strong>Tambahkan alamat email lain</strong>, isi nama &amp; email pengirim, lalu centang <em>Perlakukan sebagai alias</em>.</li>
+                    <li>Masukkan kode verifikasi yang dikirim ke email tersebut.</li>
+                  </ol>
+                </div>
+
+                <div className="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-1">
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">
+                    Opsi 2: Gunakan SMTP Resmi Milik Domain (Sangat Direkomendasikan)
+                  </p>
+                  <p className="text-slate-500 dark:text-slate-400">
+                    Gunakan server email dari hosting domain Anda sendiri (misal: Host <code>mail.domainanda.com</code>, Port <code>465</code> SSL), atau gunakan layanan transactional email seperti <strong>Brevo</strong> atau <strong>Resend</strong>.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
         </div>
