@@ -109,6 +109,7 @@ export async function testTenantSmtpConnection(
           </div>
         </div>
       `,
+      text: `[Uji Coba SMTP] Verifikasi Pengaturan Email - ${academyName}\n\nKoneksi SMTP Berhasil!\nServer email bimbel Anda telah terhubung dengan sukses. Sistem kini siap mengirimkan notifikasi tagihan dan pengumuman secara otomatis ke siswa.\n\nHost: ${config.host}:${config.port}\nAkun Pengirim: ${config.user}\nWaktu: ${new Date().toLocaleString("id-ID")}`,
     });
 
     return { success: true };
