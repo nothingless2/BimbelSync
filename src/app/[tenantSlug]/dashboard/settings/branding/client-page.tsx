@@ -311,19 +311,17 @@ export default function BrandingClientPage({
             </span>
             <div className="p-5 rounded-2xl bg-[#0F172A] text-white space-y-4 shadow-inner relative overflow-hidden">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white p-1 shadow-sm flex items-center justify-center shrink-0 overflow-hidden">
-                  {logoPreview ? (
-                    <img
-                      src={logoPreview}
-                      alt="Logo"
-                      className="w-full h-full object-cover rounded-lg"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">
-                      {initials}
-                    </div>
-                  )}
-                </div>
+                {logoPreview ? (
+                  <img
+                    src={logoPreview}
+                    alt="Logo"
+                    className="w-10 h-10 object-contain rounded-lg shrink-0"
+                  />
+                ) : (
+                  <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xs shrink-0">
+                    {initials}
+                  </div>
+                )}
                 <div className="min-w-0">
                   <h4 className="font-bold text-sm tracking-tight text-white leading-tight truncate">
                     {name || "Nama Bimbel"}
@@ -351,19 +349,17 @@ export default function BrandingClientPage({
               2. Preview Sidebar Navigasi Dashboard
             </span>
             <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-3 shadow-sm">
-              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-900 p-0.5 flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700 overflow-hidden">
-                {logoPreview ? (
-                  <img
-                    src={logoPreview}
-                    alt="Logo"
-                    className="w-full h-full object-cover rounded-md"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-blue-600 rounded flex items-center justify-center text-white font-bold text-[10px]">
-                    {initials}
-                  </div>
-                )}
-              </div>
+              {logoPreview ? (
+                <img
+                  src={logoPreview}
+                  alt="Logo"
+                  className="w-8 h-8 object-contain rounded-md shrink-0"
+                />
+              ) : (
+                <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-[10px] shrink-0">
+                  {initials}
+                </div>
+              )}
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-bold text-slate-800 dark:text-white truncate">
                   {name || "Nama Bimbel"}

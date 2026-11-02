@@ -66,20 +66,20 @@ export default async function TenantLoginPage({ params }: PageProps) {
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/60 to-slate-900/10"></div>
         </div>
 
-        {/* Top Header Logo & Nama Bimbel */}
+        {/* Top Header Logo & Nama Bimbel (Tanpa Container Putih) */}
         <div className="relative z-10 flex items-center gap-3">
-          <div className="bg-white p-2.5 rounded-xl shadow-sm flex items-center justify-center overflow-hidden">
-            {academy.logo_url ? (
-              <img
-                src={academy.logo_url}
-                alt={academy.name}
-                className="w-7 h-7 object-cover rounded-md"
-                fetchPriority="high"
-              />
-            ) : (
-              <Image src="/logo.png" alt="Logo" width={28} height={28} className="w-7 h-7 object-contain rounded-md" />
-            )}
-          </div>
+          {academy.logo_url ? (
+            <img
+              src={academy.logo_url}
+              alt={academy.name}
+              width={36}
+              height={36}
+              className="w-9 h-9 object-contain rounded-lg"
+              fetchPriority="high"
+            />
+          ) : (
+            <Image src="/logo.png" alt="Logo" width={32} height={32} className="w-8 h-8 object-contain" />
+          )}
           <span className="text-xl font-bold text-white tracking-tight truncate">{academy.name}</span>
         </div>
 
@@ -97,25 +97,23 @@ export default async function TenantLoginPage({ params }: PageProps) {
 
       {/* Sisi Kanan: Form Login */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 relative bg-[#F8FAFC]">
-        {/* Mobile Header Top */}
+        {/* Mobile Header Top (Tanpa Container Putih) */}
         <div className="md:hidden w-full max-w-md mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-xl p-1.5 shadow-sm border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden">
-              {academy.logo_url ? (
-                <img
-                  src={academy.logo_url}
-                  alt={academy.name}
-                  width={32}
-                  height={32}
-                  className="w-full h-full object-cover rounded-lg"
-                  fetchPriority="high"
-                />
-              ) : (
-                <div className="w-full h-full bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">
-                  {initials}
-                </div>
-              )}
-            </div>
+            {academy.logo_url ? (
+              <img
+                src={academy.logo_url}
+                alt={academy.name}
+                width={36}
+                height={36}
+                className="w-9 h-9 object-contain rounded-lg shrink-0"
+                fetchPriority="high"
+              />
+            ) : (
+              <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xs shrink-0">
+                {initials}
+              </div>
+            )}
             <div>
               <span className="text-base font-bold text-slate-900 tracking-tight block truncate">
                 {academy.name}
@@ -127,20 +125,20 @@ export default async function TenantLoginPage({ params }: PageProps) {
 
         {/* Form Card */}
         <div className="w-full max-w-md bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 sm:p-10 border border-slate-100">
-          {/* Logo Emblem on Card */}
+          {/* Logo pada Card (Cukup Logonya Saja, Tanpa Container Putih) */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 p-2 mx-auto mb-4 flex items-center justify-center shadow-sm overflow-hidden">
+            <div className="mb-4 flex items-center justify-center">
               {academy.logo_url ? (
                 <img
                   src={academy.logo_url}
                   alt={academy.name}
-                  width={48}
-                  height={48}
-                  className="w-full h-full object-cover rounded-xl"
+                  width={56}
+                  height={56}
+                  className="w-14 h-14 object-contain rounded-xl"
                   fetchPriority="high"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-base shadow-inner">
+                <div className="w-14 h-14 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-base shadow-inner">
                   {initials}
                 </div>
               )}
