@@ -506,8 +506,19 @@ export default function ReportsClientPage({
 
       {/* Dedicated Clean Print Report (Exactly as requested, only Alokasi Pendapatan & Buku Besar Transaksi) */}
       <div className="hidden print:block text-black print-serif leading-relaxed">
-        <h2 className="text-xl font-bold mb-4 uppercase border-b border-black pb-2 tracking-wide">
-          3. ALOKASI PENDAPATAN PER PAKET LANGGANAN
+        {/* Judul Besar PDF (Only visible in Print mode) */}
+        <div className="text-center mb-6 pb-4 border-b-2 border-black">
+          <h1 className="text-2xl font-bold uppercase tracking-wider text-black print-serif">
+            PLATFORM FINANCIAL REPORT
+          </h1>
+          <p className="text-sm font-semibold text-black mt-1 print-serif">BimbelSync Platform Management</p>
+          <p className="text-xs text-black mt-0.5 print-serif">
+            Periode: <strong>{formatPeriodText(startDate, endDate)}</strong>
+          </p>
+        </div>
+
+        <h2 className="text-lg font-bold mb-3 uppercase border-b border-black pb-1.5 tracking-wide">
+          ALOKASI PENDAPATAN PER PAKET LANGGANAN
         </h2>
         <table className="w-full mb-8 border-collapse text-sm">
           <thead>
@@ -520,7 +531,7 @@ export default function ReportsClientPage({
             {filteredPlanRevenueData.map((prog, idx) => (
               <tr key={idx}>
                 <td className="border border-black px-4 py-2">{prog.name}</td>
-                <td className="border border-black px-4 py-2 text-right font-bold">{formatRupiah(prog.value)}</td>
+                <td className="border border-black px-4 py-2 text-right font-medium">{formatRupiah(prog.value)}</td>
               </tr>
             ))}
             {filteredPlanRevenueData.length === 0 && (
@@ -531,12 +542,20 @@ export default function ReportsClientPage({
               </tr>
             )}
           </tbody>
+          {filteredPlanRevenueData.length > 0 && (
+            <tfoot>
+              <tr className="bg-gray-100 font-bold">
+                <td className="border border-black px-4 py-2 text-left uppercase">Total Pendapatan</td>
+                <td className="border border-black px-4 py-2 text-right">{formatRupiah(filteredTotalRevenue)}</td>
+              </tr>
+            </tfoot>
+          )}
         </table>
 
-        <h2 className="text-xl font-bold mb-2 uppercase border-b border-black pb-2 mt-6 tracking-wide">
-          4. BUKU BESAR TRANSAKSI PLATFORM
+        <h2 className="text-lg font-bold mb-2 uppercase border-b border-black pb-1.5 mt-6 tracking-wide">
+          BUKU BESAR TRANSAKSI PLATFORM
         </h2>
-        <p className="mb-4 text-sm text-black print-serif">
+        <p className="mb-4 text-xs text-black print-serif">
           Daftar seluruh tagihan (invoice) langganan yang telah diselesaikan oleh bimbel terkait selama periode pelaporan ini dicatat di bawah ini untuk keperluan audit dan kepatuhan.
         </p>
 
@@ -570,13 +589,25 @@ export default function ReportsClientPage({
                       {inv.plan_name}
                     </span>
                   </td>
-                  <td className="border border-black px-3 py-2 text-right font-bold">
+                  <td className="border border-black px-3 py-2 text-right font-medium">
                     {formatRupiah(inv.amount)}
                   </td>
                 </tr>
               ))
             )}
           </tbody>
+          {filteredInvoices.length > 0 && (
+            <tfoot>
+              <tr className="bg-gray-100 font-bold">
+                <td colSpan={3} className="border border-black px-3 py-2 text-right uppercase">
+                  Total Pendapatan ({filteredInvoices.length} Transaksi):
+                </td>
+                <td className="border border-black px-3 py-2 text-right">
+                  {formatRupiah(filteredTotalRevenue)}
+                </td>
+              </tr>
+            </tfoot>
+          )}
         </table>
       </div>
 
@@ -740,6 +771,18 @@ export default function ReportsClientPage({
                 ))
               )}
             </tbody>
+            {filteredInvoices.length > 0 && (
+              <tfoot className="bg-slate-50/80 dark:bg-slate-800/60 font-bold border-t border-slate-200 dark:border-slate-700">
+                <tr>
+                  <td colSpan={3} className="px-6 py-4 text-right text-slate-700 dark:text-slate-300">
+                    Total ({filteredInvoices.length} Transaksi):
+                  </td>
+                  <td className="px-6 py-4 text-right text-emerald-600 dark:text-emerald-400 font-bold">
+                    {formatRupiah(filteredTotalRevenue)}
+                  </td>
+                </tr>
+              </tfoot>
+            )}
           </table>
         </div>
       </div>
