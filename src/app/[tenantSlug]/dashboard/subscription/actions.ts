@@ -30,6 +30,7 @@ export async function uploadPlatformInvoiceProofAction(tenantSlug: string, invoi
     });
 
     revalidatePath(`/${tenantSlug}/dashboard/subscription`);
+    revalidatePath("/superadmin/billing");
     return { success: true };
   } catch (error) {
     console.error("uploadPlatformInvoiceProofAction error:", error);

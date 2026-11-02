@@ -17,6 +17,7 @@ import {
   updatePlatformBankInfoAction 
 } from "./actions";
 import { Pagination } from "@/components/ui/pagination";
+import { ViewProofModal } from "@/components/modals/view-proof-modal";
 
 const IDR = (n: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
@@ -232,12 +233,23 @@ export default function BillingClientPage({ invoices, academies, plans, initialB
   };
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState<"ALL" | "UNPAID" | "PAID" | "OVERDUE" | "VOID">("ALL");
+  const [filterStatus, setFilterStatus] = useState<"ALL" | "NEED_VERIFICATION" | "UNPAID" | "PAID" | "OVERDUE" | "VOID">("ALL");
+  const [selectedProofInvoice, setSelectedProofInvoice] = useState<InvoiceItem | null>(null);
+  const [isVerifyingProof, setIsVerifyingProof] = useState(false);
+
+  const totalNeedVerification = invoices.filter(i => i.proof_of_payment_url && i.payment_status !== "PAID").length;
 
   const filteredInvoices = invoices.filter(invoice => {
     const matchSearch = invoice.academy.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                         invoice.academy.path_url.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchStatus = filterStatus === "ALL" || invoice.payment_status === filterStatus;
+    let matchStatus = true;
+    if (filterStatus === "ALL") {
+      matchStatus = true;
+    } else if (filterStatus === "NEED_VERIFICATION") {
+      matchStatus = !!invoice.proof_of_payment_url && invoice.payment_status !== "PAID";
+    } else {
+      matchStatus = invoice.payment_status === filterStatus;
+    }
     return matchSearch && matchStatus;
   });
 
@@ -440,6 +452,17 @@ export default function BillingClientPage({ invoices, academies, plans, initialB
               Semua
             </button>
             <button 
+              onClick={() => { setFilterStatus("NEED_VERIFICATION"); setCurrentPage(1); }}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 ${filterStatus === "NEED_VERIFICATION" ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            >
+              <span>Verifikasi Bukti</span>
+              {totalNeedVerification > 0 && (
+                <span className="px-1.5 py-0.5 bg-blue-600 text-white rounded-full text-[10px] font-bold">
+                  {totalNeedVerification}
+                </span>
+              )}
+            </button>
+            <button 
               onClick={() => { setFilterStatus("UNPAID"); setCurrentPage(1); }}
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${filterStatus === "UNPAID" ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-500 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
             >
@@ -514,9 +537,16 @@ export default function BillingClientPage({ invoices, academies, plans, initialB
                       {invoice.paid_at ? new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric" }).format(new Date(invoice.paid_at)) : "-"}
                     </td>
                     <td className="px-6 py-4">
-                      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${status.class}`}>
-                        {status.label}
-                      </div>
+                      {invoice.proof_of_payment_url && invoice.payment_status !== "PAID" ? (
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/50">
+                          <Clock size={12} />
+                          Menunggu Verifikasi
+                        </div>
+                      ) : (
+                        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${status.class}`}>
+                          {status.label}
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-xs text-slate-500">
                       {invoice.verified_by ? (
@@ -529,8 +559,8 @@ export default function BillingClientPage({ invoices, academies, plans, initialB
                       <div className="flex items-center justify-end gap-2">
                         {invoice.proof_of_payment_url && (
                           <button
-                            onClick={() => window.open(invoice.proof_of_payment_url!, '_blank')}
-                            className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold"
+                            onClick={() => setSelectedProofInvoice(invoice)}
+                            className="px-2.5 py-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-semibold border border-blue-200 dark:border-blue-800/60"
                             title="Lihat Bukti Bayar"
                           >
                             <Eye size={14} /> <span className="hidden xl:inline">Bukti</span>
@@ -780,6 +810,31 @@ export default function BillingClientPage({ invoices, academies, plans, initialB
             </form>
           </div>
         </div>
+      )}
+      {/* Modal Lihat Bukti Pembayaran */}
+      {selectedProofInvoice && (
+        <ViewProofModal
+          isOpen={!!selectedProofInvoice}
+          onClose={() => setSelectedProofInvoice(null)}
+          imageUrl={selectedProofInvoice.proof_of_payment_url}
+          invoiceTitle={`INV-${selectedProofInvoice.id.split("-")[0].toUpperCase()}`}
+          academyName={selectedProofInvoice.academy.name}
+          invoicePeriod={new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(new Date(selectedProofInvoice.billing_period))}
+          invoiceAmount={IDR(selectedProofInvoice.amount)}
+          isPaid={selectedProofInvoice.payment_status === "PAID"}
+          isVerifying={isVerifyingProof}
+          onVerify={async () => {
+            setIsVerifyingProof(true);
+            const res = await verifyInvoiceAction(selectedProofInvoice.id);
+            setIsVerifyingProof(false);
+            if (res.error) {
+              toast.error(res.error);
+            } else {
+              toast.success(`Tagihan ${selectedProofInvoice.academy.name} berhasil diverifikasi dan ditandai lunas!`);
+              setSelectedProofInvoice(null);
+            }
+          }}
+        />
       )}
     </div>
   );

@@ -1,7 +1,19 @@
 "use client";
 
-import { CreditCard, CheckCircle2, Clock, AlertTriangle, ShieldCheck, Download, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { CreditCard, CheckCircle2, Clock, AlertTriangle, ShieldCheck, Download, Eye, Upload } from "lucide-react";
 import { UploadProofModal } from "@/components/modals/upload-proof-modal";
+import { ViewProofModal } from "@/components/modals/view-proof-modal";
+
+interface InvoiceItem {
+  id: string;
+  amount: number;
+  billing_period: string;
+  due_date: string;
+  payment_status: string;
+  paid_at: string | null;
+  proof_of_payment_url: string | null;
+}
 
 interface Props {
   academy: {
@@ -13,43 +25,48 @@ interface Props {
       name: string;
       price: number;
     };
-    invoices: {
-      id: string;
-      amount: number;
-      billing_period: string;
-      due_date: string;
-      payment_status: string;
-      paid_at: string | null;
-      proof_of_payment_url: string | null;
-    }[];
+    invoices: InvoiceItem[];
   };
   tenantSlug: string;
 }
 
 export default function SubscriptionClientPage({ academy, tenantSlug }: Props) {
-  const IDR = (amount: number) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(amount);
+  const [selectedProofInvoice, setSelectedProofInvoice] = useState<InvoiceItem | null>(null);
+  const [reuploadInvoiceId, setReuploadInvoiceId] = useState<string | null>(null);
+
+  const IDR = (amount: number) =>
+    new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(amount);
 
   const getStatusDisplay = (status: string) => {
-    switch(status) {
-      case "ACTIVE": return { label: "Aktif", class: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400", icon: <CheckCircle2 size={16} /> };
-      case "TRIAL": return { label: "Masa Coba", class: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400", icon: <Clock size={16} /> };
-      default: return { label: "Ditangguhkan", class: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400", icon: <AlertTriangle size={16} /> };
+    switch (status) {
+      case "ACTIVE":
+        return { label: "Aktif", class: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400", icon: <CheckCircle2 size={16} /> };
+      case "TRIAL":
+        return { label: "Masa Coba", class: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400", icon: <Clock size={16} /> };
+      default:
+        return { label: "Ditangguhkan", class: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400", icon: <AlertTriangle size={16} /> };
     }
   };
 
   const getInvoiceStatus = (status: string, proofUrl: string | null) => {
-    if (proofUrl && status !== "PAID") return { label: "Menunggu Verifikasi", class: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" };
-    switch(status) {
-      case "PAID": return { label: "Lunas", class: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" };
-      case "UNPAID": return { label: "Belum Bayar", class: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" };
-      case "OVERDUE": return { label: "Terlambat", class: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" };
-      case "VOID": return { label: "Dibatalkan", class: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400" };
-      default: return { label: status, class: "bg-slate-100 text-slate-700" };
+    if (proofUrl && status !== "PAID") {
+      return { label: "Menunggu Verifikasi", class: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" };
+    }
+    switch (status) {
+      case "PAID":
+        return { label: "Lunas", class: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" };
+      case "UNPAID":
+        return { label: "Belum Bayar", class: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" };
+      case "OVERDUE":
+        return { label: "Terlambat", class: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" };
+      case "VOID":
+        return { label: "Dibatalkan", class: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400" };
+      default:
+        return { label: status, class: "bg-slate-100 text-slate-700" };
     }
   };
 
   const currentStatus = getStatusDisplay(academy.subscription_status);
-  const unpaidInvoices = academy.invoices.filter(i => i.payment_status === "UNPAID" || i.payment_status === "OVERDUE");
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
@@ -71,7 +88,7 @@ export default function SubscriptionClientPage({ academy, tenantSlug }: Props) {
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">{academy.plan.name}</h3>
               </div>
             </div>
-            
+
             <div className="flex flex-wrap gap-4 pt-2">
               <div className="bg-slate-50 dark:bg-slate-800 px-4 py-2.5 rounded-xl border border-slate-100 dark:border-slate-700">
                 <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Status Akses</p>
@@ -82,8 +99,8 @@ export default function SubscriptionClientPage({ academy, tenantSlug }: Props) {
               <div className="bg-slate-50 dark:bg-slate-800 px-4 py-2.5 rounded-xl border border-slate-100 dark:border-slate-700">
                 <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Berlaku Hingga</p>
                 <p className="font-bold text-slate-700 dark:text-slate-300">
-                  {academy.subscription_due_date 
-                    ? new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(new Date(academy.subscription_due_date)) 
+                  {academy.subscription_due_date
+                    ? new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(new Date(academy.subscription_due_date))
                     : "Selamanya"}
                 </p>
               </div>
@@ -111,7 +128,7 @@ export default function SubscriptionClientPage({ academy, tenantSlug }: Props) {
         <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white">Riwayat Tagihan</h2>
         </div>
-        
+
         {academy.invoices.length === 0 ? (
           <div className="p-8 text-center text-slate-500">
             <CreditCard size={40} className="mx-auto mb-3 opacity-20" />
@@ -156,9 +173,33 @@ export default function SubscriptionClientPage({ academy, tenantSlug }: Props) {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {(invoice.payment_status === "UNPAID" || invoice.payment_status === "OVERDUE") && !invoice.proof_of_payment_url && (
-                            <UploadProofModal tenantSlug={tenantSlug} invoiceId={invoice.id} />
+                          {invoice.proof_of_payment_url ? (
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={() => setSelectedProofInvoice(invoice)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-300 rounded-lg text-xs font-semibold transition-colors"
+                                title="Lihat Bukti Pembayaran"
+                              >
+                                <Eye size={14} />
+                                <span>Lihat Bukti</span>
+                              </button>
+
+                              {invoice.payment_status !== "PAID" && (
+                                <button
+                                  onClick={() => setReuploadInvoiceId(invoice.id)}
+                                  className="p-1.5 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                                  title="Unggah Ulang Bukti"
+                                >
+                                  <Upload size={14} />
+                                </button>
+                              )}
+                            </div>
+                          ) : (
+                            (invoice.payment_status === "UNPAID" || invoice.payment_status === "OVERDUE") && (
+                              <UploadProofModal tenantSlug={tenantSlug} invoiceId={invoice.id} />
+                            )
                           )}
+
                           <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-1.5" title="Unduh PDF">
                             <Download size={16} />
                           </button>
@@ -172,6 +213,34 @@ export default function SubscriptionClientPage({ academy, tenantSlug }: Props) {
           </div>
         )}
       </div>
+
+      {/* Modal Lihat Bukti Pembayaran */}
+      {selectedProofInvoice && (
+        <ViewProofModal
+          isOpen={!!selectedProofInvoice}
+          onClose={() => setSelectedProofInvoice(null)}
+          imageUrl={selectedProofInvoice.proof_of_payment_url}
+          invoiceTitle={`INV-${selectedProofInvoice.id.split("-")[0].toUpperCase()}`}
+          invoicePeriod={new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(new Date(selectedProofInvoice.billing_period))}
+          invoiceAmount={IDR(selectedProofInvoice.amount)}
+          isPaid={selectedProofInvoice.payment_status === "PAID"}
+          onReupload={() => setReuploadInvoiceId(selectedProofInvoice.id)}
+        />
+      )}
+
+      {/* Modal Unggah Ulang Bukti Pembayaran */}
+      {reuploadInvoiceId && (
+        <UploadProofModal
+          tenantSlug={tenantSlug}
+          invoiceId={reuploadInvoiceId}
+          isOpenControlled={!!reuploadInvoiceId}
+          onOpenChange={(open) => !open && setReuploadInvoiceId(null)}
+          onSuccess={() => {
+            setReuploadInvoiceId(null);
+            setSelectedProofInvoice(null);
+          }}
+        />
+      )}
     </div>
   );
 }

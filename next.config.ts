@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
   turbopack: {},
   experimental: {
     serverActions: {
-      bodySizeLimit: '500kb',
+      bodySizeLimit: '10mb',
       allowedOrigins: [
         'www.bimbelsync.web.id',
         'bimbelsync.web.id',
