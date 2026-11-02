@@ -155,8 +155,16 @@ export default async function TenantLoginPage({ params }: PageProps) {
           <TenantLoginForm tenantSlug={tenantSlug} />
 
           {/* Footer Card */}
-          <div className="mt-8 pt-4 border-t border-slate-100 text-center text-xs text-slate-400">
-            Powered by BimbelSync
+          <div className="mt-8 pt-4 border-t border-slate-100 flex items-center justify-center gap-1.5 text-xs text-slate-400">
+            <span>Powered by</span>
+            <Image
+              src="/logo.png"
+              alt="BimbelSync"
+              width={16}
+              height={16}
+              className="w-4 h-4 object-contain"
+            />
+            <span className="font-semibold text-slate-700 tracking-tight">BimbelSync</span>
           </div>
         </div>
       </div>

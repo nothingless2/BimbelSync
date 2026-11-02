@@ -336,7 +336,11 @@ export default function BrandingClientPage({
 
               <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[10px] text-slate-400">
                 <span>URL: /{tenantSlug}/login</span>
-                <span className="text-slate-500">Powered by BimbelSync</span>
+                <div className="flex items-center gap-1 text-slate-400">
+                  <span>Powered by</span>
+                  <img src="/logo.png" alt="BimbelSync" className="w-3.5 h-3.5 object-contain" />
+                  <span className="font-semibold text-slate-300">BimbelSync</span>
+                </div>
               </div>
             </div>
           </div>
