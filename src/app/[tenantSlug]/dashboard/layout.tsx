@@ -91,10 +91,20 @@ export default async function DashboardLayout({
       {/* Sidebar Desktop */}
       <aside className="hidden md:flex w-64 flex-col h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-20 transition-colors print:hidden">
         <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-800 transition-colors">
-          <div className="flex items-center gap-3">
-            <Image src="/logo.png" alt="BimbelSync Logo" width={28} height={28} className="object-contain rounded-md" />
-            <span className="text-xl font-bold text-slate-800 dark:text-white capitalize tracking-tight">
-              BimbelSync
+          <div className="flex items-center gap-3 min-w-0 pr-2">
+            <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 p-1 flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700">
+              {sub.academyLogoUrl ? (
+                <img
+                  src={sub.academyLogoUrl}
+                  alt={sub.academyName}
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <Image src="/logo.png" alt="BimbelSync Logo" width={28} height={28} className="object-contain rounded-md" />
+              )}
+            </div>
+            <span className="text-base font-bold text-slate-800 dark:text-white tracking-tight truncate">
+              {sub.academyName}
             </span>
           </div>
         </div>
@@ -114,13 +124,15 @@ export default async function DashboardLayout({
             <MobileSidebar 
               tenantSlug={tenantSlug} 
               userRole={dbUser?.role} 
-              allowsAutomatedEmail={!!sub.plan.allows_automated_email} 
+              allowsAutomatedEmail={!!sub.plan.allows_automated_email}
+              academyName={sub.academyName}
+              academyLogoUrl={sub.academyLogoUrl}
             />
             <span className="text-xs md:text-sm font-medium text-slate-500">
               {dbUser?.role === 'TUTOR' ? 'Tutor Portal' : 'Admin Portal'}
             </span>
             <span className="text-slate-300 dark:text-slate-600">/</span>
-            <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 capitalize">{tenantSlug}</span>
+            <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[200px]">{sub.academyName || tenantSlug}</span>
           </div>
           <div className="flex items-center gap-5">
             <ThemeToggle />

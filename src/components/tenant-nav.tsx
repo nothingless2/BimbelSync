@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, UserCog, Calendar, CreditCard, Box, BookOpen, HelpCircle, LogOut, FileText, Library, BarChart, Mail } from "lucide-react";
+import { LayoutDashboard, Users, UserCog, Calendar, CreditCard, Box, BookOpen, HelpCircle, LogOut, FileText, Library, BarChart, Mail, Sparkles } from "lucide-react";
 
 export function TenantNav({ 
   tenantSlug, 
@@ -117,6 +117,12 @@ export function TenantNav({
                 System
               </p>
             </div>
+            <NavItem 
+              href={`/${tenantSlug}/dashboard/settings/branding`} 
+              icon={<Sparkles size={18} />} 
+              label="Identitas Bimbel" 
+              active={isRouteActive(`/${tenantSlug}/dashboard/settings/branding`)} 
+            />
             <NavItem 
               href={`/${tenantSlug}/dashboard/settings/email`} 
               icon={<Mail size={18} />} 

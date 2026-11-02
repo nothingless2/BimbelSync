@@ -66,6 +66,7 @@ export const getActiveStaff = cache(async (staffId: string, academyId: string) =
           id: true,
           name: true,
           path_url: true,
+          logo_url: true,
           deleted_at: true,
         },
       },

@@ -1,135 +1,190 @@
-'use client';
+import prisma from '@/lib/prisma';
+import { notFound } from 'next/navigation';
+import { TenantLoginForm } from './login-form';
+import type { Metadata } from 'next';
+import Image from 'next/image';
 
-import { useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import { loginTenantAction } from './actions';
-import { User, Eye, EyeOff } from 'lucide-react';
-import Link from 'next/link';
+interface PageProps {
+  params: Promise<{ tenantSlug: string }>;
+}
 
-export default function TenantLoginPage() {
-  const pathname = usePathname();
-  const router = useRouter();
-  const tenantSlug = pathname.split('/')[1] || 'Bimbel';
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { tenantSlug } = await params;
+  const academy = await prisma.academy.findUnique({
+    where: { path_url: tenantSlug, deleted_at: null },
+    select: { name: true },
+  });
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  if (!academy) {
+    return {
+      title: 'Bimbel Tidak Ditemukan | BimbelSync',
+    };
+  }
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrorMsg('');
-    
-    const formData = new FormData(e.currentTarget);
-    const result = await loginTenantAction(tenantSlug, formData);
-
-    if (result.error) {
-      setErrorMsg(result.error);
-      setIsLoading(false);
-    } else if (result.success && result.redirectUrl) {
-      router.push(result.redirectUrl);
-    }
+  return {
+    title: `Masuk - ${academy.name} | BimbelSync`,
+    description: `Portal login resmi siswa, orang tua, tentor, dan manajemen ${academy.name}. Didukung oleh BimbelSync.`,
   };
+}
+
+export default async function TenantLoginPage({ params }: PageProps) {
+  const { tenantSlug } = await params;
+
+  const academy = await prisma.academy.findUnique({
+    where: { path_url: tenantSlug, deleted_at: null },
+    select: {
+      id: true,
+      name: true,
+      path_url: true,
+      logo_url: true,
+    },
+  });
+
+  if (!academy) {
+    notFound();
+  }
+
+  // Ambil inisial nama bimbel (misal "Bimbel Juara" -> "BJ")
+  const initials = academy.name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase())
+    .join('') || 'BS';
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-[#F8FAFC]">
+      {/* Sisi Kiri: Hero Panel Branding Bimbel (Desktop) */}
       <div className="hidden md:flex flex-col justify-between w-5/12 bg-slate-900 relative p-12 overflow-hidden">
+        {/* Background Overlay */}
         <div className="absolute inset-0 z-0">
-          <img 
-            src="/photo-1.avif" 
-            alt="Students in library" 
-            className="w-full h-full object-cover opacity-50 mix-blend-overlay"
+          <img
+            src="/photo-1.avif"
+            alt="Students background"
+            className="w-full h-full object-cover opacity-40 mix-blend-overlay"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/60 to-slate-900/10"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/80 to-slate-900/40"></div>
         </div>
 
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="bg-white p-2.5 rounded-xl shadow-sm">
-            <img src="/logo.png" alt="BimbelSync Logo" className="w-7 h-7 object-contain" />
+        {/* Top Header Logo Bimbel */}
+        <div className="relative z-10 flex items-center gap-3.5">
+          <div className="w-11 h-11 bg-white rounded-2xl p-2 shadow-md flex items-center justify-center shrink-0">
+            {academy.logo_url ? (
+              <img
+                src={academy.logo_url}
+                alt={academy.name}
+                width={36}
+                height={36}
+                className="w-full h-full object-contain"
+                fetchPriority="high"
+              />
+            ) : (
+              <div className="w-full h-full bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-sm">
+                {initials}
+              </div>
+            )}
           </div>
-          <span className="text-xl font-bold text-white tracking-tight">BimbelSync</span>
+          <div className="min-w-0">
+            <span className="text-lg font-bold text-white tracking-tight block truncate">
+              {academy.name}
+            </span>
+            <span className="text-[11px] text-blue-300 font-medium tracking-wide uppercase">
+              Portal Akademik
+            </span>
+          </div>
         </div>
 
-        <div className="relative z-10 mb-20">
-          <h1 className="text-[2.75rem] font-bold text-white mb-6 leading-[1.15] tracking-tight">
-            Kelola Bimbel <br/>Lebih Mudah dan <br/>Otomatis.
+        {/* Middle Typography Hero */}
+        <div className="relative z-10 mb-16 space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold backdrop-blur-md border border-blue-400/20">
+            <span>Portal Resmi Pembelajaran</span>
+          </div>
+          <h1 className="text-[2.5rem] font-bold text-white leading-[1.2] tracking-tight">
+            Selamat Datang di <br />
+            <span className="text-blue-400">{academy.name}</span>
           </h1>
-          <p className="text-slate-300 text-lg max-w-sm leading-relaxed font-medium">
-            Satu platform terpadu untuk efisiensi operasional bimbingan belajar Anda.
+          <p className="text-slate-300 text-base max-w-sm leading-relaxed font-normal">
+            Satu portal terpadu untuk absensi kelas, jadwal belajar, materi pembelajaran, dan administrasi siswa.
           </p>
+        </div>
+
+        {/* Bottom Platform Credit */}
+        <div className="relative z-10 flex items-center gap-2 text-xs text-slate-400 font-medium">
+          <span>Platform didukung oleh</span>
+          <div className="flex items-center gap-1.5 text-white font-bold">
+            <Image src="/logo.png" alt="BimbelSync" width={16} height={16} className="object-contain" />
+            <span>BimbelSync</span>
+          </div>
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-8 sm:p-12 relative bg-[#F8FAFC]">
-        <div className="absolute top-8 left-8 md:hidden flex items-center gap-3">
-           <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-lg" />
-           <span className="text-xl font-bold text-slate-800 tracking-tight">BimbelSync</span>
+      {/* Sisi Kanan: Form Login */}
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 relative bg-[#F8FAFC]">
+        {/* Mobile Header Top */}
+        <div className="md:hidden w-full max-w-md mb-8 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white rounded-xl p-1.5 shadow-sm border border-slate-200 flex items-center justify-center shrink-0">
+              {academy.logo_url ? (
+                <img
+                  src={academy.logo_url}
+                  alt={academy.name}
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-contain"
+                  fetchPriority="high"
+                />
+              ) : (
+                <div className="w-full h-full bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">
+                  {initials}
+                </div>
+              )}
+            </div>
+            <div>
+              <span className="text-base font-bold text-slate-900 tracking-tight block truncate">
+                {academy.name}
+              </span>
+              <span className="text-[10px] text-slate-500 font-medium">Portal Akademik</span>
+            </div>
+          </div>
         </div>
 
+        {/* Form Card */}
         <div className="w-full max-w-md bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 sm:p-10 border border-slate-100">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-slate-900">Masuk ke Akun Anda</h2>
+          {/* Logo Emblem on Card */}
+          <div className="text-center mb-6">
+            <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 p-2.5 mx-auto mb-4 flex items-center justify-center shadow-sm">
+              {academy.logo_url ? (
+                <img
+                  src={academy.logo_url}
+                  alt={academy.name}
+                  width={48}
+                  height={48}
+                  className="w-full h-full object-contain"
+                  fetchPriority="high"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-base shadow-inner">
+                  {initials}
+                </div>
+              )}
+            </div>
+
+            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Masuk ke Akun Anda</h2>
+            <p className="text-xs text-slate-500 mt-1">
+              Portal Resmi <strong className="text-slate-700 font-semibold">{academy.name}</strong>
+            </p>
           </div>
 
-          {errorMsg && (
-            <div className="mb-6 p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm text-center font-medium">
-              {errorMsg}
-            </div>
-          )}
+          <TenantLoginForm tenantSlug={tenantSlug} />
 
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div>
-              <label className="block text-[13px] font-semibold text-slate-700 mb-2">
-                Email atau Username
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="email"
-                  required
-                  className="w-full pl-4 pr-10 py-3.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-slate-700 placeholder-slate-400 bg-white text-[15px]"
-                  placeholder="Masukkan email atau username"
-                />
-                <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                  <User className="w-5 h-5 text-slate-400" />
-                </div>
-              </div>
+          {/* Footer Card */}
+          <div className="mt-8 pt-5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Koneksi Aman</span>
             </div>
-
-            <div>
-              <label className="block text-[13px] font-semibold text-slate-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  required
-                  className="w-full pl-4 pr-10 py-3.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-slate-700 placeholder-slate-400 bg-white text-[15px]"
-                  placeholder="Masukkan password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-slate-600 transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-[#1D4ED8] hover:bg-blue-800 text-white font-medium py-3.5 px-4 rounded-xl transition-all shadow-sm flex justify-center items-center disabled:opacity-70 mt-2 text-[15px]"
-            >
-              {isLoading ? (
-                <span className="animate-pulse">Memverifikasi...</span>
-              ) : (
-                'Masuk'
-              )}
-            </button>
-          </form>
+            <span>Powered by BimbelSync</span>
+          </div>
         </div>
       </div>
     </div>

@@ -17,6 +17,7 @@ export interface EffectiveSubscription {
   academyId: string;
   academyName: string;
   tenantSlug: string;
+  academyLogoUrl?: string | null;
   planId: string;
   planName: string;
   status: SubscriptionStatus;
@@ -208,6 +209,7 @@ export async function getAcademySubscription(
     academyId: academy.id,
     academyName: academy.name,
     tenantSlug: academy.path_url,
+    academyLogoUrl: academy.logo_url,
     planId: academy.plan.id,
     planName: academy.plan.name,
     status: academy.subscription_status,

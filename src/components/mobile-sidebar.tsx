@@ -11,10 +11,14 @@ export function MobileSidebar({
   tenantSlug, 
   userRole,
   allowsAutomatedEmail,
+  academyName,
+  academyLogoUrl,
 }: { 
   tenantSlug: string; 
   userRole?: string;
   allowsAutomatedEmail?: boolean;
+  academyName?: string;
+  academyLogoUrl?: string | null;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -70,10 +74,20 @@ export function MobileSidebar({
             }`}
           >
             <div className="h-16 flex items-center justify-between px-6 border-b border-slate-200 dark:border-slate-800">
-              <div className="flex items-center gap-3">
-                <Image src="/logo.png" alt="BimbelSync Logo" width={28} height={28} className="object-contain rounded-md" />
-                <span className="text-xl font-bold text-slate-800 dark:text-white capitalize tracking-tight">
-                  BimbelSync
+              <div className="flex items-center gap-3 min-w-0 pr-2">
+                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 p-1 flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700">
+                  {academyLogoUrl ? (
+                    <img
+                      src={academyLogoUrl}
+                      alt={academyName || "Logo"}
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <Image src="/logo.png" alt="BimbelSync Logo" width={28} height={28} className="object-contain rounded-md" />
+                  )}
+                </div>
+                <span className="text-base font-bold text-slate-800 dark:text-white tracking-tight truncate">
+                  {academyName || "BimbelSync"}
                 </span>
               </div>
               <button 

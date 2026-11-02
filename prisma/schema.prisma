@@ -72,6 +72,7 @@ model Academy {
   plan_id                      String    @db.Uuid
   name                         String
   path_url                     String    @unique
+  logo_url                     String?
   phone                        String?
   encrypted_payment_server_key String?
   max_leave_per_month          Int       @default(0)
