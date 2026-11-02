@@ -44,7 +44,7 @@ export default async function TenantLoginPage({ params }: PageProps) {
     notFound();
   }
 
-  // Ambil inisial nama bimbel (misal "Bimbel Juara" -> "BJ")
+  // Inisial nama bimbel (misal "Bimbel Juara" -> "BJ")
   const initials = academy.name
     .split(' ')
     .filter(Boolean)
@@ -60,61 +60,38 @@ export default async function TenantLoginPage({ params }: PageProps) {
         <div className="absolute inset-0 z-0">
           <img
             src="/photo-1.avif"
-            alt="Students background"
-            className="w-full h-full object-cover opacity-40 mix-blend-overlay"
+            alt="Students in library"
+            className="w-full h-full object-cover opacity-50 mix-blend-overlay"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/80 to-slate-900/40"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/60 to-slate-900/10"></div>
         </div>
 
-        {/* Top Header Logo Bimbel */}
-        <div className="relative z-10 flex items-center gap-3.5">
-          <div className="w-11 h-11 bg-white rounded-2xl p-2 shadow-md flex items-center justify-center shrink-0">
+        {/* Top Header Logo & Nama Bimbel */}
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="bg-white p-2.5 rounded-xl shadow-sm flex items-center justify-center overflow-hidden">
             {academy.logo_url ? (
               <img
                 src={academy.logo_url}
                 alt={academy.name}
-                width={36}
-                height={36}
-                className="w-full h-full object-contain"
+                className="w-7 h-7 object-cover rounded-md"
                 fetchPriority="high"
               />
             ) : (
-              <div className="w-full h-full bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-sm">
-                {initials}
-              </div>
+              <Image src="/logo.png" alt="Logo" width={28} height={28} className="w-7 h-7 object-contain rounded-md" />
             )}
           </div>
-          <div className="min-w-0">
-            <span className="text-lg font-bold text-white tracking-tight block truncate">
-              {academy.name}
-            </span>
-            <span className="text-[11px] text-blue-300 font-medium tracking-wide uppercase">
-              Portal Akademik
-            </span>
-          </div>
+          <span className="text-xl font-bold text-white tracking-tight truncate">{academy.name}</span>
         </div>
 
-        {/* Middle Typography Hero */}
-        <div className="relative z-10 mb-16 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold backdrop-blur-md border border-blue-400/20">
-            <span>Portal Resmi Pembelajaran</span>
-          </div>
-          <h1 className="text-[2.5rem] font-bold text-white leading-[1.2] tracking-tight">
+        {/* Bottom Typography Hero */}
+        <div className="relative z-10 mb-20">
+          <h1 className="text-[2.75rem] font-bold text-white mb-6 leading-[1.15] tracking-tight">
             Selamat Datang di <br />
-            <span className="text-blue-400">{academy.name}</span>
+            {academy.name}.
           </h1>
-          <p className="text-slate-300 text-base max-w-sm leading-relaxed font-normal">
-            Satu portal terpadu untuk absensi kelas, jadwal belajar, materi pembelajaran, dan administrasi siswa.
+          <p className="text-slate-300 text-lg max-w-sm leading-relaxed font-medium">
+            Satu platform terpadu untuk efisiensi operasional bimbingan belajar Anda.
           </p>
-        </div>
-
-        {/* Bottom Platform Credit */}
-        <div className="relative z-10 flex items-center gap-2 text-xs text-slate-400 font-medium">
-          <span>Platform didukung oleh</span>
-          <div className="flex items-center gap-1.5 text-white font-bold">
-            <Image src="/logo.png" alt="BimbelSync" width={16} height={16} className="object-contain" />
-            <span>BimbelSync</span>
-          </div>
         </div>
       </div>
 
@@ -123,14 +100,14 @@ export default async function TenantLoginPage({ params }: PageProps) {
         {/* Mobile Header Top */}
         <div className="md:hidden w-full max-w-md mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-xl p-1.5 shadow-sm border border-slate-200 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 bg-white rounded-xl p-1.5 shadow-sm border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden">
               {academy.logo_url ? (
                 <img
                   src={academy.logo_url}
                   alt={academy.name}
                   width={32}
                   height={32}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-cover rounded-lg"
                   fetchPriority="high"
                 />
               ) : (
@@ -143,7 +120,7 @@ export default async function TenantLoginPage({ params }: PageProps) {
               <span className="text-base font-bold text-slate-900 tracking-tight block truncate">
                 {academy.name}
               </span>
-              <span className="text-[10px] text-slate-500 font-medium">Portal Akademik</span>
+              <span className="text-[10px] text-slate-500 font-medium">Portal Bimbel</span>
             </div>
           </div>
         </div>
@@ -151,15 +128,15 @@ export default async function TenantLoginPage({ params }: PageProps) {
         {/* Form Card */}
         <div className="w-full max-w-md bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 sm:p-10 border border-slate-100">
           {/* Logo Emblem on Card */}
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 p-2.5 mx-auto mb-4 flex items-center justify-center shadow-sm">
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 p-2 mx-auto mb-4 flex items-center justify-center shadow-sm overflow-hidden">
               {academy.logo_url ? (
                 <img
                   src={academy.logo_url}
                   alt={academy.name}
                   width={48}
                   height={48}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-cover rounded-xl"
                   fetchPriority="high"
                 />
               ) : (
@@ -178,12 +155,8 @@ export default async function TenantLoginPage({ params }: PageProps) {
           <TenantLoginForm tenantSlug={tenantSlug} />
 
           {/* Footer Card */}
-          <div className="mt-8 pt-5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>Koneksi Aman</span>
-            </div>
-            <span>Powered by BimbelSync</span>
+          <div className="mt-8 pt-4 border-t border-slate-100 text-center text-xs text-slate-400">
+            Powered by BimbelSync
           </div>
         </div>
       </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-import Image from "next/image";
 import { 
   Building2, 
   Upload, 
@@ -11,11 +10,9 @@ import {
   Loader2, 
   Sparkles, 
   Eye, 
-  ShieldCheck, 
-  Zap, 
-  Info 
+  ShieldCheck
 } from "lucide-react";
-import { compressImageToWebP, type CompressionResult } from "@/lib/image-compression";
+import { compressImageToWebP } from "@/lib/image-compression";
 import { updateAcademyBrandingAction } from "./actions";
 
 interface AcademyData {
@@ -40,7 +37,6 @@ export default function BrandingClientPage({
   const [shouldRemoveLogo, setShouldRemoveLogo] = useState(false);
 
   const [isCompressing, setIsCompressing] = useState(false);
-  const [compressionStats, setCompressionStats] = useState<CompressionResult | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{
     type: "success" | "error" | "";
@@ -48,12 +44,6 @@ export default function BrandingClientPage({
   }>({ type: "", text: "" });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const formatBytes = (bytes: number) => {
-    if (bytes < 1024) return bytes + " B";
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-    return (bytes / (1024 * 1024)).toFixed(2) + " MB";
-  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -81,7 +71,6 @@ export default function BrandingClientPage({
       setPendingLogoData(result.dataUrl);
       setLogoPreview(result.dataUrl);
       setShouldRemoveLogo(false);
-      setCompressionStats(result);
     } catch (err) {
       console.error("Kompresi logo gagal:", err);
       setStatusMessage({
@@ -90,7 +79,6 @@ export default function BrandingClientPage({
       });
     } finally {
       setIsCompressing(false);
-      // Reset input agar bisa memilih file yang sama lagi jika perlu
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
@@ -99,7 +87,6 @@ export default function BrandingClientPage({
     setLogoPreview(null);
     setPendingLogoData(null);
     setShouldRemoveLogo(true);
-    setCompressionStats(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -198,7 +185,7 @@ export default function BrandingClientPage({
                   <img
                     src={logoPreview}
                     alt="Logo Preview"
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover rounded-xl"
                   />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
@@ -248,18 +235,8 @@ export default function BrandingClientPage({
                 </div>
 
                 <p className="text-[12px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                  Format gambar: <strong className="text-slate-700 dark:text-slate-300">PNG, JPG, atau WEBP</strong> (disarankan latar transparan). Ukuran file asli bebas, sistem otomatis mengompresi secara cerdas menjadi ~20 KB.
+                  Format gambar: <strong className="text-slate-700 dark:text-slate-300">PNG, JPG, atau WEBP</strong>. Sistem otomatis menyesuaikan dan membulatkan sudut logo secara elegan.
                 </p>
-
-                {/* Compression Info Badge */}
-                {compressionStats && (
-                  <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-medium">
-                    <Zap size={14} className="text-emerald-600" />
-                    <span>
-                      Ukuran asli: <strong>{formatBytes(compressionStats.originalSize)}</strong> → Terkompresi: <strong>{formatBytes(compressionStats.compressedSize)}</strong> (Hemat {compressionStats.reductionPercentage}%)
-                    </span>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -334,12 +311,12 @@ export default function BrandingClientPage({
             </span>
             <div className="p-5 rounded-2xl bg-[#0F172A] text-white space-y-4 shadow-inner relative overflow-hidden">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white p-1.5 shadow-sm flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-white p-1 shadow-sm flex items-center justify-center shrink-0 overflow-hidden">
                   {logoPreview ? (
                     <img
                       src={logoPreview}
                       alt="Logo"
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-cover rounded-lg"
                     />
                   ) : (
                     <div className="w-full h-full bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">
@@ -347,12 +324,12 @@ export default function BrandingClientPage({
                     </div>
                   )}
                 </div>
-                <div>
-                  <h4 className="font-bold text-sm tracking-tight text-white leading-tight">
+                <div className="min-w-0">
+                  <h4 className="font-bold text-sm tracking-tight text-white leading-tight truncate">
                     {name || "Nama Bimbel"}
                   </h4>
-                  <p className="text-[10px] text-blue-300 font-medium">
-                    Portal Siswa & Pengajar
+                  <p className="text-[10px] text-slate-400 font-medium">
+                    Portal Bimbel
                   </p>
                 </div>
               </div>
@@ -370,12 +347,12 @@ export default function BrandingClientPage({
               2. Preview Sidebar Navigasi Dashboard
             </span>
             <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-3 shadow-sm">
-              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-900 p-1 flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700">
+              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-900 p-0.5 flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700 overflow-hidden">
                 {logoPreview ? (
                   <img
                     src={logoPreview}
                     alt="Logo"
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover rounded-md"
                   />
                 ) : (
                   <div className="w-full h-full bg-blue-600 rounded flex items-center justify-center text-white font-bold text-[10px]">
@@ -394,14 +371,14 @@ export default function BrandingClientPage({
             </div>
           </div>
 
-          {/* Benefit Box */}
-          <div className="p-4 rounded-2xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 text-xs text-blue-900 dark:text-blue-300 space-y-1.5">
-            <div className="flex items-center gap-1.5 font-bold text-blue-700 dark:text-blue-400">
-              <ShieldCheck size={16} />
-              <span>Keunggulan Auto-Kompresi</span>
+          {/* Info Box */}
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 text-xs text-slate-600 dark:text-slate-400 space-y-1.5">
+            <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200">
+              <ShieldCheck size={16} className="text-blue-600" />
+              <span>Optimasi Tampilan Otomatis</span>
             </div>
-            <p className="leading-relaxed text-[11.5px] text-slate-600 dark:text-slate-400">
-              Logo disimpan dalam format WebP resolusi tajam dengan berat hanya ~20 KB. Halaman login Anda akan termuat secara instan tanpa ada waktu tunggu (0 ms lag).
+            <p className="leading-relaxed text-[11.5px]">
+              Logo disimpan dalam format WebP tajam dan ringan (~20 KB) dengan sudut melengkung yang halus dan proporsional di seluruh halaman.
             </p>
           </div>
         </div>
@@ -409,4 +386,3 @@ export default function BrandingClientPage({
     </div>
   );
 }
-

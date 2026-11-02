@@ -92,12 +92,12 @@ export default async function DashboardLayout({
       <aside className="hidden md:flex w-64 flex-col h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-20 transition-colors print:hidden">
         <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-800 transition-colors">
           <div className="flex items-center gap-3 min-w-0 pr-2">
-            <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 p-1 flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700">
+            <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5 flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700 overflow-hidden">
               {sub.academyLogoUrl ? (
                 <img
                   src={sub.academyLogoUrl}
                   alt={sub.academyName}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-cover rounded-md"
                 />
               ) : (
                 <Image src="/logo.png" alt="BimbelSync Logo" width={28} height={28} className="object-contain rounded-md" />
