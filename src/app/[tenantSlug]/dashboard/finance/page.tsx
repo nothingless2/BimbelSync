@@ -58,18 +58,10 @@ export default async function FinancePage({
   const paidCount = paidAgg._count.id;
   const unpaidCount = unpaidAgg._count.id;
 
-  // Build filter for paginated list
-  const whereClause: Prisma.InvoiceWhereInput = {
-    academy_id: session.academy_id,
-    ...(q ? { student: { full_name: { contains: q, mode: 'insensitive' } } } : {}),
-    ...(statusParam !== "ALL" ? { payment_status: statusParam as any } : {})
-  };
-
-  // Fetch paginated invoices, total count, active students, and academy bank info concurrently
-  const [totalFiltered, invoices, students, academy] = await Promise.all([
-    prisma.invoice.count({ where: whereClause }),
+  // Fetch invoices akademi (client-side state murni seperti Superadmin Billing agar filter instan 0ms)
+  const [invoices, students, academy] = await Promise.all([
     prisma.invoice.findMany({
-      where: whereClause,
+      where: { academy_id: session.academy_id },
       include: {
         student: true,
         items: true,
@@ -78,8 +70,7 @@ export default async function FinancePage({
       orderBy: {
         created_at: 'desc'
       },
-      take: PAGE_SIZE,
-      skip: (page - 1) * PAGE_SIZE
+      take: 300
     }),
     prisma.student.findMany({
       where: {
@@ -95,8 +86,6 @@ export default async function FinancePage({
       select: { bank_name: true, bank_account: true, name: true, is_smtp_active: true }
     })
   ]);
-
-  const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
 
   const bankInfo = {
     bankName: academy?.bank_name || "",
@@ -156,11 +145,6 @@ export default async function FinancePage({
 
       <FinanceClientPage 
         invoices={invoices} 
-        currentPage={page}
-        totalPages={totalPages}
-        totalItems={totalFiltered}
-        initialQ={q}
-        initialStatus={statusParam}
         initialBankInfo={bankInfo}
       />
     </div>

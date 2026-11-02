@@ -5,7 +5,7 @@ import { AddScheduleModal } from "@/components/modals/add-schedule-modal";
 import { AutoSchedulerModal } from "@/components/modals/auto-scheduler-modal";
 import { redirect } from "next/navigation";
 import SchedulesClientPage from "./client-page";
-import { startOfWeek, addDays, parseISO, isValid, startOfMonth, addMonths } from "date-fns";
+import { startOfWeek, endOfWeek, addDays, parseISO, isValid, startOfMonth, endOfMonth, addMonths } from "date-fns";
 
 export default async function SchedulesPage({ 
   params,
@@ -28,16 +28,12 @@ export default async function SchedulesPage({
     }
   }
   
-  let queryStart: Date;
-  let queryEnd: Date;
-
-  if (view === "monthly") {
-    queryStart = startOfMonth(refDate);
-    queryEnd = addMonths(queryStart, 1); // Awal bulan depannya
-  } else {
-    queryStart = startOfWeek(refDate, { weekStartsOn: 1 });
-    queryEnd = addDays(queryStart, 7); // Hari Senin minggu berikutnya
-  }
+  // Selalu ambil 1 bulan kalender penuh (termasuk grid hari senin awal s/d minggu akhir)
+  // agar perpindahan mode Mingguan <-> Bulanan dapat berjalan 100% instan di browser via useState
+  const monthStart = startOfMonth(refDate);
+  const monthEnd = endOfMonth(refDate);
+  const queryStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+  const queryEnd = addDays(endOfWeek(monthEnd, { weekStartsOn: 1 }), 1);
 
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("bimbelsync_session")?.value;
@@ -94,7 +90,7 @@ export default async function SchedulesPage({
         schedules={schedules} 
         rooms={rooms}
         tenantSlug={tenantSlug} 
-        currentDateStr={queryStart.toISOString()}
+        currentDateStr={refDate.toISOString()}
         viewMode={view}
         isTutor={isTutor}
         headerActions={
