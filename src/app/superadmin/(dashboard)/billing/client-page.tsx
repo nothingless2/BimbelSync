@@ -14,7 +14,8 @@ import {
   voidInvoiceAction, 
   createInvoiceAction, 
   deleteInvoiceAction,
-  updatePlatformBankInfoAction 
+  updatePlatformBankInfoAction,
+  getPlatformInvoiceProofAction
 } from "./actions";
 import { Pagination } from "@/components/ui/pagination";
 import { ViewProofModal } from "@/components/modals/view-proof-modal";
@@ -187,7 +188,8 @@ interface InvoiceItem {
   paid_at: string | null;
   payment_status: string;
   verified_by: { name: string | null; email: string } | null;
-  proof_of_payment_url: string | null;
+  has_proof: boolean;
+  proof_of_payment_url?: string | null;
 }
 
 interface Props {
@@ -235,9 +237,25 @@ export default function BillingClientPage({ invoices, academies, plans, initialB
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<"ALL" | "NEED_VERIFICATION" | "UNPAID" | "PAID" | "OVERDUE" | "VOID">("ALL");
   const [selectedProofInvoice, setSelectedProofInvoice] = useState<InvoiceItem | null>(null);
+  const [proofImageUrl, setProofImageUrl] = useState<string | null>(null);
+  const [isLoadingProof, setIsLoadingProof] = useState(false);
   const [isVerifyingProof, setIsVerifyingProof] = useState(false);
 
-  const totalNeedVerification = invoices.filter(i => i.proof_of_payment_url && i.payment_status !== "PAID").length;
+  const handleOpenProof = async (invoice: InvoiceItem) => {
+    setSelectedProofInvoice(invoice);
+    setIsLoadingProof(true);
+    setProofImageUrl(null);
+    const res = await getPlatformInvoiceProofAction(invoice.id);
+    setIsLoadingProof(false);
+    if (res.error) {
+      toast.error(res.error);
+      setSelectedProofInvoice(null);
+    } else if (res.proof_of_payment_url) {
+      setProofImageUrl(res.proof_of_payment_url);
+    }
+  };
+
+  const totalNeedVerification = invoices.filter(i => i.has_proof && i.payment_status !== "PAID").length;
 
   const filteredInvoices = invoices.filter(invoice => {
     const matchSearch = invoice.academy.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -246,7 +264,7 @@ export default function BillingClientPage({ invoices, academies, plans, initialB
     if (filterStatus === "ALL") {
       matchStatus = true;
     } else if (filterStatus === "NEED_VERIFICATION") {
-      matchStatus = !!invoice.proof_of_payment_url && invoice.payment_status !== "PAID";
+      matchStatus = !!invoice.has_proof && invoice.payment_status !== "PAID";
     } else {
       matchStatus = invoice.payment_status === filterStatus;
     }
@@ -527,7 +545,7 @@ export default function BillingClientPage({ invoices, academies, plans, initialB
                       {invoice.paid_at ? new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric" }).format(new Date(invoice.paid_at)) : "-"}
                     </td>
                     <td className="px-6 py-4">
-                      {invoice.proof_of_payment_url && invoice.payment_status !== "PAID" ? (
+                      {invoice.has_proof && invoice.payment_status !== "PAID" ? (
                         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/50">
                           <Clock size={12} />
                           Menunggu Verifikasi
@@ -547,9 +565,9 @@ export default function BillingClientPage({ invoices, academies, plans, initialB
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {invoice.proof_of_payment_url && (
+                        {invoice.has_proof && (
                           <button
-                            onClick={() => setSelectedProofInvoice(invoice)}
+                            onClick={() => handleOpenProof(invoice)}
                             className="px-2.5 py-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-semibold border border-blue-200 dark:border-blue-800/60"
                             title="Lihat Bukti Bayar"
                           >
@@ -805,8 +823,12 @@ export default function BillingClientPage({ invoices, academies, plans, initialB
       {selectedProofInvoice && (
         <ViewProofModal
           isOpen={!!selectedProofInvoice}
-          onClose={() => setSelectedProofInvoice(null)}
-          imageUrl={selectedProofInvoice.proof_of_payment_url}
+          onClose={() => {
+            setSelectedProofInvoice(null);
+            setProofImageUrl(null);
+          }}
+          imageUrl={proofImageUrl}
+          isLoading={isLoadingProof}
           invoiceTitle={`INV-${selectedProofInvoice.id.split("-")[0].toUpperCase()}`}
           academyName={selectedProofInvoice.academy.name}
           invoicePeriod={new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(new Date(selectedProofInvoice.billing_period))}

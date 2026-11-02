@@ -30,6 +30,7 @@ export function SuperadminNav() {
           <Link
             key={href}
             href={href}
+            prefetch={true}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-medium text-sm ${
               isActive(href, exact)
                 ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
@@ -45,6 +46,7 @@ export function SuperadminNav() {
       <div className="p-4 border-t border-slate-200 dark:border-slate-800 space-y-1">
         <Link
           href="/superadmin/support"
+          prefetch={true}
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-medium text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
         >
           <HelpCircle size={18} />

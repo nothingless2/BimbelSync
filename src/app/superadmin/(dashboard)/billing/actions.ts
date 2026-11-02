@@ -2,6 +2,8 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
+import { decrypt } from "@/lib/auth";
 import { requireSuperadminSession } from "@/lib/session";
 import { changeAcademyPlan, activateAllDuePendingPlans } from "@/lib/subscription";
 import { SubscriptionStatus } from "@prisma/client";
@@ -311,6 +313,44 @@ export async function updatePlatformBankInfoAction(bankName: string, bankAccount
   } catch (error) {
     console.error("updatePlatformBankInfoAction error:", error);
     return { error: "Terjadi kesalahan saat menyimpan pengaturan rekening bank." };
+  }
+}
+
+/**
+ * Mengambil bukti pembayaran secara on-demand dengan validasi hak akses anti-IDOR (OWASP A01).
+ * Hanya Superadmin atau Admin dari akademi pemilik invoice yang diizinkan.
+ */
+export async function getPlatformInvoiceProofAction(invoiceId: string) {
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get("bimbelsync_session")?.value;
+  if (!sessionToken) return { error: "Akses ditolak. Silakan login." };
+
+  const session = await decrypt(sessionToken);
+  if (!session) return { error: "Sesi tidak valid." };
+
+  try {
+    const invoice = await prisma.platformInvoice.findUnique({
+      where: { id: invoiceId },
+      select: { id: true, academy_id: true, proof_of_payment_url: true }
+    });
+
+    if (!invoice) return { error: "Tagihan tidak ditemukan." };
+
+    // Validasi Otorisasi OWASP A01: Broken Access Control
+    if (session.role !== "SUPERADMIN") {
+      if (session.academy_id !== invoice.academy_id) {
+        return { error: "Akses ditolak. Anda tidak berwenang melihat bukti transfer ini." };
+      }
+    }
+
+    if (!invoice.proof_of_payment_url) {
+      return { error: "Bukti pembayaran belum diunggah." };
+    }
+
+    return { success: true, proof_of_payment_url: invoice.proof_of_payment_url };
+  } catch (error) {
+    console.error("getPlatformInvoiceProofAction error:", error);
+    return { error: "Gagal memuat bukti pembayaran." };
   }
 }
 

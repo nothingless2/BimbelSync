@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { 
   Receipt, User, MoreVertical, Trash2, CheckCircle2, DollarSign, Clock, Search, Filter,
   Landmark, Edit3, X, Loader2
@@ -83,7 +83,12 @@ export default function FinanceClientPage({
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState(initialQ);
-  const filterStatus = initialStatus;
+  const [optimisticStatus, setOptimisticStatus] = useState(initialStatus);
+  const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    setOptimisticStatus(initialStatus);
+  }, [initialStatus]);
 
   const updateParams = (updates: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -96,12 +101,17 @@ export default function FinanceClientPage({
 
   const handleSearchKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      updateParams({ q: searchQuery || null, page: "1" });
+      startTransition(() => {
+        updateParams({ q: searchQuery || null, page: "1" });
+      });
     }
   };
 
   const handleStatusChange = (status: string) => {
-    updateParams({ status: status === "ALL" ? null : status, page: "1" });
+    setOptimisticStatus(status); // Respon instan 0ms pada tombol
+    startTransition(() => {
+      updateParams({ status: status === "ALL" ? null : status, page: "1" });
+    });
   };
 
   const toggleDropdown = (id: string) => {
@@ -203,25 +213,30 @@ export default function FinanceClientPage({
             />
           </div>
           
-          <div className="flex bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-1 shrink-0 overflow-hidden">
+          <div className="flex items-center bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-1 shrink-0 overflow-hidden">
             <button 
               onClick={() => handleStatusChange("ALL")}
-              className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${filterStatus === "ALL" ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+              className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${optimisticStatus === "ALL" ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
             >
               Semua
             </button>
             <button 
               onClick={() => handleStatusChange("UNPAID")}
-              className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${filterStatus === "UNPAID" ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-500 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+              className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${optimisticStatus === "UNPAID" ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-500 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
             >
               Belum Dibayar
             </button>
             <button 
               onClick={() => handleStatusChange("PAID")}
-              className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${filterStatus === "PAID" ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-500 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+              className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${optimisticStatus === "PAID" ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-500 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
             >
               Lunas
             </button>
+            {isPending && (
+              <div className="px-2">
+                <Loader2 size={13} className="animate-spin text-blue-600" />
+              </div>
+            )}
           </div>
         </div>
 

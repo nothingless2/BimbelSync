@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { X, ZoomIn, ZoomOut, RotateCcw, ExternalLink, Download, CheckCircle2, Clock } from "lucide-react";
+import { X, ZoomIn, ZoomOut, RotateCcw, ExternalLink, Download, CheckCircle2, Clock, Loader2 } from "lucide-react";
 
 interface ViewProofModalProps {
   isOpen: boolean;
   onClose: () => void;
   imageUrl: string | null;
+  isLoading?: boolean;
   invoiceTitle?: string;
   invoicePeriod?: string;
   invoiceAmount?: string;
@@ -21,6 +22,7 @@ export function ViewProofModal({
   isOpen,
   onClose,
   imageUrl,
+  isLoading = false,
   invoiceTitle,
   invoicePeriod,
   invoiceAmount,
@@ -32,13 +34,14 @@ export function ViewProofModal({
 }: ViewProofModalProps) {
   const [zoom, setZoom] = useState(1);
 
-  if (!isOpen || !imageUrl) return null;
+  if (!isOpen) return null;
 
   const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 3));
   const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.25, 0.5));
   const handleResetZoom = () => setZoom(1);
 
   const openInNewTab = () => {
+    if (!imageUrl) return;
     try {
       if (imageUrl.startsWith("data:")) {
         const parts = imageUrl.split(",");
@@ -56,12 +59,12 @@ export function ViewProofModal({
         window.open(imageUrl, "_blank");
       }
     } catch (e) {
-      // Fallback
       window.open(imageUrl, "_blank");
     }
   };
 
   const handleDownload = () => {
+    if (!imageUrl) return;
     try {
       const link = document.createElement("a");
       if (imageUrl.startsWith("data:")) {
@@ -116,42 +119,46 @@ export function ViewProofModal({
           </div>
 
           <div className="flex items-center gap-1">
-            <button
-              onClick={handleZoomOut}
-              title="Perkecil"
-              className="p-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
-            >
-              <ZoomOut size={16} />
-            </button>
-            <button
-              onClick={handleResetZoom}
-              title="Reset Ukuran"
-              className="p-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
-            >
-              <RotateCcw size={16} />
-            </button>
-            <button
-              onClick={handleZoomIn}
-              title="Perbesar"
-              className="p-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
-            >
-              <ZoomIn size={16} />
-            </button>
-            <div className="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-1" />
-            <button
-              onClick={openInNewTab}
-              title="Buka Tab Baru"
-              className="p-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
-            >
-              <ExternalLink size={16} />
-            </button>
-            <button
-              onClick={handleDownload}
-              title="Unduh File"
-              className="p-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
-            >
-              <Download size={16} />
-            </button>
+            {!isLoading && imageUrl && (
+              <>
+                <button
+                  onClick={handleZoomOut}
+                  title="Perkecil"
+                  className="p-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
+                >
+                  <ZoomOut size={16} />
+                </button>
+                <button
+                  onClick={handleResetZoom}
+                  title="Reset Ukuran"
+                  className="p-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
+                >
+                  <RotateCcw size={16} />
+                </button>
+                <button
+                  onClick={handleZoomIn}
+                  title="Perbesar"
+                  className="p-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
+                >
+                  <ZoomIn size={16} />
+                </button>
+                <div className="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-1" />
+                <button
+                  onClick={openInNewTab}
+                  title="Buka Tab Baru"
+                  className="p-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
+                >
+                  <ExternalLink size={16} />
+                </button>
+                <button
+                  onClick={handleDownload}
+                  title="Unduh File"
+                  className="p-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
+                >
+                  <Download size={16} />
+                </button>
+              </>
+            )}
             <button
               onClick={onClose}
               title="Tutup"
@@ -162,28 +169,40 @@ export function ViewProofModal({
           </div>
         </div>
 
-        {/* Image Container */}
+        {/* Content Container */}
         <div className="p-4 bg-slate-100 dark:bg-slate-950 flex-1 overflow-auto flex items-center justify-center min-h-[350px]">
-          <div
-            className="transition-transform duration-150 origin-center max-w-full"
-            style={{ transform: `scale(${zoom})` }}
-          >
-            <img
-              src={imageUrl}
-              alt="Bukti Transfer"
-              className="max-h-[60vh] w-auto object-contain rounded-xl shadow-md border border-slate-200 dark:border-slate-800 bg-white"
-            />
-          </div>
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-12 text-slate-500 dark:text-slate-400">
+              <Loader2 size={36} className="animate-spin text-blue-600 mb-3" />
+              <p className="text-sm font-semibold">Memuat bukti pembayaran...</p>
+              <p className="text-xs text-slate-400 mt-1">Mengambil dokumen transfer terverifikasi</p>
+            </div>
+          ) : imageUrl ? (
+            <div
+              className="transition-transform duration-150 origin-center max-w-full"
+              style={{ transform: `scale(${zoom})` }}
+            >
+              <img
+                src={imageUrl}
+                alt="Bukti Transfer"
+                className="max-h-[60vh] w-auto object-contain rounded-xl shadow-md border border-slate-200 dark:border-slate-800 bg-white"
+              />
+            </div>
+          ) : (
+            <div className="text-sm text-slate-500 italic">Bukti pembayaran tidak ditemukan.</div>
+          )}
         </div>
 
         {/* Footer Actions */}
         <div className="flex flex-wrap items-center justify-between gap-3 p-4 px-6 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
           <div className="text-xs text-slate-500 dark:text-slate-400">
-            {zoom !== 1 ? `Zoom: ${Math.round(zoom * 100)}%` : "Klik tombol zoom atau buka di tab baru untuk tampilan penuh"}
+            {!isLoading && imageUrl && zoom !== 1
+              ? `Zoom: ${Math.round(zoom * 100)}%`
+              : "Klik tombol zoom atau buka di tab baru untuk tampilan penuh"}
           </div>
 
           <div className="flex items-center gap-2">
-            {onReupload && !isPaid && (
+            {onReupload && !isPaid && !isLoading && (
               <button
                 onClick={() => {
                   onClose();
@@ -195,7 +214,7 @@ export function ViewProofModal({
               </button>
             )}
 
-            {onVerify && !isPaid && (
+            {onVerify && !isPaid && !isLoading && (
               <button
                 onClick={onVerify}
                 disabled={isVerifying}
@@ -218,4 +237,3 @@ export function ViewProofModal({
     </div>
   );
 }
-

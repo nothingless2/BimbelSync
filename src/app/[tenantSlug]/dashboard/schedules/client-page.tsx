@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, Clock, MapPin, User, MoreVertical, Trash2, Calendar as CalendarIcon, Grid, ArrowRight, Search, Filter } from "lucide-react";
+import { useState, useTransition, useEffect } from "react";
+import { ChevronLeft, ChevronRight, Clock, MapPin, User, MoreVertical, Trash2, Calendar as CalendarIcon, Grid, ArrowRight, Search, Filter, Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { deleteScheduleAction, bulkDeleteSchedulesAction } from "./actions";
 import { CancelScheduleModal } from "@/components/modals/cancel-schedule-modal";
@@ -44,9 +44,16 @@ export default function SchedulesClientPage({
   const [selectedDaySchedules, setSelectedDaySchedules] = useState<{date: Date, schedules: ScheduleWithRelations[]} | null>(null);
   const [selectedSchedules, setSelectedSchedules] = useState<string[]>([]);
   const [isSelectMode, setIsSelectMode] = useState(false);
+  const [optimisticView, setOptimisticView] = useState(viewMode);
+  const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    setOptimisticView(viewMode);
+  }, [viewMode]);
 
   const currentDate = parseISO(currentDateStr);
   const isMonthly = viewMode === "monthly";
+  const isOptimisticMonthly = optimisticView === "monthly";
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<"ALL" | "SCHEDULED" | "CANCELLED">("ALL");
@@ -59,30 +66,37 @@ export default function SchedulesClientPage({
     return matchSearch && matchStatus;
   });
 
-  // Navigation handlers
+  // Navigation handlers with instant optimistic UI and React transition
   const goToPrevious = () => {
-    if (isMonthly) {
-      const prev = subMonths(currentDate, 1);
-      router.push(`/${tenantSlug}/dashboard/schedules?view=monthly&date=${prev.toISOString()}`);
-    } else {
-      const prev = subWeeks(currentDate, 1);
-      router.push(`/${tenantSlug}/dashboard/schedules?view=weekly&date=${prev.toISOString()}`);
-    }
+    startTransition(() => {
+      if (isOptimisticMonthly) {
+        const prev = subMonths(currentDate, 1);
+        router.push(`/${tenantSlug}/dashboard/schedules?view=monthly&date=${prev.toISOString()}`);
+      } else {
+        const prev = subWeeks(currentDate, 1);
+        router.push(`/${tenantSlug}/dashboard/schedules?view=weekly&date=${prev.toISOString()}`);
+      }
+    });
   };
 
   const goToNext = () => {
-    if (isMonthly) {
-      const next = addMonths(currentDate, 1);
-      router.push(`/${tenantSlug}/dashboard/schedules?view=monthly&date=${next.toISOString()}`);
-    } else {
-      const next = addWeeks(currentDate, 1);
-      router.push(`/${tenantSlug}/dashboard/schedules?view=weekly&date=${next.toISOString()}`);
-    }
+    startTransition(() => {
+      if (isOptimisticMonthly) {
+        const next = addMonths(currentDate, 1);
+        router.push(`/${tenantSlug}/dashboard/schedules?view=monthly&date=${next.toISOString()}`);
+      } else {
+        const next = addWeeks(currentDate, 1);
+        router.push(`/${tenantSlug}/dashboard/schedules?view=weekly&date=${next.toISOString()}`);
+      }
+    });
   };
 
   const toggleViewMode = (mode: "weekly" | "monthly") => {
-    if (mode === viewMode) return;
-    router.push(`/${tenantSlug}/dashboard/schedules?view=${mode}&date=${currentDate.toISOString()}`);
+    if (mode === optimisticView) return;
+    setOptimisticView(mode); // Reaksi seketika (0ms) di UI
+    startTransition(() => {
+      router.push(`/${tenantSlug}/dashboard/schedules?view=${mode}&date=${currentDate.toISOString()}`);
+    });
   };
 
   // Weekly calculations
@@ -223,28 +237,29 @@ export default function SchedulesClientPage({
             <div className="flex bg-slate-100 dark:bg-slate-800 rounded-xl p-1 shrink-0">
               <button 
                 onClick={() => toggleViewMode("weekly")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${!isMonthly ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${!isOptimisticMonthly ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
               >
                 <Grid size={16} /> Mingguan
               </button>
               <button 
                 onClick={() => toggleViewMode("monthly")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${isMonthly ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${isOptimisticMonthly ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
               >
                 <CalendarIcon size={16} /> Bulanan
               </button>
             </div>
 
             {/* Date Navigation */}
-            <div className="flex items-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-1">
+            <div className="flex items-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-1 relative">
               <button onClick={goToPrevious} className="p-2 hover:bg-white dark:hover:bg-slate-800 rounded-lg text-slate-500 transition-colors">
                 <ChevronLeft size={18} />
               </button>
-              <span className="px-4 font-semibold text-sm text-slate-700 dark:text-slate-300 whitespace-nowrap">
+              <span className="px-4 font-semibold text-sm text-slate-700 dark:text-slate-300 whitespace-nowrap flex items-center gap-2">
                 {isMonthly 
                   ? format(monthStart, "MMMM yyyy", { locale: localeId })
                   : `${format(currentDate, "d MMM yyyy", { locale: localeId })} - ${format(weekEnd, "d MMM yyyy", { locale: localeId })}`
                 }
+                {isPending && <Loader2 size={13} className="animate-spin text-blue-600" />}
               </span>
               <button onClick={goToNext} className="p-2 hover:bg-white dark:hover:bg-slate-800 rounded-lg text-slate-500 transition-colors">
                 <ChevronRight size={18} />
