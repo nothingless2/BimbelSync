@@ -295,6 +295,33 @@ export default function TenantReportsClientPage({
     window.print();
   };
 
+  const availableMonths = useMemo(() => {
+    const set = new Set<string>();
+    const now = new Date();
+    set.add(format(now, "yyyy-MM"));
+    set.add(format(subMonths(now, 1), "yyyy-MM"));
+    invoices.forEach(inv => {
+      const d = new Date(inv.paid_at);
+      if (!isNaN(d.getTime())) {
+        set.add(format(d, "yyyy-MM"));
+      }
+    });
+    return Array.from(set).sort().reverse();
+  }, [invoices]);
+
+  const handleSelectMonth = (monthStr: string) => {
+    if (!monthStr) {
+      applyPreset("ALL");
+      return;
+    }
+    const [y, m] = monthStr.split("-").map(Number);
+    const start = new Date(y, m - 1, 1);
+    const end = new Date(y, m, 0);
+    setStartDate(format(start, "yyyy-MM-dd"));
+    setEndDate(format(end, "yyyy-MM-dd"));
+    setQuickPreset(`MONTH_${monthStr}`);
+  };
+
   const periodOptions = [
     { value: "DAILY", label: "Harian" },
     { value: "WEEKLY", label: "Mingguan" },
@@ -304,15 +331,6 @@ export default function TenantReportsClientPage({
 
   return (
     <div className="space-y-6 print-container">
-      {/* Formal PDF Header (Only visible in Print mode) */}
-      <div className="hidden print:block text-center mb-8 border-b-2 border-black pb-4">
-        <h1 className="text-2xl font-bold uppercase tracking-widest text-black print-serif">LAPORAN KEUANGAN BIMBEL</h1>
-        <p className="text-black text-base font-semibold mt-1 print-serif">{academyName}</p>
-        <p className="text-black text-xs mt-1 print-serif">
-          Periode Laporan: <strong>{formatPeriodText(startDate, endDate)}</strong> | Tanggal Cetak: {format(new Date(), "dd MMMM yyyy, HH:mm", { locale: localeId })} WIB
-        </p>
-      </div>
-
       {/* Header & Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 no-print">
         <div>
@@ -349,28 +367,48 @@ export default function TenantReportsClientPage({
             </div>
           </div>
 
-          {/* Quick Presets */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            {[
-              { id: "ALL", label: "Semua Waktu" },
-              { id: "THIS_MONTH", label: "Bulan Ini" },
-              { id: "LAST_MONTH", label: "Bulan Lalu" },
-              { id: "30_DAYS", label: "30 Hari Terakhir" },
-              { id: "THIS_YEAR", label: "Tahun Ini" },
-            ].map(p => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => applyPreset(p.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                  quickPreset === p.id 
-                    ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30" 
-                    : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
+          {/* Quick Presets & Month Picker */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              {[
+                { id: "ALL", label: "Semua Waktu" },
+                { id: "THIS_MONTH", label: "Bulan Ini" },
+                { id: "LAST_MONTH", label: "Bulan Lalu" },
+                { id: "30_DAYS", label: "30 Hari Terakhir" },
+                { id: "THIS_YEAR", label: "Tahun Ini" },
+              ].map(p => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => applyPreset(p.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                    quickPreset === p.id 
+                      ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30" 
+                      : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Specific Month Select */}
+            <select
+              value={quickPreset.startsWith("MONTH_") ? quickPreset.replace("MONTH_", "") : ""}
+              onChange={(e) => handleSelectMonth(e.target.value)}
+              className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            >
+              <option value="">Pilih Bulan...</option>
+              {availableMonths.map((m) => {
+                const [year, month] = m.split("-").map(Number);
+                const date = new Date(year, month - 1, 1);
+                return (
+                  <option key={m} value={m}>
+                    {format(date, "MMMM yyyy", { locale: localeId })}
+                  </option>
+                );
+              })}
+            </select>
           </div>
         </div>
 
@@ -424,82 +462,66 @@ export default function TenantReportsClientPage({
         </div>
       </div>
 
-      {/* Print Specific CSS */}
+      {/* Print Specific CSS: Suppress browser default header/footer completely */}
       <style dangerouslySetInnerHTML={{__html: `
-        @media print {
-          /* Hide Sidebar and Nav */
-          body * { visibility: hidden; }
-          .print-container, .print-container * { 
-            visibility: visible; 
-            color: black !important;
-            border-color: #e2e8f0 !important;
-          }
-          .print-container { 
-            position: absolute; 
-            left: 0; 
-            top: 0; 
-            width: 100%; 
-            padding: 20px;
-          }
-          .no-print { display: none !important; }
-          
-          /* Formal Serif Font */
-          .print-serif, .print-container { font-family: "Times New Roman", Times, serif !important; }
-          
-          /* Simplify Cards */
-          .print-card { 
-            box-shadow: none !important; 
-            border: 1px solid #000 !important;
-            border-radius: 0 !important;
-            background: white !important;
-          }
-
-          /* Hide UI Dashboard elements to show only narrative in print */
-          .print-card, .print-chart-wrapper { display: none !important; }
-          
-          /* Simplify Table */
-          .print-table, .print-table .overflow-x-auto { 
-            border: none !important; 
-            border-radius: 0 !important; 
-            box-shadow: none !important; 
-            background: transparent !important; 
-            overflow: visible !important; 
-            display: block !important;
-          }
-          .print-table table { display: table !important; width: 100% !important; }
-          .print-table th, .print-table td { border-bottom: 1px solid #000 !important; padding-top: 8px !important; padding-bottom: 8px !important; }
-          .print-table tr { page-break-inside: avoid; break-inside: avoid; }
-          .print-table thead { display: table-header-group; }
-        }
         @page {
-          margin: 1cm;
           size: auto;
+          margin: 0mm;
+        }
+        @media print {
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          body * {
+            visibility: hidden;
+          }
+          .print-container, .print-container * {
+            visibility: visible;
+            color: #000000 !important;
+            border-color: #000000 !important;
+          }
+          .print-container {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            padding: 20mm 15mm !important;
+            margin: 0 !important;
+            background: #ffffff !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+          .print-serif {
+            font-family: "Times New Roman", Times, serif !important;
+          }
+          table {
+            page-break-inside: auto;
+          }
+          tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+          thead {
+            display: table-header-group;
+          }
         }
       `}} />
 
-      {/* Narrative Report (Only visible in Print mode) */}
-      <div className="hidden print:block text-black print-serif leading-relaxed text-justify mb-8">
-        <h2 className="text-xl font-bold mb-4 uppercase border-b border-black pb-2">1. Ringkasan Eksekutif</h2>
-        <p className="mb-4">
-          Dokumen ini merupakan laporan resmi pendapatan institusi pendidikan <strong>{academyName}</strong> untuk periode <strong>{formatPeriodText(startDate, endDate)}</strong> yang dicetak pada <strong>{format(new Date(), "dd MMMM yyyy", { locale: localeId })}</strong>. 
-          Laporan ini menguraikan arus kas masuk yang dihasilkan dari pembayaran biaya pendidikan dan program siswa.
-        </p>
-
-        <h2 className="text-xl font-bold mb-4 uppercase border-b border-black pb-2 mt-6">2. Tinjauan Pendapatan</h2>
-        <p className="mb-4">
-          Selama periode <strong>{formatPeriodText(startDate, endDate)}</strong>, institusi berhasil mencatat total <strong>{filteredInvoices.length} transaksi selesai</strong> dengan akumulasi pendapatan kotor sebesar <strong>{formatRupiah(filteredTotalRevenue)}</strong>.
-          Total siswa aktif terdaftar saat ini berjumlah <strong>{activeStudentsCount} siswa</strong>, dengan estimasi total piutang/tunggakan tercatat sebesar <strong>{formatRupiah(outstandingRevenue)}</strong>.
-        </p>
-
-        <h2 className="text-xl font-bold mb-4 uppercase border-b border-black pb-2 mt-6">3. Alokasi Pendapatan per Program</h2>
-        <p className="mb-4">
-          Rincian berikut menggambarkan distribusi pendapatan di berbagai program pendidikan yang ditawarkan oleh institusi pada periode ini:
-        </p>
-        <table className="w-full mb-6 border-collapse">
+      {/* Dedicated Clean Print Report (Only Alokasi Pendapatan & Buku Besar Transaksi) */}
+      <div className="hidden print:block text-black print-serif leading-relaxed">
+        <h2 className="text-xl font-bold mb-4 uppercase border-b border-black pb-2 tracking-wide">
+          3. ALOKASI PENDAPATAN PER PROGRAM
+        </h2>
+        <table className="w-full mb-8 border-collapse text-sm">
           <thead>
             <tr>
-              <th className="border border-black px-4 py-2 text-left bg-gray-100">Nama Program</th>
-              <th className="border border-black px-4 py-2 text-right bg-gray-100">Total Pendapatan</th>
+              <th className="border border-black px-4 py-2.5 text-left bg-gray-100 font-bold">Nama Program</th>
+              <th className="border border-black px-4 py-2.5 text-right bg-gray-100 font-bold">Total Pendapatan</th>
             </tr>
           </thead>
           <tbody>
@@ -511,20 +533,67 @@ export default function TenantReportsClientPage({
             ))}
             {filteredProgramRevenueData.length === 0 && (
               <tr>
-                <td colSpan={2} className="border border-black px-4 py-2 text-center">Belum ada pendapatan program yang tercatat pada periode ini.</td>
+                <td colSpan={2} className="border border-black px-4 py-3 text-center text-gray-500">
+                  Belum ada pendapatan program yang tercatat pada periode ini.
+                </td>
               </tr>
             )}
           </tbody>
         </table>
 
-        <h2 className="text-xl font-bold mb-4 uppercase border-b border-black pb-2 mt-6">4. Buku Besar Transaksi (Rincian)</h2>
-        <p className="mb-4">
-          Selama periode <strong>{formatPeriodText(startDate, endDate)}</strong>, sebanyak <strong>{filteredInvoices.length} transaksi selesai</strong> telah tercatat pada sistem. Rincian dari setiap transaksi dilampirkan pada tabel di bawah ini.
+        <h2 className="text-xl font-bold mb-2 uppercase border-b border-black pb-2 mt-6 tracking-wide">
+          4. BUKU BESAR TRANSAKSI (RINCIAN)
+        </h2>
+        <p className="mb-4 text-sm text-black print-serif">
+          Daftar seluruh transaksi pembayaran yang telah diselesaikan oleh siswa terkait selama periode pelaporan ini dicatat di bawah ini untuk keperluan audit dan kepatuhan.
         </p>
+
+        <table className="w-full border-collapse text-xs">
+          <thead>
+            <tr>
+              <th className="border border-black px-3 py-2.5 text-left font-bold uppercase tracking-wider bg-gray-100">Tanggal</th>
+              <th className="border border-black px-3 py-2.5 text-left font-bold uppercase tracking-wider bg-gray-100">ID Transaksi</th>
+              <th className="border border-black px-3 py-2.5 text-left font-bold uppercase tracking-wider bg-gray-100">Nama Siswa</th>
+              <th className="border border-black px-3 py-2.5 text-left font-bold uppercase tracking-wider bg-gray-100">Program / Rincian</th>
+              <th className="border border-black px-3 py-2.5 text-right font-bold uppercase tracking-wider bg-gray-100">Pendapatan</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredInvoices.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="border border-black px-4 py-6 text-center text-gray-500 font-medium text-sm">
+                  Tidak ada rincian transaksi pada rentang tanggal yang dipilih.
+                </td>
+              </tr>
+            ) : (
+              filteredInvoices.map((inv) => (
+                <tr key={inv.id}>
+                  <td className="border border-black px-3 py-2 whitespace-nowrap">
+                    {format(new Date(inv.paid_at), "dd MMM yyyy, HH:mm", { locale: localeId })}
+                  </td>
+                  <td className="border border-black px-3 py-2 font-mono text-[10px]">
+                    {inv.id}
+                  </td>
+                  <td className="border border-black px-3 py-2 font-medium">
+                    {inv.student_name}
+                  </td>
+                  <td className="border border-black px-3 py-2 text-[11px]">
+                    {inv.items && inv.items.length > 0
+                      ? inv.items.map(it => it.description).join(", ")
+                      : "-"}
+                  </td>
+                  <td className="border border-black px-3 py-2 text-right font-bold">
+                    {formatRupiah(inv.amount)}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Screen Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 no-print">
         {/* Card 1: Revenue */}
         <div className="group relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-fuchsia-600 p-6 rounded-3xl shadow-xl shadow-purple-500/30 flex items-center gap-5 print-card transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-500/40 border border-white/10">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none group-hover:scale-110 transition-transform duration-500"></div>
@@ -576,7 +645,7 @@ export default function TenantReportsClientPage({
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 no-print">
         {/* Revenue Bar Chart */}
         <div className="lg:col-span-2 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 dark:shadow-none print-chart-wrapper transition-all duration-300 hover:shadow-2xl">
           <div className="flex justify-between items-center mb-6">
@@ -649,7 +718,7 @@ export default function TenantReportsClientPage({
       </div>
 
       {/* Table of Latest Transactions */}
-      <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden print-table mt-8">
+      <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden no-print mt-8">
         <div className="p-6 border-b border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-r from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 no-print">
           <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Rincian Transaksi Pendapatan</h3>
         </div>
