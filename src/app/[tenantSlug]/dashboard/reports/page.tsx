@@ -28,8 +28,12 @@ export default async function TenantReportsPage({
   try {
     const now = new Date();
     
-    // Fetch all paid invoices, student count, and unpaid invoices concurrently
-    const [invoices, activeStudentsCount, unpaidInvoices] = await Promise.all([
+    // Fetch academy info, all paid invoices, student count, and unpaid invoices concurrently
+    const [academy, invoices, activeStudentsCount, unpaidInvoices] = await Promise.all([
+      prisma.academy.findUnique({
+        where: { id: session.academy_id },
+        select: { name: true }
+      }),
       prisma.invoice.findMany({
         where: {
           academy_id: session.academy_id,
@@ -121,11 +125,16 @@ export default async function TenantReportsPage({
         student_name: inv.student.full_name,
         amount: inv.total_amount,
         paid_at: paidDate.toISOString(),
+        items: inv.items.map(it => ({
+          description: it.description,
+          amount: it.amount
+        }))
       };
     }).sort((a, b) => new Date(b.paid_at).getTime() - new Date(a.paid_at).getTime());
 
     return (
       <TenantReportsClientPage 
+        academyName={academy?.name || "Bimbel"}
         programRevenueData={programRevenueData}
         invoices={serializedInvoices}
         activeStudentsCount={activeStudentsCount}

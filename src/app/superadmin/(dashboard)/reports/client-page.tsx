@@ -2,10 +2,11 @@
 
 import { useState, useMemo } from "react";
 import { BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { Download, FileText, Printer } from "lucide-react";
+import { Download, FileText, Printer, Calendar, RotateCcw } from "lucide-react";
 import { format, startOfWeek, subWeeks, subMonths, subYears, getWeek } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { toast } from "@/components/ui/sonner";
 
 type ProgramData = {
   name: string;
@@ -24,9 +25,9 @@ type InvoiceData = {
 type PeriodFilter = "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
 
 export default function ReportsClientPage({
-  planRevenueData,
+  planRevenueData: initialPlanRevenueData,
   invoices,
-  arpu,
+  arpu: initialArpu,
   churnRate
 }: {
   planRevenueData: ProgramData[];
@@ -35,13 +36,126 @@ export default function ReportsClientPage({
   churnRate: number;
 }) {
   const [period, setPeriod] = useState<PeriodFilter>("MONTHLY");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [quickPreset, setQuickPreset] = useState<string>("ALL");
+
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#6366f1', '#ec4899', '#8b5cf6', '#14b8a6'];
 
   const formatRupiah = (val: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
   };
 
-  // Dynamic Chart Data Generation
+  const parseDateRange = (s: string, e: string) => {
+    let start: Date | null = null;
+    let end: Date | null = null;
+    if (s) {
+      const [y, m, d] = s.split('-').map(Number);
+      start = new Date(y, m - 1, d, 0, 0, 0, 0);
+    }
+    if (e) {
+      const [y, m, d] = e.split('-').map(Number);
+      end = new Date(y, m - 1, d, 23, 59, 59, 999);
+    }
+    return { start, end };
+  };
+
+  const formatPeriodText = (s: string, e: string) => {
+    if (s && e) {
+      const { start, end } = parseDateRange(s, e);
+      if (start && end) {
+        return `${format(start, "dd MMMM yyyy", { locale: localeId })} - ${format(end, "dd MMMM yyyy", { locale: localeId })}`;
+      }
+    }
+    if (s) {
+      const { start } = parseDateRange(s, "");
+      if (start) return `Mulai ${format(start, "dd MMMM yyyy", { locale: localeId })}`;
+    }
+    if (e) {
+      const { end } = parseDateRange("", e);
+      if (end) return `Hingga ${format(end, "dd MMMM yyyy", { locale: localeId })}`;
+    }
+    return "Semua Waktu";
+  };
+
+  const applyPreset = (preset: string) => {
+    const now = new Date();
+    const formatDateInput = (d: Date) => format(d, "yyyy-MM-dd");
+
+    if (preset === "ALL") {
+      setStartDate("");
+      setEndDate("");
+      setQuickPreset("ALL");
+    } else if (preset === "TODAY") {
+      const str = formatDateInput(now);
+      setStartDate(str);
+      setEndDate(str);
+      setQuickPreset("TODAY");
+    } else if (preset === "7_DAYS") {
+      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+      setStartDate(formatDateInput(start));
+      setEndDate(formatDateInput(now));
+      setQuickPreset("7_DAYS");
+    } else if (preset === "30_DAYS") {
+      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29);
+      setStartDate(formatDateInput(start));
+      setEndDate(formatDateInput(now));
+      setQuickPreset("30_DAYS");
+    } else if (preset === "THIS_MONTH") {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      setStartDate(formatDateInput(start));
+      setEndDate(formatDateInput(end));
+      setQuickPreset("THIS_MONTH");
+    } else if (preset === "LAST_MONTH") {
+      const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const end = new Date(now.getFullYear(), now.getMonth(), 0);
+      setStartDate(formatDateInput(start));
+      setEndDate(formatDateInput(end));
+      setQuickPreset("LAST_MONTH");
+    } else if (preset === "THIS_YEAR") {
+      const start = new Date(now.getFullYear(), 0, 1);
+      const end = new Date(now.getFullYear(), 11, 31);
+      setStartDate(formatDateInput(start));
+      setEndDate(formatDateInput(end));
+      setQuickPreset("THIS_YEAR");
+    }
+  };
+
+  // Filtered invoices by date range
+  const filteredInvoices = useMemo(() => {
+    if (!startDate && !endDate) return invoices;
+    const { start, end } = parseDateRange(startDate, endDate);
+
+    return invoices.filter(inv => {
+      const d = new Date(inv.paid_at);
+      if (isNaN(d.getTime())) return true;
+      if (start && d < start) return false;
+      if (end && d > end) return false;
+      return true;
+    });
+  }, [invoices, startDate, endDate]);
+
+  // Recalculate plan revenue data dynamically based on filtered invoices
+  const filteredPlanRevenueData = useMemo(() => {
+    const planMap: Record<string, number> = {};
+    filteredInvoices.forEach(inv => {
+      planMap[inv.plan_name] = (planMap[inv.plan_name] || 0) + inv.amount;
+    });
+    return Object.entries(planMap).map(([name, value]) => ({ name, value }));
+  }, [filteredInvoices]);
+
+  // Recalculate total revenue and ARPU based on filtered data
+  const filteredTotalRevenue = useMemo(() => {
+    return filteredInvoices.reduce((sum, inv) => sum + inv.amount, 0);
+  }, [filteredInvoices]);
+
+  const filteredArpu = useMemo(() => {
+    const paidAcademiesSet = new Set(filteredInvoices.map(inv => inv.academy_id));
+    return paidAcademiesSet.size > 0 ? filteredTotalRevenue / paidAcademiesSet.size : 0;
+  }, [filteredInvoices, filteredTotalRevenue]);
+
+  // Dynamic Chart Data Generation based on filtered invoices
   const chartData = useMemo(() => {
     const now = new Date();
     const dataMap: Record<string, { revenue: number, newSubscribers: number }> = {};
@@ -49,7 +163,7 @@ export default function ReportsClientPage({
 
     // Pre-calculate the first invoice date for each academy to determine when they became a "new subscriber"
     const firstInvoicePerAcademy: Record<string, Date> = {};
-    invoices.forEach((inv) => {
+    filteredInvoices.forEach((inv) => {
       const d = new Date(inv.paid_at);
       if (!firstInvoicePerAcademy[inv.academy_id] || d < firstInvoicePerAcademy[inv.academy_id]) {
         firstInvoicePerAcademy[inv.academy_id] = d;
@@ -99,7 +213,7 @@ export default function ReportsClientPage({
       }
     }
 
-    invoices.forEach(inv => {
+    filteredInvoices.forEach(inv => {
       const d = new Date(inv.paid_at);
       const label = getLabel(d);
       if (dataMap[label] !== undefined) {
@@ -124,15 +238,20 @@ export default function ReportsClientPage({
         totalSubscribers: cumulativeSubscribers
       };
     });
-  }, [invoices, period]);
+  }, [filteredInvoices, period]);
 
   const handleExportCSV = () => {
+    if (filteredInvoices.length === 0) {
+      toast.error("Tidak ada data transaksi pada rentang waktu yang dipilih untuk diekspor.");
+      return;
+    }
+
     const headers = ["Transaction ID", "Date Paid", "Academy Name", "Plan", "Revenue (Rp)"];
-    const rows = invoices.map(inv => [
+    const rows = filteredInvoices.map(inv => [
       inv.id,
       format(new Date(inv.paid_at), "dd MMM yyyy HH:mm", { locale: localeId }),
-      `"${inv.academy_name}"`, // Quote to avoid comma issues
-      `"${inv.plan_name}"`,
+      `"${inv.academy_name.replace(/"/g, '""')}"`,
+      `"${inv.plan_name.replace(/"/g, '""')}"`,
       inv.amount
     ]);
     
@@ -141,17 +260,30 @@ export default function ReportsClientPage({
       ...rows.map(e => e.join(","))
     ].join("\n");
 
+    const dateSuffix = startDate && endDate
+      ? `${startDate}_sd_${endDate}`
+      : startDate
+      ? `mulai_${startDate}`
+      : endDate
+      ? `sampai_${endDate}`
+      : `semua_${format(new Date(), 'yyyyMMdd')}`;
+
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `platform_report_${format(new Date(), 'yyyyMMdd')}.csv`);
+    link.setAttribute("download", `platform_report_${dateSuffix}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    toast.success(`Berhasil mengunduh ${filteredInvoices.length} transaksi ke CSV.`);
   };
 
   const handleExportPDF = () => {
+    if (filteredInvoices.length === 0) {
+      toast.error("Tidak ada data transaksi pada rentang waktu yang dipilih untuk dicetak.");
+      return;
+    }
     window.print();
   };
 
@@ -167,7 +299,10 @@ export default function ReportsClientPage({
       {/* Formal PDF Header (Only visible in Print mode) */}
       <div className="hidden print:block text-center mb-8 border-b-2 border-black pb-4">
         <h1 className="text-2xl font-bold uppercase tracking-widest text-black print-serif">PLATFORM FINANCIAL REPORT</h1>
-        <p className="text-black text-sm mt-1 print-serif">BimbelSync | Generated on: {format(new Date(), "dd MMMM yyyy", { locale: localeId })}</p>
+        <p className="text-black text-sm mt-1 print-serif font-semibold">BimbelSync Platform Management</p>
+        <p className="text-black text-xs mt-1 print-serif">
+          Periode Laporan: <strong>{formatPeriodText(startDate, endDate)}</strong> | Tanggal Cetak: {format(new Date(), "dd MMMM yyyy, HH:mm", { locale: localeId })} WIB
+        </p>
       </div>
 
       {/* Header & Actions */}
@@ -190,6 +325,94 @@ export default function ReportsClientPage({
           >
             <Printer size={16} /> Print Report
           </button>
+        </div>
+      </div>
+
+      {/* Date Range Filter Bar */}
+      <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl p-5 rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 dark:shadow-none no-print transition-all">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+              <Calendar size={20} />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-slate-900 dark:text-white">Filter Rentang Waktu</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Pilih rentang tanggal untuk ekspor CSV dan laporan cetak PDF.</p>
+            </div>
+          </div>
+
+          {/* Quick Presets */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            {[
+              { id: "ALL", label: "Semua Waktu" },
+              { id: "THIS_MONTH", label: "Bulan Ini" },
+              { id: "LAST_MONTH", label: "Bulan Lalu" },
+              { id: "30_DAYS", label: "30 Hari Terakhir" },
+              { id: "THIS_YEAR", label: "Tahun Ini" },
+            ].map(p => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => applyPreset(p.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  quickPreset === p.id 
+                    ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30" 
+                    : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Date Inputs & Summary Indicator */}
+        <div className="mt-4 pt-4 border-t border-slate-200/60 dark:border-slate-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Dari:</span>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  setQuickPreset("CUSTOM");
+                }}
+                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Sampai:</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                  setQuickPreset("CUSTOM");
+                }}
+                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              />
+            </div>
+
+            {(startDate || endDate) && (
+              <button
+                type="button"
+                onClick={() => applyPreset("ALL")}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                title="Reset Filter"
+              >
+                <RotateCcw size={14} />
+                <span>Reset</span>
+              </button>
+            )}
+          </div>
+
+          <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
+            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>
+              Menampilkan: <strong className="text-slate-800 dark:text-slate-200">{filteredInvoices.length}</strong> transaksi ({formatRupiah(filteredTotalRevenue)})
+            </span>
+          </div>
         </div>
       </div>
 
@@ -241,14 +464,14 @@ export default function ReportsClientPage({
       <div className="hidden print:block text-black print-serif leading-relaxed text-justify mb-8">
         <h2 className="text-xl font-bold mb-4 uppercase border-b border-black pb-2">1. Ringkasan Eksekutif</h2>
         <p className="mb-4">
-          Dokumen ini merupakan laporan resmi pendapatan platform <strong>BimbelSync</strong> per <strong>{format(new Date(), "dd MMMM yyyy", { locale: localeId })}</strong>. 
+          Dokumen ini merupakan laporan resmi pendapatan platform <strong>BimbelSync</strong> untuk periode <strong>{formatPeriodText(startDate, endDate)}</strong> yang dicetak pada tanggal <strong>{format(new Date(), "dd MMMM yyyy", { locale: localeId })}</strong>. 
           Laporan ini merincikan performa keuangan dan arus kas langganan yang masuk dari berbagai institusi pendidikan (bimbel) yang berafiliasi.
         </p>
 
         <h2 className="text-xl font-bold mb-4 uppercase border-b border-black pb-2 mt-6">2. Tinjauan Pendapatan Langganan</h2>
         <p className="mb-4">
-          Platform telah mengakumulasikan total <strong>{invoices.length} transaksi langganan lunas</strong> selama periode pelaporan yang dipilih. 
-          Rincian berikut menyoroti kontribusi pendapatan yang dipetakan berdasarkan paket berlangganan (*SaaS*) yang ditawarkan kepada bimbel.
+          Selama periode <strong>{formatPeriodText(startDate, endDate)}</strong>, platform telah mengakumulasikan total <strong>{filteredInvoices.length} transaksi langganan lunas</strong> dengan akumulasi nilai pendapatan sebesar <strong>{formatRupiah(filteredTotalRevenue)}</strong>. 
+          Rata-rata pendapatan per institusi bimbel berbayar (ARPU) pada periode ini adalah sebesar <strong>{formatRupiah(filteredArpu)}</strong>.
         </p>
 
         <h2 className="text-xl font-bold mb-4 uppercase border-b border-black pb-2 mt-6">3. Alokasi Pendapatan per Paket Langganan</h2>
@@ -260,15 +483,15 @@ export default function ReportsClientPage({
             </tr>
           </thead>
           <tbody>
-            {planRevenueData.map((prog, idx) => (
+            {filteredPlanRevenueData.map((prog, idx) => (
               <tr key={idx}>
                 <td className="border border-black px-4 py-2">{prog.name}</td>
                 <td className="border border-black px-4 py-2 text-right font-bold">{formatRupiah(prog.value)}</td>
               </tr>
             ))}
-            {planRevenueData.length === 0 && (
+            {filteredPlanRevenueData.length === 0 && (
               <tr>
-                <td colSpan={2} className="border border-black px-4 py-2 text-center">Belum ada pendapatan paket yang tercatat.</td>
+                <td colSpan={2} className="border border-black px-4 py-2 text-center">Belum ada pendapatan paket yang tercatat pada periode ini.</td>
               </tr>
             )}
           </tbody>
@@ -276,7 +499,7 @@ export default function ReportsClientPage({
 
         <h2 className="text-xl font-bold mb-4 uppercase border-b border-black pb-2 mt-6">4. Buku Besar Transaksi Platform</h2>
         <p className="mb-4">
-          Daftar lengkap seluruh tagihan (invoice) yang telah diselesaikan dan pembayaran langganan yang diterima dari bimbel terkait dicatat di bawah ini untuk keperluan audit dan kepatuhan.
+          Daftar seluruh tagihan (invoice) langganan yang telah diselesaikan oleh bimbel terkait selama periode pelaporan ini dicatat di bawah ini untuk keperluan audit dan kepatuhan.
         </p>
       </div>
 
@@ -285,10 +508,15 @@ export default function ReportsClientPage({
         {/* Total Revenue */}
         <div className="group relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-fuchsia-600 p-6 rounded-3xl shadow-xl shadow-purple-500/30 flex flex-col justify-center print-card transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-500/40 border border-white/10">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none group-hover:scale-110 transition-transform duration-500"></div>
-          <p className="text-sm font-medium text-white/80 relative z-10">Total Pendapatan Platform</p>
+          <p className="text-sm font-medium text-white/80 relative z-10">
+            {startDate || endDate ? "Pendapatan Periode Terpilih" : "Total Pendapatan Platform"}
+          </p>
           <h3 className="text-3xl font-extrabold text-white tracking-tight mt-1 relative z-10">
-            {formatRupiah(invoices.reduce((sum, inv) => sum + inv.amount, 0))}
+            {formatRupiah(filteredTotalRevenue)}
           </h3>
+          <p className="text-xs text-white/70 mt-1 relative z-10">
+            {filteredInvoices.length} transaksi lunas
+          </p>
         </div>
 
         {/* ARPU */}
@@ -296,7 +524,7 @@ export default function ReportsClientPage({
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none group-hover:scale-110 transition-transform duration-500"></div>
           <p className="text-sm font-medium text-white/80 relative z-10">ARPU (Rata-rata Pendapatan per User)</p>
           <h3 className="text-3xl font-extrabold text-white tracking-tight mt-1 relative z-10">
-            {formatRupiah(arpu)}
+            {formatRupiah(filteredArpu)}
           </h3>
         </div>
 
@@ -360,11 +588,11 @@ export default function ReportsClientPage({
         <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 dark:shadow-none print-chart-wrapper transition-all duration-300 hover:shadow-2xl">
           <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight">Pendapatan per Paket</h3>
           <div className="h-[280px]">
-            {planRevenueData.length > 0 ? (
+            {filteredPlanRevenueData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={planRevenueData}
+                    data={filteredPlanRevenueData}
                     cx="50%"
                     cy="45%"
                     innerRadius={60}
@@ -372,7 +600,7 @@ export default function ReportsClientPage({
                     paddingAngle={5}
                     dataKey="value"
                   >
-                    {planRevenueData.map((entry, index) => (
+                    {filteredPlanRevenueData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
@@ -385,7 +613,7 @@ export default function ReportsClientPage({
               </ResponsiveContainer>
             ) : (
               <div className="h-full flex items-center justify-center text-slate-500">
-                No revenue data available
+                Tidak ada data pada periode ini.
               </div>
             )}
           </div>
@@ -408,12 +636,14 @@ export default function ReportsClientPage({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100/50 dark:divide-slate-800/50">
-              {invoices.length === 0 ? (
+              {filteredInvoices.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-slate-500 font-medium">Tidak ada rincian transaksi.</td>
+                  <td colSpan={4} className="px-6 py-12 text-center text-slate-500 font-medium">
+                    Tidak ada transaksi pada rentang tanggal yang dipilih.
+                  </td>
                 </tr>
               ) : (
-                invoices.map((inv) => (
+                filteredInvoices.map((inv) => (
                   <tr key={inv.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
                     <td className="px-6 py-4 whitespace-nowrap text-slate-600 dark:text-slate-300">
                       {format(new Date(inv.paid_at), "dd MMM yyyy, HH:mm", { locale: localeId })}

@@ -2,14 +2,20 @@
 
 import { useState, useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { Download, FileText, TrendingUp, Users, ArrowUpRight, ArrowDownRight, Printer } from "lucide-react";
+import { Download, FileText, TrendingUp, Users, ArrowUpRight, ArrowDownRight, Printer, Calendar, RotateCcw } from "lucide-react";
 import { format, startOfWeek, subWeeks, subMonths, subYears, getWeek } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { toast } from "@/components/ui/sonner";
 
 type ProgramData = {
   name: string;
   value: number;
+};
+
+type InvoiceItemData = {
+  description: string;
+  amount: number;
 };
 
 type InvoiceData = {
@@ -17,12 +23,14 @@ type InvoiceData = {
   student_name: string;
   amount: number;
   paid_at: string;
+  items?: InvoiceItemData[];
 };
 
 type PeriodFilter = "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
 
 export default function TenantReportsClientPage({
-  programRevenueData,
+  academyName = "Bimbel",
+  programRevenueData: initialProgramRevenueData,
   invoices,
   activeStudentsCount,
   thisMonthRevenue,
@@ -30,6 +38,7 @@ export default function TenantReportsClientPage({
   outstandingRevenue,
   tenantSlug
 }: {
+  academyName?: string;
   programRevenueData: ProgramData[];
   invoices: InvoiceData[];
   activeStudentsCount: number;
@@ -39,11 +48,132 @@ export default function TenantReportsClientPage({
   tenantSlug: string;
 }) {
   const [period, setPeriod] = useState<PeriodFilter>("MONTHLY");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [quickPreset, setQuickPreset] = useState<string>("ALL");
+
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#6366f1', '#ec4899', '#8b5cf6', '#14b8a6'];
 
   const formatRupiah = (val: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
   };
+
+  const parseDateRange = (s: string, e: string) => {
+    let start: Date | null = null;
+    let end: Date | null = null;
+    if (s) {
+      const [y, m, d] = s.split('-').map(Number);
+      start = new Date(y, m - 1, d, 0, 0, 0, 0);
+    }
+    if (e) {
+      const [y, m, d] = e.split('-').map(Number);
+      end = new Date(y, m - 1, d, 23, 59, 59, 999);
+    }
+    return { start, end };
+  };
+
+  const formatPeriodText = (s: string, e: string) => {
+    if (s && e) {
+      const { start, end } = parseDateRange(s, e);
+      if (start && end) {
+        return `${format(start, "dd MMMM yyyy", { locale: localeId })} - ${format(end, "dd MMMM yyyy", { locale: localeId })}`;
+      }
+    }
+    if (s) {
+      const { start } = parseDateRange(s, "");
+      if (start) return `Mulai ${format(start, "dd MMMM yyyy", { locale: localeId })}`;
+    }
+    if (e) {
+      const { end } = parseDateRange("", e);
+      if (end) return `Hingga ${format(end, "dd MMMM yyyy", { locale: localeId })}`;
+    }
+    return "Semua Waktu";
+  };
+
+  const applyPreset = (preset: string) => {
+    const now = new Date();
+    const formatDateInput = (d: Date) => format(d, "yyyy-MM-dd");
+
+    if (preset === "ALL") {
+      setStartDate("");
+      setEndDate("");
+      setQuickPreset("ALL");
+    } else if (preset === "TODAY") {
+      const str = formatDateInput(now);
+      setStartDate(str);
+      setEndDate(str);
+      setQuickPreset("TODAY");
+    } else if (preset === "7_DAYS") {
+      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+      setStartDate(formatDateInput(start));
+      setEndDate(formatDateInput(now));
+      setQuickPreset("7_DAYS");
+    } else if (preset === "30_DAYS") {
+      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29);
+      setStartDate(formatDateInput(start));
+      setEndDate(formatDateInput(now));
+      setQuickPreset("30_DAYS");
+    } else if (preset === "THIS_MONTH") {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      setStartDate(formatDateInput(start));
+      setEndDate(formatDateInput(end));
+      setQuickPreset("THIS_MONTH");
+    } else if (preset === "LAST_MONTH") {
+      const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const end = new Date(now.getFullYear(), now.getMonth(), 0);
+      setStartDate(formatDateInput(start));
+      setEndDate(formatDateInput(end));
+      setQuickPreset("LAST_MONTH");
+    } else if (preset === "THIS_YEAR") {
+      const start = new Date(now.getFullYear(), 0, 1);
+      const end = new Date(now.getFullYear(), 11, 31);
+      setStartDate(formatDateInput(start));
+      setEndDate(formatDateInput(end));
+      setQuickPreset("THIS_YEAR");
+    }
+  };
+
+  // Filter invoices based on date range
+  const filteredInvoices = useMemo(() => {
+    if (!startDate && !endDate) return invoices;
+    const { start, end } = parseDateRange(startDate, endDate);
+
+    return invoices.filter(inv => {
+      const d = new Date(inv.paid_at);
+      if (isNaN(d.getTime())) return true;
+      if (start && d < start) return false;
+      if (end && d > end) return false;
+      return true;
+    });
+  }, [invoices, startDate, endDate]);
+
+  const filteredTotalRevenue = useMemo(() => {
+    return filteredInvoices.reduce((sum, inv) => sum + inv.amount, 0);
+  }, [filteredInvoices]);
+
+  // Recalculate program revenue dynamically based on filtered invoices
+  const filteredProgramRevenueData = useMemo(() => {
+    const programRevenueMap: Record<string, number> = {};
+    filteredInvoices.forEach(inv => {
+      if (inv.items && inv.items.length > 0) {
+        inv.items.forEach(item => {
+          let programName = item.description;
+          const match = programName.match(/Tagihan SPP - (.*?)( \((.*)\))?$/);
+          if (match && match[1]) {
+            programName = match[1].trim();
+          }
+          programRevenueMap[programName] = (programRevenueMap[programName] || 0) + item.amount;
+        });
+      } else {
+        programRevenueMap["Lainnya"] = (programRevenueMap["Lainnya"] || 0) + inv.amount;
+      }
+    });
+
+    return Object.entries(programRevenueMap)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [filteredInvoices]);
 
   // Dynamic Chart Data Generation
   const chartData = useMemo(() => {
@@ -59,7 +189,7 @@ export default function TenantReportsClientPage({
         labels.push(key);
         dataMap[key] = 0;
       }
-      invoices.forEach(inv => {
+      filteredInvoices.forEach(inv => {
         const d = new Date(inv.paid_at);
         const key = format(d, "dd MMM", { locale: localeId });
         if (dataMap[key] !== undefined) dataMap[key] += inv.amount;
@@ -73,7 +203,7 @@ export default function TenantReportsClientPage({
         labels.push(key);
         dataMap[key] = 0;
       }
-      invoices.forEach(inv => {
+      filteredInvoices.forEach(inv => {
         const d = new Date(inv.paid_at);
         const wDate = startOfWeek(d, { weekStartsOn: 1 });
         const key = `Minggu ${getWeek(wDate)}, ${format(wDate, "yy")}`;
@@ -87,7 +217,7 @@ export default function TenantReportsClientPage({
         labels.push(key);
         dataMap[key] = 0;
       }
-      invoices.forEach(inv => {
+      filteredInvoices.forEach(inv => {
         const d = new Date(inv.paid_at);
         const key = format(d, "MMM yy", { locale: localeId });
         if (dataMap[key] !== undefined) dataMap[key] += inv.amount;
@@ -100,7 +230,7 @@ export default function TenantReportsClientPage({
         labels.push(key);
         dataMap[key] = 0;
       }
-      invoices.forEach(inv => {
+      filteredInvoices.forEach(inv => {
         const d = new Date(inv.paid_at);
         const key = format(d, "yyyy");
         if (dataMap[key] !== undefined) dataMap[key] += inv.amount;
@@ -111,33 +241,57 @@ export default function TenantReportsClientPage({
       label,
       revenue: dataMap[label]
     }));
-  }, [invoices, period]);
+  }, [filteredInvoices, period]);
 
   const handleExportCSV = () => {
-    const headers = ["Transaction ID", "Date Paid", "Student Name", "Revenue (Rp)"];
-    const rows = invoices.map(inv => [
-      inv.id,
-      format(new Date(inv.paid_at), "dd MMM yyyy HH:mm", { locale: localeId }),
-      `"${inv.student_name}"`,
-      inv.amount
-    ]);
+    if (filteredInvoices.length === 0) {
+      toast.error("Tidak ada data transaksi pada rentang waktu yang dipilih untuk diekspor.");
+      return;
+    }
+
+    const headers = ["Transaction ID", "Date Paid", "Student Name", "Program / Deskripsi", "Revenue (Rp)"];
+    const rows = filteredInvoices.map(inv => {
+      const descriptions = inv.items && inv.items.length > 0
+        ? inv.items.map(it => it.description).join("; ")
+        : "-";
+      return [
+        inv.id,
+        format(new Date(inv.paid_at), "dd MMM yyyy HH:mm", { locale: localeId }),
+        `"${inv.student_name.replace(/"/g, '""')}"`,
+        `"${descriptions.replace(/"/g, '""')}"`,
+        inv.amount
+      ];
+    });
     
     const csvContent = [
       headers.join(","),
       ...rows.map(e => e.join(","))
     ].join("\n");
 
+    const dateSuffix = startDate && endDate
+      ? `${startDate}_sd_${endDate}`
+      : startDate
+      ? `mulai_${startDate}`
+      : endDate
+      ? `sampai_${endDate}`
+      : `semua_${format(new Date(), 'yyyyMMdd')}`;
+
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `financial_report_${format(new Date(), 'yyyyMMdd')}.csv`);
+    link.setAttribute("download", `financial_report_${tenantSlug}_${dateSuffix}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    toast.success(`Berhasil mengunduh ${filteredInvoices.length} transaksi ke CSV.`);
   };
 
   const handleExportPDF = () => {
+    if (filteredInvoices.length === 0) {
+      toast.error("Tidak ada data transaksi pada rentang waktu yang dipilih untuk dicetak.");
+      return;
+    }
     window.print();
   };
 
@@ -152,8 +306,11 @@ export default function TenantReportsClientPage({
     <div className="space-y-6 print-container">
       {/* Formal PDF Header (Only visible in Print mode) */}
       <div className="hidden print:block text-center mb-8 border-b-2 border-black pb-4">
-        <h1 className="text-2xl font-bold uppercase tracking-widest text-black print-serif">FINANCIAL REPORT</h1>
-        <p className="text-black text-sm mt-1 print-serif">Generated on: {format(new Date(), "dd MMMM yyyy", { locale: localeId })}</p>
+        <h1 className="text-2xl font-bold uppercase tracking-widest text-black print-serif">LAPORAN KEUANGAN BIMBEL</h1>
+        <p className="text-black text-base font-semibold mt-1 print-serif">{academyName}</p>
+        <p className="text-black text-xs mt-1 print-serif">
+          Periode Laporan: <strong>{formatPeriodText(startDate, endDate)}</strong> | Tanggal Cetak: {format(new Date(), "dd MMMM yyyy, HH:mm", { locale: localeId })} WIB
+        </p>
       </div>
 
       {/* Header & Actions */}
@@ -176,6 +333,94 @@ export default function TenantReportsClientPage({
           >
             <Printer size={16} /> Print Report
           </button>
+        </div>
+      </div>
+
+      {/* Date Range Filter Bar */}
+      <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl p-5 rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 dark:shadow-none no-print transition-all">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+              <Calendar size={20} />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-slate-900 dark:text-white">Filter Rentang Waktu</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Pilih rentang tanggal untuk ekspor CSV dan laporan cetak PDF.</p>
+            </div>
+          </div>
+
+          {/* Quick Presets */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            {[
+              { id: "ALL", label: "Semua Waktu" },
+              { id: "THIS_MONTH", label: "Bulan Ini" },
+              { id: "LAST_MONTH", label: "Bulan Lalu" },
+              { id: "30_DAYS", label: "30 Hari Terakhir" },
+              { id: "THIS_YEAR", label: "Tahun Ini" },
+            ].map(p => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => applyPreset(p.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  quickPreset === p.id 
+                    ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30" 
+                    : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Date Inputs & Summary Indicator */}
+        <div className="mt-4 pt-4 border-t border-slate-200/60 dark:border-slate-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Dari:</span>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  setQuickPreset("CUSTOM");
+                }}
+                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Sampai:</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                  setQuickPreset("CUSTOM");
+                }}
+                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              />
+            </div>
+
+            {(startDate || endDate) && (
+              <button
+                type="button"
+                onClick={() => applyPreset("ALL")}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                title="Reset Filter"
+              >
+                <RotateCcw size={14} />
+                <span>Reset</span>
+              </button>
+            )}
+          </div>
+
+          <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
+            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>
+              Menampilkan: <strong className="text-slate-800 dark:text-slate-200">{filteredInvoices.length}</strong> transaksi ({formatRupiah(filteredTotalRevenue)})
+            </span>
+          </div>
         </div>
       </div>
 
@@ -236,22 +481,19 @@ export default function TenantReportsClientPage({
       <div className="hidden print:block text-black print-serif leading-relaxed text-justify mb-8">
         <h2 className="text-xl font-bold mb-4 uppercase border-b border-black pb-2">1. Ringkasan Eksekutif</h2>
         <p className="mb-4">
-          Dokumen ini merupakan laporan resmi pendapatan institusi pendidikan hingga <strong>{format(new Date(), "dd MMMM yyyy", { locale: localeId })}</strong>. 
-          Laporan ini menguraikan arus kas masuk yang dihasilkan dari pembayaran biaya pendidikan dan langganan program siswa.
+          Dokumen ini merupakan laporan resmi pendapatan institusi pendidikan <strong>{academyName}</strong> untuk periode <strong>{formatPeriodText(startDate, endDate)}</strong> yang dicetak pada <strong>{format(new Date(), "dd MMMM yyyy", { locale: localeId })}</strong>. 
+          Laporan ini menguraikan arus kas masuk yang dihasilkan dari pembayaran biaya pendidikan dan program siswa.
         </p>
 
         <h2 className="text-xl font-bold mb-4 uppercase border-b border-black pb-2 mt-6">2. Tinjauan Pendapatan</h2>
         <p className="mb-4">
-          Untuk bulan berjalan, institusi berhasil mencatat total pendapatan kotor sebesar <strong>{formatRupiah(thisMonthRevenue)}</strong>. 
-          {growthPercentage !== 0 && (
-            <span> Angka ini menunjukkan <strong>{Math.abs(growthPercentage).toFixed(2)}% {growthPercentage > 0 ? "pertumbuhan positif (kenaikan)" : "pertumbuhan negatif (penurunan)"}</strong> dibandingkan dengan performa keuangan bulan sebelumnya. </span>
-          )}
-          Total siswa aktif yang berkontribusi terhadap pendapatan saat ini berjumlah <strong>{activeStudentsCount} siswa</strong>.
+          Selama periode <strong>{formatPeriodText(startDate, endDate)}</strong>, institusi berhasil mencatat total <strong>{filteredInvoices.length} transaksi selesai</strong> dengan akumulasi pendapatan kotor sebesar <strong>{formatRupiah(filteredTotalRevenue)}</strong>.
+          Total siswa aktif terdaftar saat ini berjumlah <strong>{activeStudentsCount} siswa</strong>, dengan estimasi total piutang/tunggakan tercatat sebesar <strong>{formatRupiah(outstandingRevenue)}</strong>.
         </p>
 
         <h2 className="text-xl font-bold mb-4 uppercase border-b border-black pb-2 mt-6">3. Alokasi Pendapatan per Program</h2>
         <p className="mb-4">
-          Rincian berikut menggambarkan distribusi pendapatan di berbagai program pendidikan yang ditawarkan oleh institusi:
+          Rincian berikut menggambarkan distribusi pendapatan di berbagai program pendidikan yang ditawarkan oleh institusi pada periode ini:
         </p>
         <table className="w-full mb-6 border-collapse">
           <thead>
@@ -261,15 +503,15 @@ export default function TenantReportsClientPage({
             </tr>
           </thead>
           <tbody>
-            {programRevenueData.map((prog, idx) => (
+            {filteredProgramRevenueData.map((prog, idx) => (
               <tr key={idx}>
                 <td className="border border-black px-4 py-2">{prog.name}</td>
                 <td className="border border-black px-4 py-2 text-right font-bold">{formatRupiah(prog.value)}</td>
               </tr>
             ))}
-            {programRevenueData.length === 0 && (
+            {filteredProgramRevenueData.length === 0 && (
               <tr>
-                <td colSpan={2} className="border border-black px-4 py-2 text-center">Belum ada pendapatan program yang tercatat.</td>
+                <td colSpan={2} className="border border-black px-4 py-2 text-center">Belum ada pendapatan program yang tercatat pada periode ini.</td>
               </tr>
             )}
           </tbody>
@@ -277,7 +519,7 @@ export default function TenantReportsClientPage({
 
         <h2 className="text-xl font-bold mb-4 uppercase border-b border-black pb-2 mt-6">4. Buku Besar Transaksi (Rincian)</h2>
         <p className="mb-4">
-          Selama periode yang dilaporkan, sebanyak <strong>{invoices.length} transaksi selesai</strong> telah tercatat pada sistem. Rincian dari setiap transaksi dilampirkan pada tabel di bawah ini.
+          Selama periode <strong>{formatPeriodText(startDate, endDate)}</strong>, sebanyak <strong>{filteredInvoices.length} transaksi selesai</strong> telah tercatat pada sistem. Rincian dari setiap transaksi dilampirkan pada tabel di bawah ini.
         </p>
       </div>
 
@@ -290,18 +532,17 @@ export default function TenantReportsClientPage({
             <TrendingUp size={28} className="text-white" />
           </div>
           <div className="flex-1 relative z-10">
-            <p className="text-sm font-medium text-white/80">Pendapatan Bulan Ini</p>
+            <p className="text-sm font-medium text-white/80">
+              {startDate || endDate ? "Pendapatan Periode Terpilih" : "Total Pendapatan Terakumulasi"}
+            </p>
             <div className="flex items-end gap-3 mt-1">
               <h3 className="text-3xl font-extrabold text-white tracking-tight">
-                {formatRupiah(thisMonthRevenue)}
+                {formatRupiah(filteredTotalRevenue)}
               </h3>
-              {growthPercentage !== 0 && (
-                <span className={`flex items-center text-xs font-bold px-2 py-1 rounded-full mb-1.5 no-print shadow-sm backdrop-blur-sm ${growthPercentage > 0 ? 'bg-emerald-500/20 text-emerald-100 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-100 border border-rose-500/30'}`}>
-                  {growthPercentage > 0 ? <ArrowUpRight size={14} className="mr-0.5" /> : <ArrowDownRight size={14} className="mr-0.5" />}
-                  {Math.abs(growthPercentage).toFixed(1)}%
-                </span>
-              )}
             </div>
+            <p className="text-xs text-white/70 mt-1">
+              {filteredInvoices.length} transaksi selesai
+            </p>
           </div>
         </div>
         
@@ -375,11 +616,11 @@ export default function TenantReportsClientPage({
         <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 dark:shadow-none print-chart-wrapper transition-all duration-300 hover:shadow-2xl">
           <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight">Pendapatan per Program</h3>
           <div className="h-[280px]">
-            {programRevenueData.length > 0 ? (
+            {filteredProgramRevenueData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={programRevenueData}
+                    data={filteredProgramRevenueData}
                     cx="50%"
                     cy="45%"
                     innerRadius={60}
@@ -387,7 +628,7 @@ export default function TenantReportsClientPage({
                     paddingAngle={5}
                     dataKey="value"
                   >
-                    {programRevenueData.map((entry, index) => (
+                    {filteredProgramRevenueData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
@@ -400,7 +641,7 @@ export default function TenantReportsClientPage({
               </ResponsiveContainer>
             ) : (
               <div className="h-full flex items-center justify-center text-slate-500">
-                No revenue data available
+                Tidak ada data pada periode ini.
               </div>
             )}
           </div>
@@ -419,16 +660,19 @@ export default function TenantReportsClientPage({
                 <th className="px-6 py-4 font-bold tracking-wider">Tanggal</th>
                 <th className="px-6 py-4 font-bold tracking-wider">ID Transaksi</th>
                 <th className="px-6 py-4 font-bold tracking-wider">Nama Siswa</th>
+                <th className="px-6 py-4 font-bold tracking-wider">Program / Rincian</th>
                 <th className="px-6 py-4 font-bold tracking-wider text-right">Pendapatan</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100/50 dark:divide-slate-800/50">
-              {invoices.length === 0 ? (
+              {filteredInvoices.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-slate-500 font-medium">Tidak ada rincian transaksi.</td>
+                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500 font-medium">
+                    Tidak ada transaksi pada rentang tanggal yang dipilih.
+                  </td>
                 </tr>
               ) : (
-                invoices.map((inv) => (
+                filteredInvoices.map((inv) => (
                   <tr key={inv.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
                     <td className="px-6 py-4 whitespace-nowrap text-slate-600 dark:text-slate-300">
                       {format(new Date(inv.paid_at), "dd MMM yyyy, HH:mm", { locale: localeId })}
@@ -438,6 +682,11 @@ export default function TenantReportsClientPage({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-900 dark:text-slate-100">
                       {inv.student_name}
+                    </td>
+                    <td className="px-6 py-4 text-xs text-slate-500 dark:text-slate-400 max-w-xs truncate">
+                      {inv.items && inv.items.length > 0
+                        ? inv.items.map(it => it.description).join(", ")
+                        : "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right font-bold text-emerald-600 dark:text-emerald-400">
                       {formatRupiah(inv.amount)}
