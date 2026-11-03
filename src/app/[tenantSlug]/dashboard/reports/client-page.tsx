@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { Download, FileText, TrendingUp, Users, ArrowUpRight, ArrowDownRight, Printer, Calendar, RotateCcw } from "lucide-react";
+import { Download, FileText, TrendingUp, Users, ArrowUpRight, ArrowDownRight, Printer, Calendar, RotateCcw, AlertCircle } from "lucide-react";
 import { format, startOfWeek, subWeeks, subMonths, subYears, getWeek } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { CustomSelect } from "@/components/ui/custom-select";
@@ -341,13 +341,13 @@ export default function TenantReportsClientPage({
         <div className="flex items-center gap-3">
           <button 
             onClick={handleExportCSV}
-            className="flex items-center gap-2 px-5 py-2.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold transition-all hover:shadow-md hover:-translate-y-0.5"
+            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-medium transition-colors"
           >
             <Download size={16} /> Excel (CSV)
           </button>
           <button 
             onClick={handleExportPDF}
-            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors shadow-sm"
           >
             <Printer size={16} /> Print Report
           </button>
@@ -355,7 +355,7 @@ export default function TenantReportsClientPage({
       </div>
 
       {/* Date Range Filter Bar */}
-      <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl p-5 rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 dark:shadow-none no-print transition-all">
+      <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm no-print">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
@@ -624,53 +624,66 @@ export default function TenantReportsClientPage({
       </div>
 
       {/* Screen Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 no-print">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8 no-print">
         {/* Card 1: Revenue */}
-        <div className="group relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-fuchsia-600 p-6 rounded-3xl shadow-xl shadow-purple-500/30 flex items-center gap-5 print-card transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-500/40 border border-white/10">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none group-hover:scale-110 transition-transform duration-500"></div>
-          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/20 shadow-inner">
-            <TrendingUp size={28} className="text-white" />
-          </div>
-          <div className="flex-1 relative z-10">
-            <p className="text-sm font-medium text-white/80">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               {startDate || endDate ? "Pendapatan Periode Terpilih" : "Total Pendapatan Terakumulasi"}
-            </p>
-            <div className="flex items-end gap-3 mt-1">
-              <h3 className="text-3xl font-extrabold text-white tracking-tight">
-                {formatRupiah(filteredTotalRevenue)}
-              </h3>
+            </span>
+            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center shrink-0">
+              <TrendingUp size={20} />
             </div>
-            <p className="text-xs text-white/70 mt-1">
+          </div>
+          <div className="mt-4">
+            <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+              {formatRupiah(filteredTotalRevenue)}
+            </h3>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
               {filteredInvoices.length} transaksi selesai
             </p>
           </div>
         </div>
         
         {/* Card 2: Active Students */}
-        <div className="group relative overflow-hidden bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 p-6 rounded-3xl shadow-xl shadow-teal-500/30 flex items-center gap-5 print-card transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-teal-500/40 border border-white/10">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none group-hover:scale-110 transition-transform duration-500"></div>
-          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/20 shadow-inner">
-            <Users size={28} className="text-white" />
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Total Siswa Aktif
+            </span>
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50 flex items-center justify-center shrink-0">
+              <Users size={20} />
+            </div>
           </div>
-          <div className="relative z-10">
-            <p className="text-sm font-medium text-white/80">Total Siswa Aktif</p>
-            <h3 className="text-3xl font-extrabold text-white tracking-tight mt-1">
+          <div className="mt-4">
+            <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
               {activeStudentsCount} Siswa
             </h3>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-2">
+              Terdaftar aktif saat ini
+            </p>
           </div>
         </div>
 
         {/* Card 3: Outstanding Revenue */}
-        <div className="group relative overflow-hidden bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 p-6 rounded-3xl shadow-xl shadow-orange-500/30 flex items-center gap-5 print-card transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-orange-500/40 border border-white/10">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none group-hover:scale-110 transition-transform duration-500"></div>
-          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/20 shadow-inner">
-            <TrendingUp size={28} className="text-white" />
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Total Piutang / Tunggakan
+            </span>
+            <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/50 flex items-center justify-center shrink-0">
+              <AlertCircle size={20} />
+            </div>
           </div>
-          <div className="relative z-10">
-            <p className="text-sm font-medium text-white/80">Total Piutang / Tunggakan</p>
-            <h3 className="text-3xl font-extrabold text-white tracking-tight mt-1">
+          <div className="mt-4">
+            <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
               {formatRupiah(outstandingRevenue)}
             </h3>
+            <p className="text-xs font-medium text-amber-600 dark:text-amber-400 mt-2 flex items-center gap-1.5">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+              Tagihan belum lunas
+            </p>
           </div>
         </div>
       </div>
@@ -678,9 +691,9 @@ export default function TenantReportsClientPage({
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 no-print">
         {/* Revenue Bar Chart */}
-        <div className="lg:col-span-2 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 dark:shadow-none print-chart-wrapper transition-all duration-300 hover:shadow-2xl">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm print-chart-wrapper">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Tren Pendapatan</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Tren Pendapatan</h3>
             <div className="w-40 no-print">
               <CustomSelect
                 options={periodOptions}
@@ -694,8 +707,8 @@ export default function TenantReportsClientPage({
               <BarChart data={chartData} margin={{ top: 5, right: 0, bottom: 5, left: 0 }}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#4f46e5" stopOpacity={1}/>
-                    <stop offset="95%" stopColor="#ec4899" stopOpacity={0.8}/>
+                    <stop offset="0%" stopColor="#2563eb" stopOpacity={1}/>
+                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.85}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#94a3b8" opacity={0.15} vertical={false} />
@@ -703,18 +716,18 @@ export default function TenantReportsClientPage({
                 <YAxis tickFormatter={(val) => `Rp${val/1000}k`} tick={{fontSize: 12, fill: '#64748b', fontWeight: 500}} axisLine={false} tickLine={false} dx={-10} />
                 <RechartsTooltip 
                   formatter={(value: any) => [formatRupiah(value), 'Pendapatan']}
-                  contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.2)', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(8px)' }}
-                  cursor={{fill: 'rgba(99, 102, 241, 0.05)'}}
+                  contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: '#ffffff' }}
+                  cursor={{fill: 'rgba(37, 99, 235, 0.04)'}}
                 />
-                <Bar dataKey="revenue" fill="url(#colorRevenue)" radius={[6, 6, 0, 0]} maxBarSize={45} animationDuration={1500} />
+                <Bar dataKey="revenue" fill="url(#colorRevenue)" radius={[6, 6, 0, 0]} maxBarSize={45} animationDuration={1000} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Program Revenue Pie Chart */}
-        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 dark:shadow-none print-chart-wrapper transition-all duration-300 hover:shadow-2xl">
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight">Pendapatan per Program</h3>
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm print-chart-wrapper">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 tracking-tight">Pendapatan per Program</h3>
           <div className="h-[280px]">
             {filteredProgramRevenueData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -734,7 +747,7 @@ export default function TenantReportsClientPage({
                   </Pie>
                   <RechartsTooltip 
                     formatter={(value: any) => formatRupiah(value)}
-                    contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.2)', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(8px)' }}
+                    contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: '#ffffff' }}
                   />
                   <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px' }}/>
                 </PieChart>
@@ -749,8 +762,8 @@ export default function TenantReportsClientPage({
       </div>
 
       {/* Table of Latest Transactions */}
-      <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden no-print mt-8">
-        <div className="p-6 border-b border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-r from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 no-print">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden no-print mt-8">
+        <div className="p-6 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 no-print">
           <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Rincian Transaksi Pendapatan</h3>
         </div>
         <div className="overflow-x-auto">

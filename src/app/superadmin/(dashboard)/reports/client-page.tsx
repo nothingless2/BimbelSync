@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { Download, FileText, Printer, Calendar, RotateCcw } from "lucide-react";
+import { Download, FileText, Printer, Calendar, RotateCcw, TrendingUp, CreditCard, UserMinus } from "lucide-react";
 import { format, startOfWeek, subWeeks, subMonths, subYears, getWeek } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { CustomSelect } from "@/components/ui/custom-select";
@@ -347,7 +347,7 @@ export default function ReportsClientPage({
       </div>
 
       {/* Date Range Filter Bar */}
-      <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl p-5 rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 dark:shadow-none no-print transition-all">
+      <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm no-print">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
@@ -612,46 +612,80 @@ export default function ReportsClientPage({
       </div>
 
       {/* Screen Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 no-print">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8 no-print">
         {/* Total Revenue */}
-        <div className="group relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-fuchsia-600 p-6 rounded-3xl shadow-xl shadow-purple-500/30 flex flex-col justify-center print-card transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-500/40 border border-white/10">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none group-hover:scale-110 transition-transform duration-500"></div>
-          <p className="text-sm font-medium text-white/80 relative z-10">
-            {startDate || endDate ? "Pendapatan Periode Terpilih" : "Total Pendapatan Platform"}
-          </p>
-          <h3 className="text-3xl font-extrabold text-white tracking-tight mt-1 relative z-10">
-            {formatRupiah(filteredTotalRevenue)}
-          </h3>
-          <p className="text-xs text-white/70 mt-1 relative z-10">
-            {filteredInvoices.length} transaksi lunas
-          </p>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              {startDate || endDate ? "Pendapatan Periode Terpilih" : "Total Pendapatan Platform"}
+            </span>
+            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center shrink-0">
+              <TrendingUp size={20} />
+            </div>
+          </div>
+          <div className="mt-4">
+            <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+              {formatRupiah(filteredTotalRevenue)}
+            </h3>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+              {filteredInvoices.length} transaksi lunas
+            </p>
+          </div>
         </div>
 
         {/* ARPU */}
-        <div className="group relative overflow-hidden bg-gradient-to-br from-blue-500 via-cyan-600 to-teal-500 p-6 rounded-3xl shadow-xl shadow-cyan-500/30 flex flex-col justify-center print-card transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-cyan-500/40 border border-white/10">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none group-hover:scale-110 transition-transform duration-500"></div>
-          <p className="text-sm font-medium text-white/80 relative z-10">ARPU (Rata-rata Pendapatan per User)</p>
-          <h3 className="text-3xl font-extrabold text-white tracking-tight mt-1 relative z-10">
-            {formatRupiah(filteredArpu)}
-          </h3>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              ARPU (Rata-rata Pendapatan / User)
+            </span>
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center shrink-0">
+              <CreditCard size={20} />
+            </div>
+          </div>
+          <div className="mt-4">
+            <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+              {formatRupiah(filteredArpu)}
+            </h3>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-2">
+              Estimasi per akademi aktif
+            </p>
+          </div>
         </div>
 
         {/* Churn Rate */}
-        <div className="group relative overflow-hidden bg-gradient-to-br from-rose-500 via-red-500 to-orange-500 p-6 rounded-3xl shadow-xl shadow-red-500/30 flex flex-col justify-center print-card transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-red-500/40 border border-white/10">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none group-hover:scale-110 transition-transform duration-500"></div>
-          <p className="text-sm font-medium text-white/80 relative z-10">Tingkat Churn (Churn Rate)</p>
-          <h3 className="text-3xl font-extrabold text-white tracking-tight mt-1 relative z-10">
-            {churnRate.toFixed(1)}%
-          </h3>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Tingkat Churn (Churn Rate)
+            </span>
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
+              churnRate > 5 
+                ? "bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border-rose-100 dark:border-rose-900/50" 
+                : "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/50"
+            }`}>
+              <UserMinus size={20} />
+            </div>
+          </div>
+          <div className="mt-4">
+            <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+              {churnRate.toFixed(1)}%
+            </h3>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5">
+              <span className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${churnRate > 5 ? 'bg-rose-500' : 'bg-emerald-500'}`}></span>
+              Rasio bimbel berhenti berlangganan
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 no-print">
         {/* Revenue Area Chart */}
-        <div className="lg:col-span-2 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 dark:shadow-none print-chart-wrapper transition-all duration-300 hover:shadow-2xl">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm print-chart-wrapper">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Pertumbuhan Platform</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Pertumbuhan Platform</h3>
             <div className="w-40 no-print">
               <CustomSelect
                 options={periodOptions}
@@ -665,12 +699,12 @@ export default function ReportsClientPage({
               <AreaChart data={chartData} margin={{ top: 5, right: 0, bottom: 5, left: 0 }}>
                 <defs>
                   <linearGradient id="colorPlatformRev" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#ec4899" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.2}/>
+                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
                   </linearGradient>
                   <linearGradient id="colorPlatformSub" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#14b8a6" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#94a3b8" opacity={0.15} vertical={false} />
@@ -683,18 +717,18 @@ export default function ReportsClientPage({
                     if (name === 'totalSubscribers') return [`${value} Bimbel`, 'Total Bimbel'];
                     return [value, name];
                   }}
-                  contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.2)', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(8px)' }}
+                  contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: '#ffffff' }}
                 />
-                <Area yAxisId="left" type="monotone" dataKey="revenue" stroke="#4f46e5" strokeWidth={3} fillOpacity={1} fill="url(#colorPlatformRev)" activeDot={{r: 6}} animationDuration={1500} />
-                <Area yAxisId="right" type="monotone" dataKey="totalSubscribers" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorPlatformSub)" activeDot={{r: 6}} animationDuration={1500} />
+                <Area yAxisId="left" type="monotone" dataKey="revenue" stroke="#2563eb" strokeWidth={2.5} fillOpacity={1} fill="url(#colorPlatformRev)" activeDot={{r: 5}} animationDuration={1000} />
+                <Area yAxisId="right" type="monotone" dataKey="totalSubscribers" stroke="#10b981" strokeWidth={2.5} fillOpacity={1} fill="url(#colorPlatformSub)" activeDot={{r: 5}} animationDuration={1000} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Program Revenue Pie Chart */}
-        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 dark:shadow-none print-chart-wrapper transition-all duration-300 hover:shadow-2xl">
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight">Pendapatan per Paket</h3>
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm print-chart-wrapper">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 tracking-tight">Pendapatan per Paket</h3>
           <div className="h-[280px]">
             {filteredPlanRevenueData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -714,7 +748,7 @@ export default function ReportsClientPage({
                   </Pie>
                   <RechartsTooltip 
                     formatter={(value: any) => formatRupiah(value)}
-                    contentStyle={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.2)', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(8px)' }}
+                    contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: '#ffffff' }}
                   />
                   <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px' }}/>
                 </PieChart>
@@ -729,8 +763,8 @@ export default function ReportsClientPage({
       </div>
 
       {/* Table of Latest Transactions */}
-      <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden no-print mt-8">
-        <div className="p-6 border-b border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-r from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 no-print">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden no-print mt-8">
+        <div className="p-6 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 no-print">
           <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Rincian Transaksi Pendapatan</h3>
         </div>
         <div className="overflow-x-auto">
