@@ -170,7 +170,7 @@ export default function LoginPage() {
 
         {/* Middle / Value Proposition */}
         <div className="relative z-20 max-w-lg my-auto py-8">
-          <h2 className="text-3xl xl:text-4xl font-extrabold text-white mb-4 leading-tight tracking-tight drop-shadow-sm">
+          <h2 className="text-3xl xl:text-4xl font-bold text-white mb-4 leading-tight tracking-tight">
             Selamat Datang Kembali di BimbelSync.
           </h2>
           
@@ -205,7 +205,7 @@ export default function LoginPage() {
           </div>
 
           <div className="mb-6">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-1.5">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-1.5">
               Masuk ke Akun Anda
             </h1>
             <p className="text-slate-500 text-sm">
