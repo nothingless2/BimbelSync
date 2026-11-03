@@ -6,6 +6,7 @@ const withSerwist = withSerwistInit({
   swDest: "public/sw.js",
   disable: process.env.NODE_ENV === "development",
 });
+
 const nextConfig: NextConfig = {
   turbopack: {},
   experimental: {
@@ -33,6 +34,10 @@ const nextConfig: NextConfig = {
           { key: 'Permissions-Policy', value: 'camera=(self), microphone=(), geolocation=()' },
           // Memaksa browser selalu pakai HTTPS (aktif di production)
           { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+          // Isolasi origin browser (Lighthouse COOP check)
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
+          // Optimasi DNS prefetch
+          { key: 'X-DNS-Prefetch-Control', value: 'on' },
         ],
       },
     ];

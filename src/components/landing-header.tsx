@@ -4,8 +4,6 @@ import React from 'react';
 import Image from 'next/image';
 import { Menu, X } from 'lucide-react';
 
-const WA_URL = "https://wa.me/6281234567890?text=Halo%20tim%20BimbelSync,%20saya%20tertarik%20menggunakan%20platform%20ini.";
-
 export function LandingHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
@@ -13,7 +11,7 @@ export function LandingHeader() {
     <header className="sticky top-0 z-50 bg-[#F8FAFC]/90 backdrop-blur-md border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
         <div className="flex items-center gap-2">
-          <Image src="/logo.png" alt="BimbelSync Logo" width={32} height={32} className="object-contain rounded-[20%]" />
+          <Image src="/logo.png" alt="BimbelSync Logo" width={32} height={32} className="object-contain rounded-[20%]" priority />
           <span className="text-xl font-bold tracking-tight text-slate-900">BimbelSync</span>
         </div>
         
@@ -33,7 +31,12 @@ export function LandingHeader() {
           </a>
         </div>
 
-        <button className="md:hidden p-2 text-slate-600" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+        <button 
+          type="button"
+          aria-label={isMobileMenuOpen ? "Tutup menu navigasi" : "Buka menu navigasi"}
+          className="md:hidden p-2 text-slate-600 hover:text-slate-900 rounded-lg transition" 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
           {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>

@@ -58,31 +58,33 @@ export function Showcase() {
                 <button
                   key={tab.id}
                   onClick={() => setActive(i)}
-                  className={`text-left transition-all duration-300 w-full rounded-2xl ${
+                  type="button"
+                  className={`w-full text-left p-6 rounded-2xl border transition-all duration-300 ${
                     isActive
-                      ? 'bg-white shadow-lg shadow-slate-200/50 border border-slate-100 p-6'
-                      : 'bg-transparent border-transparent p-6 hover:bg-slate-100/50'
+                      ? 'bg-white border-blue-500 shadow-lg shadow-blue-500/10'
+                      : 'bg-white/60 border-slate-200 hover:bg-white hover:border-slate-300'
                   }`}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors ${isActive ? 'bg-[#0052FF] text-white' : 'bg-slate-100 text-slate-500'}`}>
+                  <div className="flex items-center gap-4 mb-2">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
+                      isActive ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600'
+                    }`}>
                       <Icon className="w-5 h-5" />
                     </div>
-                    <span className={`text-lg font-semibold ${isActive ? 'text-slate-900' : 'text-slate-600'}`}>
-                      {tab.label}
-                    </span>
+                    <span className="font-bold text-lg text-slate-900">{tab.label}</span>
                   </div>
 
                   {isActive && (
                     <motion.div
-                      initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                      animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <p className="text-base text-slate-500 mb-4 font-medium">{tab.summary}</p>
+                      <p className="text-base text-slate-600 mb-4 font-medium">{tab.summary}</p>
                       <ul className="space-y-2.5">
                         {tab.bullets.map((b, j) => (
-                          <li key={j} className="text-sm text-[#475569] flex items-center gap-3 font-medium">
+                          <li key={j} className="text-sm text-slate-700 flex items-center gap-3 font-medium">
                             <span className="w-1.5 h-1.5 bg-[#0052FF] rounded-full shrink-0" />
                             {b}
                           </li>
@@ -106,6 +108,9 @@ export function Showcase() {
                 transition={{ duration: 0.4 }}
                 src={tabs[active].image}
                 alt={tabs[active].label}
+                width={1200}
+                height={800}
+                loading="lazy"
                 className="absolute inset-0 w-full h-full object-cover"
               />
             </AnimatePresence>
