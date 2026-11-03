@@ -4,8 +4,6 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --color-primary-blue: #2563EB;
   --color-accent-green: #16A34A;
   --color-accent-red: #DC2626;
@@ -14,7 +12,6 @@
 }
 
 body {
-  font-family: var(--font-sans);
   background-color: var(--color-neutral-white);
   color: #1f2937;
 }

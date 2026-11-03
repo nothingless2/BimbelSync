@@ -176,11 +176,11 @@ export default function RegisterPage() {
 
         {/* Middle / Value Proposition (Hanya Judul & Deskripsi Singkat) */}
         <div className="relative z-20 max-w-lg my-auto py-8">
-          <h2 className="text-3xl xl:text-4xl font-bold text-white mb-4 leading-tight tracking-tight">
+          <h2 className="text-[2.5rem] xl:text-[2.75rem] font-bold text-white mb-6 leading-[1.15] tracking-tight">
             Digitalisasi Operasional Bimbel Anda Hari Ini.
           </h2>
           
-          <p className="text-slate-200 text-base xl:text-lg leading-relaxed font-normal drop-shadow-xs max-w-md">
+          <p className="text-slate-300 text-lg max-w-sm leading-relaxed font-medium">
             Satu sistem terintegrasi untuk absensi QR Code, jadwal kelas, e-rapor siswa, hingga pencatatan pembayaran SPP tanpa ribet.
           </p>
         </div>
