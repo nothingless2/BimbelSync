@@ -8,7 +8,6 @@ import { GenerateInvoicesButton } from "./generate-button";
 import { BulkEmailInvoicesButton } from "./bulk-email-button";
 import { Prisma } from "@prisma/client";
 import { formatRupiah } from "@/lib/session";
-import { Receipt, CheckCircle2, Clock } from "lucide-react";
 
 export default async function FinancePage({ 
   params,
@@ -120,56 +119,26 @@ export default async function FinancePage({
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
-          <div className="flex justify-between items-start">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">Total Tagihan (Semua)</span>
-            <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0 border border-slate-200/60 dark:border-slate-700">
-              <Receipt size={18} />
-            </div>
-          </div>
-          <div className="mt-3">
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">{totalInvoices}</span>
-              <span className="text-xs font-medium text-slate-500">Invoices</span>
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">Diterbitkan untuk siswa</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-gradient-to-br from-slate-600 to-slate-800 rounded-2xl border border-slate-700 p-5 shadow-lg flex flex-col gap-1">
+          <p className="text-sm font-semibold text-slate-200 uppercase tracking-wider">Total Tagihan (Semua)</p>
+          <div className="flex items-end gap-3 mt-1">
+            <span className="text-3xl font-bold text-white">{totalInvoices}</span>
+            <span className="text-sm font-medium text-slate-300 mb-1">Invoices</span>
           </div>
         </div>
-
-        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
-          <div className="flex justify-between items-start">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">Pendapatan Diterima (Lunas)</span>
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50 flex items-center justify-center shrink-0">
-              <CheckCircle2 size={18} />
-            </div>
-          </div>
-          <div className="mt-3">
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">{formatRupiah(totalRevenue)}</span>
-            </div>
-            <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mt-2 flex items-center gap-1.5">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
-              Lunas dari {paidCount} invoice
-            </p>
+        <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl border border-emerald-600 p-5 shadow-lg flex flex-col gap-1">
+          <p className="text-sm font-semibold text-emerald-100 uppercase tracking-wider">Pendapatan Diterima (Lunas)</p>
+          <div className="flex items-end gap-3 mt-1">
+            <span className="text-3xl font-bold text-white">{formatRupiah(totalRevenue)}</span>
+            <span className="text-sm font-medium text-emerald-200 mb-1">dari {paidCount} inv</span>
           </div>
         </div>
-
-        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
-          <div className="flex justify-between items-start">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">Potensi Pendapatan (Belum Bayar)</span>
-            <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/50 flex items-center justify-center shrink-0">
-              <Clock size={18} />
-            </div>
-          </div>
-          <div className="mt-3">
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">{formatRupiah(potentialRevenue)}</span>
-            </div>
-            <p className="text-xs font-medium text-amber-600 dark:text-amber-400 mt-2 flex items-center gap-1.5">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
-              Menunggu dari {unpaidCount} invoice
-            </p>
+        <div className="bg-gradient-to-br from-amber-500 to-amber-700 rounded-2xl border border-amber-600 p-5 shadow-lg flex flex-col gap-1">
+          <p className="text-sm font-semibold text-amber-100 uppercase tracking-wider">Potensi Pendapatan (Belum Bayar)</p>
+          <div className="flex items-end gap-3 mt-1">
+            <span className="text-3xl font-bold text-white">{formatRupiah(potentialRevenue)}</span>
+            <span className="text-sm font-medium text-amber-200 mb-1">dari {unpaidCount} inv</span>
           </div>
         </div>
       </div>
