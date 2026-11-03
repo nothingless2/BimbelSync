@@ -107,7 +107,7 @@ export default function SuperadminLoginPage() {
               Masuk ke Akun Anda
             </h2>
             <p className="text-slate-500 text-sm">
-              Silakan masukkan kredensial akun master Anda untuk melanjutkan.
+              Silakan masukkan kredensial akun Anda untuk melanjutkan.
             </p>
           </div>
 
@@ -131,7 +131,7 @@ export default function SuperadminLoginPage() {
                 name="email"
                 required
                 className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
-                placeholder="superadmin@bimbelsync.com"
+                placeholder="Masukkan email atau username"
               />
             </div>
 
@@ -154,7 +154,7 @@ export default function SuperadminLoginPage() {
                 name="password"
                 required
                 className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
-                placeholder="Masukkan kata sandi akun superadmin"
+                placeholder="Masukkan password akun "
               />
             </div>
 
@@ -174,7 +174,7 @@ export default function SuperadminLoginPage() {
                     Memverifikasi Akun...
                   </span>
                 ) : (
-                  <span>Masuk ke Superadmin</span>
+                  <span>Masuk ke Akun</span>
                 )}
               </button>
             </div>
