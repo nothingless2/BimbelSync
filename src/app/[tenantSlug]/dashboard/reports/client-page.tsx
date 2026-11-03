@@ -58,6 +58,23 @@ export default function TenantReportsClientPage({
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
   };
 
+  const formatCompactRupiah = (val: number) => {
+    if (val === 0) return "Rp 0";
+    if (val >= 1_000_000_000) {
+      const b = val / 1_000_000_000;
+      return `Rp ${b % 1 === 0 ? b : b.toFixed(1).replace('.', ',')} M`;
+    }
+    if (val >= 1_000_000) {
+      const m = val / 1_000_000;
+      return `Rp ${m % 1 === 0 ? m : m.toFixed(1).replace('.', ',')} jt`;
+    }
+    if (val >= 1_000) {
+      const k = val / 1_000;
+      return `Rp ${k % 1 === 0 ? k : k.toFixed(1).replace('.', ',')} rb`;
+    }
+    return `Rp ${val}`;
+  };
+
   const parseDateRange = (s: string, e: string) => {
     let start: Date | null = null;
     let end: Date | null = null;
@@ -684,8 +701,16 @@ export default function TenantReportsClientPage({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 no-print">
         {/* Revenue Bar Chart */}
         <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm print-chart-wrapper">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Tren Pendapatan</h3>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+            <div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Tren Pendapatan</h3>
+              <div className="flex items-center gap-2 mt-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-600 ring-2 ring-blue-100 dark:ring-blue-900/40" />
+                  <span>Pendapatan Tagihan Lunas</span>
+                </span>
+              </div>
+            </div>
             <div className="w-40 no-print">
               <CustomSelect
                 options={periodOptions}
@@ -694,9 +719,9 @@ export default function TenantReportsClientPage({
               />
             </div>
           </div>
-          <div className="h-[280px]">
+          <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 5, right: 0, bottom: 5, left: 0 }}>
+              <BarChart data={chartData} margin={{ top: 10, right: 10, bottom: 5, left: 15 }}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#2563eb" stopOpacity={1}/>
@@ -705,11 +730,26 @@ export default function TenantReportsClientPage({
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#94a3b8" opacity={0.15} vertical={false} />
                 <XAxis dataKey="label" tick={{fontSize: 12, fill: '#64748b', fontWeight: 500}} axisLine={false} tickLine={false} dy={10} />
-                <YAxis tickFormatter={(val) => `Rp${val/1000}k`} tick={{fontSize: 12, fill: '#64748b', fontWeight: 500}} axisLine={false} tickLine={false} dx={-10} />
+                <YAxis 
+                  width={80}
+                  tickFormatter={formatCompactRupiah} 
+                  tick={{fontSize: 11, fill: '#64748b', fontWeight: 500}} 
+                  axisLine={false} 
+                  tickLine={false} 
+                  dx={-4} 
+                />
                 <RechartsTooltip 
                   formatter={(value: any) => [formatRupiah(value), 'Pendapatan']}
-                  contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: '#ffffff' }}
+                  contentStyle={{ 
+                    borderRadius: '12px', 
+                    border: '1px solid #e2e8f0', 
+                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)', 
+                    backgroundColor: '#ffffff',
+                    padding: '10px 14px',
+                    fontSize: '12px'
+                  }}
                   cursor={{fill: 'rgba(37, 99, 235, 0.04)'}}
+                  labelStyle={{ fontWeight: 600, color: '#1e293b', marginBottom: '4px' }}
                 />
                 <Bar dataKey="revenue" fill="url(#colorRevenue)" radius={[6, 6, 0, 0]} maxBarSize={45} animationDuration={1000} />
               </BarChart>
@@ -720,7 +760,7 @@ export default function TenantReportsClientPage({
         {/* Program Revenue Pie Chart */}
         <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm print-chart-wrapper">
           <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 tracking-tight">Pendapatan per Program</h3>
-          <div className="h-[280px]">
+          <div className="h-[300px]">
             {filteredProgramRevenueData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
