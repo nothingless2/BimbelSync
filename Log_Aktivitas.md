@@ -448,3 +448,72 @@ Aturan:
 - Memperbaiki duplikasi bintang merah (*) pada field Nama Lengkap di modal pendaftaran siswa.
 - Memperbaiki teks placeholder terpotong pada field Total Pertemuan di modal tambah program.
 - Menghapus dropdown filter Semua Tipe pada halaman Master Data Program.
+
+---
+
+## [Tahap Penyesuaian 2] Redesign UI/UX Financial Report & Dashboard Superadmin
+- **Tanggal:** 2 - 3 November 2026
+- **Status:** ✅ Selesai & Tervalidasi.
+- **Rincian Implementasi:**
+  1. **Standardisasi Kartu KPI Gradient:**
+     - Mengganti kartu metrik datar pada laporan keuangan Superadmin dan Tenant dengan kartu gradient modern:
+       - Biru (`from-blue-600 to-blue-700`): Total Pendapatan Platform / Omset.
+       - Hijau Emerald (`from-emerald-600 to-teal-700`): ARPU (Pendapatan per User) / Siswa Aktif.
+       - Merah Rose (`from-rose-600 to-pink-700`): Tingkat Churn / Total Tunggakan.
+     - Penambahan ikon watermark SVG transparan (opacity 10-15%) di latar belakang kartu untuk estetika visual profesional non-slop.
+  2. **Standardisasi Tabel Transaksi 9-Kolom Billing-Style:**
+     - Merombak tabel transaksi pada `/superadmin/reports` mengikuti gaya tabel Platform Billing:
+       - 9 Kolom terstruktur: No., Akademi (+ URL slug), Badge paket gelap, Periode, Nominal tebal, Jatuh Tempo, Tanggal Lunas, Status pill kontras tinggi, dan Verifikator.
+       - Menambahkan fitur pencarian instan (*real-time search*) dan komponen `<Pagination />` dengan kapasitas 10 transaksi per halaman.
+  3. **Penyempurnaan 4 Kartu KPI Dashboard Superadmin:**
+     - Mengatasi masalah warna bertabrakan (*color clash*) pada kartu MRR, Pendapatan, Piutang, dan Akademi di `/superadmin/dashboard`.
+     - Menggunakan pill badge putih semi-transparan berteks tebal untuk indikator pertumbuhan MRR, serta tata letak micro-grid 2x2 yang bersih untuk rincian status akademi (Aktif, Trial, Suspended, Expired Trial).
+
+---
+
+## [Tahap Penyesuaian 3] Perbaikan Sumbu Y Grafik & Format Mata Uang Ringkas
+- **Tanggal:** 3 November 2026
+- **Status:** ✅ Selesai & Tervalidasi.
+- **Rincian Implementasi:**
+  1. **Solusi Text Clipping Label Sumbu Y:**
+     - Memperbaiki masalah teks "Rp" yang terpotong pada kurva AreaChart Pertumbuhan Platform Superadmin dan BarChart Laporan Tenant akibat `margin.left: 0` dan pergeseran `dx={-10}` tanpa deklarasi lebar.
+     - Menetapkan konfigurasi eksplisit: `margin={{ top: 10, right: 10, bottom: 5, left: 15 }}`, `width={80}`, dan `dx={-4}` pada sumbu Y kiri.
+     - Sumbu Y kanan (Total Bimbel) diberikan `width={35}`, `dx={4}`, dan `allowDecimals={false}` untuk memastikan angka bulat.
+  2. **Helper Mata Uang Ringkas (`formatCompactRupiah`):**
+     - Mengganti format `Rp6000k` yang kaku dengan format finansial ringkas standar Indonesia: `Rp 6 jt`, `Rp 4,5 jt`, `Rp 500 rb`, `Rp 0`.
+  3. **Indikator Titik Warna (Legend Dots):**
+     - Menyematkan legend visual di header grafik di bawah judul:
+       - 🔵 **Biru**: Pendapatan (AreaChart sumbu Y kiri).
+       - 🟢 **Hijau Emerald**: Total Bimbel (AreaChart sumbu Y kanan).
+
+---
+
+## [Tahap Penyesuaian 4] Integrasi Siklus Paket & Diskon Persentase Dinamis
+- **Tanggal:** 3 November 2026
+- **Status:** ✅ Selesai & Tervalidasi.
+- **Rincian Implementasi:**
+  1. **Modul Terpusat [`src/lib/pricing.ts`](file:///d:/bimbelsync/src/lib/pricing.ts):**
+     - Membuat fungsi `calculatePlanPrice` yang menjadi satu-satunya sumber kebenaran (*single source of truth*) kalkulasi tarif paket berlangganan.
+     - Formula matematis: $\text{Total} = \text{Harga} \times \text{Bulan} \times (1 - \text{Diskon} / 100)$.
+  2. **Modal Buat Invoice Baru (`BillingClientPage`):**
+     - Menyediakan segmented button selector: **1 Bulan (Bulanan)**, **6 Bulan (Semester — HEMAT 10%)**, **1 Tahun (Tahunan — HEMAT 17% Dinamis)**, serta opsi durasi kustom.
+     - Menampilkan banner rincian penghematan otomatis berwarna emerald/teal yang membandingkan harga normal vs harga diskon.
+     - Field nominal otomatis terisi tarif diskon resmi, namun tetap dapat disesuaikan manual oleh superadmin jika diperlukan.
+  3. **Modal Onboarding Akademi Baru (`AddAcademyModal`):**
+     - Menghubungkan pemilihan paket bimbel dengan selector durasi dan kalkulasi diskon otomatis.
+     - Saat akademi didaftarkan dengan status `ACTIVE`, tagihan perdana di `createAcademyAction` otomatis diterbitkan menggunakan nominal diskon resmi dan tanggal jatuh tempo diperpanjang sesuai durasi paket.
+  4. **Konversi "Hemat 2 Bulan" Menjadi Persentase Dinamis:**
+     - Menghilangkan badge statis "Hemat 2 Bulan" dan menggantinya dengan persentase dinamis `HEMAT ${plan.discount_12_months}%` (default 17%) pada Landing Page, Onboarding, dan Billing. Hal ini memastikan seluruh UI tetap sinkron saat Superadmin mengubah diskon tahunan melalui menu Plans & Pricing.
+
+---
+
+## [Tahap Penyesuaian 5] Pembaruan Menyeluruh Dokumentasi Arsitektur Sistem
+- **Tanggal:** 3 November 2026
+- **Status:** ✅ Selesai & Tervalidasi.
+- **Rincian Dokumen yang Diperbarui:**
+  1. **[`ERD.md`](file:///d:/bimbelsync/ERD.md):** Menyinkronkan entitas `ACADEMY` (pengaturan Custom SMTP BYO), entitas `PLANS` (diskon dinamis semester dan tahunan), entitas `PLATFORM_INVOICES`, serta tabel matriks batasan kuota.
+  2. **[`AGENTS.md`](file:///d:/bimbelsync/AGENTS.md):** Mempertahankan blok Next.js 16 dan menambahkan panduan teknis rekayasa komprehensif bagi agen AI (aturan diskon `pricing.ts`, larangan `npx` akibat ruang disk C: penuh, pola transaksi konkurensi, dan konvensi UI).
+  3. **[`PRD.md`](file:///d:/bimbelsync/PRD.md):** Memperbarui skema diskon billing cycle, tanggung jawab Superadmin, spesifikasi kuota ruangan/materi/cicilan per paket, dan integrasi Custom SMTP.
+  4. **[`Desain.md`](file:///d:/bimbelsync/Desain.md):** Mendokumentasikan kartu KPI watermark gradient, standar grafik Recharts dual-axis, format mata uang ringkas `formatCompactRupiah`, standar tabel 9-kolom billing style, dan segmented duration controls.
+  5. **[`Log_Aktivitas.md`](file:///d:/bimbelsync/Log_Aktivitas.md):** Mencatat seluruh tahapan penyesuaian dari Tahap 2 hingga Tahap 5 secara kronologis.
+

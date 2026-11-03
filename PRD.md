@@ -23,21 +23,22 @@ Platform menyediakan tiga tingkatan paket (Plans) berjenjang dengan pembatasan k
 | **Target Skala Bimbel** | Bimbel rintisan, 1-2 tutor | Bimbel berkembang, full otomasi | Bimbel established, multi-program |
 | **Maks. Siswa (`max_students`)** | 50 siswa | 200 siswa | 500 siswa |
 | **Maks. Staf / Tutor (`max_staff`)** | 3 staf | 10 staf | 25 staf |
-| **Maks. Ruangan (`max_rooms`)** | 2 ruangan | 6 ruangan | 15 ruangan |
+| **Maks. Ruangan (`max_rooms`)** | 3 ruangan | 6 ruangan | 15 ruangan |
 | **Jadwal Kelas Anti-Bentrok** | ✅ Ya | ✅ Ya | ✅ Ya |
 | **Presensi QR Dinamis** | ❌ (Presensi Manual) | ✅ Ya | ✅ Ya |
 | **E-Rapor & Bobot Evaluasi Nilai** | ❌ Tidak | ✅ Ya | ✅ Ya |
-| **Repositori Materi Belajar** | ❌ Tidak | ✅ Ya | ✅ Ya |
-| **Pengingat Tagihan Email Otomatis** | ❌ Tidak | ✅ Ya | ✅ Ya |
-| **Opsi Pembayaran Cicilan (Installment)** | ❌ Tidak (Hanya Lunas) | ❌ Tidak | ✅ Ya |
+| **Repositori Materi Belajar** | Maks. 15 Modul | Maks. 50 Modul | ✅ Unlimited Modul |
+| **Pengingat Tagihan Email Otomatis** | ❌ Tidak | ✅ Ya (Email Default) | ✅ Ya (Termasuk Custom SMTP BYO) |
+| **Opsi Pembayaran Cicilan (Installment)** | ❌ Tidak (Hanya Lunas) | Maks. 3 Termin | ✅ Unlimited Termin |
 | **Log Audit Keamanan (Audit Trail)** | ❌ Tidak | ❌ Tidak | ✅ Ya |
+| **Kalkulator Honor Tutor (Payroll)** | ❌ Tidak | ❌ Tidak | ✅ Ya |
 | **Prioritas Dukungan Teknis** | Standar | Standar | ✅ Prioritas Utama |
 | **Subdomain / Tenant URL Path** | ✅ Ya (`/[slug]`) | ✅ Ya (`/[slug]`) | ✅ Ya (`/[slug]`) |
 
 ### Skema Diskon Billing Cycle Platform
-- **Bulanan (Monthly):** Tarif normal per bulan.
-- **Semester (6 Bulan):** Diskon **10%** dari total tarif 6 bulan.
-- **Tahunan (12 Bulan):** Diskon **17%** (persentase dinamis sesuai konfigurasi paket).
+- **Bulanan (1 Bulan):** Tarif dasar paket normal per bulan.
+- **Semester (6 Bulan):** Diskon **10%** dari total tarif 6 bulan (badge: `HEMAT 10%`).
+- **Tahunan (12 Bulan):** Diskon **17%** persentase dinamis dari konfigurasi paket (badge: `HEMAT 17%`). Terhubung langsung dan terotomatisasi pada Landing Page, Onboarding Bimbel, dan Modul Billing Platform.
 
 ---
 
@@ -69,9 +70,10 @@ Sistem membedakan empat aktor utama dengan batasan hak akses yang tegas:
 ### 3.1. Superadmin (Tim Internal BimbelSync)
 - **Lingkup Rute:** `/superadmin`
 - **Tanggung Jawab:**
-  - Manajemen onboarding akademi bimbel baru (status: `TRIAL`, `ACTIVE`, `SUSPENDED`, `EXPIRED_TRIAL`).
-  - Manajemen konfigurasi paket (`Plan`): harga, kuota siswa/staf/ruangan, flag fitur, dan persentase diskon.
-  - Verifikasi dan rekonsiliasi tagihan platform (`PlatformInvoice`) dari transfer bank bimbel.
+  - Manajemen onboarding akademi bimbel baru dengan pemilihan siklus durasi (1 Bulan, 6 Bulan Hemat 10%, 1 Tahun Hemat 17% Dinamis) dan kalkulasi tagihan perdana otomatis (status: `TRIAL`, `ACTIVE`, `SUSPENDED`, `EXPIRED_TRIAL`).
+  - Manajemen konfigurasi paket (`Plan`): harga bulanan, kuota siswa/staf/ruangan, flag fitur, dan persentase diskon semester (`discount_6_months`) serta tahunan (`discount_12_months`).
+  - Pembuatan dan rekonsiliasi tagihan platform (`PlatformInvoice`) dengan selector siklus paket, kalkulasi diskon otomatis, dan verifikasi bukti transfer.
+  - Laporan Keuangan Platform (`/superadmin/reports`): visualisasi pertumbuhan platform (AreaChart dual-axis: Pendapatan & Jumlah Bimbel), ringkasan KPI gradient, serta tabel rincian transaksi berstandar 9 kolom lengkap dengan pencarian real-time dan pagination.
   - Pengelolaan data rekening pembayaran platform (`PlatformSetting`).
   - Monitoring audit log global dan pemantauan status rate limiting IP.
 - **Batasan Keamanan:** Tidak memiliki akses langsung ke data operasional privat (daftar murid, rekap kas internal bimbel).
@@ -80,11 +82,12 @@ Sistem membedakan empat aktor utama dengan batasan hak akses yang tegas:
 - **Lingkup Rute:** `/[tenantSlug]/dashboard`
 - **Tanggung Jawab:**
   - Akses penuh ke seluruh modul operasional tenant bimbelnya.
-  - **Master Data:** CRUD Siswa, Staf/Tutor, Ruangan, dan Program (termasuk setting bobot evaluasi ujian `weight_exam` dan tugas `weight_homework`).
+  - **Master Data:** CRUD Siswa, Staf/Tutor, Ruangan (Starter maks 3, Growth maks 6, Pro maks 15), dan Program (termasuk setting bobot evaluasi ujian `weight_exam` dan tugas `weight_homework`).
   - **Penjadwalan:** Pembuatan jadwal sesi dengan validasi anti-bentrok tutor dan ruangan secara atomik.
   - **Presensi:** Menampilkan layar QR dinamis untuk seluruh kelas bimbingan.
-  - **Keuangan & Billing:** Pembuatan invoice SPP (Lunas atau Cicilan jika paket Pro), pengaturan rekening penerima, input server key Payment Gateway (BYOK), serta verifikasi transfer manual.
-  - **Akademik & Materi:** Pengelolaan materi pembelajaran dan publikasi E-Rapor evaluasi siswa.
+  - **Keuangan & Billing:** Pembuatan invoice SPP (Lunas penuh, atau pemecahan cicilan maks. 3 termin pada paket Growth dan unlimited termin pada paket Pro), pengaturan rekening penerima, input server key Payment Gateway (BYOK), serta verifikasi transfer manual.
+  - **Akademik & Materi:** Pengelolaan materi pembelajaran (Starter maks 15 modul, Growth maks 50 modul, Pro unlimited) dan publikasi E-Rapor evaluasi siswa.
+  - **Integrasi Email:** Konfigurasi Custom BYO SMTP (Growth & Pro) untuk pengiriman email tagihan dan notifikasi menggunakan domain bimbel sendiri.
   - **Langganan:** Monitoring kuota terpakai, pengajuan upgrade paket, dan konfirmasi perpanjangan langganan bimbel ke platform.
   - **Audit Logs:** Memantau log aktivitas keamanan staf (khusus paket Pro).
 

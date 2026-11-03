@@ -79,7 +79,7 @@ erDiagram
         boolean allows_erapor "Feature gate: e-rapor & nilai berkala"
         boolean allows_audit_trail "Feature gate: log audit keamanan"
         int discount_6_months "Diskon paket semester (default 10%)"
-        int discount_12_months "Diskon paket tahunan (default 17%)"
+        int discount_12_months "Diskon paket tahunan (persentase dinamis, default 17%)"
         string_array additional_features "List fitur promosi landing page"
         boolean is_active "Status penawaran paket aktif"
         datetime deleted_at "nullable - soft delete"
@@ -99,6 +99,14 @@ erDiagram
         date pending_plan_date "nullable - tanggal aktivasi paket terjadwal"
         string bank_name "nullable - bank penerima pembayaran transfer siswa"
         string bank_account "nullable - nomor rekening pembayaran transfer siswa"
+        string smtp_host "nullable - custom host SMTP bimbel (BYO SMTP)"
+        int smtp_port "default 587 - port SMTP"
+        string smtp_user "nullable - username autentikasi SMTP"
+        string smtp_pass "nullable - password/app password SMTP"
+        string smtp_from_name "nullable - nama pengirim email notifikasi"
+        string smtp_from_email "nullable - alamat email pengirim"
+        boolean smtp_secure "default false - enkripsi TLS/SSL"
+        boolean is_smtp_active "default false - status aktif integrasi custom SMTP"
         datetime deleted_at "nullable - soft delete tenant"
     }
 
@@ -323,11 +331,11 @@ Tabel `Plan` memuat batas kuota numerik dan flag pembatas kemampuan sistem:
 | **Harga Bulanan** | Rp 99.000 | Rp 199.000 | Rp 399.000 |
 | **Maks. Siswa (`max_students`)** | 50 | 200 | 500 |
 | **Maks. Staf/Tutor (`max_staff`)** | 3 | 10 | 25 |
-| **Maks. Ruangan (`max_rooms`)** | 2 | 6 | 15 |
+| **Maks. Ruangan (`max_rooms`)** | 3 | 6 | 15 |
 | **Presensi QR Dinamis (`allows_qr_attendance`)** | ❌ (Manual) | ✅ | ✅ |
 | **E-Rapor & Bobot Nilai (`allows_erapor`)** | ❌ | ✅ | ✅ |
-| **Email Notifikasi Otomatis (`allows_automated_email`)** | ❌ | ✅ | ✅ |
-| **Materi Pembelajaran (`materials`)** | ❌ | ✅ | ✅ |
-| **Opsi Bayar Cicilan (`allows_installment`)** | ❌ | ❌ | ✅ |
+| **Email Notifikasi Otomatis (`allows_automated_email`)** | ❌ | ✅ | ✅ (Termasuk Custom SMTP BYO) |
+| **Materi Pembelajaran (`materials`)** | Maks. 15 Modul | Maks. 50 Modul | ✅ Unlimited |
+| **Opsi Bayar Cicilan (`allows_installment`)** | ❌ | Maks. 3 Termin | ✅ Unlimited Termin |
 | **Audit Trail Keamanan (`allows_audit_trail`)** | ❌ | ❌ | ✅ |
-| **Diskon 6 Bulan / 12 Bulan** | 10% / 17% | 10% / 17% | 10% / 17% |
+| **Diskon 6 Bulan / 12 Bulan** | 10% / 17% (Dinamis) | 10% / 17% (Dinamis) | 10% / 17% (Dinamis) |

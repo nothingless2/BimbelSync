@@ -104,16 +104,29 @@ src/app/
 ### 3.2. Tipografi & Representasi Data
 - **Font Utama:** Sans-serif modern (Inter / Roboto) dari Google Fonts.
 - **Tabular Figures:** Seluruh kolom angka finansial (harga, sisa kuota, nominal tagihan) menggunakan font monospace atau `tabular-nums` agar sejajar secara vertikal pada tabel data.
-- **Format Mata Uang:** Standar Rupiah Indonesia dengan pemisah ribuan titik (contoh: `Rp 199.000`).
+- **Format Mata Uang:**
+  - Standar Lengkap: Format Rupiah Indonesia dengan pemisah ribuan titik (contoh: `Rp 7.644.000` via `formatRupiah`).
+  - Standar Ringkas (Grafik/Sumbu Y): Format ringkas Indonesia via `formatCompactRupiah` (contoh: `Rp 6 jt`, `Rp 4,5 jt`, `Rp 500 rb`, `Rp 1,2 M`) guna mengoptimalkan ruang visual dan mencegah pemotongan teks (*clipping*).
 
-### 3.3. Komponen UI Standar
-1. **Sidebar Navigation (Desktop):**  
+### 3.3. Komponen UI Standar & Pola Interaksi
+1. **Kartu KPI Gradient dengan Ikon Watermark:**  
+   Menampilkan metrik bisnis utama menggunakan gradient kaya kontras (`blue-600 to blue-700` untuk Omset/Revenue, `emerald-600 to teal-700` untuk ARPU/Kehadiran, `rose-600 to pink-700` untuk Churn/Tunggakan) yang dilengkapi dengan ikon watermark transparan (opacity 10-15%) di latar belakang serta badge pill kontras tinggi.
+2. **Standar Visualisasi Grafik Dual-Axis (Recharts):**  
+   - Margin SVG terstruktur: `margin={{ top: 10, right: 10, bottom: 5, left: 15 }}`.
+   - Sumbu Y kiri (Mata Uang): Diberi `width={80}`, `dx={-4}`, dan format `formatCompactRupiah`.
+   - Sumbu Y kanan (Unit/Count): Diberi `width={35}`, `dx={4}`, dan `allowDecimals={false}` untuk bilangan bulat.
+   - Header grafik menyertakan titik indikator warna (Legend dots) agar pembacaan kurva ganda (misal Pendapatan vs Total Bimbel) langsung intuitif.
+3. **Standar Tabel Data Transaksi (Platform Billing Style):**  
+   Penyajian tabel transaksi multi-kolom terstandar: Kolom nomor, Identitas akademi + slug path, Badge paket kontras gelap, Periode, Nominal tebal, Tanggal jatuh tempo, Tanggal pelunasan, Status pill, serta Verifikator, dilengkapi filter pencarian *real-time* dan komponen `<Pagination />`.
+4. **Segmented Duration Selector & Diskon Dinamis:**  
+   Pilihan durasi paket langganan (1 Bulan, 6 Bulan, 1 Tahun) disajikan dalam segmented pill buttons dengan badge diskon dinamis (`HEMAT 10%`, `HEMAT 17%`) dan kartu rincian penghematan otomatis berwarna emerald/teal.
+5. **Sidebar Navigation (Desktop):**  
    Navigasi tetap di sebelah kiri dengan indikator badge status langganan bimbel dan pembeda visual antara mode Admin dan mode Tutor.
-2. **Bottom Navigation Bar (Portal Siswa Mobile):**  
+6. **Bottom Navigation Bar (Portal Siswa Mobile):**  
    Navigasi bawah yang ramah sentuhan jempol (*thumb-friendly*) pada perangkat smartphone dengan pintasan cepat ke: Beranda, Scan QR, Jadwal, Nilai, dan Tagihan.
-3. **Action Menu Overlay:**  
+7. **Action Menu Overlay:**  
    Dropdown aksi tabel menggunakan modal / floating overlay dengan z-index tinggi guna mencegah terpotong oleh batas kontainer tabel (*anti-clipping container overflow*).
-4. **Modal Konfirmasi Destruktif:**  
+8. **Modal Konfirmasi Destruktif:**  
    Menggunakan dialog `sweetalert2` yang di-styling selaras dengan palet tema untuk konfirmasi pembatalan sesi, penonaktifan siswa, atau penghapusan ruangan.
 
 ---
