@@ -27,7 +27,7 @@ export default async function SuperadminReportsPage() {
           payment_status: "PAID",
           paid_at: { not: null }
         },
-        include: { plan: true, academy: true },
+        include: { plan: true, academy: true, verified_by: true },
         orderBy: { paid_at: "asc" },
       })
     ]);
@@ -55,9 +55,14 @@ export default async function SuperadminReportsPage() {
       id: inv.id,
       academy_id: inv.academy_id,
       academy_name: inv.academy.name,
+      academy_path_url: inv.academy.path_url,
       plan_name: inv.plan.name,
+      billing_period: inv.billing_period.toISOString(),
       amount: inv.amount,
+      due_date: inv.due_date.toISOString(),
       paid_at: inv.paid_at!.toISOString(),
+      payment_status: inv.payment_status,
+      verified_by: inv.verified_by ? { name: inv.verified_by.name, email: inv.verified_by.email } : null,
     })).sort((a, b) => new Date(b.paid_at).getTime() - new Date(a.paid_at).getTime());
 
     return (

@@ -2,11 +2,12 @@
 
 import { useState, useMemo } from "react";
 import { BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { Download, FileText, Printer, Calendar, RotateCcw, TrendingUp, CreditCard, UserMinus } from "lucide-react";
+import { Download, FileText, Printer, Calendar, RotateCcw, TrendingUp, CreditCard, UserMinus, Search } from "lucide-react";
 import { format, startOfWeek, subWeeks, subMonths, subYears, getWeek } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { toast } from "@/components/ui/sonner";
+import { Pagination } from "@/components/ui/pagination";
 
 type ProgramData = {
   name: string;
@@ -17,9 +18,14 @@ type InvoiceData = {
   id: string;
   academy_id: string;
   academy_name: string;
+  academy_path_url?: string;
   plan_name: string;
+  billing_period?: string;
   amount: number;
+  due_date?: string;
   paid_at: string;
+  payment_status?: string;
+  verified_by?: { name: string | null; email: string } | null;
 };
 
 type PeriodFilter = "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
@@ -39,6 +45,9 @@ export default function ReportsClientPage({
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [quickPreset, setQuickPreset] = useState<string>("ALL");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const itemsPerPage = 10;
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#6366f1', '#ec4899', '#8b5cf6', '#14b8a6'];
 
@@ -79,6 +88,7 @@ export default function ReportsClientPage({
   };
 
   const applyPreset = (preset: string) => {
+    setCurrentPage(1);
     const now = new Date();
     const formatDateInput = (d: Date) => format(d, "yyyy-MM-dd");
 
@@ -154,6 +164,27 @@ export default function ReportsClientPage({
     const paidAcademiesSet = new Set(filteredInvoices.map(inv => inv.academy_id));
     return paidAcademiesSet.size > 0 ? filteredTotalRevenue / paidAcademiesSet.size : 0;
   }, [filteredInvoices, filteredTotalRevenue]);
+
+  // Filtered by Search query for the table view
+  const searchedInvoices = useMemo(() => {
+    if (!searchQuery.trim()) return filteredInvoices;
+    const q = searchQuery.toLowerCase().trim();
+    return filteredInvoices.filter(inv =>
+      inv.academy_name.toLowerCase().includes(q) ||
+      (inv.academy_path_url && inv.academy_path_url.toLowerCase().includes(q)) ||
+      inv.plan_name.toLowerCase().includes(q)
+    );
+  }, [filteredInvoices, searchQuery]);
+
+  const searchedTotalRevenue = useMemo(() => {
+    return searchedInvoices.reduce((sum, inv) => sum + inv.amount, 0);
+  }, [searchedInvoices]);
+
+  const totalPages = Math.ceil(searchedInvoices.length / itemsPerPage) || 1;
+  const paginatedInvoices = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return searchedInvoices.slice(start, start + itemsPerPage);
+  }, [searchedInvoices, currentPage, itemsPerPage]);
 
   // Dynamic Chart Data Generation based on filtered invoices
   const chartData = useMemo(() => {
@@ -302,6 +333,7 @@ export default function ReportsClientPage({
   }, [invoices]);
 
   const handleSelectMonth = (monthStr: string) => {
+    setCurrentPage(1);
     if (!monthStr) {
       applyPreset("ALL");
       return;
@@ -415,6 +447,7 @@ export default function ReportsClientPage({
                 onChange={(e) => {
                   setStartDate(e.target.value);
                   setQuickPreset("CUSTOM");
+                  setCurrentPage(1);
                 }}
                 className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
               />
@@ -427,6 +460,7 @@ export default function ReportsClientPage({
                 onChange={(e) => {
                   setEndDate(e.target.value);
                   setQuickPreset("CUSTOM");
+                  setCurrentPage(1);
                 }}
                 className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
               />
@@ -750,63 +784,129 @@ export default function ReportsClientPage({
         </div>
       </div>
 
-      {/* Table of Latest Transactions */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden no-print mt-8">
-        <div className="p-6 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 no-print">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Rincian Transaksi Pendapatan</h3>
+      {/* Table of Latest Transactions - Design matches Platform Billing */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden no-print mt-8 flex flex-col">
+        {/* Table Toolbar */}
+        <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="relative flex-1 max-w-md w-full">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search size={16} className="text-slate-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Cari nama atau URL akademi..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200"
+            />
+          </div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">
+            Total: <strong className="text-slate-800 dark:text-slate-200">{searchedInvoices.length}</strong> transaksi ({formatRupiah(searchedTotalRevenue)})
+          </div>
         </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="text-xs text-slate-500 dark:text-slate-400 uppercase bg-slate-50/50 dark:bg-slate-800/30 border-b border-slate-200/50 dark:border-slate-700/50">
+            <thead className="text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-900/10">
               <tr>
-                <th className="px-6 py-4 font-bold tracking-wider">Tanggal</th>
-                <th className="px-6 py-4 font-bold tracking-wider">Nama Bimbel</th>
-                <th className="px-6 py-4 font-bold tracking-wider">Paket</th>
-                <th className="px-6 py-4 font-bold tracking-wider text-right">Pendapatan</th>
+                <th className="px-6 py-4 w-16">No.</th>
+                <th className="px-6 py-4">Akademi</th>
+                <th className="px-6 py-4">Paket</th>
+                <th className="px-6 py-4">Periode</th>
+                <th className="px-6 py-4">Nominal</th>
+                <th className="px-6 py-4">Jatuh Tempo</th>
+                <th className="px-6 py-4">Tgl Lunas</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4">Diverifikasi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100/50 dark:divide-slate-800/50">
-              {filteredInvoices.length === 0 ? (
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
+              {paginatedInvoices.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-slate-500 font-medium">
-                    Tidak ada transaksi pada rentang tanggal yang dipilih.
+                  <td colSpan={9} className="px-6 py-16 text-center text-slate-500">
+                    <FileText className="mx-auto h-12 w-12 text-slate-300 dark:text-slate-700 mb-3" />
+                    Tidak ada transaksi pada filter yang dipilih.
                   </td>
                 </tr>
               ) : (
-                filteredInvoices.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
-                    <td className="px-6 py-4 whitespace-nowrap text-slate-600 dark:text-slate-300">
-                      {format(new Date(inv.paid_at), "dd MMM yyyy, HH:mm", { locale: localeId })}
+                paginatedInvoices.map((inv, index) => (
+                  <tr key={inv.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                    <td className="px-6 py-4 font-medium text-slate-500">
+                      {(currentPage - 1) * itemsPerPage + index + 1}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-900 dark:text-slate-100">
-                      {inv.academy_name}
+                    <td className="px-6 py-4">
+                      <p className="font-semibold text-slate-900 dark:text-slate-100">{inv.academy_name}</p>
+                      {inv.academy_path_url && (
+                        <p className="text-xs text-slate-500 font-mono">/{inv.academy_path_url}</p>
+                      )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 px-3 py-1.5 rounded-full text-xs font-bold border border-indigo-200 dark:border-indigo-800/50">
+                    <td className="px-6 py-4">
+                      <span className="bg-slate-800 dark:bg-slate-700 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">
                         {inv.plan_name}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right font-bold text-emerald-600 dark:text-emerald-400">
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400 capitalize">
+                      {inv.billing_period 
+                        ? format(new Date(inv.billing_period), "MMMM yyyy", { locale: localeId }) 
+                        : "-"}
+                    </td>
+                    <td className="px-6 py-4 font-semibold text-slate-900 dark:text-slate-100">
                       {formatRupiah(inv.amount)}
+                    </td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
+                      {inv.due_date 
+                        ? format(new Date(inv.due_date), "dd MMM yyyy", { locale: localeId }) 
+                        : "-"}
+                    </td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
+                      {inv.paid_at 
+                        ? format(new Date(inv.paid_at), "dd MMM yyyy", { locale: localeId }) 
+                        : "-"}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800/50">
+                        Lunas
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-xs text-slate-500">
+                      {inv.verified_by ? (
+                        <span className="font-medium text-slate-700 dark:text-slate-300">
+                          {inv.verified_by.name || inv.verified_by.email}
+                        </span>
+                      ) : (
+                        <span className="italic text-slate-300 dark:text-slate-600">–</span>
+                      )}
                     </td>
                   </tr>
                 ))
               )}
             </tbody>
-            {filteredInvoices.length > 0 && (
+            {searchedInvoices.length > 0 && (
               <tfoot className="bg-slate-50/80 dark:bg-slate-800/60 font-bold border-t border-slate-200 dark:border-slate-700">
                 <tr>
-                  <td colSpan={3} className="px-6 py-4 text-right text-slate-700 dark:text-slate-300">
-                    Total ({filteredInvoices.length} Transaksi):
+                  <td colSpan={4} className="px-6 py-4 text-slate-700 dark:text-slate-300">
+                    Total ({searchedInvoices.length} Transaksi)
                   </td>
-                  <td className="px-6 py-4 text-right text-emerald-600 dark:text-emerald-400 font-bold">
-                    {formatRupiah(filteredTotalRevenue)}
+                  <td className="px-6 py-4 text-emerald-600 dark:text-emerald-400 font-bold">
+                    {formatRupiah(searchedTotalRevenue)}
                   </td>
+                  <td colSpan={4}></td>
                 </tr>
               </tfoot>
             )}
           </table>
         </div>
+
+        <Pagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={searchedInvoices.length}
+          itemsPerPage={itemsPerPage}
+        />
       </div>
       
     </div>
