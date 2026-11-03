@@ -96,14 +96,19 @@ export default function DashboardClientPage({ stats, growthData, planDistributio
             <h3 className="text-xs sm:text-sm font-bold text-blue-100 uppercase tracking-wider mb-2">MRR</h3>
             <p className="text-2xl sm:text-3xl font-black text-white tracking-tight truncate">{IDR(stats.currentMRR)}</p>
           </div>
-          <div className="relative z-10 mt-3">
+          <div className="relative z-10 mt-4">
             {mrrGrowthPct !== null ? (
-              <p className={`text-xs flex items-center gap-1 font-semibold ${mrrDiff >= 0 ? "text-emerald-300" : "text-rose-200"}`}>
-                {mrrDiff >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-                {mrrDiff >= 0 ? "+" : ""}{mrrGrowthPct}% dari bulan lalu
-              </p>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white shadow-xs">
+                <span className={`flex items-center gap-0.5 font-bold text-xs ${mrrDiff >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                  {mrrDiff >= 0 ? <ArrowUpRight size={14} className="stroke-[2.5]" /> : <ArrowDownRight size={14} className="stroke-[2.5]" />}
+                  {mrrDiff >= 0 ? "+" : ""}{mrrGrowthPct}%
+                </span>
+                <span className="text-slate-500 text-xs font-medium">dari bulan lalu</span>
+              </div>
             ) : (
-              <p className="text-xs font-medium text-blue-200">/bulan dari akademi aktif</p>
+              <div className="inline-flex items-center px-3 py-1.5 rounded-xl bg-white shadow-xs text-xs font-medium text-slate-600">
+                /bulan dari akademi aktif
+              </div>
             )}
           </div>
         </div>
@@ -117,8 +122,11 @@ export default function DashboardClientPage({ stats, growthData, planDistributio
             <h3 className="text-xs sm:text-sm font-bold text-emerald-100 uppercase tracking-wider mb-2">Pendapatan</h3>
             <p className="text-2xl sm:text-3xl font-black text-white tracking-tight truncate">{IDR(stats.totalRevenue)}</p>
           </div>
-          <div className="relative z-10 mt-3">
-            <p className="text-xs font-medium text-emerald-100">Total tagihan lunas</p>
+          <div className="relative z-10 mt-4">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white shadow-xs text-xs font-semibold text-slate-700">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+              Total tagihan lunas
+            </div>
           </div>
         </div>
 
@@ -131,8 +139,11 @@ export default function DashboardClientPage({ stats, growthData, planDistributio
             <h3 className="text-xs sm:text-sm font-bold text-amber-100 uppercase tracking-wider mb-2">Piutang</h3>
             <p className="text-2xl sm:text-3xl font-black text-white tracking-tight truncate">{IDR(stats.totalReceivables)}</p>
           </div>
-          <div className="relative z-10 mt-3">
-            <p className="text-xs font-medium text-amber-100">Belum dibayar</p>
+          <div className="relative z-10 mt-4">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white shadow-xs text-xs font-semibold text-slate-700">
+              <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
+              Belum dibayar
+            </div>
           </div>
         </div>
 
@@ -145,12 +156,36 @@ export default function DashboardClientPage({ stats, growthData, planDistributio
             <h3 className="text-xs sm:text-sm font-bold text-indigo-100 uppercase tracking-wider mb-2">Akademi</h3>
             <p className="text-2xl sm:text-3xl font-black text-white tracking-tight">{stats.totalAcademies}</p>
           </div>
-          <div className="relative z-10 mt-3">
-            <div className="flex gap-1.5 flex-wrap">
-              <span className="text-[10px] font-bold text-emerald-200 bg-emerald-500/25 border border-emerald-400/30 px-1.5 py-0.5 rounded-md">{stats.activeAcademies} Aktif</span>
-              <span className="text-[10px] font-bold text-blue-200 bg-blue-500/25 border border-blue-400/30 px-1.5 py-0.5 rounded-md">{stats.trialAcademies} Trial</span>
-              <span className="text-[10px] font-bold text-rose-200 bg-rose-500/25 border border-rose-400/30 px-1.5 py-0.5 rounded-md">{stats.suspendedAcademies} Suspended</span>
-              <span className="text-[10px] font-bold text-amber-200 bg-amber-500/25 border border-amber-400/30 px-1.5 py-0.5 rounded-md">{stats.expiredTrialAcademies} Expired</span>
+          <div className="relative z-10 mt-4">
+            <div className="grid grid-cols-2 gap-1.5">
+              <div className="bg-white rounded-lg px-2.5 py-1.5 flex items-center justify-between shadow-xs">
+                <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-600">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                  Aktif
+                </span>
+                <span className="font-extrabold text-slate-900 text-xs">{stats.activeAcademies}</span>
+              </div>
+              <div className="bg-white rounded-lg px-2.5 py-1.5 flex items-center justify-between shadow-xs">
+                <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-600">
+                  <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0"></span>
+                  Trial
+                </span>
+                <span className="font-extrabold text-slate-900 text-xs">{stats.trialAcademies}</span>
+              </div>
+              <div className="bg-white rounded-lg px-2.5 py-1.5 flex items-center justify-between shadow-xs">
+                <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-600">
+                  <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0"></span>
+                  Suspended
+                </span>
+                <span className="font-extrabold text-slate-900 text-xs">{stats.suspendedAcademies}</span>
+              </div>
+              <div className="bg-white rounded-lg px-2.5 py-1.5 flex items-center justify-between shadow-xs">
+                <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-600">
+                  <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
+                  Expired
+                </span>
+                <span className="font-extrabold text-slate-900 text-xs">{stats.expiredTrialAcademies}</span>
+              </div>
             </div>
           </div>
         </div>
