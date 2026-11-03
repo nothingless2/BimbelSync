@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { Download, FileText, TrendingUp, Users, ArrowUpRight, ArrowDownRight, Printer, Calendar, RotateCcw, AlertCircle } from "lucide-react";
+import { Download, FileText, TrendingUp, Users, ArrowUpRight, ArrowDownRight, Printer, Calendar, RotateCcw, AlertCircle, Receipt } from "lucide-react";
 import { format, startOfWeek, subWeeks, subMonths, subYears, getWeek } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { CustomSelect } from "@/components/ui/custom-select";
@@ -624,64 +624,56 @@ export default function TenantReportsClientPage({
       </div>
 
       {/* Screen Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8 no-print">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 no-print">
         {/* Card 1: Revenue */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              {startDate || endDate ? "Pendapatan Periode Terpilih" : "Total Pendapatan Terakumulasi"}
-            </span>
-            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center shrink-0">
-              <TrendingUp size={20} />
-            </div>
+        <div className="p-6 rounded-3xl bg-gradient-to-br from-blue-600 to-blue-800 border border-blue-700 shadow-lg relative overflow-hidden group">
+          <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110 pointer-events-none">
+            <TrendingUp size={120} />
           </div>
-          <div className="mt-4">
-            <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-              {formatRupiah(filteredTotalRevenue)}
+          <div className="relative z-10">
+            <h3 className="text-sm font-bold text-blue-100 uppercase tracking-wider mb-2">
+              {startDate || endDate ? "Pendapatan Periode Terpilih" : "Total Pendapatan Terakumulasi"}
             </h3>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+            <p className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+              {formatRupiah(filteredTotalRevenue)}
+            </p>
+            <p className="text-xs font-medium text-blue-200 mt-2">
               {filteredInvoices.length} transaksi selesai
             </p>
           </div>
         </div>
         
         {/* Card 2: Active Students */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Total Siswa Aktif
-            </span>
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50 flex items-center justify-center shrink-0">
-              <Users size={20} />
-            </div>
+        <div className="p-6 rounded-3xl bg-gradient-to-br from-emerald-500 to-emerald-700 border border-emerald-600 shadow-lg relative overflow-hidden group">
+          <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110 pointer-events-none">
+            <Users size={120} />
           </div>
-          <div className="mt-4">
-            <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-              {activeStudentsCount} Siswa
+          <div className="relative z-10">
+            <h3 className="text-sm font-bold text-emerald-100 uppercase tracking-wider mb-2">
+              Total Siswa Aktif
             </h3>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-2">
+            <p className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+              {activeStudentsCount} Siswa
+            </p>
+            <p className="text-xs font-medium text-emerald-100 mt-2">
               Terdaftar aktif saat ini
             </p>
           </div>
         </div>
 
         {/* Card 3: Outstanding Revenue */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Total Piutang / Tunggakan
-            </span>
-            <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/50 flex items-center justify-center shrink-0">
-              <AlertCircle size={20} />
-            </div>
+        <div className="p-6 rounded-3xl bg-gradient-to-br from-rose-500 to-rose-700 border border-rose-600 shadow-lg relative overflow-hidden group">
+          <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110 pointer-events-none">
+            <Receipt size={120} />
           </div>
-          <div className="mt-4">
-            <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-              {formatRupiah(outstandingRevenue)}
+          <div className="relative z-10">
+            <h3 className="text-sm font-bold text-rose-100 uppercase tracking-wider mb-2">
+              Total Piutang / Tunggakan
             </h3>
-            <p className="text-xs font-medium text-amber-600 dark:text-amber-400 mt-2 flex items-center gap-1.5">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+            <p className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+              {formatRupiah(outstandingRevenue)}
+            </p>
+            <p className="text-xs font-medium text-rose-100 mt-2">
               Tagihan belum lunas
             </p>
           </div>
