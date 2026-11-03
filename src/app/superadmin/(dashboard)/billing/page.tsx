@@ -87,6 +87,8 @@ export default async function BillingPage() {
       id: p.id,
       name: p.name,
       price: p.price,
+      discount_6_months: p.discount_6_months,
+      discount_12_months: p.discount_12_months,
     }));
 
     return (

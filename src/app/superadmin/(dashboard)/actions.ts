@@ -8,6 +8,7 @@ import { requireSuperadminSession } from "@/lib/session";
 import { changeAcademyPlan } from "@/lib/subscription";
 
 import { parsePositiveQuotaLimit, parsePlanPrice } from "@/lib/plan-validation";
+import { calculatePlanPrice } from "@/lib/pricing";
 
 // ==================== PLAN (PAKET BERLANGGANAN) ====================
 
@@ -198,11 +199,13 @@ export async function createAcademyAction(formData: FormData) {
       // Jadikan tanggal awal bulan ini sebagai billing period
       const billingPeriod = new Date(today.getFullYear(), today.getMonth(), 1); 
       
+      const pricing = calculatePlanPrice(targetPlan, durationMonths);
+
       await prisma.platformInvoice.create({
         data: {
           academy_id: academy.id,
           plan_id: targetPlan.id,
-          amount: targetPlan.price * durationMonths,
+          amount: pricing.amount,
           billing_period: billingPeriod,
           due_date: calculatedDueDate || today,
           duration_months: durationMonths,

@@ -19,6 +19,7 @@ import {
 } from "./actions";
 import { Pagination } from "@/components/ui/pagination";
 import { ViewProofModal } from "@/components/modals/view-proof-modal";
+import { calculatePlanPrice } from "@/lib/pricing";
 
 const IDR = (n: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
@@ -195,13 +196,14 @@ interface InvoiceItem {
 interface Props {
   invoices: InvoiceItem[];
   academies: { id: string; name: string; subscription_due_date: string | null; plan: { id: string; name: string; price: number } }[];
-  plans: { id: string; name: string; price: number }[];
+  plans: { id: string; name: string; price: number; discount_6_months?: number | null; discount_12_months?: number | null }[];
   initialBankInfo?: { bankName: string; bankAccount: string };
 }
 
 export default function BillingClientPage({ invoices, academies, plans, initialBankInfo }: Props) {
   const [createModal, setCreateModal] = useState(false);
   const [form, setForm] = useState({ academyId: "", planId: "", billingPeriod: "", dueDate: "", amount: "", durationMonths: "1" });
+  const [isCustomDuration, setIsCustomDuration] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Bank Info state
@@ -304,6 +306,7 @@ export default function BillingClientPage({ invoices, academies, plans, initialB
       toast.success("Invoice berhasil dibuat!");
       setCreateModal(false);
       setForm({ academyId: "", planId: "", billingPeriod: "", dueDate: "", amount: "", durationMonths: "1" });
+      setIsCustomDuration(false);
     }
     setIsSubmitting(false);
   };
@@ -621,12 +624,15 @@ export default function BillingClientPage({ invoices, academies, plans, initialB
                         const today = new Date();
                         autoBillingPeriod = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
                       }
+
+                      const targetPlan = acad ? plans.find(p => p.id === acad.plan.id) : null;
+                      const pricing = targetPlan ? calculatePlanPrice(targetPlan, parseInt(form.durationMonths) || 1) : null;
                       
                       setForm({ 
                         ...form, 
                         academyId: value, 
                         planId: acad ? acad.plan.id : "",
-                        amount: acad ? (acad.plan.price * (parseInt(form.durationMonths) || 1)).toString() : "",
+                        amount: pricing ? pricing.amount.toString() : "",
                         dueDate: autoDueDate,
                         billingPeriod: autoBillingPeriod
                       });
@@ -640,8 +646,8 @@ export default function BillingClientPage({ invoices, academies, plans, initialB
                 </div>
               </div>
 
-              <div className="pt-2">
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">Paket Langganan</label>
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Paket Langganan</label>
                 <div className="relative">
                   <select
                     value={form.planId}
@@ -649,13 +655,14 @@ export default function BillingClientPage({ invoices, academies, plans, initialB
                     onChange={(e) => {
                       const value = e.target.value;
                       const plan = plans.find(p => p.id === value);
+                      const pricing = plan ? calculatePlanPrice(plan, parseInt(form.durationMonths) || 1) : null;
                       setForm({ 
                         ...form, 
                         planId: value, 
-                        amount: plan ? (plan.price * (parseInt(form.durationMonths) || 1)).toString() : form.amount 
+                        amount: pricing ? pricing.amount.toString() : form.amount 
                       });
                     }}
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm appearance-none outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm appearance-none outline-none focus:ring-2 focus:ring-blue-500 font-medium"
                   >
                     <option value="" disabled>Pilih Paket...</option>
                     {plans.map(p => (
@@ -664,6 +671,144 @@ export default function BillingClientPage({ invoices, academies, plans, initialB
                   </select>
                 </div>
               </div>
+
+              {/* Pilihan Siklus & Durasi Paket Sesuai Landing Page */}
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    Durasi & Siklus Paket
+                  </label>
+                  {selectedPlan && (
+                    <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                      Tarif Dasar: {IDR(selectedPlan.price)}/bln
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCustomDuration(false);
+                      const dur = "1";
+                      const plan = plans.find(p => p.id === form.planId);
+                      const pricing = plan ? calculatePlanPrice(plan, 1) : null;
+                      setForm({ ...form, durationMonths: dur, amount: pricing ? pricing.amount.toString() : form.amount });
+                    }}
+                    className={`py-2 px-2.5 rounded-xl border text-center transition-all flex flex-col items-center justify-center ${
+                      !isCustomDuration && form.durationMonths === "1"
+                        ? "border-blue-600 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-bold shadow-xs ring-2 ring-blue-500/20"
+                        : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-800/40"
+                    }`}
+                  >
+                    <span className="text-xs font-semibold">1 Bulan</span>
+                    <span className="text-[10px] text-slate-400">Bulanan</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCustomDuration(false);
+                      const dur = "6";
+                      const plan = plans.find(p => p.id === form.planId);
+                      const pricing = plan ? calculatePlanPrice(plan, 6) : null;
+                      setForm({ ...form, durationMonths: dur, amount: pricing ? pricing.amount.toString() : form.amount });
+                    }}
+                    className={`py-2 px-2.5 rounded-xl border text-center transition-all flex flex-col items-center justify-center relative ${
+                      !isCustomDuration && form.durationMonths === "6"
+                        ? "border-blue-600 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-bold shadow-xs ring-2 ring-blue-500/20"
+                        : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-800/40"
+                    }`}
+                  >
+                    <span className="text-xs font-semibold">6 Bulan</span>
+                    <span className="text-[9px] bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-1.5 py-0.2 rounded-full font-bold mt-0.5">
+                      HEMAT 10%
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCustomDuration(false);
+                      const dur = "12";
+                      const plan = plans.find(p => p.id === form.planId);
+                      const pricing = plan ? calculatePlanPrice(plan, 12) : null;
+                      setForm({ ...form, durationMonths: dur, amount: pricing ? pricing.amount.toString() : form.amount });
+                    }}
+                    className={`py-2 px-2.5 rounded-xl border text-center transition-all flex flex-col items-center justify-center relative ${
+                      !isCustomDuration && form.durationMonths === "12"
+                        ? "border-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-bold shadow-xs ring-2 ring-emerald-500/20"
+                        : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-800/40"
+                    }`}
+                  >
+                    <span className="text-xs font-semibold">1 Tahun</span>
+                    <span className="text-[9px] bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.2 rounded-full font-bold mt-0.5">
+                      HEMAT 2 BLN
+                    </span>
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setIsCustomDuration(!isCustomDuration)}
+                    className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 underline font-medium"
+                  >
+                    {isCustomDuration ? "Sembunyikan durasi kustom" : "Atau tentukan durasi kustom (bulan)..."}
+                  </button>
+                  <span className="text-xs text-slate-400">
+                    Akses: <strong>{form.durationMonths} Bulan</strong>
+                  </span>
+                </div>
+
+                {isCustomDuration && (
+                  <div className="pt-1.5 animate-in fade-in duration-200">
+                    <input
+                      type="number"
+                      min="1"
+                      required
+                      value={form.durationMonths}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const months = parseInt(val) || 1;
+                        const plan = plans.find(p => p.id === form.planId);
+                        const pricing = plan ? calculatePlanPrice(plan, months) : null;
+                        setForm({
+                          ...form,
+                          durationMonths: val,
+                          amount: pricing ? pricing.amount.toString() : form.amount,
+                        });
+                      }}
+                      placeholder="Masukkan jumlah bulan akses"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Banner Diskon jika memilih 6 bulan atau 1 tahun */}
+              {(() => {
+                const currentDuration = parseInt(form.durationMonths) || 1;
+                const p = plans.find(x => x.id === form.planId);
+                const pricing = p ? calculatePlanPrice(p, currentDuration) : null;
+                if (!pricing || pricing.savings <= 0) return null;
+                return (
+                  <div className="p-3.5 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200 dark:border-emerald-800/60 rounded-xl space-y-1 animate-in fade-in duration-200">
+                    <div className="flex items-center justify-between text-xs font-bold text-emerald-800 dark:text-emerald-300">
+                      <span className="flex items-center gap-1.5">
+                        <span className="px-1.5 py-0.5 rounded bg-emerald-200 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 text-[10px] uppercase font-bold tracking-wider">
+                          {pricing.badge}
+                        </span>
+                        <span>{pricing.label}</span>
+                      </span>
+                      <span>Hemat {IDR(pricing.savings)}</span>
+                    </div>
+                    <p className="text-[11px] text-emerald-700 dark:text-emerald-400">
+                      Harga Normal: <span className="line-through">{IDR(pricing.originalAmount)}</span> → <span className="font-bold text-emerald-900 dark:text-emerald-100">{IDR(pricing.amount)}</span>
+                    </p>
+                  </div>
+                );
+              })()}
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
@@ -679,33 +824,27 @@ export default function BillingClientPage({ invoices, academies, plans, initialB
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Nominal (Rp)</label>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Nominal Tagihan (Rp)</label>
+                  {(() => {
+                    const currentDuration = parseInt(form.durationMonths) || 1;
+                    const p = plans.find(x => x.id === form.planId);
+                    const pricing = p ? calculatePlanPrice(p, currentDuration) : null;
+                    if (!pricing) return null;
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => setForm({ ...form, amount: pricing.amount.toString() })}
+                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        Pakai Tarif Paket ({IDR(pricing.amount)})
+                      </button>
+                    );
+                  })()}
+                </div>
                 <input type="number" required min={0} value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })}
                   placeholder={selectedPlan ? `Default: ${IDR(selectedPlan.price)}` : "0"}
-                  className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none" />
-                {selectedPlan && <p className="text-xs text-slate-400">Harga paket {selectedPlan.name}: {IDR(selectedPlan.price)}/bulan</p>}
-              </div>
-
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">
-                  Durasi Langganan (Bulan)</label>
-                <p className="text-[11px] text-slate-500 mb-3">Tentukan berapa bulan akses yang akan diberikan jika tagihan ini dilunasi.</p>
-                <input
-                  type="number"
-                  min="1"
-                  required
-                  value={form.durationMonths}
-                  onChange={(e) => {
-                    const newDuration = parseInt(e.target.value) || 1;
-                    const plan = plans.find(p => p.id === form.planId);
-                    setForm({ 
-                      ...form, 
-                      durationMonths: e.target.value,
-                      amount: plan ? (plan.price * newDuration).toString() : form.amount
-                    });
-                  }}
-                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-                />
+                  className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none font-semibold text-slate-900 dark:text-white" />
               </div>
 
               <div className="flex gap-3 pt-2">

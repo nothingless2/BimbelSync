@@ -7,6 +7,7 @@ import { decrypt } from "@/lib/auth";
 import { requireSuperadminSession } from "@/lib/session";
 import { changeAcademyPlan, activateAllDuePendingPlans } from "@/lib/subscription";
 import { SubscriptionStatus } from "@prisma/client";
+import { calculatePlanPrice } from "@/lib/pricing";
 
 async function logAction(superadminId: string, action: string, entityId: string, details: object) {
   await prisma.auditLog.create({
@@ -226,11 +227,13 @@ export async function createInvoiceAction(academyId: string, planId: string, amo
     const plan = await prisma.plan.findUnique({ where: { id: planId } });
     if (!plan || plan.deleted_at !== null) return { error: "Paket langganan tidak valid atau telah dinonaktifkan." };
 
+    const finalAmount = amount > 0 ? amount : calculatePlanPrice(plan, durationMonths).amount;
+
     const newInvoice = await prisma.platformInvoice.create({
       data: {
         academy_id: academyId,
         plan_id: planId,
-        amount,
+        amount: finalAmount,
         billing_period: new Date(billingPeriod),
         due_date: new Date(dueDate),
         payment_status: "UNPAID",
@@ -240,7 +243,7 @@ export async function createInvoiceAction(academyId: string, planId: string, amo
 
     await logAction(superadminId, "CREATE_PLATFORM_INVOICE", newInvoice.id, {
       academy_id: academyId,
-      amount,
+      amount: finalAmount,
       billing_period: billingPeriod,
     });
 

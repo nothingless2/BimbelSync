@@ -1,11 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Building, X, AlertCircle, Eye, EyeOff, Plus } from "lucide-react";
+import { Building, X, AlertCircle, Eye, EyeOff, Plus, Check } from "lucide-react";
 import { createAcademyAction } from "@/app/superadmin/(dashboard)/actions";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { calculatePlanPrice } from "@/lib/pricing";
 
-type Plan = { id: string; name: string; price: number };
+type Plan = { 
+  id: string; 
+  name: string; 
+  price: number; 
+  discount_6_months?: number | null; 
+  discount_12_months?: number | null; 
+};
 
 export function AddAcademyModal({ plans }: { plans: Plan[] }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,6 +21,11 @@ export function AddAcademyModal({ plans }: { plans: Plan[] }) {
   const [showPassword, setShowPassword] = useState(false);
   const [slugPreview, setSlugPreview] = useState("");
   const [status, setStatus] = useState("TRIAL");
+  const [selectedPlanId, setSelectedPlanId] = useState("");
+  const [durationMonths, setDurationMonths] = useState<number>(1);
+
+  const selectedPlan = plans.find((p) => p.id === selectedPlanId);
+  const pricing = selectedPlan ? calculatePlanPrice(selectedPlan, durationMonths) : null;
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const slug = e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
@@ -32,6 +44,8 @@ export function AddAcademyModal({ plans }: { plans: Plan[] }) {
       setIsOpen(false);
       setSlugPreview("");
       setStatus("TRIAL");
+      setSelectedPlanId("");
+      setDurationMonths(1);
       (e.target as HTMLFormElement).reset();
     }
     setIsLoading(false);
@@ -85,13 +99,92 @@ export function AddAcademyModal({ plans }: { plans: Plan[] }) {
                 <CustomSelect
                   name="plan_id"
                   required
+                  value={selectedPlanId}
+                  onChange={(val) => setSelectedPlanId(val)}
                   placeholder="-- Pilih Paket --"
                   options={plans.map((plan) => ({
                     value: plan.id,
-                    label: `${plan.name} — ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(plan.price)}/bln`
+                    label: `${plan.name} — ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(plan.price)}/bln`
                   }))}
                 />
               </div>
+
+              {/* Pilihan Siklus Paket & Diskon */}
+              {selectedPlan && (
+                <div className="space-y-2.5 p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/80 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                      Pilihan Siklus Paket & Diskon
+                    </label>
+                    <span className="text-xs font-medium text-slate-500">
+                      Normal: {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(selectedPlan.price)}/bln
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setDurationMonths(1)}
+                      className={`py-2 px-2.5 rounded-lg border text-center transition-all flex flex-col items-center justify-center ${
+                        durationMonths === 1
+                          ? "border-blue-600 bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-300 font-bold shadow-xs ring-1 ring-blue-500/30"
+                          : "border-slate-200 dark:border-slate-700 hover:border-slate-300 text-slate-700 dark:text-slate-300 bg-white/60 dark:bg-slate-900/40"
+                      }`}
+                    >
+                      <span className="text-xs font-semibold">1 Bulan</span>
+                      <span className="text-[10px] text-slate-400">Bulanan</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setDurationMonths(6)}
+                      className={`py-2 px-2.5 rounded-lg border text-center transition-all flex flex-col items-center justify-center relative ${
+                        durationMonths === 6
+                          ? "border-blue-600 bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-300 font-bold shadow-xs ring-1 ring-blue-500/30"
+                          : "border-slate-200 dark:border-slate-700 hover:border-slate-300 text-slate-700 dark:text-slate-300 bg-white/60 dark:bg-slate-900/40"
+                      }`}
+                    >
+                      <span className="text-xs font-semibold">6 Bulan</span>
+                      <span className="text-[9px] bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-1.5 py-0.2 rounded-full font-bold mt-0.5">
+                        HEMAT 10%
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setDurationMonths(12)}
+                      className={`py-2 px-2.5 rounded-lg border text-center transition-all flex flex-col items-center justify-center relative ${
+                        durationMonths === 12
+                          ? "border-emerald-600 bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300 font-bold shadow-xs ring-1 ring-emerald-500/30"
+                          : "border-slate-200 dark:border-slate-700 hover:border-slate-300 text-slate-700 dark:text-slate-300 bg-white/60 dark:bg-slate-900/40"
+                      }`}
+                    >
+                      <span className="text-xs font-semibold">1 Tahun</span>
+                      <span className="text-[9px] bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.2 rounded-full font-bold mt-0.5">
+                        HEMAT 2 BLN
+                      </span>
+                    </button>
+                  </div>
+
+                  {pricing && (
+                    <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
+                      <span className="text-slate-600 dark:text-slate-400 font-medium">
+                        Total Biaya ({pricing.label}):
+                      </span>
+                      <div className="text-right">
+                        {pricing.savings > 0 && (
+                          <span className="line-through text-slate-400 text-[11px] mr-1.5">
+                            {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(pricing.originalAmount)}
+                          </span>
+                        )}
+                        <span className="font-bold text-slate-900 dark:text-white">
+                          {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(pricing.amount)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
@@ -118,13 +211,21 @@ export function AddAcademyModal({ plans }: { plans: Plan[] }) {
 
               {status === "ACTIVE" && (
                 <div className="p-4 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800/50 rounded-xl space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-400">Pengaturan Tagihan Awal (Invoice Pertama)</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="text-sm text-emerald-700 dark:text-emerald-500">Durasi (Bulan)</label>
-                      <input type="number" name="duration_months" defaultValue="1" min="1" className="w-full px-3 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800/50 bg-white dark:bg-slate-950 outline-none focus:ring-2 focus:ring-emerald-500 text-sm" />
-                    </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-400">Pengaturan Tagihan Awal (Invoice Pertama)</p>
+                    {pricing && (
+                      <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300">
+                        {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(pricing.amount)}
+                      </span>
+                    )}
                   </div>
+
+                  <input type="hidden" name="duration_months" value={durationMonths} />
+
+                  <p className="text-xs text-emerald-700 dark:text-emerald-400">
+                    Durasi akses: <strong>{pricing?.label || `${durationMonths} Bulan`}</strong>. Tagihan perdana otomatis dihitung sesuai diskon paket landing page.
+                  </p>
+
                   <label className="flex items-center gap-2 mt-2 cursor-pointer">
                     <input type="checkbox" name="is_paid" value="true" className="rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500" />
                     <span className="text-sm text-emerald-700 dark:text-emerald-400">Langsung tandai Lunas (Klien sudah transfer)</span>
