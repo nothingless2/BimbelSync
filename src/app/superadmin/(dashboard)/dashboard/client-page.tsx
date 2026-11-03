@@ -86,63 +86,72 @@ export default function DashboardClientPage({ stats, growthData, planDistributio
       </div>
 
       {/* === KPI CARDS === */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* MRR */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-          <div className="flex justify-between items-start mb-3">
-            <span className="text-xs font-bold text-slate-500 tracking-wider uppercase">MRR</span>
-            <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
-              <TrendingUp size={15} className="text-blue-600" />
-            </div>
+        <div className="p-6 rounded-3xl bg-gradient-to-br from-blue-600 to-blue-800 border border-blue-700 shadow-lg relative overflow-hidden group flex flex-col justify-between">
+          <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110 pointer-events-none">
+            <TrendingUp size={110} />
           </div>
-          <h3 className="text-2xl font-bold text-slate-800 dark:text-white truncate">{IDR(stats.currentMRR)}</h3>
-          {mrrGrowthPct !== null && (
-            <p className={`text-xs mt-2 flex items-center gap-1 font-medium ${mrrDiff >= 0 ? "text-emerald-600" : "text-red-500"}`}>
-              {mrrDiff >= 0 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-              {mrrDiff >= 0 ? "+" : ""}{mrrGrowthPct}% dari bulan lalu
-            </p>
-          )}
-          {mrrGrowthPct === null && <p className="text-xs text-blue-600 mt-2">/bulan dari akademi aktif</p>}
+          <div className="relative z-10">
+            <h3 className="text-xs sm:text-sm font-bold text-blue-100 uppercase tracking-wider mb-2">MRR</h3>
+            <p className="text-2xl sm:text-3xl font-black text-white tracking-tight truncate">{IDR(stats.currentMRR)}</p>
+          </div>
+          <div className="relative z-10 mt-3">
+            {mrrGrowthPct !== null ? (
+              <p className={`text-xs flex items-center gap-1 font-semibold ${mrrDiff >= 0 ? "text-emerald-300" : "text-rose-200"}`}>
+                {mrrDiff >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                {mrrDiff >= 0 ? "+" : ""}{mrrGrowthPct}% dari bulan lalu
+              </p>
+            ) : (
+              <p className="text-xs font-medium text-blue-200">/bulan dari akademi aktif</p>
+            )}
+          </div>
         </div>
 
         {/* Total Pendapatan */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-          <div className="flex justify-between items-start mb-3">
-            <span className="text-xs font-bold text-slate-500 tracking-wider uppercase">Pendapatan</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center">
-              <DollarSign size={15} className="text-emerald-600" />
-            </div>
+        <div className="p-6 rounded-3xl bg-gradient-to-br from-emerald-500 to-emerald-700 border border-emerald-600 shadow-lg relative overflow-hidden group flex flex-col justify-between">
+          <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110 pointer-events-none">
+            <DollarSign size={110} />
           </div>
-          <h3 className="text-2xl font-bold text-slate-800 dark:text-white truncate">{IDR(stats.totalRevenue)}</h3>
-          <p className="text-xs text-emerald-600 mt-2">Total tagihan lunas</p>
+          <div className="relative z-10">
+            <h3 className="text-xs sm:text-sm font-bold text-emerald-100 uppercase tracking-wider mb-2">Pendapatan</h3>
+            <p className="text-2xl sm:text-3xl font-black text-white tracking-tight truncate">{IDR(stats.totalRevenue)}</p>
+          </div>
+          <div className="relative z-10 mt-3">
+            <p className="text-xs font-medium text-emerald-100">Total tagihan lunas</p>
+          </div>
         </div>
 
         {/* Piutang */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-          <div className="flex justify-between items-start mb-3">
-            <span className="text-xs font-bold text-slate-500 tracking-wider uppercase">Piutang</span>
-            <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center">
-              <AlertCircle size={15} className="text-amber-600" />
-            </div>
+        <div className="p-6 rounded-3xl bg-gradient-to-br from-amber-500 to-amber-700 border border-amber-600 shadow-lg relative overflow-hidden group flex flex-col justify-between">
+          <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110 pointer-events-none">
+            <AlertCircle size={110} />
           </div>
-          <h3 className="text-2xl font-bold text-slate-800 dark:text-white truncate">{IDR(stats.totalReceivables)}</h3>
-          <p className="text-xs text-amber-600 mt-2">Belum dibayar</p>
+          <div className="relative z-10">
+            <h3 className="text-xs sm:text-sm font-bold text-amber-100 uppercase tracking-wider mb-2">Piutang</h3>
+            <p className="text-2xl sm:text-3xl font-black text-white tracking-tight truncate">{IDR(stats.totalReceivables)}</p>
+          </div>
+          <div className="relative z-10 mt-3">
+            <p className="text-xs font-medium text-amber-100">Belum dibayar</p>
+          </div>
         </div>
 
         {/* Total Akademi */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-          <div className="flex justify-between items-start mb-3">
-            <span className="text-xs font-bold text-slate-500 tracking-wider uppercase">Akademi</span>
-            <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center">
-              <Building2 size={15} className="text-indigo-600" />
-            </div>
+        <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-600 to-indigo-800 border border-indigo-700 shadow-lg relative overflow-hidden group flex flex-col justify-between">
+          <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110 pointer-events-none">
+            <Building2 size={110} />
           </div>
-          <h3 className="text-2xl font-bold text-slate-800 dark:text-white">{stats.totalAcademies}</h3>
-          <div className="flex gap-2 mt-2 flex-wrap">
-            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded">{stats.activeAcademies} Aktif</span>
-            <span className="text-[10px] font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded">{stats.trialAcademies} Trial</span>
-            <span className="text-[10px] font-bold text-red-600 bg-red-50 dark:bg-red-900/20 px-1.5 py-0.5 rounded">{stats.suspendedAcademies} Suspended</span>
-            <span className="text-[10px] font-bold text-orange-600 bg-orange-50 dark:bg-orange-900/20 px-1.5 py-0.5 rounded">{stats.expiredTrialAcademies} Expired Trial</span>
+          <div className="relative z-10">
+            <h3 className="text-xs sm:text-sm font-bold text-indigo-100 uppercase tracking-wider mb-2">Akademi</h3>
+            <p className="text-2xl sm:text-3xl font-black text-white tracking-tight">{stats.totalAcademies}</p>
+          </div>
+          <div className="relative z-10 mt-3">
+            <div className="flex gap-1.5 flex-wrap">
+              <span className="text-[10px] font-bold text-emerald-200 bg-emerald-500/25 border border-emerald-400/30 px-1.5 py-0.5 rounded-md">{stats.activeAcademies} Aktif</span>
+              <span className="text-[10px] font-bold text-blue-200 bg-blue-500/25 border border-blue-400/30 px-1.5 py-0.5 rounded-md">{stats.trialAcademies} Trial</span>
+              <span className="text-[10px] font-bold text-rose-200 bg-rose-500/25 border border-rose-400/30 px-1.5 py-0.5 rounded-md">{stats.suspendedAcademies} Suspended</span>
+              <span className="text-[10px] font-bold text-amber-200 bg-amber-500/25 border border-amber-400/30 px-1.5 py-0.5 rounded-md">{stats.expiredTrialAcademies} Expired</span>
+            </div>
           </div>
         </div>
       </div>
