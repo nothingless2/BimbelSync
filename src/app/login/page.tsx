@@ -168,8 +168,8 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Middle / Value Proposition */}
-        <div className="relative z-20 max-w-lg my-auto py-8">
+        {/* Bottom Typography Hero */}
+        <div className="relative z-20 max-w-lg mt-auto mb-8">
           <h2 className="text-[2.5rem] xl:text-[2.75rem] font-bold text-white mb-6 leading-[1.15] tracking-tight">
             Selamat Datang Kembali di BimbelSync.
           </h2>
