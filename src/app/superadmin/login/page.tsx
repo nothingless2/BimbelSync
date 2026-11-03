@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, User } from "lucide-react";
+import Image from "next/image";
 import { superadminLoginAction } from "./actions";
 
 export default function SuperadminLoginPage() {
@@ -30,110 +30,168 @@ export default function SuperadminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#F8FAFC]">
-      {/* Left Panel */}
-      <div className="hidden md:flex flex-col justify-between w-5/12 bg-slate-900 relative p-12 overflow-hidden">
+    <div className="min-h-screen flex bg-white font-sans selection:bg-blue-600 selection:text-white">
+      {/* Sisi Kiri - Visual & Branding (Desktop) */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-slate-950 overflow-hidden flex-col justify-between p-10 xl:p-14 border-r border-slate-200/80">
+        {/* Background Photo Nyata dengan Overlay Optimal */}
         <div className="absolute inset-0 z-0">
-          <img
-            src="/login-bg.png"
-            alt="BimbelSync Background"
-            className="w-full h-full object-cover opacity-50 mix-blend-overlay"
+          <Image
+            src="/photo-1.avif"
+            alt="Suasana Belajar Bimbingan Belajar"
+            fill
+            className="object-cover opacity-65 filter brightness-105 contrast-100"
+            priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/60 to-slate-900/10"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/45 to-slate-900/30 z-10" />
         </div>
 
-        {/* Logo */}
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="bg-white p-2.5 rounded-xl shadow-sm">
-            <img src="/logo.png" alt="BimbelSync Logo" className="w-7 h-7 object-contain" />
+        {/* Top Header / Branding */}
+        <div className="relative z-20 flex items-center gap-3">
+          <div className="p-2.5 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-sm">
+            <Image
+              src="/logo.png"
+              alt="BimbelSync Logo"
+              width={32}
+              height={32}
+              className="rounded-md"
+            />
           </div>
-          <span className="text-xl font-bold text-white tracking-tight">BimbelSync</span>
+          <div>
+            <span className="text-2xl font-bold text-white tracking-tight">BimbelSync</span>
+            <p className="text-xs text-blue-200/80 font-medium">Portal Superadmin & Master Control</p>
+          </div>
         </div>
 
-        {/* Tagline */}
-        <div className="relative z-10 mb-20">
-          <h1 className="text-[2.75rem] font-bold text-white mb-6 leading-[1.15] tracking-tight">
-            Kelola Bimbel <br />Lebih Mudah dan <br />Otomatis.
+        {/* Bottom Typography Hero */}
+        <div className="relative z-20 max-w-lg mt-auto mb-8">
+          <h1 className="text-[2.5rem] xl:text-[2.75rem] font-bold text-white mb-6 leading-[1.15] tracking-tight">
+            Kelola Bimbel <br />
+            Lebih Mudah dan <br />
+            Otomatis.
           </h1>
           <p className="text-slate-300 text-lg max-w-sm leading-relaxed font-medium">
             Satu platform terpadu untuk efisiensi operasional bimbingan belajar Anda.
           </p>
         </div>
+
+        {/* Bottom footer credit */}
+        <div className="relative z-20 text-xs text-slate-400">
+          © {new Date().getFullYear()} BimbelSync. Platform manajemen bimbingan belajar profesional.
+        </div>
       </div>
 
-      {/* Right Panel — Form */}
-      <div className="flex-1 flex items-center justify-center p-8 sm:p-12 relative bg-[#F8FAFC]">
-        {/* Mobile logo */}
-        <div className="absolute top-8 left-8 md:hidden flex items-center gap-3">
-          <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-lg" />
-          <span className="text-xl font-bold text-slate-800 tracking-tight">BimbelSync</span>
-        </div>
+      {/* Sisi Kanan - Form Login */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center px-6 sm:px-12 lg:px-16 py-10 relative z-10 overflow-y-auto min-h-screen">
+        <div className="max-w-md w-full mx-auto">
+          {/* Mobile Header Brand */}
+          <div className="lg:hidden mb-8">
+            <div className="flex items-center gap-3">
+              <Image
+                src="/logo.png"
+                alt="BimbelSync Logo"
+                width={34}
+                height={34}
+                className="rounded-lg shadow-sm"
+              />
+              <div>
+                <span className="text-2xl font-bold text-slate-900 tracking-tight block">
+                  BimbelSync
+                </span>
+                <span className="text-xs text-slate-500 font-medium">Portal Superadmin</span>
+              </div>
+            </div>
+          </div>
 
-        {/* Form Card */}
-        <div className="w-full max-w-md bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 sm:p-10 border border-slate-100">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-slate-900">Masuk ke Akun Anda</h2>
+          <div className="mb-6">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-1.5">
+              Masuk ke Akun Anda
+            </h2>
+            <p className="text-slate-500 text-sm">
+              Silakan masukkan kredensial akun Anda untuk melanjutkan.
+            </p>
           </div>
 
           {errorMsg && (
-            <div className="mb-6 p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm text-center font-medium">
-              {errorMsg}
+            <div className="mb-5 bg-red-50 text-red-700 p-3.5 rounded-xl border border-red-200 text-sm font-medium flex items-start gap-2.5 animate-fade-in shadow-xs">
+              <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span>{errorMsg}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email Field */}
             <div>
-              <label className="block text-[13px] font-semibold text-slate-700 mb-2">
+              <label className="block text-sm font-semibold text-slate-700 mb-1">
                 Email atau Username
               </label>
-              <div className="relative">
-                <input
-                  type="email"
-                  name="email"
-                  required
-                  className="w-full pl-4 pr-10 py-3.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-slate-700 placeholder-slate-400 bg-white text-[15px]"
-                  placeholder="Masukkan email atau username"
-                />
-                <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                  <User className="w-5 h-5 text-slate-400" />
-                </div>
-              </div>
+              <input
+                type="email"
+                name="email"
+                required
+                className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
+                placeholder="Masukkan email atau username"
+              />
             </div>
 
+            {/* Password Field */}
             <div>
-              <label className="block text-[13px] font-semibold text-slate-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  required
-                  className="w-full pl-4 pr-10 py-3.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-slate-700 placeholder-slate-400 bg-white text-[15px]"
-                  placeholder="Masukkan password"
-                />
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm font-semibold text-slate-700">
+                  Password
+                </label>
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="text-xs text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? "Sembunyikan" : "Lihat Password"}
                 </button>
               </div>
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                required
+                className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
+                placeholder="Masukkan password akun "
+              />
             </div>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-[#1D4ED8] hover:bg-blue-800 text-white font-medium py-3.5 px-4 rounded-xl transition-all shadow-sm flex justify-center items-center disabled:opacity-70 mt-4 text-[15px]"
-            >
-              {isLoading ? (
-                <span className="animate-pulse">Memverifikasi...</span>
-              ) : (
-                "Masuk"
-              )}
-            </button>
+            {/* Submit Button */}
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-300 transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_4px_20px_rgb(37,99,235,0.25)] hover:shadow-[0_6px_25px_rgb(37,99,235,0.35)] flex items-center justify-center gap-2 cursor-pointer text-sm sm:text-base"
+              >
+                {isLoading ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Memverifikasi Akun...
+                  </span>
+                ) : (
+                  <span>Masuk ke Akun</span>
+                )}
+              </button>
+            </div>
           </form>
+
+          {/* Footer Card Credit */}
+          <div className="mt-8 pt-5 border-t border-slate-100 flex items-center justify-center gap-1.5 text-xs text-slate-400">
+            <span>Powered by</span>
+            <Image
+              src="/logo.png"
+              alt="BimbelSync"
+              width={16}
+              height={16}
+              className="w-4 h-4 object-contain"
+            />
+            <span className="font-semibold text-slate-700 tracking-tight">BimbelSync</span>
+          </div>
         </div>
       </div>
     </div>

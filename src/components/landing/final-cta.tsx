@@ -45,39 +45,25 @@ export function FinalCTA() {
                 Siap Bawa Bimbel Anda <br className="hidden md:block"/> <span className="text-blue-500">Naik Kelas?</span>
               </h2>
               
-              <p className="text-base sm:text-lg text-slate-300 mb-10 max-w-lg font-medium leading-relaxed">
+              <p className="text-base sm:text-lg text-slate-400 mb-10 max-w-lg font-medium leading-relaxed">
                 Tinggalkan sistem manual yang menghambat skala bisnis Anda. Mari diskusikan bagaimana BimbelSync dapat disesuaikan untuk kebutuhan spesifik Anda.
               </p>
               
               <div className="flex flex-col sm:flex-row items-center gap-4">
                 <a 
                   href="/register" 
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-4 px-8 rounded-2xl transition-all duration-300 text-base shadow-lg shadow-blue-600/30 hover:shadow-blue-500/50 hover:translate-y-[-2px]"
+                  className="w-full sm:w-auto inline-flex items-center justify-center bg-blue-600 text-white hover:bg-blue-500 font-semibold text-sm sm:text-base py-3.5 sm:py-4 px-6 sm:px-8 rounded-full transition-all duration-300 shadow-lg shadow-blue-900/50 hover:shadow-blue-900/80 hover:-translate-y-0.5"
                 >
-                  Daftar Sekarang — Gratis
-                  <ArrowRight className="w-5 h-5" />
+                  Mulai Coba Gratis
                 </a>
-
                 <a 
                   href={WA_URL} 
                   target="_blank" 
                   rel="noreferrer" 
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 hover:border-slate-600 font-semibold py-4 px-8 rounded-2xl transition-all duration-300 text-base"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-transparent hover:bg-white/5 text-white border border-slate-700 hover:border-slate-500 font-semibold text-sm sm:text-base py-3.5 sm:py-4 px-6 sm:px-8 rounded-full transition-colors duration-200"
                 >
-                  Hubungi Tim Sales
+                  Konsultasi WhatsApp <ArrowRight className="w-4 h-4" />
                 </a>
-              </div>
-              
-              <div className="mt-8 flex items-center gap-4 text-xs text-slate-400">
-                <span className="flex items-center gap-1.5">
-                  <svg className="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                  Setup Cepat 5 Menit
-                </span>
-                <span>•</span>
-                <span className="flex items-center gap-1.5">
-                  <svg className="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                  Tanpa Kartu Kredit
-                </span>
               </div>
             </motion.div>
           </div>

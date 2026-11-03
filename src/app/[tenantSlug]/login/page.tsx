@@ -84,7 +84,7 @@ export default async function TenantLoginPage({ params }: PageProps) {
         </div>
 
         {/* Bottom Typography Hero */}
-        <div className="relative z-10 mb-20">
+        <div className="relative z-10 mt-auto mb-8">
           <h1 className="text-[2.75rem] font-bold text-white mb-6 leading-[1.15] tracking-tight">
             Selamat Datang di <br />
             {academy.name}.
@@ -92,6 +92,11 @@ export default async function TenantLoginPage({ params }: PageProps) {
           <p className="text-slate-300 text-lg max-w-sm leading-relaxed font-medium">
             Satu platform terpadu untuk efisiensi operasional bimbingan belajar Anda.
           </p>
+        </div>
+
+        {/* Bottom footer credit */}
+        <div className="relative z-10 text-xs text-slate-400">
+          © {new Date().getFullYear()} BimbelSync. Platform manajemen bimbingan belajar profesional.
         </div>
       </div>
 
