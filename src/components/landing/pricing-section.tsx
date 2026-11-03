@@ -152,6 +152,9 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
   // Replace with actual WA URL
   const WA_URL = "https://wa.me/6281234567890?text=Halo%20tim%20BimbelSync,%20saya%20ingin%20berlangganan%20paket%20BimbelSync.";
 
+  const semesterDiscountBadge = displayPlans.find(p => p.discount_6_months)?.discount_6_months || 10;
+  const yearlyDiscountBadge = displayPlans.find(p => p.discount_12_months)?.discount_12_months || 17;
+
   return (
     <section id="pricing" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
       <div className="text-center max-w-2xl mx-auto mb-16">
@@ -173,13 +176,13 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
               onClick={() => setBillingCycle("semester")}
               className={`px-3 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${billingCycle === "semester" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-900"}`}
             >
-              Semester <span className="hidden sm:inline">(6 Bulan)</span> <span className="hidden sm:inline-block ml-1 text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">HEMAT 10%</span>
+              Semester <span className="hidden sm:inline">(6 Bulan)</span> <span className="hidden sm:inline-block ml-1 text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">HEMAT {semesterDiscountBadge}%</span>
             </button>
             <button 
               onClick={() => setBillingCycle("yearly")}
               className={`px-3 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${billingCycle === "yearly" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-900"}`}
             >
-              Tahunan <span className="hidden sm:inline-block ml-1 text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">HEMAT 2 BULAN</span>
+              Tahunan <span className="hidden sm:inline-block ml-1 text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">HEMAT {yearlyDiscountBadge}%</span>
             </button>
           </div>
           <p className="text-xs text-slate-400">Kas bimbel sedang ketat? Tersedia opsi bayar per-semester untuk menyesuaikan arus kas Anda.</p>
@@ -203,14 +206,10 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
           
           if (billingCycle === "semester") {
             const rawSemesterPrice = plan.price * 6 * (1 - (plan.discount_6_months || 0) / 100);
-            // Bulatkan ke ribuan genap agar tidak ada embel ratusan di belakangnya
             displayPrice = Math.floor(rawSemesterPrice / 1000) * 1000;
             billingSuffix = "/6 bulan";
           } else if (billingCycle === "yearly") {
-            // Diskon tahunan: bayar 10 bulan (hemat 2 bulan) dibulatkan ke ribuan genap
-            const rawYearlyPrice = plan.discount_12_months === 17
-              ? plan.price * 10
-              : plan.price * 12 * (1 - (plan.discount_12_months || 0) / 100);
+            const rawYearlyPrice = plan.price * 12 * (1 - (plan.discount_12_months || 0) / 100);
             displayPrice = Math.round(rawYearlyPrice / 1000) * 1000;
             billingSuffix = "/tahun";
           }

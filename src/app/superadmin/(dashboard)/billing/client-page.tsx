@@ -722,7 +722,7 @@ export default function BillingClientPage({ invoices, academies, plans, initialB
                   >
                     <span className="text-xs font-semibold">6 Bulan</span>
                     <span className="text-[9px] bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-1.5 py-0.2 rounded-full font-bold mt-0.5">
-                      HEMAT 10%
+                      HEMAT {plans.find(p => p.id === form.planId)?.discount_6_months ?? 10}%
                     </span>
                   </button>
 
@@ -743,7 +743,7 @@ export default function BillingClientPage({ invoices, academies, plans, initialB
                   >
                     <span className="text-xs font-semibold">1 Tahun</span>
                     <span className="text-[9px] bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.2 rounded-full font-bold mt-0.5">
-                      HEMAT 2 BLN
+                      HEMAT {plans.find(p => p.id === form.planId)?.discount_12_months ?? 17}%
                     </span>
                   </button>
                 </div>

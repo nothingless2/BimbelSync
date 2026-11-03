@@ -37,7 +37,7 @@ Platform menyediakan tiga tingkatan paket (Plans) berjenjang dengan pembatasan k
 ### Skema Diskon Billing Cycle Platform
 - **Bulanan (Monthly):** Tarif normal per bulan.
 - **Semester (6 Bulan):** Diskon **10%** dari total tarif 6 bulan.
-- **Tahunan (12 Bulan):** Diskon **17%** (setara dengan **hemat 2 bulan langganan gratis**).
+- **Tahunan (12 Bulan):** Diskon **17%** (persentase dinamis sesuai konfigurasi paket).
 
 ---
 

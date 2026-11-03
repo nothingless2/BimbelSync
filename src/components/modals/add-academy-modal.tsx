@@ -161,7 +161,7 @@ export function AddAcademyModal({ plans }: { plans: Plan[] }) {
                     >
                       <span className="text-xs font-semibold">1 Tahun</span>
                       <span className="text-[9px] bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.2 rounded-full font-bold mt-0.5">
-                        HEMAT 2 BLN
+                        HEMAT {selectedPlan.discount_12_months ?? 17}%
                       </span>
                     </button>
                   </div>

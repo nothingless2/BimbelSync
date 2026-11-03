@@ -17,7 +17,7 @@ export interface PlanPriceCalculation {
 
 /**
  * Menghitung harga paket berlangganan platform BimbelSync berdasarkan durasi bulan
- * dengan diskon resmi sesuai landing page (1 Bulan, 6 Bulan Hemat 10%, 1 Tahun Hemat 2 Bulan).
+ * dengan diskon persentase dinamis sesuai data plan (Bulanan, Semester, Tahunan).
  */
 export function calculatePlanPrice(
   plan: PlanWithDiscounts,
@@ -43,11 +43,7 @@ export function calculatePlanPrice(
 
   if (durationMonths === 12) {
     const discountPercent = plan.discount_12_months ?? 17;
-    // Diskon tahunan default 17% setara dengan bayar 10 bulan (hemat 2 bulan)
-    const rawYearlyPrice =
-      discountPercent === 17
-        ? price * 10
-        : price * 12 * (1 - discountPercent / 100);
+    const rawYearlyPrice = price * 12 * (1 - discountPercent / 100);
     const amount = Math.round(rawYearlyPrice / 1000) * 1000;
     const savings = originalAmount - amount;
     return {
@@ -56,7 +52,7 @@ export function calculatePlanPrice(
       discountPercent,
       savings,
       label: "Tahunan (1 Tahun)",
-      badge: "HEMAT 2 BULAN",
+      badge: `HEMAT ${discountPercent}%`,
     };
   }
 
@@ -69,4 +65,3 @@ export function calculatePlanPrice(
     badge: null,
   };
 }
-
