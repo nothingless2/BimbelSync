@@ -4,7 +4,8 @@ import { useState } from "react";
 import {
   UserPlus, Shield, CheckCircle2, Key, Trash2, Search,
   Building2, GraduationCap, UserCheck, ExternalLink, X, Loader2,
-  Sparkles, Eye, EyeOff, ShieldAlert, Users as UsersIcon, Edit2
+  Sparkles, Eye, EyeOff, ShieldAlert, Users as UsersIcon, Edit2,
+  RotateCcw, AlertTriangle, UserX
 } from "lucide-react";
 import Link from "next/link";
 import { AddSuperadminModal } from "@/components/modals/add-superadmin-modal";
@@ -14,7 +15,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { Pagination } from "@/components/ui/pagination";
 import { toast } from "@/components/ui/sonner";
 import { CustomSelect } from "@/components/ui/custom-select";
-import { resetTenantUserPasswordAction } from "./actions";
+import { resetTenantUserPasswordAction, toggleTenantUserStatusAction } from "./actions";
 
 export interface TenantUser {
   id: string;
@@ -29,6 +30,8 @@ export interface TenantUser {
   academyName: string;
   academySlug: string;
   isDeleted: boolean;
+  userDeleted?: boolean;
+  academyDeleted?: boolean;
 }
 
 export interface SuperadminUser {
@@ -82,6 +85,12 @@ export default function SystemUsersClient({ superadmins, tenantUsers }: Props) {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
   const [isResetSubmitting, setIsResetSubmitting] = useState(false);
+
+  // === Toggle Status Modal State for Tenant Users ===
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [selectedUserForStatus, setSelectedUserForStatus] = useState<TenantUser | null>(null);
+  const [statusTargetAction, setStatusTargetAction] = useState<"DEACTIVATE" | "ACTIVATE">("DEACTIVATE");
+  const [isStatusSubmitting, setIsStatusSubmitting] = useState(false);
 
   // Counts for KPI
   const adminCount = tenantUsers.filter(u => u.rawRole === "ADMIN").length;
@@ -180,6 +189,35 @@ export default function SystemUsersClient({ superadmins, tenantUsers }: Props) {
       setConfirmNewPassword("");
     }
     setIsResetSubmitting(false);
+  };
+
+  const openStatusModal = (user: TenantUser, action: "DEACTIVATE" | "ACTIVATE") => {
+    setSelectedUserForStatus(user);
+    setStatusTargetAction(action);
+    setIsStatusModalOpen(true);
+  };
+
+  const handleToggleStatus = async () => {
+    if (!selectedUserForStatus) return;
+    setIsStatusSubmitting(true);
+    try {
+      const res = await toggleTenantUserStatusAction(
+        selectedUserForStatus.id,
+        selectedUserForStatus.userType,
+        statusTargetAction
+      );
+      if (res.error) {
+        toast.error(res.error);
+      } else {
+        toast.success(res.message || "Status pengguna berhasil diperbarui.");
+        setIsStatusModalOpen(false);
+        setSelectedUserForStatus(null);
+      }
+    } catch {
+      toast.error("Terjadi kesalahan jaringan.");
+    } finally {
+      setIsStatusSubmitting(false);
+    }
   };
 
   return (
@@ -402,7 +440,11 @@ export default function SystemUsersClient({ superadmins, tenantUsers }: Props) {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        {user.isDeleted ? (
+                        {user.academyDeleted ? (
+                          <span className="inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-semibold text-xs" title="Akademi bernaung sedang berada di tempat sampah">
+                            <ShieldAlert size={14} /> Akademi Diarsipkan
+                          </span>
+                        ) : user.isDeleted ? (
                           <span className="inline-flex items-center gap-1.5 text-red-600 dark:text-red-400 font-semibold text-xs">
                             <ShieldAlert size={14} /> Nonaktif
                           </span>
@@ -421,6 +463,27 @@ export default function SystemUsersClient({ superadmins, tenantUsers }: Props) {
                           >
                             <Key size={17} />
                           </button>
+
+                          {/* Tombol Nonaktifkan / Aktifkan User */}
+                          {user.isDeleted ? (
+                            <button
+                              onClick={() => openStatusModal(user, "ACTIVATE")}
+                              disabled={user.academyDeleted}
+                              className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition cursor-pointer disabled:opacity-40 disabled:hover:text-slate-400 disabled:hover:bg-transparent"
+                              title={user.academyDeleted ? "Pulihkan akademi terlebih dahulu" : "Aktifkan Kembali Pengguna"}
+                            >
+                              <RotateCcw size={17} />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => openStatusModal(user, "DEACTIVATE")}
+                              className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition cursor-pointer"
+                              title="Nonaktifkan / Hapus Pengguna"
+                            >
+                              <Trash2 size={17} />
+                            </button>
+                          )}
+
                           {user.academyId && (
                             <Link
                               href={`/superadmin/academies/${user.academyId}`}
@@ -676,6 +739,114 @@ export default function SystemUsersClient({ superadmins, tenantUsers }: Props) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Toggle Status Confirmation Modal (Tenant User) */}
+      {isStatusModalOpen && selectedUserForStatus && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center p-5 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className={`p-2 rounded-xl ${
+                  statusTargetAction === "DEACTIVATE"
+                    ? "bg-rose-50 dark:bg-rose-950/40 text-rose-600"
+                    : "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600"
+                }`}>
+                  {statusTargetAction === "DEACTIVATE" ? <UserX size={18} /> : <UserCheck size={18} />}
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 dark:text-white text-base">
+                    {statusTargetAction === "DEACTIVATE" ? "Nonaktifkan Pengguna?" : "Aktifkan Kembali Pengguna?"}
+                  </h3>
+                  <p className="text-xs text-slate-500">Konfirmasi perubahan hak akses</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsStatusModalOpen(false);
+                  setSelectedUserForStatus(null);
+                }}
+                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg transition cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* User preview card */}
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/60 flex items-center gap-3">
+                <UserAvatar id={selectedUserForStatus.id} email={selectedUserForStatus.email || selectedUserForStatus.identifier} size={36} />
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-slate-900 dark:text-white text-sm truncate">{selectedUserForStatus.name}</p>
+                  <p className="text-xs text-slate-500 font-mono truncate">{selectedUserForStatus.identifier}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200">
+                      {selectedUserForStatus.role}
+                    </span>
+                    <span className="text-xs text-slate-400 truncate">
+                      {selectedUserForStatus.academyName}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Warning or Explanation */}
+              {statusTargetAction === "DEACTIVATE" ? (
+                <div className="space-y-3">
+                  {selectedUserForStatus.rawRole === "ADMIN" && (
+                    <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-xl text-amber-800 dark:text-amber-300 text-xs flex items-start gap-2.5">
+                      <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+                      <div>
+                        <strong className="block font-semibold mb-0.5">Perhatian: Admin Lembaga</strong>
+                        Pengguna ini adalah Admin Bimbel. Jika dinonaktifkan, pastikan masih ada staf lain yang dapat mengelola bimbel ini.
+                      </div>
+                    </div>
+                  )}
+                  <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Pengguna ini akan <strong>dinonaktifkan</strong> dari sistem BimbelSync. Pengguna tidak akan dapat login lagi ke portal bimbel, namun seluruh riwayat transaksi, presensi, dan nilai tetap <strong>aman tersimpan</strong>.
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Akun pengguna ini akan <strong>dipulihkan</strong>. Pengguna akan dapat kembali login ke portal BimbelSync secara normal menggunakan kredensial mereka.
+                </p>
+              )}
+
+              {/* Action buttons */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsStatusModalOpen(false);
+                    setSelectedUserForStatus(null);
+                  }}
+                  className="flex-1 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={handleToggleStatus}
+                  disabled={isStatusSubmitting}
+                  className={`flex-1 py-2.5 text-sm font-semibold text-white rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-70 cursor-pointer shadow-sm ${
+                    statusTargetAction === "DEACTIVATE"
+                      ? "bg-rose-600 hover:bg-rose-700"
+                      : "bg-emerald-600 hover:bg-emerald-700"
+                  }`}
+                >
+                  {isStatusSubmitting ? (
+                    <><Loader2 size={16} className="animate-spin" /> Memproses...</>
+                  ) : statusTargetAction === "DEACTIVATE" ? (
+                    "Ya, Nonaktifkan Akun"
+                  ) : (
+                    "Ya, Aktifkan Akun"
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

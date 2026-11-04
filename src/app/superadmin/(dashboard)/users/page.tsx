@@ -51,6 +51,8 @@ export default async function SystemUsersPage() {
         academyName: s.academy?.name || "Belum Terhubung",
         academySlug: s.academy?.path_url || "",
         isDeleted: Boolean(s.deleted_at || s.academy?.deleted_at),
+        userDeleted: Boolean(s.deleted_at),
+        academyDeleted: Boolean(s.academy?.deleted_at),
       })),
       ...studentUsers.map((st) => ({
         id: st.id,
@@ -65,6 +67,8 @@ export default async function SystemUsersPage() {
         academyName: st.academy?.name || "Belum Terhubung",
         academySlug: st.academy?.path_url || "",
         isDeleted: Boolean(st.deleted_at || st.academy?.deleted_at),
+        userDeleted: Boolean(st.deleted_at),
+        academyDeleted: Boolean(st.academy?.deleted_at),
       })),
     ];
 
