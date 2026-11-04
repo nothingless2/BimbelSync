@@ -6,6 +6,7 @@ import { useFormStatus } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -124,30 +125,31 @@ function LoginForm() {
             <label className="block text-sm font-semibold text-slate-700">
               Password
             </label>
-            <div className="flex items-center gap-2.5">
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="text-xs text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
-              >
-                {showPassword ? "Sembunyikan" : "Lihat Password"}
-              </button>
-              <span className="text-slate-300 text-xs">•</span>
-              <Link
-                href="/forgot-password"
-                className="text-xs text-blue-600 hover:text-blue-700 font-medium transition"
-              >
-                Lupa kata sandi?
-              </Link>
-            </div>
+            <Link
+              href="/forgot-password"
+              className="text-xs text-blue-600 hover:text-blue-700 font-medium transition"
+            >
+              Lupa kata sandi?
+            </Link>
           </div>
-          <input 
-            type={showPassword ? "text" : "password"} 
-            name="password" 
-            required 
-            className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
-            placeholder="Masukkan password akun Anda"
-          />
+          <div className="relative">
+            <input 
+              type={showPassword ? "text" : "password"} 
+              name="password" 
+              required 
+              className="w-full pl-3.5 pr-11 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
+              placeholder="Masukkan password akun Anda"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+              tabIndex={-1}
+              aria-label={showPassword ? "Sembunyikan password" : "Lihat password"}
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
 
         {/* Submit Button */}

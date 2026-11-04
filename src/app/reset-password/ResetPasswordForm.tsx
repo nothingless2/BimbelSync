@@ -4,6 +4,7 @@ import { useActionState, useState, useTransition, useEffect } from "react";
 import { resetPasswordAction, resendResetOtpAction } from "./actions";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -138,48 +139,52 @@ export default function ResetPasswordForm({
 
         {/* 2. Password Baru */}
         <div>
-          <div className="flex items-center justify-between mb-1">
-            <label className="block text-sm font-semibold text-slate-700">
-              Kata Sandi Baru
-            </label>
+          <label className="block text-sm font-semibold text-slate-700 mb-1">
+            Kata Sandi Baru
+          </label>
+          <div className="relative">
+            <input 
+              type={showPassword ? "text" : "password"} 
+              name="password" 
+              required 
+              className="w-full pl-3.5 pr-11 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
+              placeholder="Min. 8 karakter (huruf besar, kecil, angka, simbol)"
+            />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="text-xs text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
+              className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+              tabIndex={-1}
+              aria-label={showPassword ? "Sembunyikan password" : "Lihat password"}
             >
-              {showPassword ? "Sembunyikan" : "Lihat Password"}
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
-          <input 
-            type={showPassword ? "text" : "password"} 
-            name="password" 
-            required 
-            className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
-            placeholder="Min. 8 karakter (huruf besar, kecil, angka, simbol)"
-          />
         </div>
 
         {/* 3. Konfirmasi Password Baru */}
         <div>
-          <div className="flex items-center justify-between mb-1">
-            <label className="block text-sm font-semibold text-slate-700">
-              Konfirmasi Kata Sandi Baru
-            </label>
+          <label className="block text-sm font-semibold text-slate-700 mb-1">
+            Konfirmasi Kata Sandi Baru
+          </label>
+          <div className="relative">
+            <input 
+              type={showConfirmPassword ? "text" : "password"} 
+              name="confirmPassword" 
+              required 
+              className="w-full pl-3.5 pr-11 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
+              placeholder="Ketik ulang kata sandi baru Anda"
+            />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="text-xs text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
+              className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+              tabIndex={-1}
+              aria-label={showConfirmPassword ? "Sembunyikan password" : "Lihat password"}
             >
-              {showConfirmPassword ? "Sembunyikan" : "Lihat Password"}
+              {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
-          <input 
-            type={showConfirmPassword ? "text" : "password"} 
-            name="confirmPassword" 
-            required 
-            className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
-            placeholder="Ketik ulang kata sandi baru Anda"
-          />
           <p className="mt-1 text-[11px] text-slate-400">
             Kombinasi minimal 8 karakter (huruf besar, huruf kecil, angka, dan simbol).
           </p>

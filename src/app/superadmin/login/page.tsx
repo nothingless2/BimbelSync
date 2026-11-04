@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Eye, EyeOff } from "lucide-react";
 import { superadminLoginAction } from "./actions";
 
 export default function SuperadminLoginPage() {
@@ -137,25 +138,27 @@ export default function SuperadminLoginPage() {
 
             {/* Password Field */}
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-sm font-semibold text-slate-700">
-                  Password
-                </label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  required
+                  className="w-full pl-3.5 pr-11 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
+                  placeholder="Masukkan password akun Anda"
+                />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="text-xs text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
+                  className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                  tabIndex={-1}
+                  aria-label={showPassword ? "Sembunyikan password" : "Lihat password"}
                 >
-                  {showPassword ? "Sembunyikan" : "Lihat Password"}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                required
-                className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
-                placeholder="Masukkan password akun "
-              />
             </div>
 
             {/* Submit Button */}
