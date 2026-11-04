@@ -3,6 +3,7 @@
 import { useActionState, useState, useTransition, useEffect } from "react";
 import { verifyOtpAction, resendOtpAction } from "./actions";
 import { useFormStatus } from "react-dom";
+import Link from "next/link";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -69,7 +70,7 @@ export default function OtpForm({
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {/* Target Masked Email Banner (OWASP PII Protection) */}
       {/* Error Alert */}
       {state?.error && (
@@ -112,7 +113,7 @@ export default function OtpForm({
         {/* Hidden Email Field untuk fallback session */}
         <input type="hidden" name="email" value={email} />
 
-        {/* 6 Digit OTP Input (No badge) */}
+        {/* 6 Digit OTP Input */}
         <div>
           <label className="block text-sm font-semibold text-slate-700 mb-1">
             Kode OTP (6 Digit)
@@ -128,10 +129,10 @@ export default function OtpForm({
             pattern="[0-9]{6}"
             autoFocus
             autoComplete="one-time-code"
-            className="w-full px-4 py-3.5 rounded-xl border-2 border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-center font-mono text-2xl tracking-[0.5em] font-bold"
+            className="w-full px-4 py-3.5 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-center font-mono text-2xl tracking-[0.5em] font-bold"
             placeholder="······"
           />
-          <p className="mt-1.5 text-xs text-slate-400 text-center">
+          <p className="mt-1 text-xs text-slate-400 text-center">
             Periksa kotak masuk (Inbox) atau folder Spam email Anda.
           </p>
         </div>
@@ -142,8 +143,8 @@ export default function OtpForm({
         </div>
       </form>
 
-      {/* Resend Action with Countdown */}
-      <div className="text-center pt-2">
+      {/* Resend Action with Countdown & Back Link */}
+      <div className="pt-4 border-t border-slate-100 text-center space-y-3">
         <p className="text-sm text-slate-500">
           Tidak menerima kode?{" "}
           {countdown > 0 ? (
@@ -160,6 +161,13 @@ export default function OtpForm({
               {isPendingResend ? "Mengirim Ulang..." : "Kirim Ulang Kode OTP"}
             </button>
           )}
+        </p>
+
+        <p className="text-xs text-slate-400">
+          Salah memasukkan email?{" "}
+          <Link href="/register" className="font-medium text-slate-600 hover:text-blue-600 underline transition">
+            Daftar ulang di sini
+          </Link>
         </p>
       </div>
     </div>

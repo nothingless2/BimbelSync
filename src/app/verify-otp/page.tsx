@@ -70,17 +70,13 @@ export default async function VerifyOtpPage({
           </div>
         </div>
 
-        {/* Middle / Security Message */}
-        <div className="relative z-20 max-w-lg my-auto py-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-semibold tracking-wide mb-6">
-            Verifikasi Keamanan Akun
-          </div>
-
-          <h2 className="text-3xl xl:text-4xl font-extrabold text-white mb-4 leading-tight tracking-tight drop-shadow-sm">
+        {/* Bottom Typography Hero */}
+        <div className="relative z-20 max-w-lg mt-auto mb-8">
+          <h2 className="text-[2.5rem] xl:text-[2.75rem] font-bold text-white mb-6 leading-[1.15] tracking-tight">
             Lindungi Data & Akses Operasional Bimbel Anda.
           </h2>
 
-          <p className="text-slate-200 text-base xl:text-lg leading-relaxed font-normal drop-shadow-xs max-w-md">
+          <p className="text-slate-300 text-lg max-w-sm leading-relaxed font-medium">
             Verifikasi email memastikan akun Anda aman dan hanya dapat diakses oleh pihak yang sah.
           </p>
         </div>
@@ -111,11 +107,11 @@ export default async function VerifyOtpPage({
           </div>
 
           <div className="mb-6">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-1.5">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-1.5">
               Verifikasi Email Anda
             </h1>
             <p className="text-slate-500 text-sm">
-              Masukkan 6 digit kode OTP yang telah dikirimkan ke email Anda.
+              Masukkan 6 digit kode OTP yang dikirim ke <span className="font-semibold text-slate-700">{maskedEmail}</span>
             </p>
           </div>
 
