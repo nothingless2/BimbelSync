@@ -59,7 +59,7 @@ export default function OnboardingForm() {
   };
 
   return (
-    <form action={formAction} className="space-y-5">
+    <form action={formAction} className="space-y-4">
       {/* Anti-Bot Honeypot */}
       <input 
         type="text" 
@@ -104,7 +104,7 @@ export default function OnboardingForm() {
           URL Portal Akses Bimbel
         </label>
         <div className="flex rounded-xl overflow-hidden border border-slate-200 focus-within:border-blue-600 focus-within:ring-4 focus-within:ring-blue-600/10 transition-all bg-slate-50 focus-within:bg-white">
-          <span className="inline-flex items-center pl-3.5 pr-1 text-slate-400 text-xs sm:text-sm font-medium select-none bg-slate-100/70 border-r border-slate-200">
+          <span className="inline-flex items-center pl-3.5 pr-2 text-slate-400 text-xs sm:text-sm font-medium select-none bg-slate-100/70 border-r border-slate-200">
             bimbelsync.web.id/
           </span>
           <input 
@@ -113,24 +113,24 @@ export default function OnboardingForm() {
             value={pathUrl}
             onChange={handleSlugChange}
             required 
-            className="flex-1 block w-full min-w-0 px-3 py-3 border-none focus:ring-0 outline-none bg-transparent text-slate-900 placeholder-slate-400 text-sm font-medium"
+            className="flex-1 block w-full min-w-0 px-3 py-3 border-none focus:ring-0 outline-none bg-transparent text-slate-900 placeholder-slate-400 text-sm"
             placeholder="bintang-pelajar"
             pattern="[a-z0-9-]+"
             title="Hanya huruf kecil, angka, dan tanda strip (-)"
           />
         </div>
-        <p className="mt-1.5 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-400">
           Tautan unik portal khusus untuk login admin, tutor, dan siswa bimbel Anda.
         </p>
       </div>
 
       {/* Info Paket Pro Uji Coba */}
-      <div className="p-4 rounded-xl bg-blue-50/80 border border-blue-100 text-blue-900 text-xs leading-relaxed space-y-1">
+      <div className="p-3.5 rounded-xl bg-blue-50/80 border border-blue-100 text-blue-900 text-xs leading-relaxed space-y-1">
         <div className="flex items-center gap-1.5 font-bold text-blue-800">
           <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
           <span>Uji Coba 14 Hari Paket Pro Aktif</span>
         </div>
-        <p className="text-blue-700/80">
+        <p className="text-blue-700/80 text-[11px] sm:text-xs">
           Seluruh fitur lengkap terbuka tanpa batasan (siswa tak terbatas, absensi QR Code, jadwal kelas, e-rapor, dan pencatatan pembayaran SPP).
         </p>
       </div>
