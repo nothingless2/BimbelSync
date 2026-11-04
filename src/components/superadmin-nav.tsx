@@ -10,7 +10,7 @@ const navItems = [
   { href: "/superadmin/plans", icon: ShieldCheck, label: "Plans & Pricing" },
   { href: "/superadmin/billing", icon: CreditCard, label: "Platform Billing" },
   { href: "/superadmin/reports", icon: FileText, label: "Financial Report" },
-  { href: "/superadmin/users", icon: Users, label: "System Users" },
+  { href: "/superadmin/users", icon: Users, label: "Users" },
   { href: "/superadmin/audit-logs", icon: FileText, label: "Audit Logs" },
 ];
 

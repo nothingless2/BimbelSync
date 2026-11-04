@@ -1,6 +1,8 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import bcrypt from "bcrypt";
+import { validatePassword } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { logAuditAction } from "../../search/actions";
 import { executeWithQuotaLock, QuotaExceededError, changeAcademyPlan } from "@/lib/subscription";
@@ -31,6 +33,53 @@ export async function deactivateAdminAction(staffId: string, academyId: string) 
   } catch (error) {
     console.error(error);
     return { error: "Gagal menonaktifkan admin" };
+  }
+}
+
+export async function directResetTenantAdminPasswordAction(
+  staffId: string,
+  academyId: string,
+  newPassword: string
+) {
+  try {
+    const auth = await requireSuperadminSession();
+    if ("error" in auth) return { error: auth.error };
+
+    if (!newPassword || newPassword.length < 8) {
+      return { error: "Password baru minimal 8 karakter." };
+    }
+
+    const passwordCheck = validatePassword(newPassword);
+    if (!passwordCheck.isValid) {
+      return { error: passwordCheck.errorMsg || "Password baru belum memenuhi kriteria keamanan." };
+    }
+
+    const staff = await prisma.staff.findFirst({
+      where: { id: staffId, academy_id: academyId },
+      include: { academy: { select: { name: true } } }
+    });
+
+    if (!staff) return { error: "Admin/Staf tidak ditemukan pada akademi ini." };
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await prisma.staff.update({
+      where: { id: staffId },
+      data: { password_hash: hashedPassword }
+    });
+
+    await logAuditAction("SUPERADMIN_RESET_PASSWORD", "Staff", academyId, {
+      staff_id: staffId,
+      email: staff.email,
+      role: staff.role,
+      academy_name: staff.academy?.name,
+    });
+
+    revalidatePath(`/superadmin/academies/${academyId}`);
+    return { success: true, message: `Password untuk ${staff.email} berhasil diubah.` };
+  } catch (error: any) {
+    console.error("directResetTenantAdminPasswordAction error:", error);
+    return { error: "Gagal mengubah password admin." };
   }
 }
 

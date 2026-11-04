@@ -3,7 +3,7 @@
 import { useState } from "react";
 import {
   Building2, Users, CreditCard, Activity, ArrowLeft, Mail, RefreshCw,
-  Trash2, CheckCircle2, ShieldAlert, Key, Edit2, X, Loader2, AlertCircle, Check, Ban, ChevronDown, ChevronUp
+  Trash2, CheckCircle2, ShieldAlert, Key, Edit2, X, Loader2, AlertCircle, Check, Ban, ChevronDown, ChevronUp, Eye, EyeOff, Sparkles
 } from "lucide-react";
 import Link from "next/link";
 import React from "react";
@@ -13,7 +13,7 @@ import { toast } from "@/components/ui/sonner";
 import { CustomSelect } from "@/components/ui/custom-select";
 import {
   deactivateAdminAction, reactivateAdminAction,
-  sendResetPasswordLinkAction, inviteAdminAction, updateAcademyAction
+  sendResetPasswordLinkAction, directResetTenantAdminPasswordAction, inviteAdminAction, updateAcademyAction
 } from "./actions";
 import { verifyInvoiceAction, markOverdueAction, voidInvoiceAction } from "../../billing/actions";
 
@@ -66,6 +66,15 @@ export default function TenantDetailClientPage({ academy, plans, invoices, audit
   });
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
 
+  // Reset password modal state
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [selectedStaffForPassword, setSelectedStaffForPassword] = useState<any>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+  const [isResetSubmitting, setIsResetSubmitting] = useState(false);
+
   // Pagination & Logs State
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -85,6 +94,60 @@ export default function TenantDetailClientPage({ academy, plans, invoices, audit
     if (res.error) toast.error(res.error);
     else { toast.success(`Undangan berhasil dikirim ke ${inviteEmail}`); setIsInviteModalOpen(false); setInviteEmail(""); }
     setIsSubmitting(false);
+  };
+
+  const openResetPasswordModal = (staff: any) => {
+    setSelectedStaffForPassword(staff);
+    setNewPassword("");
+    setConfirmNewPassword("");
+    setShowNewPassword(false);
+    setShowConfirmNewPassword(false);
+    setIsPasswordModalOpen(true);
+  };
+
+  const generateRandomPassword = () => {
+    const chars = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%";
+    let pwd = "BimbelSync#";
+    for (let i = 0; i < 4; i++) {
+      pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setNewPassword(pwd);
+    setConfirmNewPassword(pwd);
+    navigator.clipboard?.writeText(pwd);
+    toast.success("Password acak digenerate dan disalin ke clipboard!");
+  };
+
+  const handleDirectResetPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedStaffForPassword) return;
+
+    if (newPassword.length < 8) {
+      toast.error("Password minimal 8 karakter.");
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      toast.error("Konfirmasi password tidak cocok.");
+      return;
+    }
+
+    setIsResetSubmitting(true);
+    const res = await directResetTenantAdminPasswordAction(
+      selectedStaffForPassword.id,
+      academy.id,
+      newPassword
+    );
+
+    if (res.error) {
+      toast.error(res.error);
+    } else {
+      toast.success(res.message || "Password admin berhasil diperbarui.");
+      setIsPasswordModalOpen(false);
+      setNewPassword("");
+      setConfirmNewPassword("");
+      setSelectedStaffForPassword(null);
+    }
+    setIsResetSubmitting(false);
   };
 
   const handleResetPassword = async (staffId: string) => {
@@ -249,7 +312,7 @@ export default function TenantDetailClientPage({ academy, plans, invoices, audit
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center justify-end gap-2">
-                            <button onClick={() => handleResetPassword(staff.id)} className="p-2 text-slate-400 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition" title="Kirim Link Reset Password"><Key size={18} /></button>
+                            <button onClick={() => openResetPasswordModal(staff)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition cursor-pointer" title="Ubah Password Admin"><Key size={18} /></button>
                             {staff.deleted_at ? (
                               <button onClick={() => handleToggleActive(staff.id, true)} className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition" title="Aktifkan Akun"><RefreshCw size={18} /></button>
                             ) : (
@@ -546,6 +609,103 @@ export default function TenantDetailClientPage({ academy, plans, invoices, audit
                 <button type="button" onClick={() => setIsEditModalOpen(false)} className="flex-1 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition">Batal</button>
                 <button type="submit" disabled={isEditSubmitting} className="flex-1 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-70">
                   {isEditSubmitting ? <><Loader2 size={16} className="animate-spin" /> Menyimpan...</> : "Simpan Perubahan"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* === RESET PASSWORD ADMIN MODAL === */}
+      {isPasswordModalOpen && selectedStaffForPassword && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-blue-50 dark:bg-blue-950/50 text-blue-600 rounded-xl">
+                  <Key size={20} />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">Ubah Password Admin</h2>
+                  <p className="text-xs text-slate-500 font-mono truncate max-w-[240px]">{selectedStaffForPassword.email}</p>
+                </div>
+              </div>
+              <button onClick={() => setIsPasswordModalOpen(false)} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"><X size={18} className="text-slate-500" /></button>
+            </div>
+            <form onSubmit={handleDirectResetPasswordSubmit} className="p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-slate-500 dark:text-slate-400">Atur password baru secara langsung</span>
+                <button
+                  type="button"
+                  onClick={generateRandomPassword}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 dark:bg-blue-950/40 px-2.5 py-1.5 rounded-lg transition cursor-pointer"
+                >
+                  <Sparkles size={14} />
+                  Acak Password
+                </button>
+              </div>
+
+              {/* Password Baru */}
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Password Baru</label>
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Min. 8 karakter (huruf, angka, simbol)"
+                    className="w-full pl-3.5 pr-11 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-slate-100"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                    tabIndex={-1}
+                  >
+                    {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Konfirmasi Password Baru */}
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Ulangi Password Baru</label>
+                <div className="relative">
+                  <input
+                    type={showConfirmNewPassword ? "text" : "password"}
+                    required
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    placeholder="Ketik ulang password baru"
+                    className="w-full pl-3.5 pr-11 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-slate-100"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                    tabIndex={-1}
+                  >
+                    {showConfirmNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                <p className="text-[11px] text-slate-400">Minimal 8 karakter (kombinasi huruf besar, kecil, angka, dan simbol).</p>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsPasswordModalOpen(false)}
+                  className="flex-1 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isResetSubmitting || !newPassword}
+                  className="flex-1 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-70 cursor-pointer shadow-sm"
+                >
+                  {isResetSubmitting ? <><Loader2 size={16} className="animate-spin" /> Menyimpan...</> : "Simpan Password"}
                 </button>
               </div>
             </form>
