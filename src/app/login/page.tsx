@@ -37,6 +37,7 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const searchParams = useSearchParams();
   const isVerifiedSuccess = searchParams.get("verified") === "true";
+  const isResetSuccess = searchParams.get("reset") === "success";
 
   return (
     <div className="space-y-4">
@@ -50,6 +51,21 @@ function LoginForm() {
             <p className="font-semibold text-emerald-900">Email Berhasil Diverifikasi!</p>
             <p className="text-xs text-emerald-700 mt-0.5">
               Akun Anda telah aktif. Silakan masuk dengan email dan kata sandi Anda untuk melanjutkan.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Success Notification after Password Reset */}
+      {isResetSuccess && (
+        <div className="bg-emerald-50 text-emerald-800 p-4 rounded-xl border border-emerald-200 text-sm font-medium flex items-start gap-3 animate-fade-in shadow-xs">
+          <svg className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div>
+            <p className="font-semibold text-emerald-900">Kata Sandi Berhasil Diperbarui!</p>
+            <p className="text-xs text-emerald-700 mt-0.5">
+              Kata sandi akun Anda telah berhasil diubah. Silakan masuk menggunakan kata sandi baru Anda.
             </p>
           </div>
         </div>
@@ -108,13 +124,22 @@ function LoginForm() {
             <label className="block text-sm font-semibold text-slate-700">
               Password
             </label>
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="text-xs text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
-            >
-              {showPassword ? "Sembunyikan" : "Lihat Password"}
-            </button>
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-xs text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
+              >
+                {showPassword ? "Sembunyikan" : "Lihat Password"}
+              </button>
+              <span className="text-slate-300 text-xs">•</span>
+              <Link
+                href="/forgot-password"
+                className="text-xs text-blue-600 hover:text-blue-700 font-medium transition"
+              >
+                Lupa kata sandi?
+              </Link>
+            </div>
           </div>
           <input 
             type={showPassword ? "text" : "password"} 
@@ -145,7 +170,7 @@ export default function LoginPage() {
             src="/photo-1.avif" 
             alt="Suasana Belajar Bimbingan Belajar" 
             fill 
-            className="object-cover opacity-65 filter brightness-105 contrast-100"
+            className="object-cover opacity-65 filter brightness-105 contrast-100" 
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/45 to-slate-900/30 z-10" />

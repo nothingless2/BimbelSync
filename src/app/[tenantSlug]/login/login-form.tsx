@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { loginTenantAction } from './actions';
 import { User, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
+import Link from 'next/link';
 
 export function TenantLoginForm({ tenantSlug }: { tenantSlug: string }) {
   const router = useRouter();
@@ -57,9 +58,17 @@ export function TenantLoginForm({ tenantSlug }: { tenantSlug: string }) {
       </div>
 
       <div>
-        <label className="block text-[13px] font-semibold text-slate-700 mb-2">
-          Password
-        </label>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-[13px] font-semibold text-slate-700">
+            Password
+          </label>
+          <Link
+            href="/forgot-password"
+            className="text-xs text-blue-600 hover:text-blue-700 font-medium transition"
+          >
+            Lupa kata sandi?
+          </Link>
+        </div>
         <div className="relative">
           <input
             type={showPassword ? 'text' : 'password'}
@@ -98,4 +107,3 @@ export function TenantLoginForm({ tenantSlug }: { tenantSlug: string }) {
     </form>
   );
 }
-

@@ -22,6 +22,12 @@ export type OtpPendingPayload = {
   attempts?: number;
 };
 
+// Tipe data token sementara untuk reset password (Anti PII Leaks di URL)
+export type PasswordResetPendingPayload = {
+  email: string;
+  attempts?: number;
+};
+
 // Fungsi untuk membuat Token/Sesi (Saat Login)
 export async function encrypt(payload: SessionPayload) {
   return new SignJWT(payload)
@@ -55,6 +61,25 @@ export async function decryptOtpPending(token: string): Promise<OtpPendingPayloa
   try {
     const { payload } = await jwtVerify(token, SECRET_KEY);
     return payload as unknown as OtpPendingPayload;
+  } catch {
+    return null;
+  }
+}
+
+// Enkripsi token sesi pending Reset Password (HttpOnly Cookie, berlaku 15 menit)
+export async function encryptResetPending(payload: PasswordResetPendingPayload) {
+  return new SignJWT(payload)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('15m')
+    .sign(SECRET_KEY);
+}
+
+// Dekripsi token sesi pending Reset Password
+export async function decryptResetPending(token: string): Promise<PasswordResetPendingPayload | null> {
+  try {
+    const { payload } = await jwtVerify(token, SECRET_KEY);
+    return payload as unknown as PasswordResetPendingPayload;
   } catch {
     return null;
   }

@@ -517,3 +517,21 @@ Aturan:
   4. **[`Desain.md`](file:///d:/bimbelsync/Desain.md):** Mendokumentasikan kartu KPI watermark gradient, standar grafik Recharts dual-axis, format mata uang ringkas `formatCompactRupiah`, standar tabel 9-kolom billing style, dan segmented duration controls.
   5. **[`Log_Aktivitas.md`](file:///d:/bimbelsync/Log_Aktivitas.md):** Mencatat seluruh tahapan penyesuaian dari Tahap 2 hingga Tahap 5 secara kronologis.
 
+---
+
+## [Tahap Penyesuaian 6] Standardisasi Alur Autentikasi & Fitur Lupa Password
+- **Tanggal:** 4 November 2026
+- **Status:** ✅ Selesai & Tervalidasi.
+- **Rincian Implementasi:**
+  1. **Standardisasi Tampilan Onboarding & Verify OTP:**
+     - Menyelaraskan tata letak panel kiri hero agar tertambat rapi di bawah (`mt-auto mb-8`), membersihkan pill badge melayang, dan menstandarisasi tipografi judul (`text-[2.5rem] font-bold tracking-tight text-white`) serta deskripsi (`text-slate-300 text-lg`) agar 100% identik dengan halaman Register dan Login.
+     - Menyempurnakan ritme form panel kanan (`space-y-4`), border input 1px (`border border-slate-200`), dan tautan navigasi penyelamat.
+  2. **Fitur Lupa Kata Sandi (`/forgot-password` & `/reset-password`):**
+     - **Pengecualian Superadmin & Anti-Account Enumeration:** Memastikan Superadmin login (`/superadmin/login`) tidak memiliki opsi lupa password. Server actions (`requestPasswordResetAction` & `resetPasswordAction`) menolak setiap permintaan reset untuk akun Superadmin dengan mengembalikan pesan umum (*"Email tidak ditemukan"*), sehingga mencegah penyerang melakukan *user/role enumeration* untuk mengetahui email Superadmin.
+     - **Keamanan OWASP & Proteksi Sesi:** Menggunakan HttpOnly JWT Cookie (`bimbelsync_reset_pending`) dengan masa berlaku 15 menit untuk mencegah kebocoran email di URL (Anti PII Leaking).
+     - **Mekanisme OTP & Brute-Force Rate Limiting:** Kode OTP 6-digit cryptographically secure dengan masa aktif 15 menit, dibatasi maksimal 5 kali percobaan gagal sebelum kode dibatalkan otomatis.
+     - **Validasi Kekuatan Password:** Mengintegrasikan `validatePassword` (minimal 8 karakter, huruf besar, huruf kecil, angka, dan karakter spesial) serta verifikasi konfirmasi password yang cocok.
+     - **Pengiriman Email Reset:** Menyediakan fungsi email `sendPasswordResetOtpEmail` pada `src/lib/email.ts` yang mendukung Brevo API, SMTP Relay, Resend, dan dev console fallback.
+     - **Tautan & Notifikasi Sukses:** Menambahkan tautan *"Lupa kata sandi?"* pada form login utama (`/login`) dan portal tenant (`/[tenantSlug]/login`), serta menampilkan banner notifikasi sukses berwarna emerald saat pengguna kembali ke `/login?reset=success`.
+
+
