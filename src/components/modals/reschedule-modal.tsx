@@ -5,6 +5,7 @@ import { X, AlertCircle, Calendar } from "lucide-react";
 import { rescheduleScheduleAction } from "@/app/[tenantSlug]/dashboard/schedules/actions";
 import { Schedule, Program, Room, Staff } from "@prisma/client";
 import { format } from "date-fns";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 export function RescheduleModal({ 
   schedule, 
@@ -41,8 +42,8 @@ export function RescheduleModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm transition-opacity">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in duration-200">
-        <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-slate-800 bg-blue-50/50 dark:bg-blue-900/10">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md overflow-visible border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in duration-200">
+        <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-slate-800 bg-blue-50/50 dark:bg-blue-900/10 rounded-t-2xl">
           <div>
             <h2 className="text-lg font-bold text-blue-700 dark:text-blue-400 flex items-center gap-2">
               <Calendar size={18} /> Reschedule Jadwal
@@ -116,18 +117,17 @@ export function RescheduleModal({
             <label htmlFor="room_id" className="text-sm font-bold text-slate-700 dark:text-slate-300">
               Ruangan <span className="text-red-500">*</span>
             </label>
-            <select
+            <CustomSelect
               id="room_id"
               name="room_id"
               required
               defaultValue={schedule.room_id}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-            >
-              <option value="">Pilih Ruangan</option>
-              {rooms.map(room => (
-                <option key={room.id} value={room.id}>{room.name} (Kapasitas: {room.capacity})</option>
-              ))}
-            </select>
+              placeholder="Pilih Ruangan"
+              options={rooms.map((room) => ({
+                value: room.id,
+                label: `${room.name} (Kapasitas: ${room.capacity})`,
+              }))}
+            />
           </div>
 
           <div className="pt-4 flex gap-3 justify-end border-t border-slate-100 dark:border-slate-800">

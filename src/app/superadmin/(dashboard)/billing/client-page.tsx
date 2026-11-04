@@ -648,28 +648,23 @@ export default function BillingClientPage({ invoices, academies, plans, initialB
 
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Paket Langganan</label>
-                <div className="relative">
-                  <select
-                    value={form.planId}
-                    required
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      const plan = plans.find(p => p.id === value);
-                      const pricing = plan ? calculatePlanPrice(plan, parseInt(form.durationMonths) || 1) : null;
-                      setForm({ 
-                        ...form, 
-                        planId: value, 
-                        amount: pricing ? pricing.amount.toString() : form.amount 
-                      });
-                    }}
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm appearance-none outline-none focus:ring-2 focus:ring-blue-500 font-medium"
-                  >
-                    <option value="" disabled>Pilih Paket...</option>
-                    {plans.map(p => (
-                      <option key={p.id} value={p.id}>{p.name} - {IDR(p.price)}/bln</option>
-                    ))}
-                  </select>
-                </div>
+                <CustomSelect
+                  value={form.planId}
+                  placeholder="Pilih Paket..."
+                  options={plans.map(p => ({
+                    value: p.id,
+                    label: `${p.name} - ${IDR(p.price)}/bln`
+                  }))}
+                  onChange={(value) => {
+                    const plan = plans.find(p => p.id === value);
+                    const pricing = plan ? calculatePlanPrice(plan, parseInt(form.durationMonths) || 1) : null;
+                    setForm({ 
+                      ...form, 
+                      planId: value, 
+                      amount: pricing ? pricing.amount.toString() : form.amount 
+                    });
+                  }}
+                />
               </div>
 
               {/* Pilihan Siklus & Durasi Paket Sesuai Landing Page */}

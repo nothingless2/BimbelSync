@@ -13,6 +13,7 @@ import { DeleteSuperadminModal } from "@/components/modals/delete-superadmin-mod
 import { UserAvatar } from "@/components/user-avatar";
 import { Pagination } from "@/components/ui/pagination";
 import { toast } from "@/components/ui/sonner";
+import { CustomSelect } from "@/components/ui/custom-select";
 import { resetTenantUserPasswordAction } from "./actions";
 
 export interface TenantUser {
@@ -42,6 +43,19 @@ interface Props {
   superadmins: SuperadminUser[];
   tenantUsers: TenantUser[];
 }
+
+const ROLE_OPTIONS = [
+  { value: "ALL", label: "Semua Role" },
+  { value: "ADMIN", label: "Admin Bimbel" },
+  { value: "TUTOR", label: "Tutor" },
+  { value: "STUDENT", label: "Siswa" },
+];
+
+const STATUS_OPTIONS = [
+  { value: "ALL", label: "Semua Status" },
+  { value: "ACTIVE", label: "Aktif" },
+  { value: "INACTIVE", label: "Nonaktif" },
+];
 
 export default function SystemUsersClient({ superadmins, tenantUsers }: Props) {
   const [activeTab, setActiveTab] = useState<"tenants" | "internal">("tenants");
@@ -271,9 +285,9 @@ export default function SystemUsersClient({ superadmins, tenantUsers }: Props) {
 
       {/* TAB 1: PENGGUNA BIMBEL (TENANT DIRECTORY) */}
       {activeTab === "tenants" && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm flex flex-col relative">
           {/* Toolbar Search & Filter */}
-          <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+          <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between rounded-t-2xl relative z-20">
             <div className="relative flex-1 max-w-md">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search size={16} className="text-slate-400" />
@@ -286,44 +300,37 @@ export default function SystemUsersClient({ superadmins, tenantUsers }: Props) {
                   setTenantSearchQuery(e.target.value);
                   setTenantPage(1);
                 }}
-                className="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                className="block w-full pl-9 pr-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
               />
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2.5 flex-wrap">
               {/* Filter Role */}
-              <select
+              <CustomSelect
                 value={roleFilter}
-                onChange={(e) => {
-                  setRoleFilter(e.target.value);
+                onChange={(val) => {
+                  setRoleFilter(val);
                   setTenantPage(1);
                 }}
-                className="px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-              >
-                <option value="ALL">Semua Role</option>
-                <option value="ADMIN">Admin Bimbel</option>
-                <option value="TUTOR">Tutor</option>
-                <option value="STUDENT">Siswa</option>
-              </select>
+                options={ROLE_OPTIONS}
+                className="w-full sm:w-44 text-sm"
+              />
 
               {/* Filter Status */}
-              <select
+              <CustomSelect
                 value={statusFilter}
-                onChange={(e) => {
-                  setStatusFilter(e.target.value);
+                onChange={(val) => {
+                  setStatusFilter(val);
                   setTenantPage(1);
                 }}
-                className="px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-              >
-                <option value="ALL">Semua Status</option>
-                <option value="ACTIVE">Aktif</option>
-                <option value="INACTIVE">Nonaktif</option>
-              </select>
+                options={STATUS_OPTIONS}
+                className="w-full sm:w-40 text-sm"
+              />
             </div>
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto relative z-10 rounded-b-2xl">
             <table className="w-full text-sm text-left">
               <thead className="text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
                 <tr>
@@ -434,7 +441,7 @@ export default function SystemUsersClient({ superadmins, tenantUsers }: Props) {
 
           {/* Pagination */}
           {totalTenantPages > 0 && (
-            <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-b-2xl">
               <Pagination
                 currentPage={tenantPage}
                 totalPages={totalTenantPages}

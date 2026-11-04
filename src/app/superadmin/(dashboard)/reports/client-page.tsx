@@ -434,22 +434,24 @@ export default function ReportsClientPage({
             </div>
 
             {/* Specific Month Select */}
-            <select
-              value={quickPreset.startsWith("MONTH_") ? quickPreset.replace("MONTH_", "") : ""}
-              onChange={(e) => handleSelectMonth(e.target.value)}
-              className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-            >
-              <option value="">Pilih Bulan...</option>
-              {availableMonths.map((m) => {
-                const [year, month] = m.split("-").map(Number);
-                const date = new Date(year, month - 1, 1);
-                return (
-                  <option key={m} value={m}>
-                    {format(date, "MMMM yyyy", { locale: localeId })}
-                  </option>
-                );
-              })}
-            </select>
+            <div className="w-44">
+              <CustomSelect
+                value={quickPreset.startsWith("MONTH_") ? quickPreset.replace("MONTH_", "") : ""}
+                onChange={(val) => handleSelectMonth(val)}
+                placeholder="Pilih Bulan..."
+                options={[
+                  { value: "", label: "Semua Bulan" },
+                  ...availableMonths.map((m) => {
+                    const [year, month] = m.split("-").map(Number);
+                    const date = new Date(year, month - 1, 1);
+                    return {
+                      value: m,
+                      label: format(date, "MMMM yyyy", { locale: localeId }),
+                    };
+                  }),
+                ]}
+              />
+            </div>
           </div>
         </div>
 
