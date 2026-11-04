@@ -20,9 +20,9 @@ const registerSchema = z.object({
   adminPhone: z
     .string()
     .trim()
-    .transform((val) => val.replace(/\D/g, ""))
+    .regex(/^[0-9]+$/, "Nomor WhatsApp hanya boleh berisi angka.")
     .refine((val) => val.length >= 10 && val.length <= 15, {
-      message: "Nomor WhatsApp tidak valid (10-15 digit angka).",
+      message: "Nomor WhatsApp harus terdiri dari 10 - 15 digit angka.",
     }),
   adminEmail: z
     .string()
@@ -34,6 +34,12 @@ const registerSchema = z.object({
     .string()
     .min(8, "Password minimal 8 karakter.")
     .max(128, "Password maksimal 128 karakter."),
+  confirmPassword: z
+    .string()
+    .min(1, "Konfirmasi password wajib diisi."),
+}).refine((data) => data.adminPassword === data.confirmPassword, {
+  message: "Konfirmasi password tidak cocok dengan password akun. Pastikan keduanya sama.",
+  path: ["confirmPassword"],
 });
 
 export async function registerAcademyAction(prevState: any, formData: FormData) {
@@ -49,6 +55,7 @@ export async function registerAcademyAction(prevState: any, formData: FormData) 
     adminPhone: formData.get("adminPhone") as string,
     adminEmail: formData.get("adminEmail") as string,
     adminPassword: formData.get("adminPassword") as string,
+    confirmPassword: formData.get("confirmPassword") as string,
   };
 
   const validation = registerSchema.safeParse(rawData);

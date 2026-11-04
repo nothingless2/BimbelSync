@@ -34,10 +34,38 @@ function SubmitButton() {
 
 function RegisterForm() {
   const [state, formAction] = useActionState(registerAcademyAction, null);
+  const [phone, setPhone] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [clientError, setClientError] = useState("");
+
+  const handleFormAction = (formData: FormData) => {
+    setClientError("");
+    const phoneVal = (formData.get("adminPhone") as string)?.trim() || "";
+    
+    if (!/^\d+$/.test(phoneVal)) {
+      setClientError("Nomor WhatsApp hanya boleh berisi angka.");
+      return;
+    }
+
+    if (phoneVal.length < 10 || phoneVal.length > 15) {
+      setClientError("Nomor WhatsApp harus terdiri dari 10 - 15 digit angka.");
+      return;
+    }
+
+    const password = formData.get("adminPassword") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+
+    if (password !== confirmPassword) {
+      setClientError("Konfirmasi password tidak cocok dengan password akun. Pastikan keduanya sama.");
+      return;
+    }
+
+    formAction(formData);
+  };
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={handleFormAction} className="space-y-4">
       {/* Anti-Bot Honeypot Field (Tersembunyi dari manusia) */}
       <input 
         type="text" 
@@ -48,12 +76,12 @@ function RegisterForm() {
       />
 
       {/* Error Alert */}
-      {state?.error && (
+      {(clientError || state?.error) && (
         <div className="bg-red-50 text-red-600 p-3.5 rounded-xl border border-red-100 text-sm font-medium flex items-start animate-fade-in shadow-xs">
           <svg className="w-5 h-5 mr-2.5 shrink-0 mt-0.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
-          <span>{state.error}</span>
+          <span>{clientError || state?.error}</span>
         </div>
       )}
 
@@ -79,11 +107,29 @@ function RegisterForm() {
         <input 
           type="tel" 
           name="adminPhone" 
+          value={phone}
+          onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+          onKeyDown={(e) => {
+            // Izinkan tombol kontrol standar navigasi & copy/paste
+            if (
+              ["Backspace", "Delete", "Tab", "Escape", "Enter", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key) ||
+              (e.ctrlKey || e.metaKey)
+            ) {
+              return;
+            }
+            // Blokir tombol jika bukan angka 0-9
+            if (!/^[0-9]$/.test(e.key)) {
+              e.preventDefault();
+            }
+          }}
+          inputMode="numeric"
+          pattern="[0-9]*"
+          maxLength={15}
           required 
           className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
           placeholder="081234567890"
         />
-        <p className="mt-1 text-xs text-slate-400">Untuk koordinasi aktivasi akun & bantuan tim onboarding.</p>
+        <p className="mt-1 text-xs text-slate-400">Untuk koordinasi aktivasi akun & bantuan tim onboarding (hanya angka, 10-15 digit).</p>
       </div>
 
       {/* 3. Email Aktif */}
@@ -121,6 +167,31 @@ function RegisterForm() {
             aria-label={showPassword ? "Sembunyikan password" : "Lihat password"}
           >
             {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          </button>
+        </div>
+      </div>
+
+      {/* 5. Konfirmasi Password (retype password) */}
+      <div>
+        <label className="block text-sm font-semibold text-slate-700 mb-1">
+          Ulangi Password Akun
+        </label>
+        <div className="relative">
+          <input 
+            type={showConfirmPassword ? "text" : "password"} 
+            name="confirmPassword" 
+            required 
+            className="w-full pl-3.5 pr-11 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
+            placeholder="Ketik ulang password akun Anda"
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+            tabIndex={-1}
+            aria-label={showConfirmPassword ? "Sembunyikan password" : "Lihat password"}
+          >
+            {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
           </button>
         </div>
         <p className="mt-1 text-[11px] text-slate-400">
