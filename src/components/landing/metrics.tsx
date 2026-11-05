@@ -1,41 +1,50 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Clock, TrendingUp, ShieldCheck, ArrowUpRight } from 'lucide-react';
 
 export function Metrics() {
-  const metrics = [
+  const [activeTab, setActiveTab] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  const items = [
     {
-      icon: <Clock className="w-5 h-5 text-blue-600" />,
-      bgClass: "bg-blue-50",
       title: "Efisiensi Waktu Admin",
-      description: "Otomatisasi absensi dan penjadwalan membebaskan admin Anda dari rekap manual yang melelahkan."
+      description: "Otomatisasi absensi dan penjadwalan membebaskan admin Anda dari rekap manual yang melelahkan.",
     },
     {
-      icon: <TrendingUp className="w-5 h-5 text-blue-600" />,
-      bgClass: "bg-blue-50",
       title: "Siklus Penagihan Cepat",
-      description: "Kirim invoice dan pengingat otomatis. Pantau pembayaran real-time, tingkatkan arus kas bimbel."
+      description: "Kirim invoice dan pengingat otomatis. Pantau pembayaran real-time, tingkatkan arus kas bimbel.",
     },
     {
-      icon: <ShieldCheck className="w-5 h-5 text-white" />,
-      bgClass: "bg-white/20",
-      title: "99.9% Uptime & Sekuriti",
+      title: "99.9% Uptime & Keamanan Cloud",
       description: "Infrastruktur cloud modern memastikan data siswa dan keuangan Anda selalu aman dan dapat diakses.",
-      highlight: true
-    }
+    },
   ];
 
+  // Auto-play timer: 5 detik per tab, berganti otomatis
+  useEffect(() => {
+    if (isPaused) return;
+
+    const timer = setInterval(() => {
+      setActiveTab((prev) => (prev + 1) % items.length);
+    }, 5000);
+
+    return () => clearInterval(timer);
+  }, [isPaused, activeTab, items.length]);
+
   return (
-    <section className="py-24 bg-[#F8FAFC] relative overflow-hidden border-y border-slate-200/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center max-w-3xl mx-auto mb-16">
+    <section className="py-20 md:py-28 bg-[#F8FAFC] relative overflow-hidden border-y border-slate-200/60">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        {/* Section Header */}
+        <div className="text-center max-w-3xl mx-auto mb-14 md:mb-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-6 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 mb-5 tracking-tight leading-tight">
               Fokus mengajar, biar sistem yang<br className="hidden sm:block" /> urus <span className="text-blue-600">administrasinya.</span>
             </h2>
             <p className="text-base sm:text-lg text-slate-500 font-medium leading-relaxed max-w-2xl mx-auto">
@@ -43,53 +52,88 @@ export function Metrics() {
             </p>
           </motion.div>
         </div>
-        
-        <div className="flex flex-col md:flex-row flex-wrap justify-center gap-5 max-w-5xl mx-auto">
-          {metrics.map((metric, index) => (
-            <motion.div 
-              key={index}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.15 }}
-              className={`group relative p-6 md:p-8 rounded-[1.5rem] transition-all duration-300 flex flex-col w-full md:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)] ${
-                metric.highlight 
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' 
-                  : 'bg-white border border-slate-200/60 shadow-sm hover:shadow-md'
-              }`}
-            >
-              {/* Highlight Card Ornaments */}
-              {metric.highlight && (
-                <div className="absolute top-0 right-0 w-full h-full overflow-hidden rounded-[2rem] pointer-events-none">
-                   <div className="absolute -top-12 -right-12 w-48 h-48 bg-white opacity-5 rounded-full blur-2xl"></div>
-                   <div className="absolute bottom-0 right-0 w-32 h-32 bg-indigo-500 opacity-20 blur-xl"></div>
-                </div>
-              )}
 
-              <div className="relative z-10 flex-1 flex flex-col">
-                <div className={`mb-6 inline-flex items-center justify-center w-10 h-10 rounded-xl ${metric.bgClass}`}>
-                  {metric.icon}
-                </div>
-                
-                <h3 className={`text-lg font-bold mb-3 ${metric.highlight ? 'text-white' : 'text-slate-900'}`}>
-                  {metric.title}
-                </h3>
-                
-                <p className={`text-sm leading-relaxed font-medium mb-8 flex-1 ${metric.highlight ? 'text-blue-100' : 'text-slate-500'}`}>
-                  {metric.description}
-                </p>
+        {/* 3-Segment Interactive Feature Bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="relative border border-slate-200/90 rounded-2xl md:rounded-3xl overflow-hidden bg-slate-50/50 shadow-xs"
+        >
+          <div className="flex items-stretch">
+            {/* Left Technical Hatch Pattern (Blueprint Accent) */}
+            <div
+              className="hidden sm:block w-5 md:w-10 shrink-0 border-r border-slate-200/80 bg-[repeating-linear-gradient(45deg,#e2e8f0,#e2e8f0_1.5px,transparent_1.5px,transparent_7px)] opacity-60"
+              aria-hidden="true"
+            />
 
-                <div className={`mt-auto inline-flex items-center justify-center w-10 h-10 rounded-full transition-colors ${
-                  metric.highlight 
-                    ? 'bg-white/10 text-white group-hover:bg-white/20' 
-                    : 'bg-slate-50 text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600'
-                }`}>
-                  <ArrowUpRight className="w-5 h-5" />
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+            {/* 3 Interactive Cards Grid */}
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-200/80">
+              {items.map((item, index) => {
+                const isActive = activeTab === index;
+                return (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setActiveTab(index)}
+                    onMouseEnter={() => setIsPaused(true)}
+                    onMouseLeave={() => setIsPaused(false)}
+                    className={`group relative p-6 sm:p-8 md:p-10 flex flex-col justify-start text-left cursor-pointer transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+                      isActive
+                        ? 'bg-white shadow-[0_4px_24px_rgba(0,0,0,0.04)] z-10'
+                        : 'bg-[#F9FAFB]/80 hover:bg-white/70'
+                    }`}
+                  >
+                    {/* Top Progress Bar / Indicator */}
+                    <div className="absolute top-0 left-0 right-0 h-[3px] bg-slate-200/40 overflow-hidden">
+                      {isActive && (
+                        <motion.div
+                          key={`timer-${activeTab}`}
+                          initial={{ width: '0%' }}
+                          animate={{ width: '100%' }}
+                          transition={{
+                            duration: isPaused ? 0 : 5,
+                            ease: 'linear',
+                          }}
+                          className="h-full bg-slate-900 rounded-full"
+                        />
+                      )}
+                    </div>
+
+                    {/* Title */}
+                    <h3
+                      className={`text-base sm:text-lg md:text-xl font-bold tracking-tight transition-colors duration-200 ${
+                        isActive
+                          ? 'text-slate-900'
+                          : 'text-slate-700 group-hover:text-slate-900'
+                      }`}
+                    >
+                      {item.title}
+                    </h3>
+
+                    {/* Description */}
+                    <p
+                      className={`text-sm sm:text-[15px] leading-relaxed mt-2.5 transition-colors duration-200 font-normal ${
+                        isActive
+                          ? 'text-slate-600'
+                          : 'text-slate-500'
+                      }`}
+                    >
+                      {item.description}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Right Technical Hatch Pattern (Blueprint Accent) */}
+            <div
+              className="hidden sm:block w-5 md:w-10 shrink-0 border-l border-slate-200/80 bg-[repeating-linear-gradient(45deg,#e2e8f0,#e2e8f0_1.5px,transparent_1.5px,transparent_7px)] opacity-60"
+              aria-hidden="true"
+            />
+          </div>
+        </motion.div>
       </div>
     </section>
   );
