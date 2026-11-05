@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 
 export function Metrics() {
   const [activeTab, setActiveTab] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
 
   const items = [
     {
@@ -22,16 +21,9 @@ export function Metrics() {
     },
   ];
 
-  // Auto-play timer: 5 detik per tab, berganti otomatis
-  useEffect(() => {
-    if (isPaused) return;
-
-    const timer = setInterval(() => {
-      setActiveTab((prev) => (prev + 1) % items.length);
-    }, 5000);
-
-    return () => clearInterval(timer);
-  }, [isPaused, activeTab, items.length]);
+  const handleNextTab = () => {
+    setActiveTab((prev) => (prev + 1) % items.length);
+  };
 
   return (
     <section className="py-20 md:py-28 bg-[#F8FAFC] relative overflow-hidden border-y border-slate-200/60">
@@ -77,8 +69,6 @@ export function Metrics() {
                     key={index}
                     type="button"
                     onClick={() => setActiveTab(index)}
-                    onMouseEnter={() => setIsPaused(true)}
-                    onMouseLeave={() => setIsPaused(false)}
                     className={`group relative p-6 sm:p-8 md:p-10 flex flex-col justify-start text-left cursor-pointer transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
                       isActive
                         ? 'bg-white shadow-[0_4px_24px_rgba(0,0,0,0.04)] z-10'
@@ -93,9 +83,10 @@ export function Metrics() {
                           initial={{ width: '0%' }}
                           animate={{ width: '100%' }}
                           transition={{
-                            duration: isPaused ? 0 : 5,
+                            duration: 4.5,
                             ease: 'linear',
                           }}
+                          onAnimationComplete={handleNextTab}
                           className="h-full bg-slate-900 rounded-full"
                         />
                       )}
