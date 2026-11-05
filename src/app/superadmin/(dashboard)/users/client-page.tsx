@@ -106,6 +106,7 @@ export default function SystemUsersClient({ currentSuperadminId, superadmins, te
 
   // === Manual Purge State (30-day Retention Cleanup) ===
   const [isPurging, setIsPurging] = useState(false);
+  const [isPurgeModalOpen, setIsPurgeModalOpen] = useState(false);
 
   // Counts for KPI
   const adminCount = tenantUsers.filter(u => u.rawRole === "ADMIN").length;
@@ -279,7 +280,6 @@ export default function SystemUsersClient({ currentSuperadminId, superadmins, te
   };
 
   const handleTriggerManualPurge = async () => {
-    if (!confirm("Apakah Anda yakin ingin membersihkan seluruh akun yang telah nonaktif lebih dari 30 hari sekarang?")) return;
     setIsPurging(true);
     try {
       const res = await triggerManualPurgeAction();
@@ -287,6 +287,7 @@ export default function SystemUsersClient({ currentSuperadminId, superadmins, te
         toast.error(res.error);
       } else {
         toast.success(res.message || "Pembersihan akun selesai.");
+        setIsPurgeModalOpen(false);
       }
     } catch {
       toast.error("Gagal menjalankan pembersihan akun kedaluwarsa.");
@@ -410,7 +411,7 @@ export default function SystemUsersClient({ currentSuperadminId, superadmins, te
               </div>
               <button
                 type="button"
-                onClick={handleTriggerManualPurge}
+                onClick={() => setIsPurgeModalOpen(true)}
                 disabled={isPurging}
                 className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs rounded-lg transition flex items-center gap-1.5 shadow-sm cursor-pointer disabled:opacity-70 whitespace-nowrap"
               >
@@ -476,8 +477,8 @@ export default function SystemUsersClient({ currentSuperadminId, superadmins, te
                   <th className="px-6 py-4">Role</th>
                   <th className="px-6 py-4">Asal Bimbel</th>
                   <th className="px-6 py-4">Kontak (Email / No. HP)</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4 text-right">Aksi</th>
+                  <th className="px-6 py-4 whitespace-nowrap">Status</th>
+                  <th className="px-6 py-4 text-right whitespace-nowrap">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
@@ -538,13 +539,14 @@ export default function SystemUsersClient({ currentSuperadminId, superadmins, te
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         {user.academyDeleted ? (
                           <span
-                            className="inline-flex items-center gap-1.5 text-slate-500 dark:text-slate-400 font-semibold text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700"
+                            className="inline-flex items-center gap-1.5 text-slate-500 dark:text-slate-400 font-semibold text-xs bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 whitespace-nowrap"
                             title="Akademi bimbel akun ini sedang dinonaktifkan/diarsipkan"
                           >
-                            <Building2 size={13} /> Akademi Diarsipkan
+                            <Building2 size={13} className="shrink-0" />
+                            Akademi Diarsipkan
                           </span>
                         ) : user.userDeleted ? (
                           (() => {
@@ -554,21 +556,23 @@ export default function SystemUsersClient({ currentSuperadminId, superadmins, te
                             const daysRemaining = Math.max(0, 30 - daysElapsed);
                             return (
                               <span
-                                className="inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-400 font-semibold text-xs bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 rounded-full border border-amber-200 dark:border-amber-800/60"
+                                className="inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-400 font-semibold text-xs bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 rounded-full border border-amber-200 dark:border-amber-800/60 whitespace-nowrap"
                                 title={`Akun dinonaktifkan. Akan otomatis dihapus permanen oleh sistem dalam ${daysRemaining} hari jika tidak dipulihkan.`}
                               >
-                                <UserX size={13} />
-                                {daysRemaining > 0 ? `Nonaktif (Sisa ${daysRemaining} hr)` : "Nonaktif (Kedaluwarsa)"}
+                                <UserX size={13} className="shrink-0" />
+                                <span>Nonaktif</span>
+                                <span className="text-[10px] opacity-80 font-normal">({daysRemaining > 0 ? `${daysRemaining} hr` : "Kedaluwarsa"})</span>
                               </span>
                             );
                           })()
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold text-xs bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-800/60">
-                            <CheckCircle2 size={13} /> Aktif
+                          <span className="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold text-xs bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-800/60 whitespace-nowrap">
+                            <CheckCircle2 size={13} className="shrink-0" />
+                            Aktif
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-6 py-4 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1.5">
                           {/* Ubah Password */}
                           <button
@@ -678,8 +682,8 @@ export default function SystemUsersClient({ currentSuperadminId, superadmins, te
                   <th className="px-6 py-4 w-16">No.</th>
                   <th className="px-6 py-4">User</th>
                   <th className="px-6 py-4">Role</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4 text-right">Aksi</th>
+                  <th className="px-6 py-4 whitespace-nowrap">Status</th>
+                  <th className="px-6 py-4 text-right whitespace-nowrap">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
@@ -1114,6 +1118,73 @@ export default function SystemUsersClient({ currentSuperadminId, superadmins, te
                     <><Loader2 size={16} className="animate-spin" /> Menghapus...</>
                   ) : (
                     "Ya, Hapus Permanen"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Konfirmasi Bersihkan Akun Kedaluwarsa (>30 Hari) */}
+      {isPurgeModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center p-5 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600">
+                  <Trash2 size={20} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 dark:text-white text-base">
+                    Bersihkan Akun Kedaluwarsa?
+                  </h3>
+                  <p className="text-xs text-slate-500">Pembersihan akun nonaktif &gt; 30 hari</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsPurgeModalOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg transition cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-xl space-y-2 text-xs">
+                <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-bold text-sm">
+                  <AlertTriangle size={18} className="shrink-0 text-amber-600" />
+                  <span>Konfirmasi Penghapusan Permanen</span>
+                </div>
+                <p className="leading-relaxed text-slate-700 dark:text-slate-300">
+                  Terdapat <strong>{expiredCount} akun pengguna</strong> yang telah berstatus nonaktif lebih dari 30 hari. Seluruh akun tersebut akan <strong>dihapus secara permanen (Hard Delete)</strong> beserta riwayat kelas, jadwal, evaluasi, absensi, dan tagihan terkait.
+                </p>
+              </div>
+
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                Tindakan ini tidak dapat dibatalkan. Akun yang dihapus tidak dapat dipulihkan kembali ke dalam sistem.
+              </p>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsPurgeModalOpen(false)}
+                  disabled={isPurging}
+                  className="flex-1 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={handleTriggerManualPurge}
+                  disabled={isPurging}
+                  className="flex-1 py-2.5 text-sm font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-70 cursor-pointer shadow-sm"
+                >
+                  {isPurging ? (
+                    <><Loader2 size={16} className="animate-spin" /> Membersihkan...</>
+                  ) : (
+                    "Ya, Bersihkan Sekarang"
                   )}
                 </button>
               </div>
