@@ -32,30 +32,80 @@ function SubmitButton() {
   );
 }
 
+function validatePasswordClient(password: string): { isValid: boolean; errorMsg?: string } {
+  if (password.length < 8) {
+    return { isValid: false, errorMsg: "Password minimal 8 karakter." };
+  }
+  if (!/[A-Z]/.test(password)) {
+    return { isValid: false, errorMsg: "Password harus mengandung minimal 1 huruf besar." };
+  }
+  if (!/[a-z]/.test(password)) {
+    return { isValid: false, errorMsg: "Password harus mengandung minimal 1 huruf kecil." };
+  }
+  if (!/[0-9]/.test(password)) {
+    return { isValid: false, errorMsg: "Password harus mengandung minimal 1 angka." };
+  }
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    return { isValid: false, errorMsg: "Password harus mengandung minimal 1 karakter spesial." };
+  }
+  return { isValid: true };
+}
+
 function RegisterForm() {
   const [state, formAction] = useActionState(registerAcademyAction, null);
+  const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [clientError, setClientError] = useState("");
 
   const handleFormAction = (formData: FormData) => {
     setClientError("");
-    const phoneVal = (formData.get("adminPhone") as string)?.trim() || "";
-    
+
+    // 1. Validasi Nama Lengkap
+    const nameVal = name.trim();
+    if (!nameVal || nameVal.length < 2) {
+      setClientError("Nama minimal 2 karakter.");
+      return;
+    }
+    if (nameVal.length > 100) {
+      setClientError("Nama maksimal 100 karakter.");
+      return;
+    }
+    if (!/^[a-zA-Z\s.,'-]+$/.test(nameVal)) {
+      setClientError("Nama hanya boleh mengandung huruf dan tanda baca nama.");
+      return;
+    }
+
+    // 2. Validasi Nomor WhatsApp
+    const phoneVal = phone.trim();
     if (!/^\d+$/.test(phoneVal)) {
       setClientError("Nomor WhatsApp hanya boleh berisi angka.");
       return;
     }
-
     if (phoneVal.length < 10 || phoneVal.length > 15) {
       setClientError("Nomor WhatsApp harus terdiri dari 10 - 15 digit angka.");
       return;
     }
 
-    const password = formData.get("adminPassword") as string;
-    const confirmPassword = formData.get("confirmPassword") as string;
+    // 3. Validasi Email
+    const emailVal = email.trim();
+    if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+      setClientError("Format email tidak valid.");
+      return;
+    }
 
+    // 4. Validasi Ketentuan Password
+    const passwordCheck = validatePasswordClient(password);
+    if (!passwordCheck.isValid) {
+      setClientError(passwordCheck.errorMsg || "Password belum memenuhi syarat keamanan.");
+      return;
+    }
+
+    // 5. Validasi Konfirmasi Password
     if (password !== confirmPassword) {
       setClientError("Konfirmasi password tidak cocok dengan password akun. Pastikan keduanya sama.");
       return;
@@ -93,6 +143,11 @@ function RegisterForm() {
         <input 
           type="text" 
           name="adminName" 
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value);
+            if (clientError) setClientError("");
+          }}
           required 
           className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
           placeholder="Contoh: Budi Santoso"
@@ -108,7 +163,10 @@ function RegisterForm() {
           type="tel" 
           name="adminPhone" 
           value={phone}
-          onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+          onChange={(e) => {
+            setPhone(e.target.value.replace(/\D/g, ""));
+            if (clientError) setClientError("");
+          }}
           onKeyDown={(e) => {
             // Izinkan tombol kontrol standar navigasi & copy/paste
             if (
@@ -140,6 +198,11 @@ function RegisterForm() {
         <input 
           type="email" 
           name="adminEmail" 
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (clientError) setClientError("");
+          }}
           required 
           className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
           placeholder="budi@email.com"
@@ -155,6 +218,11 @@ function RegisterForm() {
           <input 
             type={showPassword ? "text" : "password"} 
             name="adminPassword" 
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (clientError) setClientError("");
+            }}
             required 
             className="w-full pl-3.5 pr-11 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
             placeholder="Min. 8 karakter, huruf besar, angka & simbol"
@@ -180,6 +248,11 @@ function RegisterForm() {
           <input 
             type={showConfirmPassword ? "text" : "password"} 
             name="confirmPassword" 
+            value={confirmPassword}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              if (clientError) setClientError("");
+            }}
             required 
             className="w-full pl-3.5 pr-11 py-3 rounded-xl border border-slate-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none text-sm"
             placeholder="Ketik ulang password akun Anda"
