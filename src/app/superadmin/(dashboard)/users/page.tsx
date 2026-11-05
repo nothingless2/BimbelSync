@@ -72,7 +72,7 @@ export default async function SystemUsersPage() {
       })),
     ];
 
-    return <SystemUsersClient superadmins={superadmins} tenantUsers={tenantUsers} />;
+    return <SystemUsersClient currentSuperadminId={session.id} superadmins={superadmins} tenantUsers={tenantUsers} />;
   } catch (error) {
     console.error("Error fetching users directory:", error);
     return (

@@ -75,7 +75,32 @@ export async function loginTenantAction(tenantSlug: string, formData: FormData) 
       }
     }
 
-    // 4. Jika keduanya gagal
+    // 4. Cek apakah ada akun Staff atau Student ini yang telah dinonaktifkan
+    const deactivatedStaff = await prisma.staff.findFirst({
+      where: {
+        email: identifier,
+        academy_id: academy.id,
+        deleted_at: { not: null },
+      }
+    });
+
+    if (deactivatedStaff) {
+      return { error: 'User sudah tidak aktif lagi.' };
+    }
+
+    const deactivatedStudent = await prisma.student.findFirst({
+      where: {
+        username: identifier,
+        academy_id: academy.id,
+        deleted_at: { not: null },
+      }
+    });
+
+    if (deactivatedStudent) {
+      return { error: 'User sudah tidak aktif lagi.' };
+    }
+
+    // 5. Jika keduanya gagal
     return { error: 'Email/Username atau kata sandi salah.' };
 
     // Kode ini sudah digantikan di blok if di atas

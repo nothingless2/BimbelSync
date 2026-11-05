@@ -149,6 +149,44 @@ export async function loginAction(prevState: any, formData: FormData) {
     }
 
     if (!redirectPath) {
+      // 4. Cek apakah ada akun Staff atau Siswa yang dinonaktifkan (Soft Delete)
+      const deactivatedStaff = await prisma.staff.findFirst({
+        where: {
+          email: { equals: identifier, mode: "insensitive" },
+          OR: [
+            { deleted_at: { not: null } },
+            { academy: { deleted_at: { not: null } } },
+          ],
+        },
+      });
+
+      if (deactivatedStaff) {
+        return { error: "User sudah tidak aktif lagi." };
+      }
+
+      const deactivatedStudent = await prisma.student.findFirst({
+        where: {
+          AND: [
+            {
+              OR: [
+                { username: { equals: identifier, mode: "insensitive" } },
+                { email: { equals: identifier, mode: "insensitive" } },
+              ],
+            },
+            {
+              OR: [
+                { deleted_at: { not: null } },
+                { academy: { deleted_at: { not: null } } },
+              ],
+            },
+          ],
+        },
+      });
+
+      if (deactivatedStudent) {
+        return { error: "User sudah tidak aktif lagi." };
+      }
+
       return { error: "Email, Username, atau kata sandi tidak cocok." };
     }
 

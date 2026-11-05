@@ -71,6 +71,21 @@ export async function requestPasswordResetAction(prevState: any, formData: FormD
         };
       }
 
+      // Cek apakah akun Staff ini telah dinonaktifkan
+      const deactivatedStaff = await prisma.staff.findFirst({
+        where: {
+          email: { equals: email, mode: "insensitive" },
+          OR: [
+            { deleted_at: { not: null } },
+            { academy: { deleted_at: { not: null } } },
+          ],
+        },
+      });
+
+      if (deactivatedStaff) {
+        return { error: "User sudah tidak aktif lagi." };
+      }
+
       return {
         error: "Email tidak ditemukan di sistem BimbelSync. Pastikan email yang Anda masukkan sudah benar.",
       };

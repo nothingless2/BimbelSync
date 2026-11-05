@@ -452,6 +452,12 @@ export async function updateSuperadminAction(formData: FormData) {
 export async function deleteSuperadminAction(id: string) {
   const auth = await requireSuperadminSession();
   if ('error' in auth) return { error: auth.error };
+
+  // CEK KEAMANAN: Cegah Superadmin menghapus akun dirinya sendiri
+  if (auth.session.id === id) {
+    return { error: "Anda tidak dapat menghapus akun Anda sendiri." };
+  }
+
   try {
     await prisma.superadmin.update({
       where: { id },

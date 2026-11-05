@@ -73,7 +73,19 @@ export async function registerAcademyAction(prevState: any, formData: FormData) 
   }
 
   try {
-    // 4. Cek apakah email sudah terdaftar
+    // 4. Cek apakah email terdaftar pada akun yang sudah dinonaktifkan
+    const deactivatedStaff = await prisma.staff.findFirst({
+      where: {
+        email: { equals: adminEmail, mode: "insensitive" },
+        deleted_at: { not: null },
+      },
+    });
+
+    if (deactivatedStaff) {
+      return { error: "User sudah tidak aktif lagi." };
+    }
+
+    // 5. Cek apakah email sudah terdaftar aktif
     const existingStaff = await prisma.staff.findFirst({
       where: {
         email: { equals: adminEmail, mode: "insensitive" },
