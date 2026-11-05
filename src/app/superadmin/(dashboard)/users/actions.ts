@@ -6,6 +6,11 @@ import { validatePassword } from "@/lib/auth";
 import { requireSuperadminSession } from "@/lib/session";
 import { logAuditAction } from "../search/actions";
 import { revalidatePath } from "next/cache";
+import {
+  cascadeDeleteStaff,
+  cascadeDeleteStudent,
+  purgeExpiredTenantUsers,
+} from "@/lib/user-cleanup";
 
 export async function resetTenantUserPasswordAction(
   userId: string,
@@ -128,8 +133,8 @@ export async function toggleTenantUserStatusAction(
       return {
         success: true,
         message: targetAction === "DEACTIVATE"
-          ? `Akun ${staff.role === "ADMIN" ? "Admin" : "Tutor"} (${staff.email}) berhasil dinonaktifkan.`
-          : `Akun ${staff.role === "ADMIN" ? "Admin" : "Tutor"} (${staff.email}) berhasil diaktifkan kembali.`,
+          ? `Akun ${staff.role === "ADMIN" ? "Admin" : "Tutor"} (${staff.email}) dinonaktifkan (masa tenggang 30 hari).`
+          : `Akun ${staff.role === "ADMIN" ? "Admin" : "Tutor"} (${staff.email}) berhasil dipulihkan dan aktif kembali.`,
       };
     } else {
       const student = await prisma.student.findUnique({
@@ -165,8 +170,8 @@ export async function toggleTenantUserStatusAction(
       return {
         success: true,
         message: targetAction === "DEACTIVATE"
-          ? `Akun siswa ${student.full_name} (${student.username}) berhasil dinonaktifkan.`
-          : `Akun siswa ${student.full_name} (${student.username}) berhasil diaktifkan kembali.`,
+          ? `Akun siswa ${student.full_name} (${student.username}) dinonaktifkan (masa tenggang 30 hari).`
+          : `Akun siswa ${student.full_name} (${student.username}) berhasil dipulihkan dan aktif kembali.`,
       };
     }
   } catch (error: any) {
@@ -194,54 +199,7 @@ export async function hardDeleteTenantUserAction(
       const staffEmail = staff.email;
       const staffRole = staff.role;
 
-      await prisma.$transaction(async (tx) => {
-        // 1. Lepaskan relasi pada materi pembelajaran
-        await tx.learningMaterial.updateMany({
-          where: { created_by_staff_id: userId },
-          data: { created_by_staff_id: null },
-        });
-
-        // 2. Lepaskan relasi verifikasi invoice dan installment
-        await tx.invoice.updateMany({
-          where: { verified_by_staff_id: userId },
-          data: { verified_by_staff_id: null },
-        });
-        await tx.installment.updateMany({
-          where: { verified_by_staff_id: userId },
-          data: { verified_by_staff_id: null },
-        });
-
-        // 3. Hapus evaluasi yang dibuat oleh staf ini
-        await tx.studentEvaluation.deleteMany({
-          where: { evaluator_id: userId },
-        });
-
-        // 4. Hapus jadwal kelas yang diajar oleh tutor ini beserta presensinya
-        const schedules = await tx.schedule.findMany({
-          where: { tutor_id: userId },
-          select: { id: true },
-        });
-        const scheduleIds = schedules.map((s: any) => s.id);
-        if (scheduleIds.length > 0) {
-          await tx.attendance.deleteMany({
-            where: { schedule_id: { in: scheduleIds } },
-          });
-          await tx.schedule.deleteMany({
-            where: { id: { in: scheduleIds } },
-          });
-        }
-
-        // 5. Lepaskan referensi pada audit log
-        await tx.auditLog.updateMany({
-          where: { staff_id: userId },
-          data: { staff_id: null },
-        });
-
-        // 6. Hapus permanen akun staf
-        await tx.staff.delete({
-          where: { id: userId },
-        });
-      }, { timeout: 15000 });
+      await cascadeDeleteStaff(userId);
 
       if (academyId) {
         await logAuditAction("SUPERADMIN_HARD_DELETE_USER", "Staff", academyId, {
@@ -269,45 +227,7 @@ export async function hardDeleteTenantUserAction(
       const studentUsername = student.username;
       const studentFullName = student.full_name;
 
-      await prisma.$transaction(async (tx) => {
-        // 1. Hapus presensi siswa
-        await tx.attendance.deleteMany({
-          where: { student_id: userId },
-        });
-
-        // 2. Hapus pendaftaran kelas (enrollment)
-        await tx.enrollment.deleteMany({
-          where: { student_id: userId },
-        });
-
-        // 3. Hapus evaluasi nilai siswa
-        await tx.studentEvaluation.deleteMany({
-          where: { student_id: userId },
-        });
-
-        // 4. Hapus invoice SPP & cicilannya
-        const invoices = await tx.invoice.findMany({
-          where: { student_id: userId },
-          select: { id: true },
-        });
-        const invoiceIds = invoices.map((inv: any) => inv.id);
-        if (invoiceIds.length > 0) {
-          await tx.installment.deleteMany({
-            where: { invoice_id: { in: invoiceIds } },
-          });
-          await tx.invoiceItem.deleteMany({
-            where: { invoice_id: { in: invoiceIds } },
-          });
-          await tx.invoice.deleteMany({
-            where: { id: { in: invoiceIds } },
-          });
-        }
-
-        // 5. Hapus permanen akun siswa
-        await tx.student.delete({
-          where: { id: userId },
-        });
-      }, { timeout: 15000 });
+      await cascadeDeleteStudent(userId);
 
       await logAuditAction("SUPERADMIN_HARD_DELETE_USER", "Student", academyId, {
         student_id: userId,
@@ -326,5 +246,30 @@ export async function hardDeleteTenantUserAction(
   } catch (error: any) {
     console.error("hardDeleteTenantUserAction error:", error);
     return { error: "Gagal menghapus permanen pengguna karena keterikatan relasi data." };
+  }
+}
+
+/**
+ * Superadmin dapat memicu pembersihan manual untuk akun-akun
+ * yang telah dinonaktifkan lebih dari 30 hari.
+ */
+export async function triggerManualPurgeAction() {
+  try {
+    const auth = await requireSuperadminSession();
+    if ("error" in auth) return { error: auth.error };
+
+    const result = await purgeExpiredTenantUsers();
+
+    revalidatePath("/superadmin/users");
+    revalidatePath("/superadmin/dashboard");
+
+    return {
+      success: true,
+      message: `Pembersihan selesai: ${result.purgedStaffCount} staf dan ${result.purgedStudentCount} siswa (nonaktif > 30 hari) telah dihapus permanen.`,
+      result,
+    };
+  } catch (error: any) {
+    console.error("triggerManualPurgeAction error:", error);
+    return { error: "Gagal menjalankan pembersihan akun kedaluwarsa." };
   }
 }

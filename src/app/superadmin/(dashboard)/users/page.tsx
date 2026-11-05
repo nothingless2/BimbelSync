@@ -50,6 +50,7 @@ export default async function SystemUsersPage() {
         academyId: s.academy?.id || null,
         academyName: s.academy?.name || "Belum Terhubung",
         academySlug: s.academy?.path_url || "",
+        deletedAt: s.deleted_at ? s.deleted_at.toISOString() : null,
         isDeleted: Boolean(s.deleted_at || s.academy?.deleted_at),
         userDeleted: Boolean(s.deleted_at),
         academyDeleted: Boolean(s.academy?.deleted_at),
@@ -66,13 +67,20 @@ export default async function SystemUsersPage() {
         academyId: st.academy?.id || null,
         academyName: st.academy?.name || "Belum Terhubung",
         academySlug: st.academy?.path_url || "",
+        deletedAt: st.deleted_at ? st.deleted_at.toISOString() : null,
         isDeleted: Boolean(st.deleted_at || st.academy?.deleted_at),
         userDeleted: Boolean(st.deleted_at),
         academyDeleted: Boolean(st.academy?.deleted_at),
       })),
     ];
 
-    return <SystemUsersClient currentSuperadminId={session.id} superadmins={superadmins} tenantUsers={tenantUsers} />;
+    return (
+      <SystemUsersClient
+        currentSuperadminId={session.id}
+        superadmins={superadmins}
+        tenantUsers={tenantUsers}
+      />
+    );
   } catch (error) {
     console.error("Error fetching users directory:", error);
     return (
