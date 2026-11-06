@@ -57,8 +57,27 @@ export default async function DirectQrScanPage({
       throw new Error('Jadwal kelas tidak ditemukan.');
     }
 
+    if (schedule.status === 'CANCELLED') {
+      throw new Error('Sesi kelas ini telah dibatalkan.');
+    }
+
     if (schedule.status !== 'SCHEDULED') {
-      throw new Error('Sesi kelas ini belum dimulai atau sudah dibatalkan.');
+      throw new Error('Sesi kelas ini tidak aktif.');
+    }
+
+    // Validasi Waktu Jadwal Kelas (Tolak jika jadwal sudah lewat)
+    const currentTime = Date.now();
+    const startTime = new Date(schedule.start_time).getTime();
+    const endTime = new Date(schedule.end_time).getTime();
+
+    if (currentTime > endTime) {
+      throw new Error('Waktu sesi kelas ini telah berakhir. Scan absensi sudah ditutup.');
+    }
+
+    // Siswa hanya boleh scan maksimal 30 menit sebelum kelas dimulai
+    const earlyToleranceMs = 30 * 60 * 1000;
+    if (currentTime < startTime - earlyToleranceMs) {
+      throw new Error('Sesi kelas belum dimulai. Scan absensi baru dapat dilakukan 30 menit sebelum jam kelas dimulai.');
     }
 
     const student = await prisma.student.findFirst({

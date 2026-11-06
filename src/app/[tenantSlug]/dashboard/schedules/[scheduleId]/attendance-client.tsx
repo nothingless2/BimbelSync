@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, XCircle, AlertCircle, User, Loader2, Save } from "lucide-react";
+import { CheckCircle2, XCircle, AlertCircle, User, Loader2, Save, Clock } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { saveAttendancesAction, AttendancePayload } from "./actions";
 import { AttendanceStatus, Student, Attendance } from "@prisma/client";
@@ -18,11 +18,13 @@ type StudentWithAttendance = {
 export function AttendanceClient({
   scheduleId,
   tenantSlug,
-  studentsData
+  studentsData,
+  isEnded = false
 }: {
   scheduleId: string;
   tenantSlug: string;
   studentsData: StudentWithAttendance[];
+  isEnded?: boolean;
 }) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
@@ -97,7 +99,7 @@ export function AttendanceClient({
             className="flex items-center gap-2 px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-semibold text-sm hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors shadow-sm"
           >
             <MonitorPlay size={18} />
-            Tampilkan di TV / Layar
+            {isEnded ? "Layar TV (Selesai)" : "Tampilkan di TV / Layar"}
           </Link>
           
           <div className="flex items-center gap-2 text-sm bg-white dark:bg-slate-900 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800">
@@ -108,6 +110,18 @@ export function AttendanceClient({
         </div>
       </div>
     </div>
+
+    {isEnded && (
+      <div className="mx-6 mt-4 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-xl flex items-start gap-3 text-amber-900 dark:text-amber-200 text-sm">
+        <Clock size={18} className="shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+        <div>
+          <p className="font-semibold">Sesi Kelas Telah Berakhir</p>
+          <p className="text-amber-800/90 dark:text-amber-300/80 text-xs mt-0.5 leading-relaxed">
+            Waktu pelaksanaan kelas telah selesai. Presensi mandiri siswa via scan QR code telah otomatis ditutup. Anda tetap dapat menyimpan atau memperbarui status kehadiran siswa secara manual di tabel ini.
+          </p>
+        </div>
+      </div>
+    )}
 
     <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
         {studentsData.length === 0 ? (

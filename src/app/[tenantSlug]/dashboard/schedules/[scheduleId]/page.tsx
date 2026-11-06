@@ -183,6 +183,7 @@ export default async function AttendancePage({
           scheduleId={schedule.id}
           tenantSlug={tenantSlug}
           studentsData={studentsData}
+          isEnded={new Date() > new Date(schedule.end_time)}
         />
       )}
     </div>

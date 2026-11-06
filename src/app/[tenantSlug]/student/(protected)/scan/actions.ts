@@ -59,8 +59,27 @@ export async function processQrScanAction(tenantSlug: string, qrDataRaw: string)
       return { error: "Fitur absensi QR dinamis tidak aktif pada paket bimbel ini. Silakan hubungi tutor untuk absensi manual." };
     }
 
+    if (schedule.status === 'CANCELLED') {
+      return { error: 'Sesi kelas ini telah dibatalkan.' };
+    }
+
     if (schedule.status !== 'SCHEDULED') {
-      return { error: 'Sesi kelas ini belum dimulai atau sudah dibatalkan.' };
+      return { error: 'Sesi kelas ini tidak aktif.' };
+    }
+
+    // 4.b. Validasi Waktu Jadwal Kelas (Tolak jika jadwal sudah lewat)
+    const currentTime = Date.now();
+    const startTime = new Date(schedule.start_time).getTime();
+    const endTime = new Date(schedule.end_time).getTime();
+
+    if (currentTime > endTime) {
+      return { error: 'Waktu sesi kelas ini telah berakhir. Scan absensi sudah tidak dapat diterima.' };
+    }
+
+    // Siswa hanya boleh scan maksimal 30 menit sebelum kelas dimulai
+    const earlyToleranceMs = 30 * 60 * 1000;
+    if (currentTime < startTime - earlyToleranceMs) {
+      return { error: 'Sesi kelas belum dimulai. Scan absensi baru dapat dilakukan 30 menit sebelum jam kelas dimulai.' };
     }
 
     const student = await prisma.student.findFirst({
