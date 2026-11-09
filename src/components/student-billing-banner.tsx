@@ -10,7 +10,9 @@ interface StudentBillingBannerProps {
   dueDate?: Date | string | null;
   bankName?: string | null;
   bankAccount?: string | null;
+  academyName?: string | null;
   tenantSlug: string;
+  targetInvoiceId?: string | null;
 }
 
 const IDR = (n: number) =>
@@ -28,7 +30,9 @@ export function StudentBillingBanner({
   dueDate,
   bankName,
   bankAccount,
+  academyName,
   tenantSlug,
+  targetInvoiceId,
 }: StudentBillingBannerProps) {
   const [copied, setCopied] = useState(false);
 
@@ -51,69 +55,69 @@ export function StudentBillingBanner({
     }
   })() : null;
 
+  const invoiceHref = targetInvoiceId 
+    ? `/${tenantSlug}/student/invoices/${targetInvoiceId}`
+    : `/${tenantSlug}/student/invoices`;
+
   return (
-    <div className="p-4 sm:p-5 rounded-2xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/40 text-red-950 dark:text-red-100 shadow-sm animate-in fade-in duration-300">
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex items-start gap-3">
-          <div className="p-2.5 bg-red-100 dark:bg-red-900/40 rounded-xl shrink-0 mt-0.5 text-red-600 dark:text-red-400">
-            <AlertCircle size={22} />
-          </div>
-          <div className="space-y-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h4 className="text-sm font-bold text-red-900 dark:text-red-200">
-                Menunggu Pembayaran (Tagihan SPP Tertunda)
-              </h4>
-              {formattedDate && (
-                <span className="text-[11px] font-semibold bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 px-2.5 py-0.5 rounded-full border border-red-200 dark:border-red-800/60 inline-flex items-center gap-1">
-                  <Clock size={12} />
-                  Batas Pembayaran: {formattedDate}
-                </span>
-              )}
-            </div>
-
-            <p className="text-xs text-red-800 dark:text-red-300 leading-relaxed">
-              Anda memiliki tagihan yang belum lunas sebesar{" "}
-              <strong className="font-extrabold text-red-700 dark:text-red-300 text-sm">
-                {IDR(totalDebt)}
-              </strong>
-              . {bankAccount ? "Silakan segera lakukan pembayaran melalui transfer bank ke:" : "Silakan segera selesaikan pembayaran ke pihak administrasi bimbel."}
-            </p>
-
-            {bankAccount && (
-              <div className="flex flex-wrap items-center gap-2 pt-1.5">
-                <span className="text-xs font-semibold bg-white dark:bg-red-950/80 px-2.5 py-1 rounded-lg border border-red-200 dark:border-red-900/60 shadow-xs">
-                  {bankName || "Transfer Bank"}
-                </span>
-                <div className="flex items-center bg-white dark:bg-red-950/80 rounded-lg border border-red-200 dark:border-red-900/60 overflow-hidden shadow-xs">
-                  <span className="text-xs font-bold px-2.5 py-1 font-mono tracking-wider text-slate-800 dark:text-slate-100">
-                    {bankAccount}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleCopy}
-                    className="flex items-center justify-center p-1.5 hover:bg-red-100 dark:hover:bg-red-900/40 border-l border-red-200 dark:border-red-900/60 transition-colors"
-                    title="Salin Nomor Rekening"
-                  >
-                    {copied ? (
-                      <CheckCircle2 size={14} className="text-emerald-500" />
-                    ) : (
-                      <Copy size={14} className="text-red-600 dark:text-red-400" />
-                    )}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+    <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none animate-in fade-in duration-300">
+      {/* Header: Alert Icon + Title */}
+      <div className="flex items-center gap-2 mb-2">
+        <div className="w-6 h-6 rounded-full bg-red-100 dark:bg-red-950/50 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
+          <AlertCircle size={14} />
         </div>
-
-        <Link
-          href={`/${tenantSlug}/student/invoices`}
-          className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white rounded-xl text-xs font-bold transition shadow-sm shadow-red-500/20"
-        >
-          Lihat Tagihan
-          <ArrowRight size={14} />
-        </Link>
+        <h4 className="text-xs sm:text-sm font-bold text-red-950 dark:text-red-200">
+          Menunggu Pembayaran (Tagihan SPP)
+        </h4>
       </div>
+
+      {/* Due Date Badge */}
+      {formattedDate && (
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900/40 text-red-600 dark:text-red-300 text-[11px] font-medium mb-3">
+          <Clock size={12} />
+          <span>Batas Pembayaran: {formattedDate}</span>
+        </div>
+      )}
+
+      {/* Big Prominent Amount */}
+      <div className="my-1">
+        <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          {IDR(totalDebt)}
+        </p>
+      </div>
+
+      {/* Bank Account Info */}
+      <div className="mt-2 text-left">
+        <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
+          {bankName || "Transfer Bank"}{academyName ? ` a.n ${academyName}` : ""}
+        </p>
+        {bankAccount && (
+          <div className="inline-flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 rounded-xl px-3 py-1.5 text-xs text-slate-800 dark:text-slate-200">
+            <span className="font-mono font-bold tracking-wider">{bankAccount}</span>
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="p-1 hover:bg-slate-200/60 dark:hover:bg-slate-700 rounded-md transition-colors text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
+              title="Salin Nomor Rekening"
+            >
+              {copied ? (
+                <CheckCircle2 size={13} className="text-emerald-500" />
+              ) : (
+                <Copy size={13} />
+              )}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Action Button: Blue Button matching mockup */}
+      <Link
+        href={invoiceHref}
+        className="mt-5 w-full py-3 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white rounded-2xl text-xs sm:text-sm font-semibold transition-all shadow-md shadow-blue-500/25 flex items-center justify-center gap-2"
+      >
+        <span>Lihat Detail Tagihan</span>
+        <ArrowRight size={16} />
+      </Link>
     </div>
   );
 }
