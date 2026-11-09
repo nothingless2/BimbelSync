@@ -115,14 +115,43 @@ export async function testTenantSmtpConnection(
     return { success: true };
   } catch (err: any) {
     console.error("[SMTP TEST ERROR]:", err);
-    let errorMessage = err.message || "Gagal menghubungi server SMTP.";
-    if (err.code === "EAUTH") {
-      errorMessage = "Autentikasi gagal. Pastikan username dan password (App Password) sudah benar.";
-    } else if (err.code === "ESOCKET" || err.code === "ETIMEDOUT") {
-      errorMessage = `Koneksi timeout ke ${config.host}:${config.port}. Periksa host dan port SMTP.`;
-    }
-    return { success: false, error: errorMessage };
+    return { success: false, error: formatTenantSmtpError(err, config.host) };
   }
+}
+
+/**
+ * Memformat pesan error teknis SMTP dari mail provider menjadi pesan ramah dan solutif bagi pengguna.
+ */
+export function formatTenantSmtpError(err: any, host?: string): string {
+  const rawMsg = String(err?.message || "");
+  const code = String(err?.code || "");
+  const responseCode = Number(err?.responseCode) || 0;
+  const isGmail = Boolean(host && host.toLowerCase().includes("gmail"));
+
+  // Error autentikasi (535 Bad Credentials / EAUTH / password salah)
+  if (
+    code === "EAUTH" ||
+    responseCode === 535 ||
+    rawMsg.includes("535") ||
+    rawMsg.toLowerCase().includes("badcredentials") ||
+    rawMsg.toLowerCase().includes("username and password not accepted")
+  ) {
+    if (isGmail) {
+      return "Autentikasi SMTP Gagal (535 Bad Credentials): Google menolak login. Gmail mewajibkan 'Sandi Aplikasi' (App Password 16 karakter) dengan Verifikasi 2 Langkah yang aktif, bukan kata sandi akun Google biasa. Silakan buat Sandi Aplikasi di Akun Google dan perbarui di menu Pengaturan Email.";
+    }
+    return "Autentikasi SMTP Gagal: Username atau Password ditolak oleh server email Anda. Pastikan username dan password SMTP sudah benar di menu Pengaturan Email.";
+  }
+
+  // Error koneksi / timeout / socket
+  if (code === "ESOCKET" || code === "ETIMEDOUT" || code === "ECONNREFUSED" || code === "ENOTFOUND") {
+    return `Gagal terhubung ke server SMTP (${host || "server"}). Periksa alamat host, port, dan koneksi internet Anda.`;
+  }
+
+  if (rawMsg.includes("Greeting never received") || rawMsg.includes("Connection closed")) {
+    return "Koneksi ke server SMTP terputus sebelum selesai. Pastikan opsi SSL/TLS sesuai dengan port yang digunakan (port 465 untuk SSL, port 587 untuk TLS).";
+  }
+
+  return rawMsg || "Gagal mengirimkan email melalui server SMTP.";
 }
 
 /**
@@ -141,6 +170,7 @@ export async function sendTenantEmail({
   html: string;
   text?: string;
 }): Promise<{ success: boolean; error?: string }> {
+  let hostForError: string | undefined = undefined;
   try {
     const smtpData = await getTenantSmtpConfig(academyId);
     if ("error" in smtpData) return { success: false, error: smtpData.error };
@@ -154,6 +184,7 @@ export async function sendTenantEmail({
     }
 
     const { config } = smtpData;
+    hostForError = config.host;
     const isSecure = config.secure || config.port === 465;
 
     const transporter = nodemailer.createTransport({
@@ -184,7 +215,7 @@ export async function sendTenantEmail({
     return { success: true };
   } catch (err: any) {
     console.error("[SEND TENANT EMAIL ERROR]:", err);
-    return { success: false, error: err.message || "Gagal mengirimkan email ke siswa." };
+    return { success: false, error: formatTenantSmtpError(err, hostForError) };
   }
 }
 

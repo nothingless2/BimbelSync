@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Invoice, InvoiceItem, Installment } from "@prisma/client";
 import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
-import { ArrowLeft, CreditCard, Clock, CheckCircle2, AlertCircle, Calendar, Landmark, Copy } from "lucide-react";
+import { ArrowLeft, Clock, CheckCircle2, AlertCircle, Calendar, Landmark, Copy } from "lucide-react";
 
 type InvoiceWithDetails = Invoice & {
   items: InvoiceItem[];
@@ -39,20 +39,16 @@ export default function StudentInvoiceDetailClient({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handlePay = () => {
-    alert("Ini adalah simulasi integrasi Payment Gateway (Midtrans). Di tahap produksi, ini akan membuka pop-up atau mengalihkan Anda ke halaman pembayaran midtrans.");
-  };
-
   const hasOverdue = invoice.payment_status === 'OVERDUE' || invoice.installments.some(i => i.status === 'OVERDUE');
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-safe">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20 font-sans">
       
       {/* Header */}
       <div className="bg-white dark:bg-[#111827] pt-12 pb-4 px-4 shadow-sm border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 flex items-center gap-3">
         <button 
           onClick={() => router.push(`/${tenantSlug}/student/invoices`)}
-          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors -ml-2"
+          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors -ml-2 cursor-pointer"
         >
           <ArrowLeft size={24} className="text-slate-700 dark:text-slate-300" />
         </button>
@@ -73,14 +69,16 @@ export default function StudentInvoiceDetailClient({
              <Clock size={40} />}
           </div>
           
-          <p className="text-sm text-slate-500 mb-1">Status Pembayaran</p>
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2">{invoice.payment_status}</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Status Pembayaran</p>
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">
+            {invoice.payment_status === 'PAID' ? 'LUNAS' : hasOverdue ? 'LEWAT JATUH TEMPO' : 'UNPAID'}
+          </h2>
           
           <div className="w-full h-px bg-slate-100 dark:bg-slate-800 my-4"></div>
           
-          <p className="text-sm text-slate-500 mb-1">Total Tagihan</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Total Tagihan</p>
           <p className="text-3xl font-black text-blue-600 dark:text-blue-400">{formatRupiah(invoice.total_amount)}</p>
-          <p className="text-xs text-slate-400 mt-2">INV-{invoice.id.split('-')[0].toUpperCase()}</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 font-mono">INV-{invoice.id.split('-')[0].toUpperCase()}</p>
         </div>
 
         {/* Rincian Item */}
@@ -90,7 +88,7 @@ export default function StudentInvoiceDetailClient({
             {invoice.items.map((item, idx) => (
               <div key={idx} className="flex justify-between items-start text-sm">
                 <span className="text-slate-600 dark:text-slate-300 pr-4">{item.description}</span>
-                <span className="font-medium text-slate-900 dark:text-white shrink-0">{formatRupiah(item.amount)}</span>
+                <span className="font-semibold text-slate-900 dark:text-white shrink-0">{formatRupiah(item.amount)}</span>
               </div>
             ))}
           </div>
@@ -139,14 +137,14 @@ export default function StudentInvoiceDetailClient({
               <Landmark size={18} className="text-blue-600 dark:text-blue-400" />
               <h3>Rekening Transfer Pembayaran</h3>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
               Silakan lakukan transfer sesuai total tagihan ke rekening resmi bimbingan belajar berikut:
             </p>
             {bankInfo?.bankAccount ? (
               <div className="p-3.5 bg-slate-50 dark:bg-slate-900/80 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    {bankInfo.bankName || "Transfer Bank"}
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate">
+                    {bankInfo.bankName || "Transfer Bank"}{bankInfo.academyName ? ` a.n ${bankInfo.academyName}` : ""}
                   </p>
                   <p className="text-base font-bold font-mono tracking-wider text-blue-600 dark:text-blue-400 mt-0.5">
                     {bankInfo.bankAccount}
@@ -155,7 +153,7 @@ export default function StudentInvoiceDetailClient({
                 <button
                   type="button"
                   onClick={handleCopyBank}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 transition"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 transition cursor-pointer shrink-0"
                 >
                   {copied ? (
                     <>
@@ -178,18 +176,12 @@ export default function StudentInvoiceDetailClient({
           </div>
         )}
 
-        {/* Action Bottom */}
+        {/* Notification & Confirmation Notice */}
         {invoice.payment_status !== 'PAID' && (
-          <div className="mt-8 pt-4">
-            <button 
-              onClick={handlePay}
-              className="w-full flex items-center justify-center gap-2 py-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-2xl transition-colors shadow-lg shadow-blue-500/20"
-            >
-              <CreditCard size={20} />
-              Bayar Sekarang
-            </button>
-            <p className="text-center text-xs text-slate-500 mt-4">
-              Pembayaran aman diproses oleh Midtrans.
+          <div className="p-4 bg-blue-50/70 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 rounded-2xl flex items-start gap-3 text-blue-900 dark:text-blue-200 text-xs">
+            <AlertCircle size={16} className="text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+            <p className="leading-relaxed">
+              Silakan lakukan transfer sesuai nominal tagihan ke rekening di atas. Setelah melakukan pembayaran, Anda dapat mengonfirmasikan bukti transfer kepada pihak staf administrasi bimbel untuk verifikasi status kehadiran & SPP.
             </p>
           </div>
         )}

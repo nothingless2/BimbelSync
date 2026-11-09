@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -14,6 +15,8 @@ import Link from "next/link";
 import { toast } from "@/components/ui/sonner";
 import { verifyPaymentAction, verifyInstallmentAction, sendInvoiceEmailAction } from "../actions";
 import { SplitInstallmentModal } from "@/components/modals/split-installment-modal";
+import { SendInvoiceEmailModal } from "@/components/modals/send-invoice-email-modal";
+import { ConfirmVerifyPaymentModal } from "@/components/modals/confirm-verify-payment-modal";
 
 type InvoiceWithDetails = Invoice & {
   academy?: {
@@ -45,6 +48,14 @@ export default function FinanceDetailClient({
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [verifyingInstallmentId, setVerifyingInstallmentId] = useState<string | null>(null);
   const [isSplitModalOpen, setIsSplitModalOpen] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [verifyModalState, setVerifyModalState] = useState<{
+    isOpen: boolean;
+    method: "CASH" | "MANUAL_TRANSFER";
+    termNumber?: number;
+    installmentId?: string;
+    amount: number;
+  } | null>(null);
   const [copied, setCopied] = useState(false);
 
   const formatRupiah = (num: number) => {
@@ -70,55 +81,80 @@ export default function FinanceDetailClient({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Verifikasi pelunasan seluruh invoice sekaligus
-  const handleVerify = async (method: "CASH" | "MANUAL_TRANSFER") => {
-    const methodLabel = method === 'CASH' ? 'Tunai' : 'Transfer Manual';
-    if (!confirm(`Konfirmasi pelunasan tagihan ${invoiceNumber} via ${methodLabel}?`)) return;
-    
-    setIsVerifying(true);
-    const result = await verifyPaymentAction(invoice.id, method);
-    
-    if (result.error) {
-      toast.error(result.error);
-    } else {
-      toast.success("Tagihan berhasil diverifikasi lunas.");
-      router.refresh();
-    }
-    setIsVerifying(false);
+  // Buka modal verifikasi pelunasan seluruh invoice
+  const handleOpenVerifyModal = (method: "CASH" | "MANUAL_TRANSFER") => {
+    setVerifyModalState({
+      isOpen: true,
+      method,
+      amount: invoice.total_amount,
+    });
   };
 
-  // Verifikasi pelunasan per termin cicilan
-  const handleVerifyInstallment = async (installmentId: string, termNumber: number, method: "CASH" | "MANUAL_TRANSFER") => {
-    const methodLabel = method === 'CASH' ? 'Tunai' : 'Transfer Manual';
-    if (!confirm(`Tandai Lunas Termin ${termNumber} via ${methodLabel}?`)) return;
-
-    setVerifyingInstallmentId(installmentId);
-    const result = await verifyInstallmentAction(installmentId, method);
-
-    if (result.error) {
-      toast.error(result.error);
-    } else {
-      toast.success(result.message || `Termin ${termNumber} berhasil ditandai Lunas.`);
-      router.refresh();
-    }
-    setVerifyingInstallmentId(null);
+  // Buka modal verifikasi pelunasan per termin cicilan
+  const handleOpenVerifyInstallmentModal = (
+    installmentId: string,
+    termNumber: number,
+    method: "CASH" | "MANUAL_TRANSFER",
+    amount: number
+  ) => {
+    setVerifyModalState({
+      isOpen: true,
+      method,
+      installmentId,
+      termNumber,
+      amount,
+    });
   };
 
-  // Kirim notifikasi email tagihan ke siswa
-  const handleSendEmail = async () => {
+  // Eksekusi verifikasi pelunasan setelah konfirmasi di modal
+  const handleConfirmVerify = async () => {
+    if (!verifyModalState) return;
+
+    if (verifyModalState.installmentId && verifyModalState.termNumber) {
+      setVerifyingInstallmentId(verifyModalState.installmentId);
+      const result = await verifyInstallmentAction(verifyModalState.installmentId, verifyModalState.method);
+      setVerifyingInstallmentId(null);
+
+      if (result.error) {
+        toast.error(result.error);
+        throw new Error(result.error);
+      } else {
+        toast.success(result.message || `Termin ${verifyModalState.termNumber} berhasil ditandai Lunas.`);
+        router.refresh();
+      }
+    } else {
+      setIsVerifying(true);
+      const result = await verifyPaymentAction(invoice.id, verifyModalState.method);
+      setIsVerifying(false);
+
+      if (result.error) {
+        toast.error(result.error);
+        throw new Error(result.error);
+      } else {
+        toast.success("Tagihan berhasil diverifikasi lunas.");
+        router.refresh();
+      }
+    }
+  };
+
+  // Buka modal konfirmasi kirim rincian email tagihan ke siswa
+  const handleOpenEmailModal = () => {
     if (!invoice.student.email) {
       toast.error("Siswa ini belum memiliki alamat email yang terdaftar.");
       return;
     }
+    setIsEmailModalOpen(true);
+  };
 
-    if (!confirm(`Kirim rincian tagihan ini ke ${invoice.student.email}?`)) return;
-
+  // Eksekusi kirim notifikasi email tagihan setelah konfirmasi di modal
+  const handleConfirmSendEmail = async () => {
     setIsSendingEmail(true);
     const res = await sendInvoiceEmailAction(invoice.id);
     setIsSendingEmail(false);
 
     if (res.error) {
       toast.error(res.error);
+      throw new Error(res.error);
     } else {
       toast.success(res.message || "Email rincian tagihan berhasil dikirim.");
     }
@@ -406,14 +442,14 @@ export default function FinanceDetailClient({
                         {!instPaid && (
                           <div className="flex items-center gap-1.5">
                             <button
-                              onClick={() => handleVerifyInstallment(inst.id, inst.installment_number, "CASH")}
+                              onClick={() => handleOpenVerifyInstallmentModal(inst.id, inst.installment_number, "CASH", inst.amount)}
                               disabled={isProcessing || isVerifying}
                               className="px-2.5 py-1 text-xs font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/80 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
                             >
                               {isProcessing ? <Loader2 size={12} className="animate-spin inline" /> : "Tunai"}
                             </button>
                             <button
-                              onClick={() => handleVerifyInstallment(inst.id, inst.installment_number, "MANUAL_TRANSFER")}
+                              onClick={() => handleOpenVerifyInstallmentModal(inst.id, inst.installment_number, "MANUAL_TRANSFER", inst.amount)}
                               disabled={isProcessing || isVerifying}
                               className="px-2.5 py-1 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200/80 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
                             >
@@ -446,7 +482,7 @@ export default function FinanceDetailClient({
             {!isPaid ? (
               <div className="space-y-2">
                 <button
-                  onClick={() => handleVerify("CASH")}
+                  onClick={() => handleOpenVerifyModal("CASH")}
                   disabled={isVerifying}
                   className="w-full p-3 bg-white dark:bg-slate-900 hover:bg-emerald-50/60 dark:hover:bg-emerald-950/20 border border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-800 rounded-xl transition-all flex items-center justify-between text-left group cursor-pointer disabled:opacity-50"
                 >
@@ -465,7 +501,7 @@ export default function FinanceDetailClient({
                 </button>
 
                 <button
-                  onClick={() => handleVerify("MANUAL_TRANSFER")}
+                  onClick={() => handleOpenVerifyModal("MANUAL_TRANSFER")}
                   disabled={isVerifying}
                   className="w-full p-3 bg-white dark:bg-slate-900 hover:bg-blue-50/60 dark:hover:bg-blue-950/20 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-800 rounded-xl transition-all flex items-center justify-between text-left group cursor-pointer disabled:opacity-50"
                 >
@@ -506,7 +542,7 @@ export default function FinanceDetailClient({
                 emailInfo.active ? (
                   <div className="space-y-1">
                     <button
-                      onClick={handleSendEmail}
+                      onClick={handleOpenEmailModal}
                       disabled={isSendingEmail || !invoice.student.email}
                       title={!invoice.student.email ? "Siswa belum memiliki alamat email yang terdaftar" : "Kirim rincian faktur ke email siswa"}
                       className="w-full flex items-center justify-between p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
@@ -635,6 +671,34 @@ export default function FinanceDetailClient({
           isOpen={isSplitModalOpen} 
           onClose={() => setIsSplitModalOpen(false)} 
           maxTerms={maxTerms}
+        />
+      )}
+
+      {/* Modal Kirim Rincian Tagihan via Email */}
+      {isEmailModalOpen && (
+        <SendInvoiceEmailModal
+          isOpen={isEmailModalOpen}
+          onClose={() => setIsEmailModalOpen(false)}
+          onConfirm={handleConfirmSendEmail}
+          studentName={invoice.student.full_name}
+          studentEmail={invoice.student.email || ""}
+          invoiceNumber={invoiceNumber}
+          totalAmount={invoice.total_amount}
+          billingPeriod={formatBillingPeriod(invoice.billing_period)}
+        />
+      )}
+
+      {/* Modal Konfirmasi Pelunasan */}
+      {verifyModalState?.isOpen && (
+        <ConfirmVerifyPaymentModal
+          isOpen={verifyModalState.isOpen}
+          onClose={() => setVerifyModalState(null)}
+          onConfirm={handleConfirmVerify}
+          studentName={invoice.student.full_name}
+          invoiceNumber={invoiceNumber}
+          amount={verifyModalState.amount}
+          method={verifyModalState.method}
+          termNumber={verifyModalState.termNumber}
         />
       )}
 
