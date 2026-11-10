@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Building2, ShieldCheck, CreditCard, Users, HelpCircle, LogOut, FileText } from "lucide-react";
+import { LayoutDashboard, Building2, ShieldCheck, CreditCard, Users, HelpCircle, LogOut, FileText, Settings } from "lucide-react";
 
 const navItems = [
   { href: "/superadmin/dashboard", icon: LayoutDashboard, label: "Dashboard", exact: true },
@@ -12,6 +12,7 @@ const navItems = [
   { href: "/superadmin/reports", icon: FileText, label: "Financial Report" },
   { href: "/superadmin/users", icon: Users, label: "Users" },
   { href: "/superadmin/audit-logs", icon: FileText, label: "Audit Logs" },
+  { href: "/superadmin/settings", icon: Settings, label: "Settings" },
 ];
 
 export function SuperadminNav() {

@@ -9,6 +9,7 @@ import { changeAcademyPlan } from "@/lib/subscription";
 
 import { parsePositiveQuotaLimit, parsePlanPrice } from "@/lib/plan-validation";
 import { calculatePlanPrice } from "@/lib/pricing";
+import { cascadeDeleteAcademy } from "@/lib/user-cleanup";
 
 // ==================== PLAN (PAKET BERLANGGANAN) ====================
 
@@ -342,53 +343,7 @@ export async function hardDeleteAcademyAction(id: string) {
   const auth = await requireSuperadminSession();
   if ('error' in auth) return { error: auth.error };
   try {
-    // Karena kita tidak memakai onDelete: Cascade di schema, 
-    // kita harus menghapus data secara manual dari child terdalam ke parent 
-    // melalui transaksi agar tidak terjadi error P2003 (Foreign Key Constraint).
-    
-    await prisma.$transaction(async (tx) => {
-      // 1. Ambil ID dari entitas tingkat pertama
-      const students = await tx.student.findMany({ where: { academy_id: id }, select: { id: true } });
-      const studentIds = students.map((s: any) => s.id);
-
-      const invoices = await tx.invoice.findMany({ where: { academy_id: id }, select: { id: true } });
-      const invoiceIds = invoices.map((i: any) => i.id);
-
-      const rooms = await tx.room.findMany({ where: { academy_id: id }, select: { id: true } });
-      const roomIds = rooms.map((r: any) => r.id);
-
-      // 2. Hapus entitas tingkat ketiga (bergantung pada entitas tingkat kedua)
-      if (studentIds.length > 0) {
-        await tx.attendance.deleteMany({ where: { student_id: { in: studentIds } } });
-        await tx.enrollment.deleteMany({ where: { student_id: { in: studentIds } } });
-      }
-      if (invoiceIds.length > 0) {
-        await tx.installment.deleteMany({ where: { invoice_id: { in: invoiceIds } } });
-        await tx.invoiceItem.deleteMany({ where: { invoice_id: { in: invoiceIds } } });
-      }
-      if (roomIds.length > 0) {
-        await tx.schedule.deleteMany({ where: { room_id: { in: roomIds } } });
-      }
-
-      // 3. Hapus entitas tingkat kedua yang bergantung langsung pada akademi
-      await tx.studentEvaluation.deleteMany({ where: { academy_id: id } });
-      await tx.learningMaterial.deleteMany({ where: { academy_id: id } });
-      await tx.invoice.deleteMany({ where: { academy_id: id } });
-      await tx.platformInvoice.deleteMany({ where: { academy_id: id } });
-      await tx.auditLog.deleteMany({ where: { academy_id: id } });
-
-      // 4. Hapus entitas tingkat pertama
-      await tx.student.deleteMany({ where: { academy_id: id } });
-      await tx.staff.deleteMany({ where: { academy_id: id } });
-      await tx.program.deleteMany({ where: { academy_id: id } });
-      await tx.room.deleteMany({ where: { academy_id: id } });
-
-      // 5. Akhirnya, hapus akademi itu sendiri
-      await tx.academy.delete({ where: { id } });
-    }, {
-      timeout: 15000 // Beri waktu lebih karena delete bisa lama
-    });
-
+    await cascadeDeleteAcademy(id);
     revalidatePath("/superadmin/academies");
     revalidatePath("/superadmin/dashboard");
     return { success: true };

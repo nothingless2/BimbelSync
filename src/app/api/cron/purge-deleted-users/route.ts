@@ -39,7 +39,9 @@ async function handlePurgeRequest(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: `Pembersihan berhasil. ${result.purgedStaffCount} staf dan ${result.purgedStudentCount} siswa (yang nonaktif > 30 hari) telah dihapus permanen.`,
+      message:
+        result.message ||
+        `Pembersihan berhasil. ${result.purgedStaffCount} staf, ${result.purgedStudentCount} siswa, dan ${result.purgedAcademyCount} bimbel (yang nonaktif > ${result.retentionDays} hari) telah dihapus permanen.`,
       ...result,
     });
   } catch (error: any) {
