@@ -180,14 +180,16 @@ export default async function LandingPage() {
             <FadeInView direction="up" delay={0.2}>
               <div className="flex flex-col md:flex-row gap-12 items-center group p-6 sm:p-10 rounded-3xl transition-all duration-500 hover:bg-white hover:shadow-[0_10px_40px_rgba(59,130,246,0.1)] border border-transparent hover:border-blue-100">
                 <div className="flex-1 w-full flex justify-center">
-                   <div className="relative">
-                      <img 
-                        src="/features/calendar-bg.png" 
-                        alt="Mockup Penjadwalan" 
-                        width={448}
-                        height={440}
-                        loading="lazy"
-                        className="w-full max-w-md h-auto object-contain drop-shadow-md opacity-90" 
+                   <div className="relative w-full max-w-lg rounded-2xl overflow-hidden shadow-xl border border-slate-200/80 bg-slate-100 group-hover:shadow-2xl transition-all duration-500">
+                      <video 
+                        src="/features/schedule.mp4" 
+                        poster="/features/schedule.jpg" 
+                        autoPlay 
+                        loop 
+                        muted 
+                        playsInline 
+                        preload="metadata"
+                        className="w-full h-auto object-cover rounded-2xl block" 
                       />
                    </div>
                 </div>
@@ -208,14 +210,16 @@ export default async function LandingPage() {
             <FadeInView direction="up" delay={0.2}>
               <div className="flex flex-col md:flex-row-reverse gap-12 items-center group p-6 sm:p-10 rounded-3xl transition-all duration-500 hover:bg-white hover:shadow-[0_10px_40px_rgba(59,130,246,0.1)] border border-transparent hover:border-blue-100">
                 <div className="flex-1 w-full flex justify-center">
-                   <div className="relative">
-                      <img 
-                        src="/features/qr-bg.png" 
-                        alt="Mockup Presensi QR" 
-                        width={384}
-                        height={372}
-                        loading="lazy"
-                        className="w-full max-w-sm h-auto object-contain drop-shadow-md opacity-90" 
+                   <div className="relative w-full max-w-lg rounded-2xl overflow-hidden shadow-xl border border-slate-200/80 bg-slate-100 group-hover:shadow-2xl transition-all duration-500">
+                      <video 
+                        src="/features/qr_code.mp4" 
+                        poster="/features/qr_code.jpg" 
+                        autoPlay 
+                        loop 
+                        muted 
+                        playsInline 
+                        preload="metadata"
+                        className="w-full h-auto object-cover rounded-2xl block" 
                       />
                    </div>
                 </div>
@@ -236,14 +240,16 @@ export default async function LandingPage() {
             <FadeInView direction="up" delay={0.4}>
               <div className="flex flex-col md:flex-row gap-12 items-center group p-6 sm:p-10 rounded-3xl transition-all duration-500 hover:bg-white hover:shadow-[0_10px_40px_rgba(59,130,246,0.1)] border border-transparent hover:border-blue-100">
                 <div className="flex-1 w-full flex justify-center">
-                   <div className="relative">
-                      <img 
-                        src="/features/email-bg.png" 
-                        alt="Mockup Email Tagihan" 
-                        width={384}
-                        height={384}
-                        loading="lazy"
-                        className="w-full max-w-sm h-auto object-contain drop-shadow-md opacity-90 group-hover:scale-105 transition-transform duration-500" 
+                   <div className="relative w-full max-w-lg rounded-2xl overflow-hidden shadow-xl border border-slate-200/80 bg-slate-100 group-hover:shadow-2xl transition-all duration-500">
+                      <video 
+                        src="/features/email.mp4" 
+                        poster="/features/email.jpg" 
+                        autoPlay 
+                        loop 
+                        muted 
+                        playsInline 
+                        preload="metadata"
+                        className="w-full h-auto object-cover rounded-2xl block" 
                       />
                    </div>
                 </div>
@@ -264,14 +270,16 @@ export default async function LandingPage() {
             <FadeInView direction="up" delay={0.6}>
               <div className="flex flex-col md:flex-row-reverse gap-12 items-center group p-6 sm:p-10 rounded-3xl transition-all duration-500 hover:bg-white hover:shadow-[0_10px_40px_rgba(59,130,246,0.1)] border border-transparent hover:border-blue-100">
                 <div className="flex-1 w-full flex justify-center">
-                   <div className="relative">
-                      <img 
-                        src="/features/payment-bg.png" 
-                        alt="Mockup Pembayaran & Bukti Transfer" 
-                        width={384}
-                        height={362}
-                        loading="lazy"
-                        className="w-full max-w-sm h-auto object-contain drop-shadow-md opacity-90" 
+                   <div className="relative w-full max-w-lg rounded-2xl overflow-hidden shadow-xl border border-slate-200/80 bg-slate-100 group-hover:shadow-2xl transition-all duration-500">
+                      <video 
+                        src="/features/pembayaran.mp4" 
+                        poster="/features/pembayaran.jpg" 
+                        autoPlay 
+                        loop 
+                        muted 
+                        playsInline 
+                        preload="metadata"
+                        className="w-full h-auto object-cover rounded-2xl block" 
                       />
                    </div>
                 </div>
