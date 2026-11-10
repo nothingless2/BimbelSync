@@ -105,6 +105,7 @@ model Academy {
   audit_logs        AuditLog[]
   materials         LearningMaterial[]
   evaluations       StudentEvaluation[]
+  quizzes           Quiz[]
 }
 
 enum SubscriptionStatus {
