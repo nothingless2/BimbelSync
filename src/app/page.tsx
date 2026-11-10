@@ -325,8 +325,8 @@ export default async function LandingPage() {
       <footer id="contact" className="bg-[#1E293B] text-slate-300 py-16 border-t border-slate-800 scroll-mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-            <div className="col-span-1 md:col-span-1">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-12 mb-16">
+            <div className="col-span-1 md:col-span-4 lg:col-span-4">
               <div className="bg-white w-10 h-10 rounded mb-6 flex items-center justify-center">
                  <img src="/logo.png" alt="BimbelSync Logo" width={24} height={24} loading="lazy" className="object-contain rounded-[20%] w-6 h-6" />
               </div>
@@ -341,29 +341,31 @@ export default async function LandingPage() {
               </div>
             </div>
             
-            <div>
-              <h4 className="text-white font-bold text-sm tracking-widest mb-6 uppercase">Product</h4>
-              <ul className="space-y-4 text-sm text-slate-300">
-                <li><a href="#features" className="hover:text-white transition">Features</a></li>
-                <li><a href="#pricing" className="hover:text-white transition">Pricing</a></li>
-                <li><a href="#" className="hover:text-white transition">Changelog</a></li>
-              </ul>
-            </div>
+            <div className="col-span-1 md:col-span-8 lg:col-span-8 grid grid-cols-3 gap-4 sm:gap-8">
+              <div>
+                <h4 className="text-white font-bold text-xs sm:text-sm tracking-widest mb-4 sm:mb-6 uppercase">Product</h4>
+                <ul className="space-y-3 sm:space-y-4 text-xs sm:text-sm text-slate-300">
+                  <li><a href="#features" className="hover:text-white transition">Features</a></li>
+                  <li><a href="#pricing" className="hover:text-white transition">Pricing</a></li>
+                  <li><a href="#" className="hover:text-white transition">Changelog</a></li>
+                </ul>
+              </div>
 
-            <div>
-              <h4 className="text-white font-bold text-sm tracking-widest mb-6 uppercase">Company</h4>
-              <ul className="space-y-4 text-sm text-slate-300">
-                <li><a href="#about" className="hover:text-white transition">About</a></li>
-                <li><a href="mailto:admin@bimbelsync.web.id" className="hover:text-white transition">Contact</a></li>
-              </ul>
-            </div>
+              <div>
+                <h4 className="text-white font-bold text-xs sm:text-sm tracking-widest mb-4 sm:mb-6 uppercase">Company</h4>
+                <ul className="space-y-3 sm:space-y-4 text-xs sm:text-sm text-slate-300">
+                  <li><a href="#about" className="hover:text-white transition">About</a></li>
+                  <li><a href="mailto:admin@bimbelsync.web.id" className="hover:text-white transition">Contact</a></li>
+                </ul>
+              </div>
 
-            <div>
-              <h4 className="text-white font-bold text-sm tracking-widest mb-6 uppercase">Legal</h4>
-              <ul className="space-y-4 text-sm text-slate-300">
-                <li><Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
-                <li><Link href="/terms" className="hover:text-white transition">Terms of Service</Link></li>
-              </ul>
+              <div>
+                <h4 className="text-white font-bold text-xs sm:text-sm tracking-widest mb-4 sm:mb-6 uppercase">Legal</h4>
+                <ul className="space-y-3 sm:space-y-4 text-xs sm:text-sm text-slate-300">
+                  <li><Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
+                  <li><Link href="/terms" className="hover:text-white transition">Terms of Service</Link></li>
+                </ul>
+              </div>
             </div>
           </div>
 

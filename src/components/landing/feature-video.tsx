@@ -82,27 +82,26 @@ export function FeatureVideo({
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 520px"
         loading="lazy"
         priority={false}
-        className={`object-cover transition-opacity duration-700 pointer-events-none ${
-          isVideoPlaying ? "opacity-0" : "opacity-100"
-        }`}
+        className="object-cover pointer-events-none"
       />
 
       {/* 2. Video Player HTML5 (Hanya dimuat saat elemen mendekati viewport) */}
       {isInView && (
         <video
           ref={handleVideoRef}
+          poster={posterSrc}
           autoPlay
           loop
           muted
           playsInline
           preload="metadata"
+          onLoadedData={() => setIsVideoPlaying(true)}
           onPlaying={() => setIsVideoPlaying(true)}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
             isVideoPlaying ? "opacity-100" : "opacity-0"
           }`}
         >
           <source src={videoSrc} type="video/mp4" />
-          {/* Fallback teks jika browser tidak mendukung mp4 */}
           Browser Anda tidak mendukung pemutaran video.
         </video>
       )}
