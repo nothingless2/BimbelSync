@@ -126,7 +126,7 @@ export default async function StudentDashboardPage({
   const pastSchedules = allSchedules.filter((s) => new Date(s.end_time) <= now && s.status === 'SCHEDULED');
   const totalPastSchedules = pastSchedules.length;
   const attendancePercentage = totalPastSchedules === 0
-    ? 100
+    ? null
     : Math.min(100, Math.round((presentAttendancesCount / totalPastSchedules) * 100));
 
   const validScores = evaluations

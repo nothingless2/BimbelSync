@@ -167,13 +167,13 @@ export default async function DashboardHome({ params }: { params: Promise<{ tena
     : Math.min(100, Math.round((completedClassesCount / thisMonthClassesCount) * 100));
 
   const attendanceVerificationPercentage = completedClassesCount === 0
-    ? 100
+    ? null
     : Math.max(0, Math.min(100, Math.round(((completedClassesCount - pendingAttendanceCount) / completedClassesCount) * 100)));
 
   const totalStudentsTaught = totalTaughtStudentsCount;
   const evaluatedStudentsCount = evaluatedStudents.length;
   const evaluationPercentage = totalStudentsTaught === 0
-    ? 100
+    ? null
     : Math.min(100, Math.round((evaluatedStudentsCount / totalStudentsTaught) * 100));
 
   const tutorMilestone = isTutor ? {
