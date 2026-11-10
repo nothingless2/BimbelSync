@@ -11,6 +11,7 @@ import {
   cascadeDeleteStudent,
   purgeExpiredTenantUsers,
 } from "@/lib/user-cleanup";
+import { getDataRetentionConfig } from "@/lib/platform-settings";
 
 export async function resetTenantUserPasswordAction(
   userId: string,
@@ -95,6 +96,7 @@ export async function toggleTenantUserStatusAction(
     const auth = await requireSuperadminSession();
     if ("error" in auth) return { error: auth.error };
 
+    const retentionConfig = await getDataRetentionConfig();
     const newDeletedAt = targetAction === "DEACTIVATE" ? new Date() : null;
 
     if (userType === "STAFF") {
@@ -133,7 +135,7 @@ export async function toggleTenantUserStatusAction(
       return {
         success: true,
         message: targetAction === "DEACTIVATE"
-          ? `Akun ${staff.role === "ADMIN" ? "Admin" : "Tutor"} (${staff.email}) dinonaktifkan (masa tenggang 30 hari).`
+          ? `Akun ${staff.role === "ADMIN" ? "Admin" : "Tutor"} (${staff.email}) dinonaktifkan (masa tenggang ${retentionConfig.retentionDays} hari).`
           : `Akun ${staff.role === "ADMIN" ? "Admin" : "Tutor"} (${staff.email}) berhasil dipulihkan dan aktif kembali.`,
       };
     } else {
@@ -170,7 +172,7 @@ export async function toggleTenantUserStatusAction(
       return {
         success: true,
         message: targetAction === "DEACTIVATE"
-          ? `Akun siswa ${student.full_name} (${student.username}) dinonaktifkan (masa tenggang 30 hari).`
+          ? `Akun siswa ${student.full_name} (${student.username}) dinonaktifkan (masa tenggang ${retentionConfig.retentionDays} hari).`
           : `Akun siswa ${student.full_name} (${student.username}) berhasil dipulihkan dan aktif kembali.`,
       };
     }
@@ -265,7 +267,9 @@ export async function triggerManualPurgeAction() {
 
     return {
       success: true,
-      message: `Pembersihan selesai: ${result.purgedStaffCount} staf dan ${result.purgedStudentCount} siswa (nonaktif > 30 hari) telah dihapus permanen.`,
+      message:
+        result.message ||
+        `Pembersihan selesai: ${result.purgedStaffCount} staf, ${result.purgedStudentCount} siswa, dan ${result.purgedAcademyCount} bimbel (nonaktif > ${result.retentionDays} hari) telah dihapus permanen.`,
       result,
     };
   } catch (error: any) {

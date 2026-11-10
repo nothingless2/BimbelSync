@@ -3,6 +3,7 @@ import ArchivedClientPage from "./client-page";
 import { cookies } from "next/headers";
 import { decrypt } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { getDataRetentionConfig } from "@/lib/platform-settings";
 
 export default async function ArchivedAcademiesPage() {
   const cookieStore = await cookies();
@@ -14,15 +15,24 @@ export default async function ArchivedAcademiesPage() {
   }
 
   try {
-    const academies = await prisma.academy.findMany({
-      where: { deleted_at: { not: null } },
-      include: {
-        plan: true,
-      },
-      orderBy: { deleted_at: "desc" },
-    });
+    const [academies, retentionConfig] = await Promise.all([
+      prisma.academy.findMany({
+        where: { deleted_at: { not: null } },
+        include: {
+          plan: true,
+        },
+        orderBy: { deleted_at: "desc" },
+      }),
+      getDataRetentionConfig(),
+    ]);
 
-    return <ArchivedClientPage academies={academies} />;
+    return (
+      <ArchivedClientPage
+        academies={academies}
+        retentionDays={retentionConfig.retentionDays}
+        targetAcademy={retentionConfig.targetAcademy}
+      />
+    );
   } catch (error) {
     console.error("Error fetching archived academies:", error);
     return (

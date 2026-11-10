@@ -3,6 +3,7 @@ import SystemUsersClient from "./client-page";
 import { cookies } from "next/headers";
 import { decrypt } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { getDataRetentionConfig } from "@/lib/platform-settings";
 
 export default async function SystemUsersPage() {
   const cookieStore = await cookies();
@@ -14,7 +15,7 @@ export default async function SystemUsersPage() {
   }
 
   try {
-    const [superadmins, staffUsers, studentUsers] = await Promise.all([
+    const [superadmins, staffUsers, studentUsers, retentionConfig] = await Promise.all([
       prisma.superadmin.findMany({
         where: { deleted_at: null },
         orderBy: { email: "asc" },
@@ -35,6 +36,7 @@ export default async function SystemUsersPage() {
         },
         orderBy: { full_name: "asc" },
       }),
+      getDataRetentionConfig(),
     ]);
 
     const tenantUsers = [
@@ -79,6 +81,7 @@ export default async function SystemUsersPage() {
         currentSuperadminId={session.id}
         superadmins={superadmins}
         tenantUsers={tenantUsers}
+        retentionDays={retentionConfig.retentionDays}
       />
     );
   } catch (error) {

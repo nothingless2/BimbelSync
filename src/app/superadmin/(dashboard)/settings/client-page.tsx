@@ -200,10 +200,15 @@ export default function SettingsClientPage({ stats }: SettingsClientPageProps) {
             </span>
             <span className="text-sm font-medium text-slate-500">Hari</span>
           </div>
-          <p className="text-xs text-slate-500 mt-2 flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-blue-500" />
-            Cutoff: Sebelum {formattedCutoff}
-          </p>
+          <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 space-y-1">
+            <p className="text-xs text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+              <span>Hapus data sebelum: <strong className="text-slate-900 dark:text-white">{formattedCutoff}</strong></span>
+            </p>
+            <p className="text-[11px] text-slate-400 leading-tight">
+              (Akun yang dinonaktifkan &gt; {retentionDays} hari yang lalu)
+            </p>
+          </div>
         </div>
 
         {/* Card 2: Siswa Nonaktif */}
@@ -517,8 +522,8 @@ export default function SettingsClientPage({ stats }: SettingsClientPageProps) {
 
             <div className="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 rounded-xl p-4 mb-4 text-xs space-y-2">
               <div className="flex justify-between items-center text-slate-700 dark:text-slate-300">
-                <span>Batas Cutoff Tanggal Nonaktif:</span>
-                <span className="font-semibold text-slate-900 dark:text-white">{formattedCutoff}</span>
+                <span>Kriteria Waktu Hapus:</span>
+                <span className="font-semibold text-slate-900 dark:text-white">Dinonaktifkan sebelum {formattedCutoff} (&gt; {retentionDays} hari lalu)</span>
               </div>
               <div className="flex justify-between items-center text-slate-700 dark:text-slate-300">
                 <span>Total Data Memenuhi Syarat Hard Delete:</span>
@@ -630,7 +635,7 @@ export default function SettingsClientPage({ stats }: SettingsClientPageProps) {
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mb-5 text-center leading-relaxed">
                 Tindakan ini akan <strong>menghapus secara fisik</strong> data yang telah dinonaktifkan lebih dari{" "}
-                <strong>{retentionDays} hari</strong> (sebelum {formattedCutoff}). Data yang terhapus <strong>TIDAK DAPAT DIKEMBALIKAN</strong>.
+                <strong>{retentionDays} hari yang lalu</strong> (yaitu akun yang dinonaktifkan <strong>sebelum {formattedCutoff}</strong>). Data yang terhapus <strong>TIDAK DAPAT DIKEMBALIKAN</strong>.
               </p>
 
               {/* Data Summary Box */}

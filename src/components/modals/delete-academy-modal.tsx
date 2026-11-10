@@ -47,7 +47,7 @@ export function DeleteAcademyModal({ isOpen, onClose, academy }: DeleteAcademyMo
           </div>
           <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2 text-center">Hapus Akademi?</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 text-center">
-            Anda akan menghapus akademi <strong className="text-slate-700 dark:text-slate-300">"{academy.name}"</strong>. (Aksi ini bersifat Soft Delete).
+            Anda akan memindahkan akademi <strong className="text-slate-700 dark:text-slate-300">"{academy.name}"</strong> ke tempat sampah. Data akan disimpan dalam masa tenggang sebelum dihapus permanen sesuai kebijakan retensi.
           </p>
 
           <div className="mb-6 space-y-2">

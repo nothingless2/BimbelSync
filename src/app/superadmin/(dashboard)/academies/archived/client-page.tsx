@@ -5,7 +5,15 @@ import { Building2, ArrowLeft, RefreshCw, Trash2, AlertTriangle, X, Save } from 
 import Link from "next/link";
 import { restoreAcademyAction, hardDeleteAcademyAction } from "@/app/superadmin/(dashboard)/actions";
 
-export default function ArchivedClientPage({ academies }: { academies: any[] }) {
+export default function ArchivedClientPage({
+  academies,
+  retentionDays = 90,
+  targetAcademy = true,
+}: {
+  academies: any[];
+  retentionDays?: number;
+  targetAcademy?: boolean;
+}) {
   const [selectedAcademy, setSelectedAcademy] = useState<any>(null);
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -43,6 +51,11 @@ export default function ArchivedClientPage({ academies }: { academies: any[] }) 
     setLoading(false);
   };
 
+  const cutoffTime = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
+  const expiredAcademiesCount = academies.filter(
+    (a) => new Date(a.deleted_at).getTime() <= cutoffTime
+  ).length;
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -56,6 +69,23 @@ export default function ArchivedClientPage({ academies }: { academies: any[] }) 
           <p className="text-slate-500 dark:text-slate-400 mt-1">Daftar akademi yang telah dihapus (Soft Delete).</p>
         </div>
       </div>
+
+      {expiredAcademiesCount > 0 && (
+        <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs">
+          <div className="flex items-center gap-2.5 text-amber-800 dark:text-amber-300">
+            <AlertTriangle size={18} className="shrink-0 text-amber-600" />
+            <span>
+              Terdapat <strong>{expiredAcademiesCount} bimbel</strong> yang telah berstatus nonaktif lebih dari <strong>{retentionDays} hari</strong> dan memenuhi syarat pembersihan permanen.
+            </span>
+          </div>
+          <Link
+            href="/superadmin/settings"
+            className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition shrink-0 whitespace-nowrap"
+          >
+            Kelola di Settings
+          </Link>
+        </div>
+      )}
 
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
         {academies.length === 0 ? (
@@ -72,47 +102,67 @@ export default function ArchivedClientPage({ academies }: { academies: any[] }) 
                   <th className="px-6 py-4 font-semibold">Bimbel (URL Lama)</th>
                   <th className="px-6 py-4 font-semibold">Paket</th>
                   <th className="px-6 py-4 font-semibold">Dihapus Pada</th>
+                  <th className="px-6 py-4 font-semibold">Status Retensi</th>
                   <th className="px-6 py-4 text-right font-semibold">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {academies.map((academy) => (
-                  <tr key={academy.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center shrink-0">
-                          <Building2 size={18} />
+                {academies.map((academy) => {
+                  const daysInactive = Math.floor(
+                    (Date.now() - new Date(academy.deleted_at).getTime()) / (24 * 60 * 60 * 1000)
+                  );
+                  const isExpired = daysInactive >= retentionDays;
+
+                  return (
+                    <tr key={academy.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center shrink-0">
+                            <Building2 size={18} />
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-900 dark:text-white">{academy.name}</p>
+                            <p className="text-xs text-slate-500 font-mono truncate max-w-[200px]">{academy.path_url}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-bold text-slate-900 dark:text-white">{academy.name}</p>
-                          <p className="text-xs text-slate-500 font-mono truncate max-w-[200px]">{academy.path_url}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                        {academy.plan.name}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
-                      {new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric" }).format(new Date(academy.deleted_at))}
-                    </td>
-                    <td className="px-6 py-4 text-right space-x-2">
-                      <button 
-                        onClick={() => { setSelectedAcademy(academy); setIsRestoreModalOpen(true); setMessage(null); }}
-                        className="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 dark:text-blue-400 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 rounded-lg transition"
-                      >
-                        Pulihkan
-                      </button>
-                      <button 
-                        onClick={() => { setSelectedAcademy(academy); setIsDeleteModalOpen(true); setMessage(null); }}
-                        className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 dark:text-red-400 dark:bg-red-900/20 dark:hover:bg-red-900/40 rounded-lg transition"
-                      >
-                        Hapus Permanen
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                          {academy.plan.name}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
+                        {new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric" }).format(new Date(academy.deleted_at))}
+                      </td>
+                      <td className="px-6 py-4">
+                        {isExpired ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50">
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                            Kadaluarsa ({daysInactive} hr &gt; {retentionDays} hr)
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                            Masa Tenggang (sisa {retentionDays - daysInactive} hari)
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-right space-x-2">
+                        <button 
+                          onClick={() => { setSelectedAcademy(academy); setIsRestoreModalOpen(true); setMessage(null); }}
+                          className="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 dark:text-blue-400 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 rounded-lg transition cursor-pointer"
+                        >
+                          Pulihkan
+                        </button>
+                        <button 
+                          onClick={() => { setSelectedAcademy(academy); setIsDeleteModalOpen(true); setMessage(null); }}
+                          className="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 dark:text-red-400 dark:bg-red-900/20 dark:hover:bg-red-900/40 rounded-lg transition cursor-pointer"
+                        >
+                          Hapus Permanen
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -159,8 +209,8 @@ export default function ArchivedClientPage({ academies }: { academies: any[] }) 
               <AlertTriangle size={24} />
             </div>
             <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Hapus Permanen?</h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-              Peringatan! Menghapus <b>{selectedAcademy.name}</b> secara permanen akan memusnahkan SEMUA data tagihan, staf, murid, dan materi yang ada di dalamnya secara tidak dapat dikembalikan.
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
+              Peringatan! Menghapus <b>{selectedAcademy.name}</b> secara permanen akan memusnahkan <strong>SEMUA data tagihan, staf, murid, jadwal, dan materi</strong> di dalamnya seketika tanpa menunggu sisa masa tenggang ({retentionDays} hari). Tindakan ini <strong>TIDAK DAPAT DIBATALKAN</strong>.
             </p>
             {message?.type === 'error' && (
               <div className="p-3 rounded-xl mb-4 text-sm font-medium bg-red-50 text-red-600 border border-red-200">

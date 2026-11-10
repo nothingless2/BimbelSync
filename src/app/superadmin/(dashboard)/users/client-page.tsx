@@ -52,6 +52,7 @@ interface Props {
   currentSuperadminId?: string;
   superadmins: SuperadminUser[];
   tenantUsers: TenantUser[];
+  retentionDays?: number;
 }
 
 const ROLE_OPTIONS = [
@@ -67,7 +68,12 @@ const STATUS_OPTIONS = [
   { value: "INACTIVE", label: "Nonaktif" },
 ];
 
-export default function SystemUsersClient({ currentSuperadminId, superadmins, tenantUsers }: Props) {
+export default function SystemUsersClient({
+  currentSuperadminId,
+  superadmins,
+  tenantUsers,
+  retentionDays = 90,
+}: Props) {
   const [activeTab, setActiveTab] = useState<"tenants" | "internal">("tenants");
 
   // === Superadmin Internal Management State ===
@@ -113,12 +119,12 @@ export default function SystemUsersClient({ currentSuperadminId, superadmins, te
   const tutorCount = tenantUsers.filter(u => u.rawRole === "TUTOR").length;
   const studentCount = tenantUsers.filter(u => u.rawRole === "STUDENT").length;
 
-  // Count expired accounts (>30 days inactive)
+  // Count expired accounts (> retentionDays inactive)
   const expiredCount = tenantUsers.filter(
     (u) =>
       u.userDeleted &&
       u.deletedAt &&
-      Date.now() - new Date(u.deletedAt).getTime() >= 30 * 24 * 60 * 60 * 1000
+      Date.now() - new Date(u.deletedAt).getTime() >= retentionDays * 24 * 60 * 60 * 1000
   ).length;
 
   // Filter Tenant Users
@@ -406,7 +412,7 @@ export default function SystemUsersClient({ currentSuperadminId, superadmins, te
               <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300">
                 <AlertTriangle size={16} className="shrink-0 text-amber-600" />
                 <span>
-                  Terdapat <strong>{expiredCount} akun</strong> yang telah berstatus nonaktif lebih dari 30 hari dan siap dibersihkan permanen oleh sistem.
+                  Terdapat <strong>{expiredCount} akun</strong> yang telah berstatus nonaktif lebih dari {retentionDays} hari dan siap dibersihkan permanen oleh sistem.
                 </span>
               </div>
               <button
@@ -1092,7 +1098,7 @@ export default function SystemUsersClient({ currentSuperadminId, superadmins, te
                   </div>
                 )}
                 <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                  Akun pengguna ini akan <strong>dihapus permanen (Hard Delete) seketika</strong> dari database sistem tanpa menunggu masa tenggang 30 hari. Seluruh data terkait (pendaftaran kelas, riwayat absensi, evaluasi, dan tagihan) akan dibersihkan dan akun ini <strong>tidak dapat dipulihkan kembali</strong>.
+                  Akun pengguna ini akan <strong>dihapus permanen (Hard Delete) seketika</strong> dari database sistem tanpa menunggu masa tenggang {retentionDays} hari. Seluruh data terkait (pendaftaran kelas, riwayat absensi, evaluasi, dan tagihan) akan dibersihkan dan akun ini <strong>tidak dapat dipulihkan kembali</strong>.
                 </p>
               </div>
 
@@ -1139,7 +1145,7 @@ export default function SystemUsersClient({ currentSuperadminId, superadmins, te
                   <h3 className="font-bold text-slate-900 dark:text-white text-base">
                     Bersihkan Akun Kedaluwarsa?
                   </h3>
-                  <p className="text-xs text-slate-500">Pembersihan akun nonaktif &gt; 30 hari</p>
+                  <p className="text-xs text-slate-500">Pembersihan akun nonaktif &gt; {retentionDays} hari</p>
                 </div>
               </div>
               <button
@@ -1158,7 +1164,7 @@ export default function SystemUsersClient({ currentSuperadminId, superadmins, te
                   <span>Konfirmasi Penghapusan Permanen</span>
                 </div>
                 <p className="leading-relaxed text-slate-700 dark:text-slate-300">
-                  Terdapat <strong>{expiredCount} akun pengguna</strong> yang telah berstatus nonaktif lebih dari 30 hari. Seluruh akun tersebut akan <strong>dihapus secara permanen (Hard Delete)</strong> beserta riwayat kelas, jadwal, evaluasi, absensi, dan tagihan terkait.
+                  Terdapat <strong>{expiredCount} akun pengguna</strong> yang telah berstatus nonaktif lebih dari {retentionDays} hari. Seluruh akun tersebut akan <strong>dihapus secara permanen (Hard Delete)</strong> beserta riwayat kelas, jadwal, evaluasi, absensi, dan tagihan terkait.
                 </p>
               </div>
 
