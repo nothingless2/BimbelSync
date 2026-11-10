@@ -10,6 +10,7 @@ import { FAQ } from '@/components/landing/faq';
 import { FinalCTA } from '@/components/landing/final-cta';
 import { PricingSection } from '@/components/landing/pricing-section';
 import { VideoFacade } from '@/components/landing/video-facade';
+import { FeatureVideo } from '@/components/landing/feature-video';
 import prisma from '@/lib/prisma';
 import { Metadata } from 'next';
 import { TextRotator } from '@/components/ui/text-rotator';
@@ -180,16 +181,11 @@ export default async function LandingPage() {
             <FadeInView direction="up" delay={0.2}>
               <div className="flex flex-col md:flex-row gap-12 items-center group p-6 sm:p-10 rounded-3xl transition-all duration-500 hover:bg-white hover:shadow-[0_10px_40px_rgba(59,130,246,0.1)] border border-transparent hover:border-blue-100">
                 <div className="flex-1 w-full flex justify-center">
-                   <div className="relative w-full max-w-lg rounded-2xl overflow-hidden shadow-xl border border-slate-200/80 bg-slate-100 group-hover:shadow-2xl transition-all duration-500">
-                      <video 
-                        src="/features/schedule.mp4" 
-                        poster="/features/schedule.jpg" 
-                        autoPlay 
-                        loop 
-                        muted 
-                        playsInline 
-                        preload="metadata"
-                        className="w-full h-auto object-cover rounded-2xl block" 
+                   <div className="w-full max-w-lg">
+                      <FeatureVideo 
+                        videoSrc="/features/schedule.mp4" 
+                        posterSrc="/features/schedule.jpg" 
+                        alt="Mockup Penjadwalan Anti-Bentrok BimbelSync" 
                       />
                    </div>
                 </div>
@@ -210,16 +206,11 @@ export default async function LandingPage() {
             <FadeInView direction="up" delay={0.2}>
               <div className="flex flex-col md:flex-row-reverse gap-12 items-center group p-6 sm:p-10 rounded-3xl transition-all duration-500 hover:bg-white hover:shadow-[0_10px_40px_rgba(59,130,246,0.1)] border border-transparent hover:border-blue-100">
                 <div className="flex-1 w-full flex justify-center">
-                   <div className="relative w-full max-w-lg rounded-2xl overflow-hidden shadow-xl border border-slate-200/80 bg-slate-100 group-hover:shadow-2xl transition-all duration-500">
-                      <video 
-                        src="/features/qr_code.mp4" 
-                        poster="/features/qr_code.jpg" 
-                        autoPlay 
-                        loop 
-                        muted 
-                        playsInline 
-                        preload="metadata"
-                        className="w-full h-auto object-cover rounded-2xl block" 
+                   <div className="w-full max-w-lg">
+                      <FeatureVideo 
+                        videoSrc="/features/qr_code.mp4" 
+                        posterSrc="/features/qr_code.jpg" 
+                        alt="Mockup Presensi QR Dinamis BimbelSync" 
                       />
                    </div>
                 </div>
@@ -240,16 +231,11 @@ export default async function LandingPage() {
             <FadeInView direction="up" delay={0.4}>
               <div className="flex flex-col md:flex-row gap-12 items-center group p-6 sm:p-10 rounded-3xl transition-all duration-500 hover:bg-white hover:shadow-[0_10px_40px_rgba(59,130,246,0.1)] border border-transparent hover:border-blue-100">
                 <div className="flex-1 w-full flex justify-center">
-                   <div className="relative w-full max-w-lg rounded-2xl overflow-hidden shadow-xl border border-slate-200/80 bg-slate-100 group-hover:shadow-2xl transition-all duration-500">
-                      <video 
-                        src="/features/email.mp4" 
-                        poster="/features/email.jpg" 
-                        autoPlay 
-                        loop 
-                        muted 
-                        playsInline 
-                        preload="metadata"
-                        className="w-full h-auto object-cover rounded-2xl block" 
+                   <div className="w-full max-w-lg">
+                      <FeatureVideo 
+                        videoSrc="/features/email.mp4" 
+                        posterSrc="/features/email.jpg" 
+                        alt="Mockup Tagihan via Email BimbelSync" 
                       />
                    </div>
                 </div>
@@ -270,16 +256,11 @@ export default async function LandingPage() {
             <FadeInView direction="up" delay={0.6}>
               <div className="flex flex-col md:flex-row-reverse gap-12 items-center group p-6 sm:p-10 rounded-3xl transition-all duration-500 hover:bg-white hover:shadow-[0_10px_40px_rgba(59,130,246,0.1)] border border-transparent hover:border-blue-100">
                 <div className="flex-1 w-full flex justify-center">
-                   <div className="relative w-full max-w-lg rounded-2xl overflow-hidden shadow-xl border border-slate-200/80 bg-slate-100 group-hover:shadow-2xl transition-all duration-500">
-                      <video 
-                        src="/features/pembayaran.mp4" 
-                        poster="/features/pembayaran.jpg" 
-                        autoPlay 
-                        loop 
-                        muted 
-                        playsInline 
-                        preload="metadata"
-                        className="w-full h-auto object-cover rounded-2xl block" 
+                   <div className="w-full max-w-lg">
+                      <FeatureVideo 
+                        videoSrc="/features/pembayaran.mp4" 
+                        posterSrc="/features/pembayaran.jpg" 
+                        alt="Mockup Pencatatan & Verifikasi Pembayaran BimbelSync" 
                       />
                    </div>
                 </div>
