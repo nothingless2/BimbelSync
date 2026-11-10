@@ -29,7 +29,17 @@ export default async function DashboardHome({ params }: { params: Promise<{ tena
   endOfDay.setHours(23, 59, 59, 999);
 
   // Menarik semua data yang dibutuhkan secara paralel dengan query yang teroptimasi
-  const [totalStudents, todaySchedules, unpaidAgg, recentPayments, thisMonthClassesCount, pendingAttendanceCount] = await Promise.all([
+  const [
+    totalStudents,
+    todaySchedules,
+    unpaidAgg,
+    recentPayments,
+    thisMonthClassesCount,
+    pendingAttendanceCount,
+    completedClassesCount,
+    totalTaughtStudentsCount,
+    evaluatedStudents,
+  ] = await Promise.all([
     // 1. Total Siswa Aktif (Hanya ADMIN)
     !isTutor ? prisma.student.count({
       where: {
@@ -107,10 +117,81 @@ export default async function DashboardHome({ params }: { params: Promise<{ tena
         status: 'SCHEDULED',
         attendances: { none: {} }
       }
-    }) : Promise.resolve(0)
+    }) : Promise.resolve(0),
+
+    // 7. Sesi Mengajar yang Telah Selesai Bulan Ini (Hanya TUTOR)
+    isTutor ? prisma.schedule.count({
+      where: {
+        tutor_id: session.id,
+        start_time: { gte: startOfMonth(today) },
+        end_time: { lt: today },
+        status: 'SCHEDULED'
+      }
+    }) : Promise.resolve(0),
+
+    // 8. Total Siswa Aktif yang Diajar oleh Tutor Ini (Hanya TUTOR)
+    isTutor ? prisma.student.count({
+      where: {
+        academy_id: academyId,
+        deleted_at: null,
+        enrollments: {
+          some: {
+            status: 'ACTIVE',
+            program: {
+              schedules: {
+                some: { tutor_id: session.id }
+              }
+            }
+          }
+        }
+      }
+    }) : Promise.resolve(0),
+
+    // 9. Siswa yang Telah Diberikan Evaluasi oleh Tutor Ini (Hanya TUTOR)
+    isTutor ? prisma.studentEvaluation.findMany({
+      where: {
+        evaluator_id: session.id,
+      },
+      select: {
+        student_id: true,
+      },
+      distinct: ['student_id'],
+    }) : Promise.resolve([])
   ]);
 
   const totalUnpaid = unpaidAgg._sum?.total_amount || 0;
+
+  // Hitung Milestone Tutor
+  const teachingPercentage = thisMonthClassesCount === 0
+    ? 0
+    : Math.min(100, Math.round((completedClassesCount / thisMonthClassesCount) * 100));
+
+  const attendanceVerificationPercentage = completedClassesCount === 0
+    ? 100
+    : Math.max(0, Math.min(100, Math.round(((completedClassesCount - pendingAttendanceCount) / completedClassesCount) * 100)));
+
+  const totalStudentsTaught = totalTaughtStudentsCount;
+  const evaluatedStudentsCount = evaluatedStudents.length;
+  const evaluationPercentage = totalStudentsTaught === 0
+    ? 100
+    : Math.min(100, Math.round((evaluatedStudentsCount / totalStudentsTaught) * 100));
+
+  const tutorMilestone = isTutor ? {
+    teaching: {
+      thisMonthTotal: thisMonthClassesCount,
+      completedCount: completedClassesCount,
+      percentage: teachingPercentage,
+    },
+    attendanceVerification: {
+      pendingCount: pendingAttendanceCount,
+      percentage: attendanceVerificationPercentage,
+    },
+    evaluations: {
+      totalStudentsTaught,
+      evaluatedStudentsCount,
+      percentage: evaluationPercentage,
+    },
+  } : null;
 
   return (
     <DashboardClientPage 
@@ -123,6 +204,7 @@ export default async function DashboardHome({ params }: { params: Promise<{ tena
       recentPayments={recentPayments}
       thisMonthClassesCount={thisMonthClassesCount}
       pendingAttendanceCount={pendingAttendanceCount}
+      tutorMilestone={tutorMilestone}
     />
   );
 }

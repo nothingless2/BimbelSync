@@ -4,6 +4,7 @@ import { Users, BookOpen, Receipt, ArrowRight, UserPlus, CalendarPlus, FileText,
 import Link from "next/link";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { TutorMilestoneCard, TutorMilestoneData } from "@/components/tutor/tutor-milestone-card";
 
 interface DashboardClientProps {
   tenantSlug: string;
@@ -15,6 +16,7 @@ interface DashboardClientProps {
   todaySchedules: any[];
   thisMonthClassesCount?: number;
   pendingAttendanceCount?: number;
+  tutorMilestone?: TutorMilestoneData | null;
 }
 
 export default function DashboardClientPage({
@@ -27,6 +29,7 @@ export default function DashboardClientPage({
   todaySchedules,
   thisMonthClassesCount = 0,
   pendingAttendanceCount = 0,
+  tutorMilestone = null,
 }: DashboardClientProps) {
 
   const formatRupiah = (num: number) => {
@@ -138,6 +141,10 @@ export default function DashboardClientPage({
             </div>
           </div>
         </div>
+      )}
+
+      {userRole === 'TUTOR' && tutorMilestone && (
+        <TutorMilestoneCard milestone={tutorMilestone} tenantSlug={tenantSlug} />
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

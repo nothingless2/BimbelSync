@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import StudentSchedulesClientPage from '../schedules/client-page';
 import { StudentBillingBanner } from '@/components/student-billing-banner';
+import { StudentMilestoneCard } from '@/components/student/student-milestone-card';
 
 // Helper format waktu (WIB) untuk Server Component di Vercel
 const formatTimeWIB = (date: Date | string) => {
@@ -27,7 +28,7 @@ export default async function StudentDashboardPage({
 
   const session = auth.session;
 
-  const [student, allSchedules, unpaidInvoices, academy] = await Promise.all([
+  const [student, allSchedules, unpaidInvoices, academy, presentAttendancesCount, evaluations, materialsCount] = await Promise.all([
     prisma.student.findFirst({
       where: {
         id: session.id,
@@ -84,6 +85,32 @@ export default async function StudentDashboardPage({
     prisma.academy.findUnique({
       where: { id: session.academy_id },
       select: { name: true, bank_name: true, bank_account: true }
+    }),
+    prisma.attendance.count({
+      where: {
+        student_id: session.id,
+        attendance_status: 'PRESENT',
+      }
+    }),
+    prisma.studentEvaluation.findMany({
+      where: {
+        student_id: session.id,
+        status: 'PUBLISHED',
+      },
+      select: {
+        score: true,
+      }
+    }),
+    prisma.learningMaterial.count({
+      where: {
+        academy_id: session.academy_id,
+        deleted_at: null,
+        program: {
+          enrollments: {
+            some: { student_id: session.id, status: 'ACTIVE' }
+          }
+        }
+      }
     })
   ]);
 
@@ -93,6 +120,36 @@ export default async function StudentDashboardPage({
 
   const totalDebt = unpaidInvoices.reduce((sum, inv) => sum + inv.total_amount, 0);
   const hasUnpaid = unpaidInvoices.length > 0;
+
+  // Kalkulasi Milestone Progress Siswa
+  const now = new Date();
+  const pastSchedules = allSchedules.filter((s) => new Date(s.end_time) <= now && s.status === 'SCHEDULED');
+  const totalPastSchedules = pastSchedules.length;
+  const attendancePercentage = totalPastSchedules === 0
+    ? 100
+    : Math.min(100, Math.round((presentAttendancesCount / totalPastSchedules) * 100));
+
+  const validScores = evaluations
+    .filter((e) => e.score !== null)
+    .map((e) => Number(e.score));
+  const averageScore = validScores.length > 0
+    ? validScores.reduce((a, b) => a + b, 0) / validScores.length
+    : null;
+
+  const milestoneData = {
+    attendance: {
+      totalPastSchedules,
+      attendedCount: presentAttendancesCount,
+      percentage: attendancePercentage,
+    },
+    academic: {
+      averageScore,
+      totalEvaluations: evaluations.length,
+    },
+    materials: {
+      totalAvailable: materialsCount,
+    },
+  };
 
   return (
     <div className="p-4 sm:p-8 md:pt-10 space-y-6">
@@ -131,6 +188,9 @@ export default async function StudentDashboardPage({
           </div>
         </div>
       </div>
+
+      {/* Capaian Belajar Siswa (Milestone Progress Card) */}
+      <StudentMilestoneCard milestone={milestoneData} tenantSlug={tenantSlug} />
 
       {/* Full Schedule Calendar */}
       <div>
