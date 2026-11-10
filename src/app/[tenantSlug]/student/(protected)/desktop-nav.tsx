@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, QrCode, User, CreditCard, BarChart, BookOpen, LogOut, Calendar } from "lucide-react";
+import { Home, QrCode, User, CreditCard, BarChart, BookOpen, LogOut, Calendar, FileQuestion } from "lucide-react";
 import { logoutStudentAction } from "./profile/actions";
 
 export function StudentDesktopNav({ tenantSlug }: { tenantSlug: string }) {
@@ -13,6 +13,7 @@ export function StudentDesktopNav({ tenantSlug }: { tenantSlug: string }) {
     { href: `/${tenantSlug}/student/scan`, icon: QrCode, label: "Scan Absen" },
     { href: `/${tenantSlug}/student/attendances`, icon: Calendar, label: "Absensi" },
     { href: `/${tenantSlug}/student/materials`, icon: BookOpen, label: "Materi Belajar" },
+    { href: `/${tenantSlug}/student/quizzes`, icon: FileQuestion, label: "Kuis Online" },
     { href: `/${tenantSlug}/student/invoices`, icon: CreditCard, label: "Tagihan" },
     { href: `/${tenantSlug}/student/evaluations`, icon: BarChart, label: "Evaluasi" },
     { href: `/${tenantSlug}/student/profile`, icon: User, label: "Profil" },

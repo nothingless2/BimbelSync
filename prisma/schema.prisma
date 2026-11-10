@@ -154,6 +154,7 @@ model Staff {
   audit_logs            AuditLog[]
   materials_created     LearningMaterial[] @relation("StaffCreatesMaterial")
   evaluations_given     StudentEvaluation[] @relation("StaffEvaluatesStudent")
+  quizzes_created       Quiz[]             @relation("StaffCreatesQuiz")
 
   @@unique([academy_id, email])
 }
@@ -179,6 +180,7 @@ model Student {
   attendances Attendance[]
   invoices    Invoice[]
   evaluations StudentEvaluation[]
+  quiz_submissions QuizSubmission[]
 
   @@unique([academy_id, username])
   @@index([academy_id, deleted_at])
@@ -201,6 +203,7 @@ model Program {
   enrollments Enrollment[]
   materials   LearningMaterial[]
   evaluations StudentEvaluation[]
+  quizzes     Quiz[]
 
   @@index([academy_id])
 }
@@ -429,3 +432,58 @@ model PlatformSetting {
   value      String
   updated_at DateTime @updatedAt
 }
+
+model Quiz {
+  id                  String           @id @default(uuid()) @db.Uuid
+  academy_id          String           @db.Uuid
+  program_id          String           @db.Uuid
+  created_by_staff_id String?          @db.Uuid
+  title               String
+  description         String?
+  duration_minutes    Int              @default(30)
+  is_published        Boolean          @default(true)
+  created_at          DateTime         @default(now())
+  updated_at          DateTime         @updatedAt
+  deleted_at          DateTime?
+
+  academy     Academy        @relation(fields: [academy_id], references: [id])
+  program     Program        @relation(fields: [program_id], references: [id])
+  creator     Staff?         @relation("StaffCreatesQuiz", fields: [created_by_staff_id], references: [id])
+  questions   QuizQuestion[]
+  submissions QuizSubmission[]
+
+  @@index([academy_id, program_id, deleted_at])
+}
+
+model QuizQuestion {
+  id                   String   @id @default(uuid()) @db.Uuid
+  quiz_id              String   @db.Uuid
+  question_text        String
+  options              Json
+  correct_answer_index Int      @default(0)
+  explanation          String?
+  points               Int      @default(10)
+  order_index          Int      @default(0)
+
+  quiz Quiz @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+
+  @@index([quiz_id, order_index])
+}
+
+model QuizSubmission {
+  id              String   @id @default(uuid()) @db.Uuid
+  quiz_id         String   @db.Uuid
+  student_id      String   @db.Uuid
+  score           Decimal  @db.Decimal(5, 2)
+  total_correct   Int
+  total_questions Int
+  answers         Json
+  submitted_at    DateTime @default(now())
+
+  quiz    Quiz    @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [student_id], references: [id], onDelete: Cascade)
+
+  @@unique([quiz_id, student_id])
+  @@index([student_id])
+}
+

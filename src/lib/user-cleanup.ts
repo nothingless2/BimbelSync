@@ -82,6 +82,14 @@ export async function cascadeDeleteAcademy(academyId: string) {
       }
 
       // 3. Hapus entitas tingkat kedua yang bergantung langsung pada akademi
+      const quizzes = await tx.quiz.findMany({ where: { academy_id: academyId }, select: { id: true } });
+      const quizIds = quizzes.map((q: any) => q.id);
+      if (quizIds.length > 0) {
+        await tx.quizSubmission.deleteMany({ where: { quiz_id: { in: quizIds } } });
+        await tx.quizQuestion.deleteMany({ where: { quiz_id: { in: quizIds } } });
+        await tx.quiz.deleteMany({ where: { id: { in: quizIds } } });
+      }
+
       await tx.studentEvaluation.deleteMany({ where: { academy_id: academyId } });
       await tx.learningMaterial.deleteMany({ where: { academy_id: academyId } });
       await tx.invoice.deleteMany({ where: { academy_id: academyId } });
@@ -107,8 +115,12 @@ export async function cascadeDeleteAcademy(academyId: string) {
 export async function cascadeDeleteStaff(userId: string) {
   return await prisma.$transaction(
     async (tx) => {
-      // 1. Lepaskan relasi pada materi pembelajaran
+      // 1. Lepaskan relasi pada materi pembelajaran dan kuis
       await tx.learningMaterial.updateMany({
+        where: { created_by_staff_id: userId },
+        data: { created_by_staff_id: null },
+      });
+      await tx.quiz.updateMany({
         where: { created_by_staff_id: userId },
         data: { created_by_staff_id: null },
       });
@@ -174,7 +186,10 @@ export async function cascadeDeleteStudent(userId: string) {
         where: { student_id: userId },
       });
 
-      // 3. Hapus evaluasi nilai siswa
+      // 3. Hapus evaluasi nilai & riwayat kuis siswa
+      await tx.quizSubmission.deleteMany({
+        where: { student_id: userId },
+      });
       await tx.studentEvaluation.deleteMany({
         where: { student_id: userId },
       });

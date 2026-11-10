@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, QrCode, User, CreditCard, BarChart, BookOpen, Calendar, Menu, X, ChevronRight } from 'lucide-react';
+import { Home, QrCode, User, CreditCard, BarChart, BookOpen, Calendar, Menu, X, ChevronRight, FileQuestion } from 'lucide-react';
 
 export function StudentMobileNav({ tenantSlug }: { tenantSlug: string }) {
   const pathname = usePathname();
@@ -19,6 +19,7 @@ export function StudentMobileNav({ tenantSlug }: { tenantSlug: string }) {
 
   // Secondary Menu Items (inside the "Lainnya" drawer)
   const secondaryItems = [
+    { href: `/${tenantSlug}/student/quizzes`, icon: FileQuestion, label: 'Kuis & Latihan', desc: 'Latihan soal online dan evaluasi' },
     { href: `/${tenantSlug}/student/attendances`, icon: Calendar, label: 'Riwayat Absensi', desc: 'Lihat daftar kehadiran kelas' },
     { href: `/${tenantSlug}/student/materials`, icon: BookOpen, label: 'Materi Belajar', desc: 'Akses modul dan video pembelajaran' },
     { href: `/${tenantSlug}/student/invoices`, icon: CreditCard, label: 'Tagihan Saya', desc: 'Kelola SPP dan riwayat pembayaran' },
