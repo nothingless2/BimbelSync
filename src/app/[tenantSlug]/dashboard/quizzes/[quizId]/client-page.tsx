@@ -24,6 +24,7 @@ import { AddQuestionModal } from "@/components/modals/add-question-modal";
 import { deleteQuestionAction } from "./actions";
 import { togglePublishQuizAction } from "../actions";
 import { toast } from "@/components/ui/sonner";
+import { MathText } from "@/components/math-text";
 
 interface QuestionItem {
   id: string;
@@ -310,9 +311,9 @@ export default function QuizDetailClientPage({
                   </div>
 
                   {/* Question Text */}
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200 whitespace-pre-wrap">
-                    {q.questionText}
-                  </p>
+                  <div className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                    <MathText text={q.questionText} />
+                  </div>
 
                   {/* Options List */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
@@ -336,7 +337,9 @@ export default function QuizDetailClientPage({
                           >
                             {optionLabels[optIdx] || optIdx + 1}
                           </span>
-                          <span className="flex-1 line-clamp-2">{opt}</span>
+                          <div className="flex-1">
+                            <MathText text={opt} />
+                          </div>
                           {isCorrect && (
                             <Check size={14} className="text-emerald-600 shrink-0" />
                           )}
@@ -349,7 +352,7 @@ export default function QuizDetailClientPage({
                   {q.explanation && (
                     <div className="pt-2 text-xs bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-xl text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-800">
                       <strong className="text-slate-700 dark:text-slate-300">Pembahasan: </strong>
-                      {q.explanation}
+                      <MathText text={q.explanation} />
                     </div>
                   )}
                 </div>

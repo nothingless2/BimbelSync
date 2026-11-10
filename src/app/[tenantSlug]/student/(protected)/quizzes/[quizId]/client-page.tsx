@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { submitQuizAction } from "../actions";
 import { toast } from "@/components/ui/sonner";
+import { MathText } from "@/components/math-text";
 
 interface QuizQuestionItem {
   id: string;
@@ -241,9 +242,9 @@ export default function StudentQuizPlayClientPage({
                     </span>
                   </div>
 
-                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 whitespace-pre-wrap">
-                    {q.questionText}
-                  </p>
+                  <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    <MathText text={q.questionText} />
+                  </div>
 
                   {/* Options */}
                   <div className="space-y-2 pt-1">
@@ -286,7 +287,7 @@ export default function StudentQuizPlayClientPage({
                           key={optIdx}
                           className={`flex items-center justify-between gap-3 p-3 rounded-xl border text-xs sm:text-sm ${borderClass} ${bgClass}`}
                         >
-                          <div className="flex items-center gap-2.5">
+                          <div className="flex items-center gap-2.5 flex-1">
                             <span
                               className={`w-6 h-6 rounded-md flex items-center justify-center font-bold text-xs shrink-0 ${
                                 isKey
@@ -298,7 +299,9 @@ export default function StudentQuizPlayClientPage({
                             >
                               {optionLabels[optIdx] || optIdx + 1}
                             </span>
-                            <span className="text-slate-800 dark:text-slate-200">{opt}</span>
+                            <div className="flex-1">
+                              <MathText text={opt} />
+                            </div>
                           </div>
                           {badge}
                         </div>
@@ -310,7 +313,7 @@ export default function StudentQuizPlayClientPage({
                   {q.explanation && (
                     <div className="mt-2 p-3 rounded-xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40 text-xs text-blue-900 dark:text-blue-200">
                       <strong>Pembahasan Tutor: </strong>
-                      {q.explanation}
+                      <MathText text={q.explanation} />
                     </div>
                   )}
                 </div>
@@ -416,9 +419,9 @@ export default function StudentQuizPlayClientPage({
               </span>
             </div>
 
-            <p className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 whitespace-pre-wrap leading-relaxed">
-              {currentQuestion.questionText}
-            </p>
+            <div className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 leading-relaxed">
+              <MathText text={currentQuestion.questionText} />
+            </div>
 
             {/* Options Radio List */}
             <div className="space-y-2.5 pt-2">
@@ -445,7 +448,9 @@ export default function StudentQuizPlayClientPage({
                     >
                       {optionLabels[optIdx] || optIdx + 1}
                     </span>
-                    <span className="text-xs sm:text-sm font-medium flex-1">{optionText}</span>
+                    <div className="text-xs sm:text-sm font-medium flex-1">
+                      <MathText text={optionText} />
+                    </div>
                   </button>
                 );
               })}
