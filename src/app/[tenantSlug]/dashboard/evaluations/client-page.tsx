@@ -233,94 +233,101 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
             )}
           </div>
 
-          {/* Matrix Table & Mobile Cards */}
+          {/* Matrix Table with Horizontal Scroll */}
           {availableStudents.length === 0 ? (
             <div className="p-8 sm:p-12 text-center text-slate-500 text-sm sm:text-base">
               Belum ada siswa yang terdaftar di kelas ini.
             </div>
           ) : (
-            <>
-              {/* Mobile Task Management Bar (md:hidden) */}
-              {columns.length > 0 && (
-                <div className="md:hidden border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/70 p-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                      Daftar Tugas & Status ({columns.length})
-                    </span>
-                    <span className="text-[10px] text-slate-400">
-                      Sentuh tombol untuk kelola
-                    </span>
-                  </div>
-                  <div className="space-y-2">
-                    {columns.map((col, idx) => (
-                      <div key={idx} className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 shrink-0">
-                            {getSmallIcon(col.type)}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{col.title}</p>
-                            <div className="flex items-center gap-1.5 mt-0.5">
-                              <span className={`px-1.5 py-0.2 rounded text-[9px] font-bold uppercase ${col.status === 'PUBLISHED' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'}`}>
-                                {col.status}
-                              </span>
-                              <span className="text-[10px] text-slate-400">
-                                {format(new Date(col.date), 'dd MMM yy', { locale: id })}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        {userRole === "TUTOR" && !isReadOnly && (
-                          <div className="flex items-center gap-1 shrink-0">
-                            <button
-                              onClick={() => handleTogglePublish(col.title, col.type, col.status)}
-                              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold text-white flex items-center gap-1 transition ${col.status === 'DRAFT' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-600 hover:bg-slate-700'}`}
-                              title={col.status === 'DRAFT' ? 'Terbitkan ke siswa' : 'Jadikan Draf'}
-                            >
-                              {col.status === 'DRAFT' ? <CheckCircle2 size={13} /> : <AlertCircle size={13} />}
-                              <span>{col.status === 'DRAFT' ? 'Publish' : 'Draf'}</span>
-                            </button>
-                            <button
-                              onClick={() => handleDeleteColumn(col.title, col.type)}
-                              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition"
-                              title="Hapus Tugas"
-                            >
-                              <Trash2 size={15} />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+            <div className="relative overflow-hidden flex flex-col">
+              {/* Horizontal Scroll Cue for Mobile */}
+              {columns.length > 1 && (
+                <div className="sm:hidden flex items-center justify-between px-4 py-2 bg-blue-50/70 dark:bg-blue-950/30 border-b border-blue-100 dark:border-blue-900/40 text-[11px] font-semibold text-blue-700 dark:text-blue-300">
+                  <span className="flex items-center gap-1.5">
+                    ↔️ Geser ke samping untuk melihat seluruh {columns.length} tugas
+                  </span>
                 </div>
               )}
 
-              {/* Mobile Student Cards (md:hidden) */}
-              <div className="md:hidden p-3 space-y-3">
-                {availableStudents.map((student: any) => (
-                  <div key={student.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 shadow-xs space-y-3">
-                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-bold text-xs flex items-center justify-center shrink-0">
-                          {student.full_name.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="min-w-0">
-                          <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate" title={student.full_name}>
-                            {student.full_name}
-                          </h4>
-                          <p className="text-[11px] text-slate-400">
-                            {student.student_number || "Siswa Aktif"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs sm:text-sm border-collapse">
+                  <thead className="bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400">
+                    <tr>
+                      {/* Sticky Student Name Column */}
+                      <th className="px-3 py-3 sm:px-4 sm:py-3.5 font-semibold border-b border-r border-slate-200 dark:border-slate-800 w-36 min-w-[130px] max-w-[150px] sm:w-56 sm:min-w-[200px] sm:max-w-none sticky left-0 z-20 bg-slate-50 dark:bg-slate-900 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_4px_-1px_rgba(0,0,0,0.3)]">
+                        Nama Siswa
+                      </th>
 
-                    {columns.length === 0 ? (
-                      <p className="text-xs text-slate-400 italic text-center py-2">
-                        {isReadOnly ? "Belum ada evaluasi." : 'Klik "+ Tambah Tugas Baru" di atas.'}
-                      </p>
-                    ) : (
-                      <div className="space-y-2">
+                      {columns.length === 0 && (
+                        <th className="px-4 py-4 font-normal text-slate-400 border-b border-slate-200 dark:border-slate-800 text-center italic text-xs">
+                          {isReadOnly ? "Belum ada riwayat tugas/evaluasi." : 'Belum ada tugas/evaluasi. Klik "Tambah Tugas Baru".'}
+                        </th>
+                      )}
+
+                      {columns.map((col, idx) => (
+                        <th key={idx} className="px-2.5 py-3 font-semibold border-b border-r border-slate-200 dark:border-slate-800 w-36 min-w-[130px] text-center align-top bg-slate-50 dark:bg-slate-900">
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="flex items-center justify-center gap-1 w-full">
+                              {getSmallIcon(col.type)}
+                              <span className="truncate max-w-[105px] font-bold text-xs text-slate-800 dark:text-slate-200" title={col.title}>
+                                {col.title}
+                              </span>
+                            </div>
+                            <span className="text-[10px] text-slate-400 font-normal">
+                              {format(new Date(col.date), 'dd MMM yy', { locale: id })}
+                            </span>
+
+                            {/* Status Badge & Actions (Clickable on Mobile without hover) */}
+                            <div className="flex items-center justify-center gap-1.5 mt-1">
+                              {userRole === "TUTOR" && !isReadOnly ? (
+                                <>
+                                  <button
+                                    onClick={() => handleTogglePublish(col.title, col.type, col.status)}
+                                    className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase transition flex items-center gap-1 ${
+                                      col.status === 'PUBLISHED'
+                                        ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300'
+                                        : 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-300'
+                                    }`}
+                                    title="Klik untuk ubah status Publish / Draf"
+                                  >
+                                    {col.status === 'PUBLISHED' ? <CheckCircle2 size={10} /> : <AlertCircle size={10} />}
+                                    <span>{col.status}</span>
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteColumn(col.title, col.type)}
+                                    className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition"
+                                    title="Hapus Tugas Ini"
+                                  >
+                                    <Trash2 size={12} />
+                                  </button>
+                                </>
+                              ) : (
+                                <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
+                                  col.status === 'PUBLISHED'
+                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+                                    : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                                }`}>
+                                  {col.status}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-950">
+                    {availableStudents.map((student: any) => (
+                      <tr key={student.id} className="group hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
+                        {/* Sticky Student Name Cell */}
+                        <td className="px-3 py-2.5 sm:px-4 sm:py-3 font-semibold text-slate-900 dark:text-slate-200 border-r border-slate-200 dark:border-slate-800 w-36 min-w-[130px] max-w-[150px] sm:w-56 sm:min-w-[200px] sm:max-w-none sticky left-0 z-10 bg-white dark:bg-slate-950 group-hover:bg-slate-50 dark:group-hover:bg-slate-900/50 transition-colors shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_4px_-1px_rgba(0,0,0,0.3)]">
+                          <div className="truncate text-xs sm:text-sm" title={student.full_name}>
+                            {student.full_name}
+                          </div>
+                        </td>
+
+                        {columns.length === 0 && <td className="bg-slate-50/30 dark:bg-slate-900/10"></td>}
+
                         {columns.map((col, idx) => {
                           const ev = evaluations.find((e: any) => 
                             e.student_id === student.id &&
@@ -330,30 +337,15 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
                           );
 
                           if (!ev) {
-                            return (
-                              <div key={idx} className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-800/30 text-xs text-slate-400">
-                                <span>{col.title}</span>
-                                <span>-</span>
-                              </div>
-                            );
+                            return <td key={idx} className="bg-slate-50/50 dark:bg-slate-900/20 text-center text-slate-300 text-xs border-r border-slate-100 dark:border-slate-800">-</td>;
                           }
 
                           const inputValue = localScores[ev.id] ?? "";
                           const hasNote = !!ev.notes;
 
                           return (
-                            <div key={idx} className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  {getSmallIcon(col.type)}
-                                  <span className="font-semibold text-xs text-slate-800 dark:text-slate-200 truncate">{col.title}</span>
-                                </div>
-                                <span className="text-[10px] text-slate-400 block mt-0.5">
-                                  {format(new Date(col.date), 'dd MMM yy', { locale: id })}
-                                </span>
-                              </div>
-
-                              <div className="flex items-center gap-2 shrink-0">
+                            <td key={idx} className="px-2 py-2 w-36 min-w-[130px] border-r border-slate-100 dark:border-slate-800">
+                              <div className="relative flex justify-center items-center gap-1.5">
                                 <input
                                   type="number"
                                   placeholder="--"
@@ -361,156 +353,35 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
                                   disabled={isReadOnly}
                                   onChange={(e) => setLocalScores(prev => ({ ...prev, [ev.id]: e.target.value }))}
                                   onBlur={(e) => handleScoreBlur(ev.id, ev.score, e.target.value)}
-                                  className={`w-16 h-9 text-center text-sm font-bold rounded-xl border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                                  className={`w-14 sm:w-16 h-8 text-center text-xs sm:text-sm font-bold rounded-lg border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                                     isReadOnly ? "cursor-not-allowed opacity-80" : ""
                                   } ${
                                     inputValue !== "" 
-                                      ? "bg-emerald-50 border-emerald-300 text-emerald-800 dark:bg-emerald-900/30 dark:border-emerald-700 dark:text-emerald-300" 
+                                      ? "bg-emerald-50 border-emerald-300 text-emerald-800 dark:bg-emerald-900/20 dark:border-emerald-800/50 dark:text-emerald-400" 
                                       : "bg-white border-slate-200 text-slate-900 dark:bg-slate-900 dark:border-slate-700 dark:text-white"
                                   }`}
                                 />
                                 <button
                                   onClick={() => setNoteModal({ id: ev.id, title: col.title, studentName: student.full_name, notes: ev.notes || "" })}
-                                  className={`p-2 rounded-xl transition-colors ${
+                                  className={`p-1.5 rounded-lg transition-colors ${
                                     hasNote 
-                                      ? "text-blue-600 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300" 
-                                      : "text-slate-400 hover:text-slate-600 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+                                      ? "text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100" 
+                                      : "text-slate-300 hover:text-slate-500 hover:bg-slate-100 dark:text-slate-600 dark:hover:text-slate-400"
                                   }`}
                                   title={hasNote ? "Edit Catatan" : "Tambah Catatan"}
                                 >
-                                  <MessageSquare size={15} />
+                                  <MessageSquare size={13} />
                                 </button>
                               </div>
-                            </div>
+                            </td>
                           );
                         })}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Desktop Matrix Table (hidden md:block) */}
-              <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm border-collapse">
-                <thead className="bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400">
-                  <tr>
-                    <th className="px-3 py-3 sm:px-4 sm:py-4 font-semibold border-b border-r border-slate-200 dark:border-slate-800 min-w-[150px] sm:min-w-[200px] sticky left-0 z-10 bg-slate-50 dark:bg-slate-900 shadow-[1px_0_0_0_#e2e8f0] dark:shadow-[1px_0_0_0_#1e293b]">
-                      Nama Siswa
-                    </th>
-                    {columns.length === 0 && (
-                      <th className="px-3 py-3 sm:px-4 sm:py-4 font-normal text-slate-400 border-b border-slate-200 dark:border-slate-800 text-center italic text-xs">
-                        {isReadOnly ? "Belum ada riwayat tugas/evaluasi." : 'Belum ada tugas/evaluasi. Klik "Tambah Tugas Baru".'}
-                      </th>
-                    )}
-                    {columns.map((col, idx) => (
-                      <th key={idx} className="px-4 py-3 font-semibold border-b border-slate-200 dark:border-slate-800 min-w-[140px] text-center align-top group">
-                        <div className="flex flex-col items-center gap-1 relative">
-                          <div className="flex items-center gap-1.5 justify-center w-full">
-                            {getSmallIcon(col.type)}
-                            <span className="truncate max-w-[100px]" title={col.title}>{col.title}</span>
-                          </div>
-                          <span className="text-[10px] text-slate-400 font-normal">
-                            {format(new Date(col.date), 'dd MMM yy', { locale: id })}
-                          </span>
-                          
-                          {/* Dropdown Menu untuk Status & Hapus */}
-                          {userRole === "TUTOR" && !isReadOnly && (
-                            <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-all flex flex-col gap-1">
-                              <button
-                                onClick={() => handleTogglePublish(col.title, col.type, col.status)}
-                                className={`p-1 rounded-md shadow-sm transition-colors text-white ${col.status === 'DRAFT' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-slate-500 hover:bg-slate-600'}`}
-                                title={col.status === 'DRAFT' ? 'Publish (Siswa bisa melihat)' : 'Jadikan Draf (Sembunyikan dari siswa)'}
-                              >
-                                {col.status === 'DRAFT' ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
-                              </button>
-                              <button
-                                onClick={() => handleDeleteColumn(col.title, col.type)}
-                                className="p-1 bg-red-500 text-white hover:bg-red-600 rounded-md shadow-sm transition-colors"
-                                title="Hapus Tugas Ini"
-                              >
-                                <Trash2 size={12} />
-                              </button>
-                            </div>
-                          )}
-                          <div className="mt-1">
-                            <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide ${col.status === 'PUBLISHED' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'}`}>
-                              {col.status}
-                            </span>
-                          </div>
-                        </div>
-                      </th>
+                      </tr>
                     ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-950">
-                  {availableStudents.map((student: any) => (
-                    <tr key={student.id} className="group hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
-                      <td className="px-3 py-2.5 sm:px-4 sm:py-3 font-medium text-slate-900 dark:text-slate-200 border-r border-slate-200 dark:border-slate-800 sticky left-0 z-10 bg-white dark:bg-slate-950 group-hover:bg-slate-50 dark:group-hover:bg-slate-900/50 transition-colors shadow-[1px_0_0_0_#e2e8f0] dark:shadow-[1px_0_0_0_#1e293b]">
-                        <div className="truncate max-w-[140px] sm:max-w-[200px]" title={student.full_name}>
-                          {student.full_name}
-                        </div>
-                      </td>
-                      
-                      {columns.length === 0 && <td className="bg-slate-50/30 dark:bg-slate-900/10"></td>}
-                      
-                      {columns.map((col, idx) => {
-                        // Find evaluation for this student and column
-                        const ev = evaluations.find((e: any) => 
-                          e.student_id === student.id &&
-                          e.program_id === selectedProgramId &&
-                          e.evaluation_type === col.type &&
-                          e.title.toLowerCase() === col.title.toLowerCase()
-                        );
-
-                        if (!ev) {
-                          return <td key={idx} className="bg-slate-50/50 dark:bg-slate-900/20 text-center text-slate-300 text-xs">-</td>;
-                        }
-
-                        const inputValue = localScores[ev.id] ?? "";
-                        const hasNote = !!ev.notes;
-
-                        return (
-                          <td key={idx} className="px-1.5 py-1.5 sm:px-2 sm:py-2">
-                            <div className="relative flex justify-center items-center gap-1 sm:gap-1.5 group/cell">
-                              <input
-                                type="number"
-                                placeholder="--"
-                                value={inputValue}
-                                disabled={isReadOnly}
-                                onChange={(e) => setLocalScores(prev => ({ ...prev, [ev.id]: e.target.value }))}
-                                onBlur={(e) => handleScoreBlur(ev.id, ev.score, e.target.value)}
-                                className={`w-12 sm:w-16 h-8 text-center text-xs sm:text-sm font-semibold rounded-lg border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                                  isReadOnly ? "cursor-not-allowed opacity-80" : ""
-                                } ${
-                                  inputValue !== "" 
-                                    ? "bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-900/20 dark:border-emerald-800/50 dark:text-emerald-400" 
-                                    : "bg-white border-slate-200 text-slate-900 dark:bg-slate-900 dark:border-slate-700 dark:text-white"
-                                }`}
-                              />
-                              <button
-                                onClick={() => setNoteModal({ id: ev.id, title: col.title, studentName: student.full_name, notes: ev.notes || "" })}
-                                className={`p-1.5 rounded-lg transition-colors ${
-                                  hasNote 
-                                    ? "text-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100" 
-                                    : isReadOnly 
-                                      ? "hidden"
-                                      : "text-slate-300 hover:text-slate-500 hover:bg-slate-100 dark:text-slate-600 dark:hover:text-slate-400 dark:hover:bg-slate-800 opacity-0 group-hover/cell:opacity-100"
-                                }`}
-                                title={isReadOnly ? "Lihat Catatan" : (hasNote ? "Edit Catatan" : "Tambah Catatan")}
-                              >
-                                <MessageSquare size={12} />
-                              </button>
-                            </div>
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </>
           )}
         </div>
       ) : (

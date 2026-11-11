@@ -128,156 +128,91 @@ export default function GradebookClientPage({ tenantSlug, program, students, eva
             Belum ada siswa yang terdaftar di kelas ini.
           </div>
         ) : (
-          <>
-            {/* Mobile Student Final Grade Cards */}
-            <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
-              {gradebookData.map((student: any) => (
-                <div key={student.id} className="p-4 space-y-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-bold text-xs flex items-center justify-center shrink-0">
-                        {student.full_name.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="min-w-0">
-                        <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate">
-                          {student.full_name}
-                        </h4>
-                        <p className="text-[11px] text-slate-400">
-                          {student.student_number || "Siswa Aktif"}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="text-right shrink-0">
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block">Nilai Akhir</span>
-                      <span className="text-xl font-black text-blue-600 dark:text-blue-400">
-                        {student.finalGrade.toFixed(1)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Sub-Averages */}
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="p-2.5 rounded-xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30">
-                      <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-400 block">
-                        Rata-rata Ujian ({program.weight_exam}%)
-                      </span>
-                      <span className="text-sm font-bold text-amber-900 dark:text-amber-200">
-                        {student.examAvg.toFixed(1)}
-                      </span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30">
-                      <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 block">
-                        Rata-rata PR ({program.weight_homework}%)
-                      </span>
-                      <span className="text-sm font-bold text-emerald-900 dark:text-emerald-200">
-                        {student.hwAvg.toFixed(1)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Individual Tasks preview */}
-                  {columns.length > 0 && (
-                    <div className="pt-1">
-                      <details className="group/dt text-xs">
-                        <summary className="cursor-pointer text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-semibold list-none flex items-center justify-between py-1">
-                          <span>Rincian {columns.length} Nilai Tugas</span>
-                          <span className="text-[10px] text-blue-600 group-open/dt:rotate-180 transition-transform">▼</span>
-                        </summary>
-                        <div className="mt-2 space-y-1.5 pl-1">
-                          {columns.map((col, idx) => {
-                            const ev = student.evaluations.find((e: any) => e.evaluation_type === col.type && e.title === col.title);
-                            return (
-                              <div key={idx} className="flex items-center justify-between py-1 px-2 rounded-lg bg-slate-50 dark:bg-slate-800/40 text-[11px]">
-                                <span className="truncate max-w-[180px] text-slate-700 dark:text-slate-300">{col.title}</span>
-                                <span className="font-bold text-slate-900 dark:text-white">{ev?.score ?? "-"}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </details>
-                    </div>
-                  )}
-                </div>
-              ))}
+          <div className="relative overflow-hidden flex flex-col">
+            {/* Mobile Scroll Cue */}
+            <div className="sm:hidden flex items-center justify-between px-4 py-2 bg-blue-50/70 dark:bg-blue-950/30 border-b border-blue-100 dark:border-blue-900/40 text-[11px] font-semibold text-blue-700 dark:text-blue-300">
+              <span className="flex items-center gap-1.5">
+                ↔️ Geser tabel ke samping untuk melihat rekap nilai lengkap
+              </span>
             </div>
 
-            {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto print:block print:overflow-visible">
-            <table className="w-full text-left text-xs sm:text-sm border-collapse">
-              <thead className="bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400">
-                <tr>
-                  <th className="px-3 py-3 sm:px-4 sm:py-4 font-semibold border-b border-r border-slate-200 dark:border-slate-800 min-w-[150px] sticky left-0 z-20 bg-slate-50 dark:bg-slate-900">
-                    Nama Siswa
-                  </th>
-                  
-                  {examCols.length > 0 && (
-                    <th colSpan={examCols.length} className="px-4 py-2 font-semibold border-b border-r border-slate-200 dark:border-slate-800 text-center bg-yellow-50/50 dark:bg-yellow-900/10 text-yellow-800 dark:text-yellow-500">
-                      Ujian & Kuis ({program.weight_exam}%)
+            <div className="overflow-x-auto print:overflow-visible">
+              <table className="w-full text-left text-xs sm:text-sm border-collapse">
+                <thead className="bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400">
+                  <tr>
+                    <th className="px-3 py-3 sm:px-4 sm:py-4 font-semibold border-b border-r border-slate-200 dark:border-slate-800 w-36 min-w-[130px] max-w-[150px] sm:w-56 sm:min-w-[200px] sticky left-0 z-20 bg-slate-50 dark:bg-slate-900 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_4px_-1px_rgba(0,0,0,0.3)]">
+                      Nama Siswa
                     </th>
-                  )}
-                  {hwCols.length > 0 && (
-                    <th colSpan={hwCols.length} className="px-4 py-2 font-semibold border-b border-r border-slate-200 dark:border-slate-800 text-center bg-emerald-50/50 dark:bg-emerald-900/10 text-emerald-800 dark:text-emerald-500">
-                      PR & Tugas ({program.weight_homework}%)
-                    </th>
-                  )}
-                  
-                  <th className="px-3 py-3 sm:px-4 sm:py-4 font-bold border-b border-slate-200 dark:border-slate-800 min-w-[120px] text-center sticky right-0 z-20 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white shadow-[-1px_0_0_0_#e2e8f0] dark:shadow-[-1px_0_0_0_#1e293b]">
-                    NILAI AKHIR
-                  </th>
-                </tr>
-                {/* Sub-header for individual tasks */}
-                <tr>
-                  <th className="px-3 py-2 border-b border-r border-slate-200 dark:border-slate-800 sticky left-0 z-20 bg-slate-50 dark:bg-slate-900"></th>
-                  {examCols.map((col, idx) => (
-                    <th key={`exam-${idx}`} className="px-2 py-2 font-medium border-b border-slate-200 dark:border-slate-800 text-center max-w-[100px] truncate" title={col.title}>
-                      {col.title}
-                    </th>
-                  ))}
-                  {hwCols.map((col, idx) => (
-                    <th key={`hw-${idx}`} className="px-2 py-2 font-medium border-b border-slate-200 dark:border-slate-800 text-center max-w-[100px] truncate" title={col.title}>
-                      {col.title}
-                    </th>
-                  ))}
-                  <th className="px-3 py-2 border-b border-slate-200 dark:border-slate-800 sticky right-0 z-20 bg-slate-100 dark:bg-slate-800 shadow-[-1px_0_0_0_#e2e8f0] dark:shadow-[-1px_0_0_0_#1e293b]"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-950">
-                {gradebookData.map((student: any) => (
-                  <tr key={student.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors group">
-                    <td className="px-3 py-3 sm:px-4 sm:py-3 font-medium text-slate-900 dark:text-slate-200 border-r border-slate-200 dark:border-slate-800 sticky left-0 z-10 bg-white dark:bg-slate-950 group-hover:bg-slate-50 dark:group-hover:bg-slate-900/50">
-                      {student.full_name}
-                    </td>
                     
-                    {/* Exam Scores */}
-                    {examCols.map((col, idx) => {
-                      const ev = student.evaluations.find((e: any) => e.evaluation_type === col.type && e.title === col.title);
-                      return (
-                        <td key={`sc-exam-${idx}`} className="px-2 py-2 text-center text-slate-700 dark:text-slate-300">
-                          {ev?.score ?? "-"}
-                        </td>
-                      );
-                    })}
-
-                    {/* HW Scores */}
-                    {hwCols.map((col, idx) => {
-                      const ev = student.evaluations.find((e: any) => e.evaluation_type === col.type && e.title === col.title);
-                      return (
-                        <td key={`sc-hw-${idx}`} className="px-2 py-2 text-center text-slate-700 dark:text-slate-300">
-                          {ev?.score ?? "-"}
-                        </td>
-                      );
-                    })}
-
-                    <td className="px-3 py-3 sm:px-4 sm:py-3 text-center sticky right-0 z-10 bg-slate-50 dark:bg-slate-900 group-hover:bg-slate-100 dark:group-hover:bg-slate-800 shadow-[-1px_0_0_0_#e2e8f0] dark:shadow-[-1px_0_0_0_#1e293b] font-bold text-lg text-blue-600 dark:text-blue-400">
-                      {student.finalGrade.toFixed(1)}
-                    </td>
+                    {examCols.length > 0 && (
+                      <th colSpan={examCols.length} className="px-3 py-2 font-semibold border-b border-r border-slate-200 dark:border-slate-800 text-center bg-yellow-50/50 dark:bg-yellow-900/10 text-yellow-800 dark:text-yellow-500">
+                        Ujian & Kuis ({program.weight_exam}%)
+                      </th>
+                    )}
+                    {hwCols.length > 0 && (
+                      <th colSpan={hwCols.length} className="px-3 py-2 font-semibold border-b border-r border-slate-200 dark:border-slate-800 text-center bg-emerald-50/50 dark:bg-emerald-900/10 text-emerald-800 dark:text-emerald-500">
+                        PR & Tugas ({program.weight_homework}%)
+                      </th>
+                    )}
+                    
+                    <th className="px-3 py-3 sm:px-4 sm:py-4 font-bold border-b border-slate-200 dark:border-slate-800 min-w-[110px] text-center sm:sticky sm:right-0 sm:z-20 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white sm:shadow-[-2px_0_4px_-1px_rgba(0,0,0,0.06)]">
+                      NILAI AKHIR
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                  {/* Sub-header for individual tasks */}
+                  <tr>
+                    <th className="px-3 py-2 border-b border-r border-slate-200 dark:border-slate-800 w-36 min-w-[130px] max-w-[150px] sm:w-56 sm:min-w-[200px] sticky left-0 z-20 bg-slate-50 dark:bg-slate-900 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_4px_-1px_rgba(0,0,0,0.3)]"></th>
+                    {examCols.map((col, idx) => (
+                      <th key={`exam-${idx}`} className="px-2 py-2 font-medium border-b border-r border-slate-200 dark:border-slate-800 text-center min-w-[85px] max-w-[100px] truncate" title={col.title}>
+                        {col.title}
+                      </th>
+                    ))}
+                    {hwCols.map((col, idx) => (
+                      <th key={`hw-${idx}`} className="px-2 py-2 font-medium border-b border-r border-slate-200 dark:border-slate-800 text-center min-w-[85px] max-w-[100px] truncate" title={col.title}>
+                        {col.title}
+                      </th>
+                    ))}
+                    <th className="px-3 py-2 border-b border-slate-200 dark:border-slate-800 sm:sticky sm:right-0 sm:z-20 bg-slate-100 dark:bg-slate-800 sm:shadow-[-2px_0_4px_-1px_rgba(0,0,0,0.06)]"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-950">
+                  {gradebookData.map((student: any) => (
+                    <tr key={student.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors group">
+                      <td className="px-3 py-3 sm:px-4 sm:py-3 font-semibold text-slate-900 dark:text-slate-200 border-r border-slate-200 dark:border-slate-800 w-36 min-w-[130px] max-w-[150px] sm:w-56 sm:min-w-[200px] sticky left-0 z-10 bg-white dark:bg-slate-950 group-hover:bg-slate-50 dark:group-hover:bg-slate-900/50 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] dark:shadow-[2px_0_4px_-1px_rgba(0,0,0,0.3)]">
+                        <div className="truncate text-xs sm:text-sm" title={student.full_name}>
+                          {student.full_name}
+                        </div>
+                      </td>
+                      
+                      {/* Exam Scores */}
+                      {examCols.map((col, idx) => {
+                        const ev = student.evaluations.find((e: any) => e.evaluation_type === col.type && e.title === col.title);
+                        return (
+                          <td key={`sc-exam-${idx}`} className="px-2 py-2 text-center text-slate-700 dark:text-slate-300 border-r border-slate-100 dark:border-slate-800 font-medium">
+                            {ev?.score ?? "-"}
+                          </td>
+                        );
+                      })}
+
+                      {/* HW Scores */}
+                      {hwCols.map((col, idx) => {
+                        const ev = student.evaluations.find((e: any) => e.evaluation_type === col.type && e.title === col.title);
+                        return (
+                          <td key={`sc-hw-${idx}`} className="px-2 py-2 text-center text-slate-700 dark:text-slate-300 border-r border-slate-100 dark:border-slate-800 font-medium">
+                            {ev?.score ?? "-"}
+                          </td>
+                        );
+                      })}
+
+                      <td className="px-3 py-3 sm:px-4 sm:py-3 text-center sm:sticky sm:right-0 sm:z-10 bg-slate-50 dark:bg-slate-900 group-hover:bg-slate-100 dark:group-hover:bg-slate-800 sm:shadow-[-2px_0_4px_-1px_rgba(0,0,0,0.06)] font-extrabold text-base sm:text-lg text-blue-600 dark:text-blue-400">
+                        {student.finalGrade.toFixed(1)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-          </>
         )}
       </div>
 

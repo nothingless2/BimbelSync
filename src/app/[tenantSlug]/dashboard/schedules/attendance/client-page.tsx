@@ -407,16 +407,16 @@ export default function AttendanceMonitoringClient({
           </div>
 
           {/* Filters Bar */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
             {/* Program Dropdown Selector */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 shrink-0">
                 Program:
               </span>
               <select
                 value={selectedProgramId}
                 onChange={(e) => setSelectedProgramId(e.target.value)}
-                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 focus:ring-blue-500 focus:border-blue-500"
+                className="flex-1 sm:flex-initial px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="ALL">Semua Program ({programs.length})</option>
                 {programs.map((p) => (
@@ -427,12 +427,12 @@ export default function AttendanceMonitoringClient({
               </select>
             </div>
 
-            {/* Status Pills (Only relevant in sessions view) */}
+            {/* Status Pills (Single horizontal scrollable row on mobile) */}
             {viewMode === "sessions" && (
-              <div className="flex flex-wrap items-center gap-1.5 sm:ml-auto">
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 w-full sm:w-auto sm:ml-auto">
                 <button
                   onClick={() => setStatusFilter("ALL")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition shrink-0 whitespace-nowrap ${
                     statusFilter === "ALL"
                       ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
                       : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
@@ -443,7 +443,7 @@ export default function AttendanceMonitoringClient({
 
                 <button
                   onClick={() => setStatusFilter("PENDING")}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition shrink-0 whitespace-nowrap ${
                     statusFilter === "PENDING"
                       ? "bg-rose-600 text-white shadow-xs"
                       : "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 hover:bg-rose-100"
@@ -455,7 +455,7 @@ export default function AttendanceMonitoringClient({
 
                 <button
                   onClick={() => setStatusFilter("RECORDED")}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition shrink-0 whitespace-nowrap ${
                     statusFilter === "RECORDED"
                       ? "bg-emerald-600 text-white shadow-xs"
                       : "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 hover:bg-emerald-100"
@@ -468,7 +468,7 @@ export default function AttendanceMonitoringClient({
 
                 <button
                   onClick={() => setStatusFilter("UPCOMING")}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition shrink-0 whitespace-nowrap ${
                     statusFilter === "UPCOMING"
                       ? "bg-blue-600 text-white shadow-xs"
                       : "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 hover:bg-blue-100"
