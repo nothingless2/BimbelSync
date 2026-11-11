@@ -86,30 +86,29 @@ export function AttendanceClient({
   return (
     <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
       
-      <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex flex-wrap gap-4 items-center justify-between bg-slate-50/50 dark:bg-slate-900/30">
+      <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-900/30">
         <div>
-          <h3 className="font-semibold text-slate-800 dark:text-slate-200 text-lg">Daftar Kehadiran Siswa</h3>
-          <p className="text-sm text-slate-500 mt-1">Pilih status absensi untuk masing-masing siswa, lalu klik Simpan.</p>
+          <h3 className="font-semibold text-slate-800 dark:text-slate-200 text-base sm:text-lg">Daftar Kehadiran Siswa</h3>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Pilih status absensi untuk masing-masing siswa, lalu klik Simpan.</p>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
           <Link
             href={`/${tenantSlug}/present/${scheduleId}`}
             target="_blank"
-            className="flex items-center gap-2 px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-semibold text-sm hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors shadow-sm"
+            className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-semibold text-xs sm:text-sm hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors shadow-xs"
           >
-            <MonitorPlay size={18} />
-            {isEnded ? "Layar TV (Selesai)" : "Tampilkan di TV / Layar"}
+            <MonitorPlay size={16} />
+            {isEnded ? "Layar TV (Selesai)" : "Layar TV / QR"}
           </Link>
           
-          <div className="flex items-center gap-2 text-sm bg-white dark:bg-slate-900 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800">
-            <span className="font-semibold text-slate-700 dark:text-slate-300">Statistik:</span>
-          <span className="text-emerald-600 font-bold ml-2">Hadir: {Object.values(attendanceState).filter(v => v === 'PRESENT').length}</span>
-          <span className="text-amber-600 font-bold ml-2">Izin: {Object.values(attendanceState).filter(v => v === 'EXCUSED').length}</span>
-          <span className="text-red-600 font-bold ml-2">Alpa: {Object.values(attendanceState).filter(v => v === 'ABSENT').length}</span>
+          <div className="grid grid-cols-3 sm:flex items-center gap-1 sm:gap-2 text-xs bg-white dark:bg-slate-900 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 text-center font-bold">
+            <span className="text-emerald-600">Hadir: {Object.values(attendanceState).filter(v => v === 'PRESENT').length}</span>
+            <span className="text-amber-600">Izin: {Object.values(attendanceState).filter(v => v === 'EXCUSED').length}</span>
+            <span className="text-rose-600">Alpa: {Object.values(attendanceState).filter(v => v === 'ABSENT').length}</span>
+          </div>
         </div>
       </div>
-    </div>
 
     {isEnded && (
       <div className="mx-6 mt-4 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-xl flex items-start gap-3 text-amber-900 dark:text-amber-200 text-sm">
