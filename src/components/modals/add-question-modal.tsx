@@ -4,13 +4,11 @@ import { useState, useEffect, useRef } from "react";
 import {
   X,
   Loader2,
-  CheckCircle,
   HelpCircle,
   Eye,
   PenTool,
   Image as ImageIcon,
   Sparkles,
-  BookOpen,
   CornerDownRight,
 } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
@@ -34,6 +32,8 @@ interface AddQuestionModalProps {
   initialData?: QuestionData | null;
 }
 
+type CategoryType = "matrix" | "algebra" | "calculus" | "symbols" | "science" | "lang";
+
 export function AddQuestionModal({
   isOpen,
   onClose,
@@ -48,7 +48,7 @@ export function AddQuestionModal({
   const [explanation, setExplanation] = useState("");
   const [points, setPoints] = useState(10);
   const [activeView, setActiveView] = useState<"edit" | "preview">("edit");
-  const [activeCategory, setActiveCategory] = useState<"matrix" | "math" | "symbols" | "lang">("matrix");
+  const [activeCategory, setActiveCategory] = useState<CategoryType>("matrix");
 
   // Melacak input mana yang sedang aktif (Pertanyaan atau Opsi A, B, C, D)
   const [activeTarget, setActiveTarget] = useState<"question" | number>("question");
@@ -204,7 +204,7 @@ export function AddQuestionModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200 max-h-[95vh] flex flex-col">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden animate-in zoom-in-95 duration-200 max-h-[96vh] flex flex-col">
         {/* Modal Header */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 shrink-0">
           <div className="flex items-center gap-2.5">
@@ -215,7 +215,7 @@ export function AddQuestionModal({
               <h2 className="text-base sm:text-lg font-bold text-slate-800 dark:text-white">
                 {initialData ? "Edit Butir Soal" : "Tambah Butir Soal Baru"}
               </h2>
-              <p className="text-xs text-slate-500">Mendukung simbol & rumus matematika di soal dan pilihan ganda</p>
+              <p className="text-xs text-slate-500">Bank simbol lengkap matematika, matriks 3×3, kalkulus, sains, dan wacana</p>
             </div>
           </div>
 
@@ -261,7 +261,7 @@ export function AddQuestionModal({
         <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4 overflow-y-auto custom-scrollbar flex-1">
           {activeView === "edit" ? (
             <>
-              {/* Formula & Formatting Helper Toolbar (Bisa masuk ke Pertanyaan atau Opsi Jawaban) */}
+              {/* Formula & Formatting Helper Toolbar */}
               <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl p-3 space-y-2.5">
                 {/* Indikator Target Sisipan */}
                 <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-200/80 dark:border-slate-700/80">
@@ -269,14 +269,14 @@ export function AddQuestionModal({
                     <CornerDownRight size={13} className="text-blue-600" />
                     Sisipkan Simbol Ke:
                   </span>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 flex-wrap">
                     <button
                       type="button"
                       onClick={() => {
                         setActiveTarget("question");
                         textareaRef.current?.focus();
                       }}
-                      className={`px-2 py-0.5 rounded-md text-xs font-semibold transition ${
+                      className={`px-2.5 py-0.5 rounded-md text-xs font-semibold transition ${
                         activeTarget === "question"
                           ? "bg-blue-600 text-white shadow-xs"
                           : "bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200"
@@ -292,7 +292,7 @@ export function AddQuestionModal({
                           setActiveTarget(idx);
                           optionInputRefs.current[idx]?.focus();
                         }}
-                        className={`px-2 py-0.5 rounded-md text-xs font-semibold transition ${
+                        className={`px-2.5 py-0.5 rounded-md text-xs font-semibold transition ${
                           activeTarget === idx
                             ? "bg-emerald-600 text-white shadow-xs"
                             : "bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200"
@@ -304,45 +304,67 @@ export function AddQuestionModal({
                   </div>
                 </div>
 
-                {/* Category switcher */}
-                <div className="flex items-center gap-1 border-b border-slate-200/80 dark:border-slate-700/80 pb-2 overflow-x-auto text-xs">
+                {/* Category switcher (6 Kategori Lengkap) */}
+                <div className="flex items-center gap-1 border-b border-slate-200/80 dark:border-slate-700/80 pb-2 overflow-x-auto text-xs custom-scrollbar">
                   <button
                     type="button"
                     onClick={() => setActiveCategory("matrix")}
-                    className={`px-2.5 py-1 rounded-lg font-semibold transition ${
+                    className={`px-2.5 py-1 rounded-lg font-semibold whitespace-nowrap transition ${
                       activeCategory === "matrix"
                         ? "bg-slate-900 text-white dark:bg-blue-600"
                         : "text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
                     }`}
                   >
-                    📐 Matriks
+                    📐 Matriks & Vektor
                   </button>
                   <button
                     type="button"
-                    onClick={() => setActiveCategory("math")}
-                    className={`px-2.5 py-1 rounded-lg font-semibold transition ${
-                      activeCategory === "math"
+                    onClick={() => setActiveCategory("algebra")}
+                    className={`px-2.5 py-1 rounded-lg font-semibold whitespace-nowrap transition ${
+                      activeCategory === "algebra"
                         ? "bg-slate-900 text-white dark:bg-blue-600"
                         : "text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
                     }`}
                   >
-                    ➗ Aljabar & Pecahan
+                    ➗ Aljabar & Persamaan
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveCategory("calculus")}
+                    className={`px-2.5 py-1 rounded-lg font-semibold whitespace-nowrap transition ${
+                      activeCategory === "calculus"
+                        ? "bg-slate-900 text-white dark:bg-blue-600"
+                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                    }`}
+                  >
+                    ∫ Kalkulus & Trigo
                   </button>
                   <button
                     type="button"
                     onClick={() => setActiveCategory("symbols")}
-                    className={`px-2.5 py-1 rounded-lg font-semibold transition ${
+                    className={`px-2.5 py-1 rounded-lg font-semibold whitespace-nowrap transition ${
                       activeCategory === "symbols"
                         ? "bg-slate-900 text-white dark:bg-blue-600"
                         : "text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
                     }`}
                   >
-                    🔣 Simbol Cepat
+                    🔣 Simbol & Yunani
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveCategory("science")}
+                    className={`px-2.5 py-1 rounded-lg font-semibold whitespace-nowrap transition ${
+                      activeCategory === "science"
+                        ? "bg-slate-900 text-white dark:bg-blue-600"
+                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                    }`}
+                  >
+                    🧪 Fisika & Kimia
                   </button>
                   <button
                     type="button"
                     onClick={() => setActiveCategory("lang")}
-                    className={`px-2.5 py-1 rounded-lg font-semibold transition ${
+                    className={`px-2.5 py-1 rounded-lg font-semibold whitespace-nowrap transition ${
                       activeCategory === "lang"
                         ? "bg-slate-900 text-white dark:bg-blue-600"
                         : "text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
@@ -352,42 +374,38 @@ export function AddQuestionModal({
                   </button>
                 </div>
 
-                {/* Buttons for Active Category */}
+                {/* Sub-Buttons for Active Category */}
                 <div className="flex flex-wrap items-center gap-1.5 pt-0.5 text-xs">
+                  {/* 1. MATRIKS & VEKTOR */}
                   {activeCategory === "matrix" && (
                     <>
+                      {/* Matriks 3x3 */}
                       <button
                         type="button"
                         onClick={() =>
-                          insertSnippet(`$\\begin{pmatrix} a \\\\ b \\end{pmatrix}$`)
+                          insertSnippet(
+                            `$\\begin{pmatrix} a & b & c \\\\ d & e & f \\\\ g & h & i \\end{pmatrix}$`
+                          )
                         }
-                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-emerald-500 font-mono text-[11px] text-emerald-600 dark:text-emerald-300 font-bold"
-                        title="Cocok untuk pilihan ganda hasil matriks kolom 2x1"
+                        className="px-2.5 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px] text-blue-600 dark:text-blue-300 font-bold"
+                        title="Matriks 3x3 (Kurung Bulat)"
                       >
-                        Matriks Kolom (2×1)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          insertSnippet(`$\\begin{pmatrix} a & b \\end{pmatrix}$`)
-                        }
-                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-emerald-500 font-mono text-[11px] text-emerald-600 dark:text-emerald-300 font-bold"
-                        title="Matriks Baris 1x2"
-                      >
-                        Matriks Baris (1×2)
+                        Matriks 3×3
                       </button>
                       <button
                         type="button"
                         onClick={() =>
                           insertSnippet(
-                            `\n$$\\begin{pmatrix} 1 & 2 & 12 \\\\ 4 & 3 & 7 \\end{pmatrix} \\times \\begin{pmatrix} 4 \\\\ 5 \\\\ 9 \\end{pmatrix}$$\n`
+                            `$\\begin{bmatrix} a & b & c \\\\ d & e & f \\\\ g & h & i \\end{bmatrix}$`
                           )
                         }
-                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px] text-blue-600 dark:text-blue-300 font-semibold"
-                        title="Perkalian Matriks 2x3 dengan 3x1"
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                        title="Matriks Siku 3x3"
                       >
-                        Perkalian Matriks (2×3 × 3×1)
+                        Matriks Siku [3×3]
                       </button>
+
+                      {/* Matriks 2x2 */}
                       <button
                         type="button"
                         onClick={() =>
@@ -406,17 +424,169 @@ export function AddQuestionModal({
                       >
                         Matriks Siku [2×2]
                       </button>
+
+                      {/* Matriks Persegi Panjang & Kolom / Baris */}
                       <button
                         type="button"
-                        onClick={() => insertSnippet(`$\\det(A)$`)}
+                        onClick={() =>
+                          insertSnippet(
+                            `$\\begin{pmatrix} a & b & c \\\\ d & e & f \\end{pmatrix}$`
+                          )
+                        }
                         className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
                       >
-                        det(A)
+                        Matriks 2×3
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          insertSnippet(
+                            `$\\begin{pmatrix} a & b \\\\ c & d \\\\ e & f \\end{pmatrix}$`
+                          )
+                        }
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Matriks 3×2
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          insertSnippet(`$\\begin{pmatrix} a \\\\ b \\\\ c \\end{pmatrix}$`)
+                        }
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-emerald-500 font-mono text-[11px] text-emerald-600 dark:text-emerald-300 font-semibold"
+                        title="Matriks Kolom 3x1"
+                      >
+                        Kolom (3×1)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          insertSnippet(`$\\begin{pmatrix} a \\\\ b \\end{pmatrix}$`)
+                        }
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-emerald-500 font-mono text-[11px] text-emerald-600 dark:text-emerald-300 font-semibold"
+                        title="Matriks Kolom 2x1"
+                      >
+                        Kolom (2×1)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          insertSnippet(`$\\begin{pmatrix} a & b & c \\end{pmatrix}$`)
+                        }
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-emerald-500 font-mono text-[11px] text-emerald-600 dark:text-emerald-300 font-semibold"
+                        title="Matriks Baris 1x3"
+                      >
+                        Baris (1×3)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          insertSnippet(`$\\begin{pmatrix} a & b \\end{pmatrix}$`)
+                        }
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-emerald-500 font-mono text-[11px] text-emerald-600 dark:text-emerald-300 font-semibold"
+                        title="Matriks Baris 1x2"
+                      >
+                        Baris (1×2)
+                      </button>
+
+                      {/* Operasi Matriks */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          insertSnippet(
+                            `\n$$\\begin{pmatrix} 1 & 2 & 12 \\\\ 4 & 3 & 7 \\end{pmatrix} \\times \\begin{pmatrix} 4 \\\\ 5 \\\\ 9 \\end{pmatrix}$$\n`
+                          )
+                        }
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px] text-blue-600 dark:text-blue-300 font-semibold"
+                      >
+                        Perkalian (2×3 × 3×1)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          insertSnippet(
+                            `\n$$\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix} \\begin{pmatrix} e & f \\\\ g & h \\end{pmatrix}$$\n`
+                          )
+                        }
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Perkalian (2×2 × 2×2)
+                      </button>
+
+                      {/* Determinan */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          insertSnippet(
+                            `$\\begin{vmatrix} a & b & c \\\\ d & e & f \\\\ g & h & i \\end{vmatrix}$`
+                          )
+                        }
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                        title="Determinan Matriks 3x3"
+                      >
+                        |Det 3×3|
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          insertSnippet(`$\\begin{vmatrix} a & b \\\\ c & d \\end{vmatrix}$`)
+                        }
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                        title="Determinan Matriks 2x2"
+                      >
+                        |Det 2×2|
+                      </button>
+
+                      {/* Matriks Identitas & Simbol Khusus */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          insertSnippet(
+                            `$I_3 = \\begin{pmatrix} 1 & 0 & 0 \\\\ 0 & 1 & 0 \\\\ 0 & 0 & 1 \\end{pmatrix}$`
+                          )
+                        }
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Identitas I₃
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          insertSnippet(
+                            `$I_2 = \\begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\end{pmatrix}$`
+                          )
+                        }
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Identitas I₂
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$A^{-1}$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Invers A⁻¹
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$A^{T}$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Transpose Aᵀ
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$\\vec{v} = x\\hat{i} + y\\hat{j}$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Vektor v⃗ (î, ĵ)
                       </button>
                     </>
                   )}
 
-                  {activeCategory === "math" && (
+                  {/* 2. ALJABAR & PERSAMAAN */}
+                  {activeCategory === "algebra" && (
                     <>
                       <button
                         type="button"
@@ -427,10 +597,24 @@ export function AddQuestionModal({
                       </button>
                       <button
                         type="button"
+                        onClick={() => insertSnippet(`$c\\frac{a}{b}$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Pecahan Campuran
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => insertSnippet(`$\\sqrt{x}$`)}
                         className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
                       >
                         Akar √x
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$\\sqrt[n]{x}$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Akar ⁿ√x
                       </button>
                       <button
                         type="button"
@@ -441,6 +625,13 @@ export function AddQuestionModal({
                       </button>
                       <button
                         type="button"
+                        onClick={() => insertSnippet(`$x^{n}$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Pangkat xⁿ
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => insertSnippet(`$x_{1}$`)}
                         className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
                       >
@@ -448,31 +639,323 @@ export function AddQuestionModal({
                       </button>
                       <button
                         type="button"
-                        onClick={() => insertSnippet(`$\\pm$`)}
+                        onClick={() =>
+                          insertSnippet(
+                            `$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$`
+                          )
+                        }
                         className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
                       >
-                        Plus Minus ±
+                        Rumus ABC
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          insertSnippet(
+                            `\n$$\\begin{cases} 2x + y = 8 \\\\ x - 3y = -3 \\end{cases}$$\n`
+                          )
+                        }
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        SPLDV (Sistem Persamaan)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$\\binom{n}{r}$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Kombinasi (nCr)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$^{n}P_{r}$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Permutasi (nPr)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$|x|$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Mutlak |x|
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$(f \\circ g)(x)$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Komposisi (f∘g)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$\\log_{a}(b)$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Logaritma
                       </button>
                     </>
                   )}
 
-                  {activeCategory === "symbols" && (
+                  {/* 3. KALKULUS & TRIGONOMETRI */}
+                  {activeCategory === "calculus" && (
                     <>
-                      {["\\times", "\\div", "\\pm", "\\le", "\\ge", "\\neq", "\\approx", "\\pi", "\\alpha", "\\beta", "\\theta", "^\\circ"].map(
-                        (sym) => (
-                          <button
-                            key={sym}
-                            type="button"
-                            onClick={() => insertSnippet(`$${sym}$`)}
-                            className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
-                          >
-                            {sym.replace("\\", "")}
-                          </button>
-                        )
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$\\sin(x)$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        sin(x)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$\\cos(x)$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        cos(x)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$\\tan(x)$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        tan(x)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          insertSnippet(`$\\sin^2(x) + \\cos^2(x) = 1$`)
+                        }
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        sin²x + cos²x = 1
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$\\theta = 45^\\circ$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Sudut θ = 45°
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          insertSnippet(`$\\lim_{x \\to 0} \\frac{\\sin x}{x} = 1$`)
+                        }
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Limit x→0
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$\\lim_{x \\to \\infty}$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Limit x→∞
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$\\frac{df}{dx}$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Turunan (df/dx)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$f'(x)$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Turunan f&apos;(x)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$\\int f(x) \\, dx$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Integral Tak Tentu ∫
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          insertSnippet(`$\\int_{a}^{b} f(x) \\, dx$`)
+                        }
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Integral Tentu ∫ₐᵇ
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$\\sum_{i=1}^{n} x_i$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Sigma ∑
+                      </button>
                     </>
                   )}
 
+                  {/* 4. SIMBOL, LOGIKA & YUNANI */}
+                  {activeCategory === "symbols" && (
+                    <>
+                      {/* Operator Matematis & Relasi */}
+                      {[
+                        "\\times",
+                        "\\div",
+                        "\\pm",
+                        "\\mp",
+                        "\\le",
+                        "\\ge",
+                        "\\neq",
+                        "\\approx",
+                        "\\equiv",
+                        "\\infty",
+                        "\\propto",
+                      ].map((sym) => (
+                        <button
+                          key={sym}
+                          type="button"
+                          onClick={() => insertSnippet(`$${sym}$`)}
+                          className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                        >
+                          {sym.replace("\\", "")}
+                        </button>
+                      ))}
+
+                      {/* Himpunan & Logika */}
+                      {[
+                        "\\in",
+                        "\\notin",
+                        "\\subset",
+                        "\\cup",
+                        "\\cap",
+                        "\\emptyset",
+                        "\\implies",
+                        "\\iff",
+                        "\\rightarrow",
+                        "\\leftarrow",
+                        "\\forall",
+                        "\\exists",
+                      ].map((sym) => (
+                        <button
+                          key={sym}
+                          type="button"
+                          onClick={() => insertSnippet(`$${sym}$`)}
+                          className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                        >
+                          {sym.replace("\\", "")}
+                        </button>
+                      ))}
+
+                      {/* Huruf Yunani (Greek) */}
+                      {[
+                        "\\alpha",
+                        "\\beta",
+                        "\\gamma",
+                        "\\delta",
+                        "\\Delta",
+                        "\\theta",
+                        "\\lambda",
+                        "\\mu",
+                        "\\pi",
+                        "\\rho",
+                        "\\sigma",
+                        "\\Sigma",
+                        "\\omega",
+                        "\\Omega",
+                        "^\\circ",
+                        "\\angle",
+                        "\\perp",
+                        "\\parallel",
+                      ].map((sym) => (
+                        <button
+                          key={sym}
+                          type="button"
+                          onClick={() => insertSnippet(`$${sym}$`)}
+                          className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                        >
+                          {sym.replace("\\", "")}
+                        </button>
+                      ))}
+                    </>
+                  )}
+
+                  {/* 5. FISIKA & KIMIA (SAINS) */}
+                  {activeCategory === "science" && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$\\text{H}_2\\text{O}$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        H₂O
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$\\text{CO}_2$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        CO₂
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          insertSnippet(`$\\text{H}_2\\text{SO}_4$`)
+                        }
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        H₂SO₄
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$\\text{Ca}^{2+}$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Ion Ca²⁺
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$\\text{SO}_4^{2-}$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Ion SO₄²⁻
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          insertSnippet(
+                            `$\\text{A} + \\text{B} \\longrightarrow \\text{C}$`
+                          )
+                        }
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Reaksi (A+B → C)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$\\vec{F} = m\\vec{a}$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        F⃗ = ma⃗ (Gaya)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          insertSnippet(`$E_k = \\frac{1}{2}mv^2$`)
+                        }
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Energi Kinetik (½mv²)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet(`$V = I \\cdot R$`)}
+                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 font-mono text-[11px]"
+                      >
+                        Hukum Ohm (V=IR)
+                      </button>
+                    </>
+                  )}
+
+                  {/* 6. BAHASA & WACANA */}
                   {activeCategory === "lang" && (
                     <>
                       <button
@@ -480,33 +963,44 @@ export function AddQuestionModal({
                         onClick={() => insertSnippet(`**kata penting**`)}
                         className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 text-[11px] font-bold"
                       >
-                        Tebal
+                        Tebal (**teks**)
                       </button>
                       <button
                         type="button"
                         onClick={() => insertSnippet(`*kata miring*`)}
                         className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 text-[11px] italic"
                       >
-                        Miring
+                        Miring (*teks*)
                       </button>
                       <button
                         type="button"
                         onClick={() =>
                           insertSnippet(
-                            `\n> **Wacana / Teks Bacaan:**\n> Paragraf wacana bacaan untuk menjawab pertanyaan...\n`
+                            `\n> **Wacana / Teks Bacaan:**\n> Bacalah teks wacana berikut dengan saksama untuk menjawab soal di bawah ini...\n`
                           )
                         }
-                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 text-[11px] text-blue-600 dark:text-blue-300 font-semibold"
+                        className="px-2.5 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 text-[11px] text-blue-600 dark:text-blue-300 font-semibold"
                       >
-                        Kutipan Wacana
+                        Kutipan Wacana Bacaan
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          insertSnippet(
+                            `\n*Dialog:*\n**Andi:** &quot;Bagaimana kabarmu hari ini?&quot;\n**Budi:** &quot;Aku sangat baik, terima kasih!&quot;\n`
+                          )
+                        }
+                        className="px-2.5 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 text-[11px] text-purple-600 dark:text-purple-300 font-semibold"
+                      >
+                        Format Percakapan / Dialog
                       </button>
                       <button
                         type="button"
                         onClick={handleInsertImagePrompt}
-                        className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-blue-500 text-[11px] text-emerald-600 dark:text-emerald-300 font-semibold flex items-center gap-1"
+                        className="px-2.5 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:border-emerald-500 text-[11px] text-emerald-600 dark:text-emerald-300 font-semibold flex items-center gap-1"
                       >
                         <ImageIcon size={12} />
-                        Sisipkan Gambar
+                        Sisipkan Gambar / Diagram Soal
                       </button>
                     </>
                   )}
@@ -538,7 +1032,7 @@ export function AddQuestionModal({
                       ? "border-blue-500 ring-2 ring-blue-500/20"
                       : "border-slate-200 dark:border-slate-700"
                   }`}
-                  placeholder="Contoh: Tentukan hasil perkalian matriks berikut:&#10;$$\begin{pmatrix} 1 & 2 & 12 \\ 4 & 3 & 7 \end{pmatrix} \times \begin{pmatrix} 4 \\ 5 \\ 9 \end{pmatrix}$$"
+                  placeholder="Contoh: Diketahui matriks A berordo 3x3 berikut:&#10;$$\begin{pmatrix} 1 & 2 & 3 \\ 0 & 1 & 4 \\ 5 & 6 & 0 \end{pmatrix}$$&#10;Tentukan nilai determinan dari matriks A!"
                 />
               </div>
 
@@ -591,7 +1085,7 @@ export function AddQuestionModal({
                             value={optValue}
                             onFocus={() => setActiveTarget(idx)}
                             onChange={(e) => handleOptionChange(idx, e.target.value)}
-                            placeholder={`Jawaban opsi ${lbl}... (bisa berupa rumus misal $\\begin{pmatrix} 122 \\\\ 94 \\end{pmatrix}$ atau angka)`}
+                            placeholder={`Jawaban opsi ${lbl}... (bisa berupa rumus misal $\\begin{pmatrix} 122 \\\\ 94 \\end{pmatrix}$ atau angka biasa)`}
                             className="flex-1 bg-transparent border-0 outline-none text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 font-sans"
                           />
                           {isSelected && (
