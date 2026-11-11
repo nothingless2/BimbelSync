@@ -112,6 +112,10 @@ export default async function AttendancePage({
             Jadwal Kelas
           </Link>
           <ChevronRight size={14} />
+          <Link href={`/${tenantSlug}/dashboard/schedules/attendance`} className="hover:text-blue-600 transition-colors">
+            Monitoring Presensi
+          </Link>
+          <ChevronRight size={14} />
           <span className="text-slate-800 dark:text-slate-200">Presensi</span>
         </div>
 

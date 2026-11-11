@@ -51,7 +51,7 @@ export default async function SchedulesPage({
 
   // Fetch all schedules for this academy with their relations
   // Concurrent fetch for optimum performance
-  const [schedules, programs, rooms, tutors] = await Promise.all([
+  const [schedules, programs, rooms, tutors, pendingCount] = await Promise.all([
     prisma.schedule.findMany({
       where: {
         program: { academy_id: session.academy_id },
@@ -65,6 +65,9 @@ export default async function SchedulesPage({
         program: true,
         room: true,
         tutor: true,
+        attendances: {
+          select: { id: true }
+        }
       },
       orderBy: {
         start_time: 'asc' // Sort by upcoming schedules first
@@ -81,6 +84,15 @@ export default async function SchedulesPage({
     prisma.staff.findMany({
       where: { academy_id: session.academy_id, deleted_at: null, role: 'TUTOR' },
       orderBy: { email: 'asc' } // Actually should be by name if it existed, but email works for MVP
+    }),
+    prisma.schedule.count({
+      where: {
+        program: { academy_id: session.academy_id },
+        ...(isTutor ? { tutor_id: session.id } : {}),
+        status: 'SCHEDULED',
+        end_time: { lt: new Date() },
+        attendances: { none: {} }
+      }
     })
   ]);
 
@@ -93,6 +105,7 @@ export default async function SchedulesPage({
         currentDateStr={refDate.toISOString()}
         viewMode={view}
         isTutor={isTutor}
+        pendingCount={pendingCount}
         headerActions={
           <>
             <AutoSchedulerModal 

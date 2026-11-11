@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Clock, MapPin, User, MoreVertical, Trash2, Calendar as CalendarIcon, Grid, ArrowRight, Search, Filter, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight, Clock, MapPin, User, MoreVertical, Trash2, Calendar as CalendarIcon, Grid, ArrowRight, Search, Filter, Loader2, ClipboardCheck, AlertTriangle } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { deleteScheduleAction, bulkDeleteSchedulesAction } from "./actions";
 import { CancelScheduleModal } from "@/components/modals/cancel-schedule-modal";
@@ -17,6 +18,7 @@ type ScheduleWithRelations = Schedule & {
   program: Program;
   tutor: Staff;
   room: Room;
+  attendances?: { id: string }[];
 };
 
 export default function SchedulesClientPage({ 
@@ -26,6 +28,7 @@ export default function SchedulesClientPage({
   currentDateStr,
   viewMode,
   isTutor,
+  pendingCount = 0,
   headerActions
 }: { 
   schedules: ScheduleWithRelations[], 
@@ -34,6 +37,7 @@ export default function SchedulesClientPage({
   currentDateStr: string,
   viewMode: string,
   isTutor?: boolean,
+  pendingCount?: number,
   headerActions?: React.ReactNode
 }) {
   const router = useRouter();
@@ -186,6 +190,41 @@ export default function SchedulesClientPage({
 
   return (
     <div className="space-y-6">
+      {/* Top Header Navigation Tabs */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {}}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200 dark:border-blue-800/40 shadow-sm"
+          >
+            <CalendarIcon size={16} />
+            Kalender Jadwal
+          </button>
+          <Link
+            href={`/${tenantSlug}/dashboard/schedules/attendance`}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            <ClipboardCheck size={16} />
+            Monitoring Presensi Siswa
+            {pendingCount > 0 && (
+              <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-500 text-white animate-pulse">
+                {pendingCount} Lupa Absen
+              </span>
+            )}
+          </Link>
+        </div>
+
+        {pendingCount > 0 && (
+          <Link
+            href={`/${tenantSlug}/dashboard/schedules/attendance?filter=PENDING`}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 hover:bg-rose-100 transition border border-rose-200 dark:border-rose-900/40"
+          >
+            <AlertTriangle size={13} />
+            Ada {pendingCount} Sesi Lupa Diabsen &rarr;
+          </Link>
+        )}
+      </div>
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Jadwal Kelas</h2>
@@ -393,6 +432,20 @@ export default function SchedulesClientPage({
                                         <span className="truncate max-w-[80px]">{sch.tutor.name || sch.tutor.email}</span>
                                       </div>
                                     </div>
+
+                                    {!isCancelled && new Date(sch.end_time) < new Date() && (
+                                      <div className="mt-1">
+                                        {sch.attendances && sch.attendances.length === 0 ? (
+                                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-500 text-white animate-pulse">
+                                            ⚠️ Belum Absen
+                                          </span>
+                                        ) : (
+                                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                                            ✓ Absen Terisi
+                                          </span>
+                                        )}
+                                      </div>
+                                    )}
                                   </div>
                                 );
                               })}

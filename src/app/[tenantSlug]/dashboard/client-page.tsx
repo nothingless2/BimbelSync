@@ -120,26 +120,54 @@ export default function DashboardClientPage({
             </div>
           </div>
 
-          <div className={`p-6 rounded-3xl bg-gradient-to-br shadow-lg relative overflow-hidden group ${
-            pendingAttendanceCount > 0 
-              ? "from-rose-500 to-rose-700 border-rose-600 animate-pulse-soft" 
-              : "from-slate-500 to-slate-700 border-slate-600"
-          }`}>
+          <Link
+            href={`/${tenantSlug}/dashboard/schedules/attendance?filter=PENDING`}
+            className={`p-6 rounded-3xl bg-gradient-to-br shadow-lg relative overflow-hidden group transition-transform hover:scale-[1.02] block ${
+              pendingAttendanceCount > 0 
+                ? "from-rose-500 to-rose-700 border border-rose-600 animate-pulse-soft" 
+                : "from-slate-500 to-slate-700 border border-slate-600"
+            }`}
+          >
             <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110">
               <CheckCircle2 size={120} />
             </div>
             <div className="relative z-10">
               <h3 className="text-sm font-bold text-white/80 uppercase tracking-wider mb-2">Absensi Tertunda</h3>
-              <div className="flex items-end gap-3">
-                <p className="text-4xl font-black text-white">{pendingAttendanceCount}</p>
-                {pendingAttendanceCount > 0 && (
-                  <span className="text-xs font-semibold text-rose-100 bg-rose-900/40 px-2 py-1 rounded-md mb-1.5">
-                    Perlu diisi!
-                  </span>
-                )}
+              <div className="flex items-end justify-between">
+                <div className="flex items-end gap-3">
+                  <p className="text-4xl font-black text-white">{pendingAttendanceCount}</p>
+                  {pendingAttendanceCount > 0 && (
+                    <span className="text-xs font-semibold text-rose-100 bg-rose-900/40 px-2 py-1 rounded-md mb-1.5">
+                      Perlu diisi!
+                    </span>
+                  )}
+                </div>
+                <span className="text-xs font-bold text-white/90 underline decoration-white/40">
+                  {pendingAttendanceCount > 0 ? "Isi Sekarang →" : "Lihat Rekap →"}
+                </span>
               </div>
             </div>
+          </Link>
+        </div>
+      )}
+
+      {userRole === 'TUTOR' && pendingAttendanceCount > 0 && (
+        <div className="bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-rose-900 dark:text-rose-200">
+          <div className="flex items-center gap-3">
+            <span className="w-8 h-8 rounded-xl bg-rose-500 text-white flex items-center justify-center font-bold shrink-0">
+              !
+            </span>
+            <div className="text-sm">
+              <p className="font-bold">Ada {pendingAttendanceCount} sesi kelas yang belum direkap presensinya</p>
+              <p className="text-xs text-rose-700 dark:text-rose-300">Waktu sesi kelas telah usai. Lengkapi presensi sekarang agar riwayat kehadiran siswa tercatat.</p>
+            </div>
           </div>
+          <Link
+            href={`/${tenantSlug}/dashboard/schedules/attendance?filter=PENDING`}
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition shrink-0"
+          >
+            Isi Presensi Tertunda &rarr;
+          </Link>
         </div>
       )}
 

@@ -102,13 +102,30 @@ export function TutorMilestoneCard({ milestone, tenantSlug }: TutorMilestoneCard
             />
           </div>
 
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            {attendanceVerification.percentage !== null
-              ? attendanceVerification.pendingCount === 0
-                ? "Semua presensi tertib diisi"
-                : `${attendanceVerification.pendingCount} sesi belum direkap`
-              : "Belum ada sesi kelas yang usai"}
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {attendanceVerification.percentage !== null
+                ? attendanceVerification.pendingCount === 0
+                  ? "Semua presensi tertib diisi"
+                  : `${attendanceVerification.pendingCount} sesi belum direkap`
+                : "Belum ada sesi kelas yang usai"}
+            </p>
+            {attendanceVerification.pendingCount > 0 ? (
+              <Link
+                href={`/${tenantSlug}/dashboard/schedules/attendance?filter=PENDING`}
+                className="text-xs font-bold text-rose-600 hover:text-rose-700 dark:text-rose-400"
+              >
+                Isi Presensi &rarr;
+              </Link>
+            ) : (
+              <Link
+                href={`/${tenantSlug}/dashboard/schedules/attendance`}
+                className="text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400"
+              >
+                Cek &rarr;
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Metric 3: Input Nilai & Rapor */}

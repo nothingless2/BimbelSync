@@ -77,7 +77,7 @@ export function AttendanceClient({
       } else {
         toast.success("Berhasil menyimpan absensi!");
       }
-      router.push(`/${tenantSlug}/dashboard/schedules`);
+      router.push(`/${tenantSlug}/dashboard/schedules/attendance`);
     }
 
     setIsSaving(false);
