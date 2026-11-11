@@ -210,30 +210,30 @@ export default function AttendanceMonitoringClient({
         </div>
 
         {/* Top Header Tabs */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
             <Link
               href={`/${tenantSlug}/dashboard/schedules`}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent"
             >
-              <Calendar size={16} />
-              Kalender Jadwal
+              <Calendar size={15} />
+              <span className="truncate">Kalender Kelas</span>
             </Link>
             <button
               onClick={() => {}}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200 dark:border-blue-800/40 shadow-sm"
+              className="inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200 dark:border-blue-800/40 shadow-xs"
             >
-              <ClipboardCheck size={16} />
-              Monitoring Presensi Siswa
+              <ClipboardCheck size={15} />
+              <span className="truncate">Monitoring Presensi</span>
               {pendingCount > 0 && (
-                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-500 text-white animate-pulse">
-                  {pendingCount} Lupa Absen
+                <span className="px-1.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-rose-500 text-white animate-pulse">
+                  {pendingCount}
                 </span>
               )}
             </button>
           </div>
 
-          <div className="text-xs text-slate-500 dark:text-slate-400">
+          <div className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
             {isTutor ? "Portal Presensi Tutor" : "Monitoring Presensi Akademi"}
           </div>
         </div>
@@ -665,8 +665,96 @@ export default function AttendanceMonitoringClient({
                     Belum ada siswa aktif yang terdaftar di kelas program ini.
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs sm:text-sm">
+                  <>
+                    {/* Mobile Student Cards */}
+                    <div className="block sm:hidden space-y-3">
+                      {studentStats.map((item) => {
+                        const rate = item.rate;
+                        const isHigh = rate !== null && rate >= 80;
+                        const isMedium = rate !== null && rate >= 60 && rate < 80;
+
+                        return (
+                          <div
+                            key={item.student.id}
+                            className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs space-y-2.5"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-700 dark:text-slate-300 text-xs shrink-0">
+                                  {item.student.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="font-bold text-sm text-slate-900 dark:text-white truncate">
+                                    {item.student.name}
+                                  </p>
+                                  <p className="text-[11px] text-slate-400 truncate">
+                                    {item.student.phone || item.student.email || "No contact"}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {rate === null ? (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 shrink-0">
+                                  Baru
+                                </span>
+                              ) : isHigh ? (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 shrink-0">
+                                  Sangat Rajin
+                                </span>
+                              ) : isMedium ? (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 shrink-0">
+                                  Cukup
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 shrink-0">
+                                  Perlu Perhatian
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="grid grid-cols-4 gap-1.5 p-2 bg-slate-50 dark:bg-slate-800/40 rounded-xl text-center text-xs">
+                              <div>
+                                <p className="text-[10px] text-slate-400 font-medium">Sesi</p>
+                                <p className="font-bold text-slate-700 dark:text-slate-300">{item.totalPastSessions}</p>
+                              </div>
+                              <div>
+                                <p className="text-[10px] text-emerald-600 font-medium">Hadir</p>
+                                <p className="font-bold text-emerald-600 dark:text-emerald-400">{item.present}</p>
+                              </div>
+                              <div>
+                                <p className="text-[10px] text-amber-600 font-medium">Izin</p>
+                                <p className="font-bold text-amber-600 dark:text-amber-400">{item.excused}</p>
+                              </div>
+                              <div>
+                                <p className="text-[10px] text-rose-600 font-medium">Alpa</p>
+                                <p className="font-bold text-rose-600 dark:text-rose-400">{item.absent}</p>
+                              </div>
+                            </div>
+
+                            {rate !== null && (
+                              <div className="space-y-1">
+                                <div className="flex items-center justify-between text-xs font-bold">
+                                  <span className="text-slate-500 text-[11px] font-medium">Kehadiran</span>
+                                  <span className={isHigh ? "text-emerald-600" : isMedium ? "text-amber-600" : "text-rose-600"}>
+                                    {rate}%
+                                  </span>
+                                </div>
+                                <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full ${isHigh ? "bg-emerald-500" : isMedium ? "bg-amber-500" : "bg-rose-500"}`}
+                                    style={{ width: `${rate}%` }}
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Desktop Table View */}
+                    <div className="hidden sm:block overflow-x-auto">
+                      <table className="w-full text-left text-xs sm:text-sm">
                       <thead>
                         <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[11px]">
                           <th className="py-3 px-4">Nama Siswa</th>
@@ -787,6 +875,7 @@ export default function AttendanceMonitoringClient({
                       </tbody>
                     </table>
                   </div>
+                </>
                 )}
               </div>
             )}

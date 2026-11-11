@@ -50,6 +50,7 @@ export default function SchedulesClientPage({
   const [isSelectMode, setIsSelectMode] = useState(false);
   // Mode Mingguan / Bulanan dikontrol 100% oleh useState client-side murni (instan 0ms)
   const [currentViewMode, setCurrentViewMode] = useState<"weekly" | "monthly">((viewMode as "weekly" | "monthly") || "weekly");
+  const [selectedMobileDay, setSelectedMobileDay] = useState<Date>(() => new Date());
 
   const currentDate = parseISO(currentDateStr);
   const isMonthly = currentViewMode === "monthly";
@@ -95,6 +96,10 @@ export default function SchedulesClientPage({
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
   const weekEnd = addDays(weekStart, 6);
   const weekDays = Array.from({ length: 7 }).map((_, i) => addDays(weekStart, i));
+
+  // Active day for mobile agenda view
+  const activeMobileDay = weekDays.some(d => isSameDay(d, selectedMobileDay)) ? selectedMobileDay : weekDays[0];
+  const mobileDaySchedules = filteredSchedules.filter(sch => isSameDay(new Date(sch.start_time), activeMobileDay));
 
   // Monthly calculations
   const monthStart = startOfMonth(currentDate);
@@ -191,24 +196,24 @@ export default function SchedulesClientPage({
   return (
     <div className="space-y-6">
       {/* Top Header Navigation Tabs */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
           <button
             onClick={() => {}}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200 dark:border-blue-800/40 shadow-sm"
+            className="inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200 dark:border-blue-800/40 shadow-xs"
           >
-            <CalendarIcon size={16} />
-            Kalender Jadwal
+            <CalendarIcon size={15} />
+            <span className="truncate">Kalender Kelas</span>
           </button>
           <Link
             href={`/${tenantSlug}/dashboard/schedules/attendance`}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent"
           >
-            <ClipboardCheck size={16} />
-            Monitoring Presensi Siswa
+            <ClipboardCheck size={15} />
+            <span className="truncate">Monitoring Presensi</span>
             {pendingCount > 0 && (
-              <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-500 text-white animate-pulse">
-                {pendingCount} Lupa Absen
+              <span className="px-1.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-rose-500 text-white animate-pulse">
+                {pendingCount}
               </span>
             )}
           </Link>
@@ -217,7 +222,7 @@ export default function SchedulesClientPage({
         {pendingCount > 0 && (
           <Link
             href={`/${tenantSlug}/dashboard/schedules/attendance?filter=PENDING`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 hover:bg-rose-100 transition border border-rose-200 dark:border-rose-900/40"
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 hover:bg-rose-100 transition border border-rose-200 dark:border-rose-900/40 w-full sm:w-auto text-center"
           >
             <AlertTriangle size={13} />
             Ada {pendingCount} Sesi Lupa Diabsen &rarr;
@@ -259,45 +264,45 @@ export default function SchedulesClientPage({
       <div className="bg-white dark:bg-[#111827] rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
         
         {/* Toolbar & Legend */}
-        <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div className="p-3 sm:p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col xl:flex-row xl:items-center justify-between gap-3 sm:gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
             {/* View Mode Toggle */}
-            <div className="flex bg-slate-100 dark:bg-slate-800 rounded-xl p-1 shrink-0">
+            <div className="grid grid-cols-2 sm:flex bg-slate-100 dark:bg-slate-800 rounded-xl p-1 shrink-0">
               <button 
                 onClick={() => toggleViewMode("weekly")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${currentViewMode === "weekly" ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${currentViewMode === "weekly" ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-xs' : 'text-slate-500 hover:text-slate-700'}`}
               >
-                <Grid size={16} /> Mingguan
+                <Grid size={15} /> Mingguan
               </button>
               <button 
                 onClick={() => toggleViewMode("monthly")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${currentViewMode === "monthly" ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${currentViewMode === "monthly" ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-xs' : 'text-slate-500 hover:text-slate-700'}`}
               >
-                <CalendarIcon size={16} /> Bulanan
+                <CalendarIcon size={15} /> Bulanan
               </button>
             </div>
 
             {/* Date Navigation */}
-            <div className="flex items-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-1">
-              <button onClick={goToPrevious} className="p-2 hover:bg-white dark:hover:bg-slate-800 rounded-lg text-slate-500 transition-colors">
-                <ChevronLeft size={18} />
+            <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-1">
+              <button onClick={goToPrevious} className="p-1.5 sm:p-2 hover:bg-white dark:hover:bg-slate-800 rounded-lg text-slate-500 transition-colors">
+                <ChevronLeft size={16} />
               </button>
-              <span className="px-4 font-semibold text-sm text-slate-700 dark:text-slate-300 whitespace-nowrap">
+              <span className="px-2 sm:px-4 font-semibold text-xs sm:text-sm text-slate-700 dark:text-slate-300 text-center truncate">
                 {isMonthly 
                   ? format(monthStart, "MMMM yyyy", { locale: localeId })
-                  : `${format(weekStart, "d MMM yyyy", { locale: localeId })} - ${format(weekEnd, "d MMM yyyy", { locale: localeId })}`
+                  : `${format(weekStart, "d MMM", { locale: localeId })} - ${format(weekEnd, "d MMM yyyy", { locale: localeId })}`
                 }
               </span>
-              <button onClick={goToNext} className="p-2 hover:bg-white dark:hover:bg-slate-800 rounded-lg text-slate-500 transition-colors">
-                <ChevronRight size={18} />
+              <button onClick={goToNext} className="p-1.5 sm:p-2 hover:bg-white dark:hover:bg-slate-800 rounded-lg text-slate-500 transition-colors">
+                <ChevronRight size={16} />
               </button>
             </div>
           </div>
 
-          {/* Legend & Filter Toolbar */}
-          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-4 text-xs font-semibold shrink-0">
+          {/* Search & Filter Toolbar */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:flex items-center gap-2 sm:gap-3 text-xs font-semibold shrink-0">
             {/* Search Input */}
-            <div className="relative max-w-[200px]">
+            <div className="relative w-full xl:w-[200px]">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search size={14} className="text-slate-400" />
               </div>
@@ -306,12 +311,12 @@ export default function SchedulesClientPage({
                 placeholder="Cari tutor / program..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="block w-full pl-8 pr-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded-lg text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200"
+                className="block w-full pl-8 pr-3 py-2 sm:py-1.5 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200"
               />
             </div>
             
             {/* Status Filter */}
-            <div className="relative w-full sm:w-auto">
+            <div className="relative w-full xl:w-auto">
               <CustomSelect
                 value={filterStatus}
                 onChange={(val) => setFilterStatus(val as any)}
@@ -325,11 +330,11 @@ export default function SchedulesClientPage({
 
             <div className="hidden md:flex items-center gap-4 ml-2 border-l border-slate-200 dark:border-slate-700 pl-4">
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
                 <span className="text-slate-600 dark:text-slate-400">Terjadwal</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-red-500"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500"></span>
                 <span className="text-slate-600 dark:text-slate-400">Dibatalkan</span>
               </div>
             </div>
@@ -337,10 +342,156 @@ export default function SchedulesClientPage({
         </div>
 
         {/* =========================================
-            WEEKLY VIEW MATRIX
+            WEEKLY VIEW
         ========================================= */}
         {!isMonthly && (
-          <div className="overflow-x-auto">
+          <>
+            {/* 1. Mobile Agenda View (block md:hidden) */}
+            <div className="block md:hidden">
+              {/* Day Selector Strip */}
+              <div className="grid grid-cols-7 gap-1 p-2 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 text-center">
+                {weekDays.map((day, idx) => {
+                  const isSelected = isSameDay(day, activeMobileDay);
+                  const isCurrentDay = isSameDay(day, new Date());
+                  const daySchedules = filteredSchedules.filter(sch => isSameDay(new Date(sch.start_time), day));
+                  const hasSchedules = daySchedules.length > 0;
+                  const hasPending = daySchedules.some(sch => sch.status === 'SCHEDULED' && new Date(sch.end_time) < new Date() && sch.attendances?.length === 0);
+
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedMobileDay(day)}
+                      className={`flex flex-col items-center py-2 px-1 rounded-xl transition relative ${
+                        isSelected
+                          ? 'bg-blue-600 text-white shadow-xs'
+                          : isCurrentDay
+                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold border border-blue-200 dark:border-blue-800/40'
+                          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <span className="text-[10px] uppercase font-bold">
+                        {format(day, "EEE", { locale: localeId })}
+                      </span>
+                      <span className="text-xs font-black mt-0.5">
+                        {format(day, "d")}
+                      </span>
+                      {hasSchedules && (
+                        <span className={`w-1.5 h-1.5 rounded-full mt-1 ${
+                          hasPending 
+                            ? 'bg-rose-500 animate-pulse' 
+                            : isSelected 
+                            ? 'bg-white' 
+                            : 'bg-blue-500'
+                        }`} />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Schedules for the Selected Day */}
+              <div className="p-3 space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800/80">
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                    Jadwal {format(activeMobileDay, "EEEE, d MMM yyyy", { locale: localeId })}
+                  </span>
+                  <span className="text-[11px] font-semibold text-slate-500">
+                    {mobileDaySchedules.length} Kelas
+                  </span>
+                </div>
+
+                {mobileDaySchedules.length === 0 ? (
+                  <div className="py-8 text-center text-slate-400 dark:text-slate-500">
+                    <CalendarIcon size={30} className="mx-auto mb-2 opacity-40" />
+                    <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Tidak ada kelas terjadwal</p>
+                    <p className="text-[11px] mt-0.5">Pilih tanggal lain pada bilah hari di atas untuk melihat jadwal.</p>
+                  </div>
+                ) : (
+                  mobileDaySchedules.map((sch) => {
+                    const isCancelled = sch.status === 'CANCELLED';
+                    const isPast = new Date(sch.end_time) < new Date();
+                    const isOngoing = new Date(sch.start_time) <= new Date() && new Date(sch.end_time) >= new Date();
+                    const isPending = !isCancelled && isPast && sch.attendances?.length === 0;
+                    const isAttended = !isCancelled && sch.attendances && sch.attendances.length > 0;
+
+                    return (
+                      <div
+                        key={sch.id}
+                        onClick={() => router.push(`/${tenantSlug}/dashboard/schedules/${sch.id}`)}
+                        className={`p-3.5 rounded-2xl border text-left cursor-pointer transition shadow-xs ${
+                          isPending
+                            ? 'bg-rose-50/70 border-rose-200 dark:bg-rose-950/20 dark:border-rose-900/40'
+                            : isCancelled
+                            ? 'bg-slate-50 border-slate-200 dark:bg-slate-900/40 dark:border-slate-800 opacity-60'
+                            : 'bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-800 hover:border-blue-400'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-2 mb-1.5">
+                          <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                            <Clock size={13} className="text-blue-500" />
+                            {formatTime(sch.start_time)} - {formatTime(sch.end_time)}
+                          </span>
+
+                          {isPending ? (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white animate-pulse">
+                              ⚠️ Lupa Absen
+                            </span>
+                          ) : isAttended ? (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                              ✓ Presensi Terisi
+                            </span>
+                          ) : isOngoing ? (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300">
+                              Sedang Berlangsung
+                            </span>
+                          ) : isCancelled ? (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-400 line-through">
+                              Dibatalkan
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                              Mendatang
+                            </span>
+                          )}
+                        </div>
+
+                        <h4 className={`font-bold text-sm ${isCancelled ? 'line-through text-slate-400' : 'text-slate-900 dark:text-white'}`}>
+                          {sch.program.name}
+                        </h4>
+
+                        <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-xs text-slate-500">
+                          <span className="flex items-center gap-1">
+                            <MapPin size={12} className="text-slate-400" />
+                            {sch.room.name}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <User size={12} className="text-slate-400" />
+                            {sch.tutor.name || sch.tutor.email}
+                          </span>
+                        </div>
+
+                        <div className="mt-2.5">
+                          {isPending ? (
+                            <span className="w-full text-center py-2 bg-rose-600 text-white rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5">
+                              <ClipboardCheck size={14} />
+                              Isi Presensi Sekarang &rarr;
+                            </span>
+                          ) : (
+                            <div className="flex items-center justify-between text-[11px] text-blue-600 dark:text-blue-400 font-semibold">
+                              <span>Buka Presensi / Detail</span>
+                              <ChevronRight size={14} />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* 2. Desktop Matrix View (hidden md:block) */}
+            <div className="hidden md:block overflow-x-auto">
             <div className="min-w-[1000px]">
               {/* Header Row */}
               <div className="grid grid-cols-[200px_repeat(7,1fr)] bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 text-center divide-x divide-slate-200 dark:divide-slate-800">
@@ -459,6 +610,7 @@ export default function SchedulesClientPage({
               </div>
             </div>
           </div>
+          </>
         )}
 
         {/* =========================================
@@ -489,13 +641,13 @@ export default function SchedulesClientPage({
                   <div 
                     key={idx} 
                     onClick={() => handleDayClick(day, daySchedules)}
-                    className={`min-h-[120px] p-2 border-r border-b border-slate-200 dark:border-slate-800 last:border-r-0 transition-colors ${
+                    className={`min-h-[55px] sm:min-h-[120px] p-1 sm:p-2 border-r border-b border-slate-200 dark:border-slate-800 last:border-r-0 transition-colors ${
                       !inCurrentMonth ? 'bg-slate-50/50 dark:bg-slate-900/20 text-slate-400' : 'bg-white dark:bg-[#111827] text-slate-700 dark:text-slate-300'
                     } ${hasSchedules ? 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50' : ''}`}
                     style={{ borderRight: (idx + 1) % 7 === 0 ? 'none' : undefined }}
                   >
-                    <div className="flex justify-between items-start mb-2">
-                      <span className={`text-sm font-semibold w-7 h-7 flex items-center justify-center rounded-full ${
+                    <div className="flex justify-between items-start mb-1 sm:mb-2">
+                      <span className={`text-xs sm:text-sm font-semibold w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-full ${
                         isSameDay(day, new Date()) ? 'bg-blue-600 text-white shadow-md' : ''
                       }`}>
                         {format(day, "d")}
@@ -506,26 +658,35 @@ export default function SchedulesClientPage({
                           checked={daySchedules.every(s => selectedSchedules.includes(s.id))}
                           onChange={(e) => toggleSelectDay(daySchedules, e as any)}
                           onClick={(e) => e.stopPropagation()}
-                          className="mr-1 mt-1 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                          className="mr-0.5 mt-0.5 sm:mr-1 sm:mt-1 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                         />
                       )}
                     </div>
 
-                    {/* Compact Schedule Badges */}
+                    {/* Schedule Indicators: Dots on Mobile, Badges on Desktop */}
                     {hasSchedules && (
-                      <div className="space-y-1">
-                        <div className="text-[10px] font-bold text-white bg-blue-500 px-2 py-1 rounded-md shadow-sm">
-                          {activeCount} Kelas Terjadwal
+                      <>
+                        <div className="flex sm:hidden items-center justify-center gap-1 mt-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                          {daySchedules.some(s => s.status === 'SCHEDULED' && new Date(s.end_time) < new Date() && s.attendances?.length === 0) && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                          )}
                         </div>
-                        {daySchedules.length > activeCount && (
-                          <div className="text-[10px] font-bold text-red-600 bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded-md">
-                            {daySchedules.length - activeCount} Dibatalkan
+
+                        <div className="hidden sm:block space-y-1">
+                          <div className="text-[10px] font-bold text-white bg-blue-500 px-2 py-1 rounded-md shadow-sm">
+                            {activeCount} Kelas Terjadwal
                           </div>
-                        )}
-                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1 truncate opacity-70">
-                          <span className="truncate">Klik untuk lihat rincian...</span>
+                          {daySchedules.length > activeCount && (
+                            <div className="text-[10px] font-bold text-red-600 bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded-md">
+                              {daySchedules.length - activeCount} Dibatalkan
+                            </div>
+                          )}
+                          <div className="mt-2 text-xs text-slate-500 flex items-center gap-1 truncate opacity-70">
+                            <span className="truncate">Klik untuk lihat rincian...</span>
+                          </div>
                         </div>
-                      </div>
+                      </>
                     )}
                   </div>
                 );
