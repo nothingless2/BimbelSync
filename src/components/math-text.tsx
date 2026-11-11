@@ -118,9 +118,9 @@ export function MathText({ text, className = "" }: MathTextProps) {
     // 3. Escape HTML pada teks sisa
     processed = escapeHtml(processed);
 
-    // 4. Parse Markdown Gambar: ![alt](url)
-    processed = processed.replace(/!\[(.*?)\]\((https?:\/\/.*?)\)/g, (_, alt, url) => {
-      return `<img src="${url}" alt="${alt}" class="max-h-72 my-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm mx-auto object-contain bg-white" />`;
+    // 4. Parse Markdown Gambar: ![alt](url) atau ![alt](data:image/...)
+    processed = processed.replace(/!\[(.*?)\]\(((?:https?:\/\/|data:image\/)[\s\S]*?)\)/g, (_, alt, url) => {
+      return `<div class="my-3 flex justify-center"><img src="${url.trim()}" alt="${alt}" class="max-h-80 max-w-full rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm object-contain bg-white dark:bg-slate-900" loading="lazy" /></div>`;
     });
 
     // 5. Parse Markdown Formatting:

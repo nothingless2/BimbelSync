@@ -14,6 +14,7 @@ import {
 import { toast } from "@/components/ui/sonner";
 import { addQuestionAction, updateQuestionAction } from "@/app/[tenantSlug]/dashboard/quizzes/[quizId]/actions";
 import { MathText } from "@/components/math-text";
+import { InsertImageModal } from "@/components/modals/insert-image-modal";
 
 interface QuestionData {
   id?: string;
@@ -52,6 +53,7 @@ export function AddQuestionModal({
 
   // Melacak input mana yang sedang aktif (Pertanyaan atau Opsi A, B, C, D)
   const [activeTarget, setActiveTarget] = useState<"question" | number>("question");
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const optionInputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -138,10 +140,7 @@ export function AddQuestionModal({
   };
 
   const handleInsertImagePrompt = () => {
-    const url = prompt("Masukkan URL/Link Gambar Soal atau Diagram (misal dari Google Drive, Imgur, Cloudinary):");
-    if (url && url.trim()) {
-      insertSnippet(`\n![Diagram Soal](${url.trim()})\n`);
-    }
+    setIsImageModalOpen(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -1238,6 +1237,15 @@ export function AddQuestionModal({
           </div>
         </form>
       </div>
+
+      {/* Modal Sisipkan / Upload Gambar Kustom */}
+      <InsertImageModal
+        isOpen={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+        onInsertImage={(imageMarkdown) => {
+          insertSnippet(`\n${imageMarkdown}\n`);
+        }}
+      />
     </div>
   );
 }
