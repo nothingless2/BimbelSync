@@ -127,15 +127,39 @@ export default function QuizzesClientPage({
         </div>
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition shadow-sm flex items-center gap-2 shadow-blue-500/20"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition shadow-sm flex items-center justify-center gap-2 shadow-blue-500/20 w-full sm:w-auto"
         >
           <Plus size={18} />
           Buat Kuis Baru
         </button>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* KPI Metrics: Mobile Compact 3-Column / Desktop Cards */}
+      <div className="grid grid-cols-3 gap-2 sm:hidden">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 shadow-xs text-center flex flex-col justify-between min-h-[75px]">
+          <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tight">
+            Total Kuis
+          </span>
+          <p className="text-xl font-black text-slate-900 dark:text-white mt-1">{totalQuizzes}</p>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 shadow-xs text-center flex flex-col justify-between min-h-[75px]">
+          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-tight">
+            Kuis Aktif
+          </span>
+          <p className="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-1">{publishedQuizzes}</p>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 shadow-xs text-center flex flex-col justify-between min-h-[75px]">
+          <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-tight">
+            Pengerjaan
+          </span>
+          <p className="text-xl font-black text-slate-900 dark:text-white mt-1">{totalSubmissions}</p>
+        </div>
+      </div>
+
+      {/* KPI Cards Desktop (hidden sm:grid) */}
+      <div className="hidden sm:grid grid-cols-3 gap-4">
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">

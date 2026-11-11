@@ -193,10 +193,10 @@ export default function AttendanceMonitoringClient({
   }, [activeProgram, schedules]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Breadcrumb & Navigation Tabs */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
+      <div className="space-y-3 sm:space-y-4">
+        <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500 font-medium">
           <Link
             href={`/${tenantSlug}/dashboard/schedules`}
             className="hover:text-blue-600 transition-colors"
@@ -241,10 +241,10 @@ export default function AttendanceMonitoringClient({
 
       {/* Main Title & Description */}
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
           Monitoring & Rekap Presensi Siswa
         </h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
           {isTutor
             ? "Pantau status kehadiran siswa pada kelas yang Anda ajar. Jika ada sesi yang lupa diabsen, Anda dapat langsung mengisinya di sini."
             : "Pantau rekap kehadiran seluruh sesi kelas bimbel dan pastikan tidak ada jadwal yang tertinggal."}
@@ -316,31 +316,31 @@ export default function AttendanceMonitoringClient({
       )}
 
       {/* KPI Stats Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
-          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 sm:p-4 shadow-xs">
+          <p className="text-[11px] sm:text-xs font-medium text-slate-500 dark:text-slate-400">
             Total Sesi Terjadwal
           </p>
-          <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+          <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mt-0.5 sm:mt-1">
             {schedules.length}
           </p>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
-          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 sm:p-4 shadow-xs">
+          <p className="text-[11px] sm:text-xs font-medium text-slate-500 dark:text-slate-400">
             Sudah Diabsen
           </p>
-          <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
+          <p className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 sm:mt-1">
             {schedules.filter((s) => s.attendancesCount > 0).length}
           </p>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
-          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 sm:p-4 shadow-xs">
+          <p className="text-[11px] sm:text-xs font-medium text-slate-500 dark:text-slate-400">
             Lupa Absen (Tertunda)
           </p>
           <p
-            className={`text-2xl font-bold mt-1 ${
+            className={`text-xl sm:text-2xl font-bold mt-0.5 sm:mt-1 ${
               pendingCount > 0
                 ? "text-rose-600 dark:text-rose-400"
                 : "text-slate-900 dark:text-white"
@@ -350,11 +350,11 @@ export default function AttendanceMonitoringClient({
           </p>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
-          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 sm:p-4 shadow-xs">
+          <p className="text-[11px] sm:text-xs font-medium text-slate-500 dark:text-slate-400">
             Program Yang Diajar
           </p>
-          <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">
+          <p className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400 mt-0.5 sm:mt-1">
             {programs.length}
           </p>
         </div>
@@ -363,31 +363,31 @@ export default function AttendanceMonitoringClient({
       {/* Main Container Card */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
         {/* Controls Bar & View Switcher */}
-        <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 space-y-4">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="p-3.5 sm:p-6 border-b border-slate-200 dark:border-slate-800 space-y-3 sm:space-y-4">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
             {/* View Mode Toggle */}
-            <div className="flex bg-slate-100 dark:bg-slate-800 rounded-xl p-1 shrink-0 self-start">
+            <div className="grid grid-cols-2 sm:flex bg-slate-100 dark:bg-slate-800 rounded-xl p-1 w-full sm:w-auto">
               <button
                 onClick={() => setViewMode("sessions")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
+                className={`flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
                   viewMode === "sessions"
                     ? "bg-white dark:bg-slate-900 text-blue-600 shadow-xs"
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                 }`}
               >
-                <ClipboardCheck size={16} />
-                Daftar Sesi Kelas ({filteredSchedules.length})
+                <ClipboardCheck size={15} />
+                <span className="truncate">Sesi Kelas ({filteredSchedules.length})</span>
               </button>
               <button
                 onClick={() => setViewMode("students")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
+                className={`flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
                   viewMode === "students"
                     ? "bg-white dark:bg-slate-900 text-blue-600 shadow-xs"
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                 }`}
               >
-                <Users size={16} />
-                Rekap Kehadiran Siswa
+                <Users size={15} />
+                <span className="truncate">Rekap Siswa</span>
               </button>
             </div>
 
@@ -596,11 +596,11 @@ export default function AttendanceMonitoringClient({
                     </div>
 
                     {/* Right: Action Buttons */}
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800">
                       <Link
                         href={`/${tenantSlug}/present/${sch.id}`}
                         target="_blank"
-                        className="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition"
+                        className="flex-1 sm:flex-initial text-center px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold transition"
                         title="Tampilkan Layar QR Presensi di TV"
                       >
                         Layar QR
@@ -609,15 +609,15 @@ export default function AttendanceMonitoringClient({
                       {sch.isLupaAbsen ? (
                         <Link
                           href={`/${tenantSlug}/dashboard/schedules/${sch.id}`}
-                          className="inline-flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition shadow-sm shadow-rose-600/20"
+                          className="flex-[2] sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition shadow-sm shadow-rose-600/20"
                         >
                           <CheckCircle2 size={14} />
-                          Isi Presensi Sekarang &rarr;
+                          Isi Presensi &rarr;
                         </Link>
                       ) : (
                         <Link
                           href={`/${tenantSlug}/dashboard/schedules/${sch.id}`}
-                          className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-300 rounded-xl text-xs font-semibold transition"
+                          className="flex-[2] sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-300 rounded-xl text-xs font-semibold transition"
                         >
                           {sch.attendancesCount > 0 ? "Edit Presensi" : "Buka Presensi"}
                           <ChevronRight size={14} />

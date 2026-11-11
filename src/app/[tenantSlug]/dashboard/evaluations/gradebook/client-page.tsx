@@ -87,39 +87,39 @@ export default function GradebookClientPage({ tenantSlug, program, students, eva
             Program: <strong className="text-slate-700 dark:text-slate-300">{program.name}</strong>
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           {(userRole === "ADMIN" || userRole === "SUPERADMIN") && (
             <button
               onClick={() => setIsWeightModalOpen(true)}
-              className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 px-4 py-2 rounded-xl text-sm font-semibold transition shadow-sm"
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition shadow-sm"
             >
-              <Settings2 size={16} /> Atur Bobot Penilaian
+              <Settings2 size={16} /> Atur Bobot
             </button>
           )}
           <button
             onClick={() => window.print()}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition shadow-sm"
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition shadow-sm"
           >
-            <Download size={16} /> Ekspor PDF / Cetak
+            <Download size={16} /> Cetak / PDF
           </button>
         </div>
       </div>
 
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col">
-        <div className="p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-          <div className="flex items-center gap-4">
+        <div className="p-3.5 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+          <div className="flex items-center gap-3 sm:gap-4">
             <div className="flex flex-col">
-              <span className="text-xs font-semibold text-slate-500">Bobot Ujian (Kuis/UAS)</span>
-              <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{program.weight_exam}%</span>
+              <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Bobot Ujian (Kuis/UAS)</span>
+              <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">{program.weight_exam}%</span>
             </div>
-            <div className="w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
+            <div className="w-px h-7 sm:h-8 bg-slate-200 dark:bg-slate-700"></div>
             <div className="flex flex-col">
-              <span className="text-xs font-semibold text-slate-500">Bobot PR (Tugas Harian)</span>
-              <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{program.weight_homework}%</span>
+              <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Bobot PR (Tugas Harian)</span>
+              <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">{program.weight_homework}%</span>
             </div>
           </div>
-          <div className="text-xs font-medium text-slate-500 flex items-center gap-2">
-            <Calculator size={14} /> Nilai Akhir otomatis dihitung berdasarkan bobot.
+          <div className="text-[11px] sm:text-xs font-medium text-slate-500 flex items-center gap-1.5">
+            <Calculator size={13} /> Nilai Akhir otomatis dihitung berdasarkan bobot.
           </div>
         </div>
 
@@ -128,7 +128,82 @@ export default function GradebookClientPage({ tenantSlug, program, students, eva
             Belum ada siswa yang terdaftar di kelas ini.
           </div>
         ) : (
-          <div className="overflow-x-auto print:overflow-visible">
+          <>
+            {/* Mobile Student Final Grade Cards */}
+            <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+              {gradebookData.map((student: any) => (
+                <div key={student.id} className="p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-bold text-xs flex items-center justify-center shrink-0">
+                        {student.full_name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate">
+                          {student.full_name}
+                        </h4>
+                        <p className="text-[11px] text-slate-400">
+                          {student.student_number || "Siswa Aktif"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">Nilai Akhir</span>
+                      <span className="text-xl font-black text-blue-600 dark:text-blue-400">
+                        {student.finalGrade.toFixed(1)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Sub-Averages */}
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="p-2.5 rounded-xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30">
+                      <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-400 block">
+                        Rata-rata Ujian ({program.weight_exam}%)
+                      </span>
+                      <span className="text-sm font-bold text-amber-900 dark:text-amber-200">
+                        {student.examAvg.toFixed(1)}
+                      </span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30">
+                      <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 block">
+                        Rata-rata PR ({program.weight_homework}%)
+                      </span>
+                      <span className="text-sm font-bold text-emerald-900 dark:text-emerald-200">
+                        {student.hwAvg.toFixed(1)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Individual Tasks preview */}
+                  {columns.length > 0 && (
+                    <div className="pt-1">
+                      <details className="group/dt text-xs">
+                        <summary className="cursor-pointer text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-semibold list-none flex items-center justify-between py-1">
+                          <span>Rincian {columns.length} Nilai Tugas</span>
+                          <span className="text-[10px] text-blue-600 group-open/dt:rotate-180 transition-transform">▼</span>
+                        </summary>
+                        <div className="mt-2 space-y-1.5 pl-1">
+                          {columns.map((col, idx) => {
+                            const ev = student.evaluations.find((e: any) => e.evaluation_type === col.type && e.title === col.title);
+                            return (
+                              <div key={idx} className="flex items-center justify-between py-1 px-2 rounded-lg bg-slate-50 dark:bg-slate-800/40 text-[11px]">
+                                <span className="truncate max-w-[180px] text-slate-700 dark:text-slate-300">{col.title}</span>
+                                <span className="font-bold text-slate-900 dark:text-white">{ev?.score ?? "-"}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </details>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto print:block print:overflow-visible">
             <table className="w-full text-left text-xs sm:text-sm border-collapse">
               <thead className="bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400">
                 <tr>
@@ -202,6 +277,7 @@ export default function GradebookClientPage({ tenantSlug, program, students, eva
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
 

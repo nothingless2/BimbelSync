@@ -99,56 +99,100 @@ export default function DashboardClientPage({
       )}
 
       {userRole === 'TUTOR' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-6 rounded-3xl bg-gradient-to-br from-emerald-500 to-emerald-700 border border-emerald-600 shadow-lg relative overflow-hidden group">
-            <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110">
-              <BookOpen size={120} />
+        <>
+          {/* Mobile Compact KPI Row (sm:hidden) */}
+          <div className="grid grid-cols-3 gap-2 sm:hidden">
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-sm flex flex-col justify-between min-h-[85px]">
+              <span className="text-[10px] font-bold text-emerald-100 uppercase tracking-tight leading-tight">
+                Kelas Hari Ini
+              </span>
+              <p className="text-2xl font-black text-white">{todayClassesCount}</p>
             </div>
-            <div className="relative z-10">
-              <h3 className="text-sm font-bold text-emerald-100 uppercase tracking-wider mb-2">Kelas Hari Ini</h3>
-              <p className="text-4xl font-black text-white">{todayClassesCount}</p>
-            </div>
-          </div>
-          
-          <div className="p-6 rounded-3xl bg-gradient-to-br from-blue-600 to-blue-800 border border-blue-700 shadow-lg relative overflow-hidden group">
-            <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110">
-              <CalendarPlus size={120} />
-            </div>
-            <div className="relative z-10">
-              <h3 className="text-sm font-bold text-blue-100 uppercase tracking-wider mb-2">Total Kelas Bulan Ini</h3>
-              <p className="text-4xl font-black text-white">{thisMonthClassesCount}</p>
-            </div>
-          </div>
 
-          <Link
-            href={`/${tenantSlug}/dashboard/schedules/attendance?filter=PENDING`}
-            className={`p-6 rounded-3xl bg-gradient-to-br shadow-lg relative overflow-hidden group transition-transform hover:scale-[1.02] block ${
-              pendingAttendanceCount > 0 
-                ? "from-rose-500 to-rose-700 border border-rose-600 animate-pulse-soft" 
-                : "from-slate-500 to-slate-700 border border-slate-600"
-            }`}
-          >
-            <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110">
-              <CheckCircle2 size={120} />
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 text-white shadow-sm flex flex-col justify-between min-h-[85px]">
+              <span className="text-[10px] font-bold text-blue-100 uppercase tracking-tight leading-tight">
+                Kelas Bulan Ini
+              </span>
+              <p className="text-2xl font-black text-white">{thisMonthClassesCount}</p>
             </div>
-            <div className="relative z-10">
-              <h3 className="text-sm font-bold text-white/80 uppercase tracking-wider mb-2">Absensi Tertunda</h3>
-              <div className="flex items-end justify-between">
-                <div className="flex items-end gap-3">
-                  <p className="text-4xl font-black text-white">{pendingAttendanceCount}</p>
-                  {pendingAttendanceCount > 0 && (
-                    <span className="text-xs font-semibold text-rose-100 bg-rose-900/40 px-2 py-1 rounded-md mb-1.5">
-                      Perlu diisi!
-                    </span>
-                  )}
-                </div>
-                <span className="text-xs font-bold text-white/90 underline decoration-white/40">
-                  {pendingAttendanceCount > 0 ? "Isi Sekarang →" : "Lihat Rekap →"}
+
+            <Link
+              href={`/${tenantSlug}/dashboard/schedules/attendance?filter=PENDING`}
+              className={`p-3 rounded-2xl shadow-sm flex flex-col justify-between min-h-[85px] text-white transition-all ${
+                pendingAttendanceCount > 0
+                  ? "bg-gradient-to-br from-rose-500 to-rose-700 border border-rose-400 animate-pulse-soft"
+                  : "bg-gradient-to-br from-slate-600 to-slate-800"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-white/90 uppercase tracking-tight leading-tight">
+                  Lupa Absen
+                </span>
+                {pendingAttendanceCount > 0 && (
+                  <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+                )}
+              </div>
+              <div className="flex items-baseline justify-between">
+                <p className="text-2xl font-black text-white">{pendingAttendanceCount}</p>
+                <span className="text-[9px] font-semibold text-white/80 underline">
+                  {pendingAttendanceCount > 0 ? "Isi →" : "Cek →"}
                 </span>
               </div>
+            </Link>
+          </div>
+
+          {/* Desktop Large KPI Cards (hidden sm:grid) */}
+          <div className="hidden sm:grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-emerald-500 to-emerald-700 border border-emerald-600 shadow-lg relative overflow-hidden group">
+              <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110">
+                <BookOpen size={120} />
+              </div>
+              <div className="relative z-10">
+                <h3 className="text-sm font-bold text-emerald-100 uppercase tracking-wider mb-2">Kelas Hari Ini</h3>
+                <p className="text-4xl font-black text-white">{todayClassesCount}</p>
+              </div>
             </div>
-          </Link>
-        </div>
+            
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-blue-600 to-blue-800 border border-blue-700 shadow-lg relative overflow-hidden group">
+              <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110">
+                <CalendarPlus size={120} />
+              </div>
+              <div className="relative z-10">
+                <h3 className="text-sm font-bold text-blue-100 uppercase tracking-wider mb-2">Total Kelas Bulan Ini</h3>
+                <p className="text-4xl font-black text-white">{thisMonthClassesCount}</p>
+              </div>
+            </div>
+
+            <Link
+              href={`/${tenantSlug}/dashboard/schedules/attendance?filter=PENDING`}
+              className={`p-6 rounded-3xl bg-gradient-to-br shadow-lg relative overflow-hidden group transition-transform hover:scale-[1.02] block ${
+                pendingAttendanceCount > 0 
+                  ? "from-rose-500 to-rose-700 border border-rose-600 animate-pulse-soft" 
+                  : "from-slate-500 to-slate-700 border border-slate-600"
+              }`}
+            >
+              <div className="absolute -right-4 -top-4 text-white/10 transition-transform group-hover:scale-110">
+                <CheckCircle2 size={120} />
+              </div>
+              <div className="relative z-10">
+                <h3 className="text-sm font-bold text-white/80 uppercase tracking-wider mb-2">Absensi Tertunda</h3>
+                <div className="flex items-end justify-between">
+                  <div className="flex items-end gap-3">
+                    <p className="text-4xl font-black text-white">{pendingAttendanceCount}</p>
+                    {pendingAttendanceCount > 0 && (
+                      <span className="text-xs font-semibold text-rose-100 bg-rose-900/40 px-2 py-1 rounded-md mb-1.5">
+                        Perlu diisi!
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs font-bold text-white/90 underline decoration-white/40">
+                    {pendingAttendanceCount > 0 ? "Isi Sekarang →" : "Lihat Rekap →"}
+                  </span>
+                </div>
+              </div>
+            </Link>
+          </div>
+        </>
       )}
 
       {userRole === 'TUTOR' && pendingAttendanceCount > 0 && (
