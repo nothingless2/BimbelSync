@@ -153,36 +153,36 @@ export function AttendanceClient({
                 </div>
 
                 {/* Radio Toggles */}
-                <div className="flex rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 p-1 bg-slate-100 dark:bg-slate-900">
+                <div className="grid grid-cols-3 sm:flex w-full sm:w-auto rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 p-1 bg-slate-100 dark:bg-slate-900 gap-1">
                   <button
                     onClick={() => handleStatusChange(student.id, 'PRESENT')}
-                    className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-1.5 ${
+                    className={`px-3 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                       currentVal === 'PRESENT' 
                         ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-sm ring-1 ring-emerald-500/20' 
                         : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                     }`}
                   >
-                    <CheckCircle2 size={16} /> Hadir
+                    <CheckCircle2 size={15} /> Hadir
                   </button>
                   <button
                     onClick={() => handleStatusChange(student.id, 'EXCUSED')}
-                    className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-1.5 ${
+                    className={`px-3 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                       currentVal === 'EXCUSED' 
                         ? 'bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 shadow-sm ring-1 ring-amber-500/20' 
                         : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                     }`}
                   >
-                    <AlertCircle size={16} /> Izin
+                    <AlertCircle size={15} /> Izin
                   </button>
                   <button
                     onClick={() => handleStatusChange(student.id, 'ABSENT')}
-                    className={`flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-1.5 ${
+                    className={`px-3 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                       currentVal === 'ABSENT' 
                         ? 'bg-white dark:bg-slate-800 text-red-600 dark:text-red-400 shadow-sm ring-1 ring-red-500/20' 
                         : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                     }`}
                   >
-                    <XCircle size={16} /> Alpa
+                    <XCircle size={15} /> Alpa
                   </button>
                 </div>
               </div>
@@ -191,18 +191,19 @@ export function AttendanceClient({
         )}
       </div>
 
-      <div className="p-6 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 flex justify-end gap-3">
+      {/* Sticky Bottom Save Bar for Mobile and Desktop */}
+      <div className="sticky bottom-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-3 sm:p-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-lg">
         <button
           type="button"
-          onClick={() => router.push(`/${tenantSlug}/dashboard/schedules`)}
-          className="px-6 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl transition-colors"
+          onClick={() => router.push(`/${tenantSlug}/dashboard/schedules/attendance`)}
+          className="px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
         >
           Kembali
         </button>
         <button
           onClick={handleSave}
           disabled={isSaving || studentsData.length === 0}
-          className="px-6 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2 shadow-md shadow-blue-500/20"
+          className="flex-1 sm:flex-none px-6 py-2.5 text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-md shadow-blue-500/20"
         >
           {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           {isSaving ? "Menyimpan..." : "Simpan Absensi"}
