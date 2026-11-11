@@ -38,7 +38,7 @@ export default async function StudentEvaluationsPage({
 
   const evaluations = rawEvaluations.map(ev => ({
     ...ev,
-    score: Number(ev.score)
+    score: ev.score !== null ? Number(ev.score) : null
   }));
 
   return (

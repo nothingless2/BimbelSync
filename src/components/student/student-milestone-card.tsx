@@ -12,6 +12,7 @@ export interface StudentMilestoneData {
   academic: {
     averageScore: number | null;
     totalEvaluations: number;
+    scoredCount?: number;
   };
   materials: {
     totalAvailable: number;
@@ -103,7 +104,9 @@ export function StudentMilestoneCard({ milestone, tenantSlug }: StudentMilestone
 
           <p className="text-xs text-slate-500 dark:text-slate-400">
             {academic.totalEvaluations > 0
-              ? `${academic.totalEvaluations} evaluasi nilai terbit`
+              ? academic.scoredCount !== undefined && academic.scoredCount < academic.totalEvaluations
+                ? `${academic.scoredCount} dari ${academic.totalEvaluations} evaluasi ternilai`
+                : `${academic.totalEvaluations} evaluasi nilai terbit`
               : "Belum ada asesmen dinilai"}
           </p>
         </div>
