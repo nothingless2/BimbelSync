@@ -150,21 +150,45 @@ export default function TenantDetailClientPage({ academy, plans, invoices, audit
     setIsResetSubmitting(false);
   };
 
-  const handleResetPassword = async (staffId: string) => {
-    if (!confirm("Kirim link reset password ke admin ini?")) return;
-    const res = await sendResetPasswordLinkAction(staffId, academy.id);
-    if (res.error) toast.error(res.error);
-    else toast.success(res.message || "Link reset password terkirim");
+  const handleResetPassword = (staffId: string) => {
+    toast("Kirim Link Reset Password?", {
+      description: "Email tautan pemulihan kata sandi akan dikirimkan ke admin ini.",
+      duration: 8000,
+      action: {
+        label: "Ya, Kirim Link",
+        onClick: async () => {
+          const res = await sendResetPasswordLinkAction(staffId, academy.id);
+          if (res.error) toast.error(res.error);
+          else toast.success(res.message || "Link reset password terkirim");
+        },
+      },
+      cancel: {
+        label: "Batal",
+        onClick: () => {},
+      },
+    });
   };
 
-  const handleToggleActive = async (staffId: string, isDeleted: boolean) => {
+  const handleToggleActive = (staffId: string, isDeleted: boolean) => {
     const actionName = isDeleted ? "mengaktifkan" : "menonaktifkan";
-    if (!confirm(`Yakin ingin ${actionName} admin ini?`)) return;
-    const res = isDeleted
-      ? await reactivateAdminAction(staffId, academy.id)
-      : await deactivateAdminAction(staffId, academy.id);
-    if (res.error) toast.error(res.error);
-    else toast.success(`Admin berhasil di${actionName}`);
+    toast(`${isDeleted ? "Aktifkan" : "Nonaktifkan"} Admin?`, {
+      description: `Yakin ingin ${actionName} akun admin ini?`,
+      duration: 8000,
+      action: {
+        label: isDeleted ? "Ya, Aktifkan" : "Ya, Nonaktifkan",
+        onClick: async () => {
+          const res = isDeleted
+            ? await reactivateAdminAction(staffId, academy.id)
+            : await deactivateAdminAction(staffId, academy.id);
+          if (res.error) toast.error(res.error);
+          else toast.success(`Admin berhasil di${actionName}`);
+        },
+      },
+      cancel: {
+        label: "Batal",
+        onClick: () => {},
+      },
+    });
   };
 
   const handleEditSubmit = async (e: React.FormEvent) => {

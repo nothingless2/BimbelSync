@@ -46,24 +46,36 @@ export function ManageEnrollmentsModal({
     setIsLoading(false);
   };
 
-  const handleWithdraw = async (enrollmentId: string) => {
-    if (!confirm("Yakin ingin memberhentikan siswa dari kelas ini?")) return;
-    
-    setIsLoading(true);
-    setErrorMsg(null);
+  const handleWithdraw = (enrollmentId: string) => {
+    toast("Memberhentikan Siswa?", {
+      description: "Siswa ini akan dinonaktifkan dari program kelas yang dipilih.",
+      duration: 8000,
+      action: {
+        label: "Ya, Berhentikan",
+        onClick: async () => {
+          setIsLoading(true);
+          setErrorMsg(null);
 
-    // Using "LAINNYA" reason by default for simplicity from this UI
-    const result = await withdrawEnrollmentAction(enrollmentId, "LAINNYA", "Diberhentikan via kelola program");
+          // Using "LAINNYA" reason by default for simplicity from this UI
+          const result = await withdrawEnrollmentAction(enrollmentId, "LAINNYA", "Diberhentikan via kelola program");
 
-    if (result?.error) {
-      setErrorMsg(result.error);
-    } else {
-      toast.success("Siswa berhasil diberhentikan dari program.");
-      setLocalEnrollments(prev => prev.filter(e => e.id !== enrollmentId));
-      router.refresh();
-    }
-    
-    setIsLoading(false);
+          if (result?.error) {
+            setErrorMsg(result.error);
+            toast.error(result.error);
+          } else {
+            toast.success("Siswa berhasil diberhentikan dari program.");
+            setLocalEnrollments(prev => prev.filter(e => e.id !== enrollmentId));
+            router.refresh();
+          }
+          
+          setIsLoading(false);
+        },
+      },
+      cancel: {
+        label: "Batal",
+        onClick: () => {},
+      },
+    });
   };
 
   // Filter out programs the student is already actively enrolled in
