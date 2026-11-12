@@ -441,6 +441,7 @@ model Quiz {
   title               String
   description         String?
   duration_minutes    Int              @default(30)
+  evaluation_type     EvaluationType   @default(EXAM)
   is_published        Boolean          @default(true)
   created_at          DateTime         @default(now())
   updated_at          DateTime         @updatedAt
