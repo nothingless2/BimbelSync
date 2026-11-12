@@ -108,18 +108,30 @@ export default function QuizDetailClientPage({
     setIsQuestionModalOpen(true);
   };
 
-  const handleDeleteQuestion = async (qId: string) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus butir soal ini?")) return;
-    try {
-      setDeletingQuestionId(qId);
-      const res = await deleteQuestionAction(qId, quiz.id, tenantSlug);
-      if (res.error) throw new Error(res.error);
-      toast.success("Butir soal berhasil dihapus!");
-    } catch (err: any) {
-      toast.error(err.message || "Gagal menghapus butir soal.");
-    } finally {
-      setDeletingQuestionId(null);
-    }
+  const handleDeleteQuestion = (qId: string) => {
+    toast("Hapus Butir Soal?", {
+      description: "Soal ini akan dihapus permanen dari kuis.",
+      duration: 8000,
+      action: {
+        label: "Ya, Hapus",
+        onClick: async () => {
+          try {
+            setDeletingQuestionId(qId);
+            const res = await deleteQuestionAction(qId, quiz.id, tenantSlug);
+            if (res.error) throw new Error(res.error);
+            toast.success("Butir soal berhasil dihapus!");
+          } catch (err: any) {
+            toast.error(err.message || "Gagal menghapus butir soal.");
+          } finally {
+            setDeletingQuestionId(null);
+          }
+        },
+      },
+      cancel: {
+        label: "Batal",
+        onClick: () => {},
+      },
+    });
   };
 
   const handleTogglePublish = async () => {

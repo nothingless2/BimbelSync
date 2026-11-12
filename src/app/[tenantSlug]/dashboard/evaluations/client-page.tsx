@@ -98,19 +98,30 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
     setIsSubmitting(false);
   };
 
-  const handleDeleteColumn = async (title: string, type: string) => {
-    if (!confirm(`Hapus semua nilai untuk tugas "${title}"? Tindakan ini tidak dapat dibatalkan.`)) return;
-    
-    setSavingStatus("SAVING");
-    const res = await deleteEvaluationColumnAction(selectedProgramId, title, type as any, tenantSlug);
-    if (res.error) {
-      toast.error(res.error);
-      setSavingStatus("IDLE");
-    } else {
-      toast.success("Kolom berhasil dihapus.");
-      setSavingStatus("SAVED");
-      setTimeout(() => setSavingStatus("IDLE"), 2000);
-    }
+  const handleDeleteColumn = (title: string, type: string) => {
+    toast(`Hapus Tugas "${title}"?`, {
+      description: "Semua nilai siswa untuk tugas ini akan dihapus permanen.",
+      duration: 8000,
+      action: {
+        label: "Ya, Hapus",
+        onClick: async () => {
+          setSavingStatus("SAVING");
+          const res = await deleteEvaluationColumnAction(selectedProgramId, title, type as any, tenantSlug);
+          if (res.error) {
+            toast.error(res.error);
+            setSavingStatus("IDLE");
+          } else {
+            toast.success("Kolom tugas berhasil dihapus.");
+            setSavingStatus("SAVED");
+            setTimeout(() => setSavingStatus("IDLE"), 2000);
+          }
+        },
+      },
+      cancel: {
+        label: "Batal",
+        onClick: () => {},
+      },
+    });
   };
 
   const handleTogglePublish = async (title: string, type: string, currentStatus: string) => {

@@ -98,18 +98,30 @@ export default function QuizzesClientPage({
     }
   };
 
-  const handleDelete = async (quizId: string, title: string) => {
-    if (!confirm(`Apakah Anda yakin ingin menghapus kuis "${title}"?`)) return;
-    try {
-      setDeletingId(quizId);
-      const res = await deleteQuizAction(quizId, tenantSlug);
-      if (res.error) throw new Error(res.error);
-      toast.success("Kuis berhasil dihapus!");
-    } catch (err: any) {
-      toast.error(err.message || "Gagal menghapus kuis.");
-    } finally {
-      setDeletingId(null);
-    }
+  const handleDelete = (quizId: string, title: string) => {
+    toast(`Hapus Kuis "${title}"?`, {
+      description: "Kuis dan semua butir soal di dalamnya akan dihapus.",
+      duration: 8000,
+      action: {
+        label: "Ya, Hapus",
+        onClick: async () => {
+          try {
+            setDeletingId(quizId);
+            const res = await deleteQuizAction(quizId, tenantSlug);
+            if (res.error) throw new Error(res.error);
+            toast.success("Kuis berhasil dihapus!");
+          } catch (err: any) {
+            toast.error(err.message || "Gagal menghapus kuis.");
+          } finally {
+            setDeletingId(null);
+          }
+        },
+      },
+      cancel: {
+        label: "Batal",
+        onClick: () => {},
+      },
+    });
   };
 
   return (

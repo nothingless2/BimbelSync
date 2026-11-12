@@ -26,17 +26,29 @@ export default function MaterialsClientPage({ materials, programs, tenantSlug, a
       toast.error("Paket aktif Anda dalam mode baca-saja. Upgrade paket untuk mengelola materi.");
       return;
     }
-    if (!confirm("Apakah Anda yakin ingin menghapus materi ini?")) return;
-    try {
-      setDeletingId(id);
-      const res = await deleteMaterialAction(id, tenantSlug);
-      if (res.error) throw new Error(res.error);
-      toast.success("Materi berhasil dihapus!");
-    } catch (err: any) {
-      toast.error(err.message || "Gagal menghapus materi");
-    } finally {
-      setDeletingId(null);
-    }
+    toast("Hapus Materi?", {
+      description: "Materi ini akan dihapus permanen dari sistem.",
+      duration: 8000,
+      action: {
+        label: "Ya, Hapus",
+        onClick: async () => {
+          try {
+            setDeletingId(id);
+            const res = await deleteMaterialAction(id, tenantSlug);
+            if (res.error) throw new Error(res.error);
+            toast.success("Materi berhasil dihapus!");
+          } catch (err: any) {
+            toast.error(err.message || "Gagal menghapus materi");
+          } finally {
+            setDeletingId(null);
+          }
+        },
+      },
+      cancel: {
+        label: "Batal",
+        onClick: () => {},
+      },
+    });
   };
 
   const getIcon = (type: string) => {
