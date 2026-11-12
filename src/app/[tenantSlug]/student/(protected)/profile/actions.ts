@@ -5,6 +5,9 @@ import { redirect } from "next/navigation";
 
 export async function logoutStudentAction(tenantSlug: string) {
   const cookieStore = await cookies();
-  cookieStore.delete("bimbelsync_session");
+  cookieStore.delete({
+    name: "bimbelsync_session",
+    path: "/",
+  });
   redirect(`/${tenantSlug}/login`);
 }

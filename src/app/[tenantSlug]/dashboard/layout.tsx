@@ -78,9 +78,9 @@ export default async function DashboardLayout({
                ? "Masa percobaan gratis (TRIAL) Bimbel Anda telah berakhir. Yuk tingkatkan ke Paket Pro untuk terus menikmati fitur lengkap BimbelSync!"
                : "Masa berlangganan Bimbel Anda telah berakhir atau sistem sedang ditangguhkan. Silakan lunasi tagihan atau hubungi Superadmin untuk memulihkan akses."}
            </p>
-           <Link href={`/${tenantSlug}/logout`} className="inline-flex items-center justify-center px-6 py-3.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 transition rounded-xl w-full shadow-lg shadow-red-600/20">
+           <a href={`/${tenantSlug}/logout`} className="inline-flex items-center justify-center px-6 py-3.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 transition rounded-xl w-full shadow-lg shadow-red-600/20">
               Keluar dari Sistem
-           </Link>
+           </a>
         </div>
       </div>
     );
