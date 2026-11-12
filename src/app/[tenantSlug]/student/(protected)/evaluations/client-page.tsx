@@ -20,9 +20,9 @@ export default function StudentEvaluationsClientPage({ evaluations }: { evaluati
   };
 
   const getTypeName = (type: string) => {
-    if (type === "EXAM") return "Ujian / Kuis";
-    if (type === "HOMEWORK") return "Tugas / PR";
-    return "Evaluasi Bulanan";
+    if (type === "EXAM") return "Ujian & Kuis";
+    if (type === "HOMEWORK") return "Tugas & Latihan";
+    return "Laporan Bulanan";
   };
 
   const formatScore = (score: string | number | null) => {

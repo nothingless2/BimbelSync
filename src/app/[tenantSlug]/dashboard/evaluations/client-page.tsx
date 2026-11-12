@@ -419,9 +419,9 @@ export default function EvaluationsClientPage({ evaluations, students, programs,
                   value={formData.evaluationType}
                   onChange={(value) => setFormData({ ...formData, evaluationType: value as any })}
                   options={[
-                    { value: "HOMEWORK", label: "PR / Tugas" },
-                    { value: "EXAM", label: "Ujian / Kuis" },
-                    { value: "MONTHLY_REPORT", label: "Laporan Bulanan (Rapor)" }
+                    { value: "EXAM", label: "Ujian & Kuis" },
+                    { value: "HOMEWORK", label: "Tugas & Latihan" },
+                    { value: "MONTHLY_REPORT", label: "Laporan Bulanan" }
                   ]}
                 />
               </div>

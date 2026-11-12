@@ -112,6 +112,7 @@ export default async function QuizDetailPage({
         title: quiz.title,
         description: quiz.description,
         durationMinutes: quiz.duration_minutes,
+        evaluationType: quiz.evaluation_type,
         isPublished: quiz.is_published,
         programId: quiz.program_id,
         programName: quiz.program.name,

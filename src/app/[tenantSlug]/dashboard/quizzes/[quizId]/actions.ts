@@ -165,6 +165,7 @@ export async function updateQuizSettingsAction(data: {
   title: string;
   description?: string;
   durationMinutes: number;
+  evaluationType?: "EXAM" | "HOMEWORK";
   isPublished: boolean;
   tenantSlug: string;
 }) {
@@ -187,6 +188,7 @@ export async function updateQuizSettingsAction(data: {
         title: trimmedTitle,
         description: data.description?.trim() || null,
         duration_minutes: Number(data.durationMinutes) || 30,
+        ...(data.evaluationType ? { evaluation_type: data.evaluationType } : {}),
         is_published: data.isPublished,
       },
     });

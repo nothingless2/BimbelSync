@@ -125,9 +125,9 @@ export function AddEvaluationModal({ isOpen, onClose, tenantSlug, academyId, stu
             </label>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { id: "EXAM", label: "Ujian", icon: <Star size={16} /> },
-                { id: "HOMEWORK", label: "PR/Tugas", icon: <BookOpen size={16} /> },
-                { id: "MONTHLY_REPORT", label: "Rapor", icon: <BarChart size={16} /> },
+                { id: "EXAM", label: "Ujian & Kuis", icon: <Star size={16} /> },
+                { id: "HOMEWORK", label: "Tugas & Latihan", icon: <BookOpen size={16} /> },
+                { id: "MONTHLY_REPORT", label: "Laporan Bulanan", icon: <BarChart size={16} /> },
               ].map(type => (
                 <button
                   key={type.id}

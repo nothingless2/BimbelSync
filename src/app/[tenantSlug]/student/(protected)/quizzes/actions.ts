@@ -120,7 +120,7 @@ export async function submitQuizAction(data: {
             program_id: quiz.program_id,
             evaluator_id: evaluatorId,
             title: `[Kuis Online] ${quiz.title}`,
-            evaluation_type: "HOMEWORK",
+            evaluation_type: quiz.evaluation_type || "EXAM",
             score: finalScore,
             notes: `Hasil kuis online: ${totalCorrect} dari ${totalQuestions} soal terjawab benar (Skor: ${finalScore}/100).`,
             status: "PUBLISHED",

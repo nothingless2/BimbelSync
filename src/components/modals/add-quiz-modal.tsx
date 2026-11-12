@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { X, Loader2, HelpCircle, Clock, BookOpen } from "lucide-react";
+import { X, Loader2, HelpCircle, Clock, BookOpen, Star } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { createQuizAction } from "@/app/[tenantSlug]/dashboard/quizzes/actions";
 import { CustomSelect } from "@/components/ui/custom-select";
@@ -23,6 +23,7 @@ export function AddQuizModal({ isOpen, onClose, tenantSlug, academyId, programs 
     programId: programs[0]?.id || "",
     durationMinutes: 30,
     description: "",
+    evaluationType: "EXAM" as "EXAM" | "HOMEWORK",
     isPublished: true,
   });
 
@@ -47,6 +48,7 @@ export function AddQuizModal({ isOpen, onClose, tenantSlug, academyId, programs 
         title: formData.title,
         description: formData.description,
         durationMinutes: Number(formData.durationMinutes) || 30,
+        evaluationType: formData.evaluationType,
         isPublished: formData.isPublished,
         tenantSlug,
       });
@@ -115,6 +117,49 @@ export function AddQuizModal({ isOpen, onClose, tenantSlug, academyId, programs 
                 label: p.name,
               }))}
             />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+              Kategori Nilai di Rapor
+            </label>
+            <div className="grid grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, evaluationType: "EXAM" })}
+                className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition ${
+                  formData.evaluationType === "EXAM"
+                    ? "border-amber-500 bg-amber-50/60 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 ring-2 ring-amber-500/20"
+                    : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400"
+                }`}
+              >
+                <div className={`p-2 rounded-lg shrink-0 ${formData.evaluationType === "EXAM" ? "bg-amber-500 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-500"}`}>
+                  <Star size={16} />
+                </div>
+                <div>
+                  <div className="text-xs font-bold leading-tight">Ujian & Kuis</div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Bobot Ujian Rapor</div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, evaluationType: "HOMEWORK" })}
+                className={`flex items-center gap-2.5 p-3 rounded-xl border text-left transition ${
+                  formData.evaluationType === "HOMEWORK"
+                    ? "border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-200 ring-2 ring-emerald-500/20"
+                    : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400"
+                }`}
+              >
+                <div className={`p-2 rounded-lg shrink-0 ${formData.evaluationType === "HOMEWORK" ? "bg-emerald-500 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-500"}`}>
+                  <BookOpen size={16} />
+                </div>
+                <div>
+                  <div className="text-xs font-bold leading-tight">Tugas & Latihan</div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Bobot Tugas Rapor</div>
+                </div>
+              </button>
+            </div>
           </div>
 
           <div className="space-y-1.5">

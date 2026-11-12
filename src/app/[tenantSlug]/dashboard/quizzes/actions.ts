@@ -13,6 +13,7 @@ export async function createQuizAction(data: {
   title: string;
   description?: string;
   durationMinutes: number;
+  evaluationType?: "EXAM" | "HOMEWORK";
   isPublished: boolean;
   tenantSlug: string;
 }) {
@@ -46,6 +47,7 @@ export async function createQuizAction(data: {
         title: trimmedTitle,
         description: data.description?.trim() || null,
         duration_minutes: Number(data.durationMinutes) || 30,
+        evaluation_type: data.evaluationType || "EXAM",
         is_published: data.isPublished,
       },
     });
@@ -66,6 +68,7 @@ export async function updateQuizAction(data: {
   title: string;
   description?: string;
   durationMinutes: number;
+  evaluationType?: "EXAM" | "HOMEWORK";
   programId: string;
   isPublished: boolean;
   tenantSlug: string;
@@ -89,6 +92,7 @@ export async function updateQuizAction(data: {
         title: trimmedTitle,
         description: data.description?.trim() || null,
         duration_minutes: Number(data.durationMinutes) || 30,
+        evaluation_type: data.evaluationType || "EXAM",
         program_id: data.programId,
         is_published: data.isPublished,
       },

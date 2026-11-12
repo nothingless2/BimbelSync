@@ -72,6 +72,7 @@ export default async function QuizzesPage({ params }: { params: Promise<{ tenant
       title: q.title,
       description: q.description,
       durationMinutes: q.duration_minutes,
+      evaluationType: q.evaluation_type,
       isPublished: q.is_published,
       createdAt: q.created_at.toISOString(),
       programId: q.program_id,

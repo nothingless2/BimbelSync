@@ -18,6 +18,7 @@ import {
   FileQuestion,
   Eye,
   EyeOff,
+  Star,
 } from "lucide-react";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { AddQuizModal } from "@/components/modals/add-quiz-modal";
@@ -29,6 +30,7 @@ interface QuizItem {
   title: string;
   description: string | null;
   durationMinutes: number;
+  evaluationType?: "EXAM" | "HOMEWORK" | "MONTHLY_REPORT" | string;
   isPublished: boolean;
   createdAt: string;
   programId: string;
@@ -279,10 +281,20 @@ export default function QuizzesClientPage({
               <div className="space-y-3">
                 {/* Badge row */}
                 <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
-                    <BookOpen size={12} />
-                    {q.programName}
-                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
+                      <BookOpen size={12} />
+                      {q.programName}
+                    </span>
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
+                      q.evaluationType === "EXAM"
+                        ? "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50"
+                        : "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50"
+                    }`}>
+                      {q.evaluationType === "EXAM" ? <Star size={10} /> : <BookOpen size={10} />}
+                      {q.evaluationType === "EXAM" ? "Ujian & Kuis" : "Tugas & Latihan"}
+                    </span>
+                  </div>
                   <button
                     onClick={() => handleTogglePublish(q.id, q.isPublished)}
                     disabled={togglingId === q.id}

@@ -109,12 +109,12 @@ export default function GradebookClientPage({ tenantSlug, program, students, eva
         <div className="p-3.5 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="flex flex-col">
-              <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Bobot Ujian (Kuis/UAS)</span>
+              <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Bobot Ujian (Ujian & Kuis)</span>
               <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">{program.weight_exam}%</span>
             </div>
             <div className="w-px h-7 sm:h-8 bg-slate-200 dark:bg-slate-700"></div>
             <div className="flex flex-col">
-              <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Bobot PR (Tugas Harian)</span>
+              <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Bobot Tugas (Tugas & Latihan)</span>
               <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">{program.weight_homework}%</span>
             </div>
           </div>
@@ -151,7 +151,7 @@ export default function GradebookClientPage({ tenantSlug, program, students, eva
                     )}
                     {hwCols.length > 0 && (
                       <th colSpan={hwCols.length} className="px-3 py-2 font-semibold border-b border-r border-slate-200 dark:border-slate-800 text-center bg-emerald-50/50 dark:bg-emerald-900/10 text-emerald-800 dark:text-emerald-500">
-                        PR & Tugas ({program.weight_homework}%)
+                        Tugas & Latihan ({program.weight_homework}%)
                       </th>
                     )}
                     
@@ -227,7 +227,7 @@ export default function GradebookClientPage({ tenantSlug, program, students, eva
               <div className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex justify-between">
-                    Bobot Ujian (EXAM) <span>{weightExam}%</span>
+                    Bobot Ujian & Kuis (EXAM) <span>{weightExam}%</span>
                   </label>
                   <input
                     type="range"
@@ -245,7 +245,7 @@ export default function GradebookClientPage({ tenantSlug, program, students, eva
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex justify-between">
-                    Bobot PR (HOMEWORK) <span>{weightHomework}%</span>
+                    Bobot Tugas & Latihan (HOMEWORK) <span>{weightHomework}%</span>
                   </label>
                   <input
                     type="range"

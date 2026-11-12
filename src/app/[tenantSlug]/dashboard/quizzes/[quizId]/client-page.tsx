@@ -19,6 +19,7 @@ import {
   FileQuestion,
   Check,
   X as CloseIcon,
+  Star,
 } from "lucide-react";
 import { AddQuestionModal } from "@/components/modals/add-question-modal";
 import { deleteQuestionAction } from "./actions";
@@ -60,6 +61,7 @@ interface QuizDetailProps {
     title: string;
     description: string | null;
     durationMinutes: number;
+    evaluationType?: "EXAM" | "HOMEWORK" | "MONTHLY_REPORT" | string;
     isPublished: boolean;
     programId: string;
     programName: string;
@@ -156,6 +158,14 @@ export default function QuizDetailClientPage({
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
                 <BookOpen size={12} />
                 {quiz.programName}
+              </span>
+              <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                quiz.evaluationType === "EXAM"
+                  ? "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50"
+                  : "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50"
+              }`}>
+                {quiz.evaluationType === "EXAM" ? <Star size={12} /> : <BookOpen size={12} />}
+                {quiz.evaluationType === "EXAM" ? "Ujian & Kuis" : "Tugas & Latihan"}
               </span>
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
                 <Clock size={12} />
