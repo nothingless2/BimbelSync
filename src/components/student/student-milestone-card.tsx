@@ -203,6 +203,7 @@ export function StudentMilestoneCard({
 
         <Link
           href={`/${tenantSlug}/student/evaluations${selectedProgramId !== 'ALL' ? `?programId=${selectedProgramId}` : ''}`}
+          prefetch={true}
           className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 self-start sm:self-auto bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 px-3 py-1.5 rounded-xl transition"
         >
           Lihat E-Rapor <ChevronRight className="w-3.5 h-3.5" />
@@ -494,6 +495,7 @@ export function StudentMilestoneCard({
             </div>
             <Link
               href={`/${tenantSlug}/student/materials${selectedProgramId !== 'ALL' ? `?programId=${selectedProgramId}` : ''}`}
+              prefetch={true}
               className="text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 shrink-0"
             >
               Buka &rarr;

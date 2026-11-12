@@ -25,62 +25,65 @@ export default async function StudentQuizzesPage({
   const studentId = session.id as string;
   const academyId = session.academy_id as string;
 
-  // Ambil program aktif yang diikuti siswa
-  const enrollments = await prisma.enrollment.findMany({
-    where: {
-      student_id: studentId,
-      status: "ACTIVE",
-    },
-    include: {
-      program: {
-        select: { id: true, name: true },
+  // Query enrollments and available published quizzes concurrently
+  const [enrollments, rawQuizzes] = await Promise.all([
+    prisma.enrollment.findMany({
+      where: {
+        student_id: studentId,
+        status: "ACTIVE",
       },
-    },
-  });
+      include: {
+        program: {
+          select: { id: true, name: true },
+        },
+      },
+    }),
+    prisma.quiz.findMany({
+      where: {
+        academy_id: academyId,
+        is_published: true,
+        deleted_at: null,
+        program: {
+          enrollments: {
+            some: { student_id: studentId, status: "ACTIVE" },
+          },
+        },
+      },
+      include: {
+        program: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        creator: {
+          select: {
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            questions: true,
+          },
+        },
+        submissions: {
+          where: {
+            student_id: studentId,
+          },
+          select: {
+            id: true,
+            score: true,
+            total_correct: true,
+            total_questions: true,
+            submitted_at: true,
+          },
+        },
+      },
+      orderBy: { created_at: "desc" },
+    }),
+  ]);
 
   const programs = enrollments.map((e) => e.program);
-  const enrolledProgramIds = programs.map((p) => p.id);
-
-  // Ambil kuis yang tersedia untuk program siswa
-  const rawQuizzes = await prisma.quiz.findMany({
-    where: {
-      academy_id: academyId,
-      program_id: { in: enrolledProgramIds },
-      is_published: true,
-      deleted_at: null,
-    },
-    include: {
-      program: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-      creator: {
-        select: {
-          name: true,
-        },
-      },
-      _count: {
-        select: {
-          questions: true,
-        },
-      },
-      submissions: {
-        where: {
-          student_id: studentId,
-        },
-        select: {
-          id: true,
-          score: true,
-          total_correct: true,
-          total_questions: true,
-          submitted_at: true,
-        },
-      },
-    },
-    orderBy: { created_at: "desc" },
-  });
 
   const quizzes = rawQuizzes.map((q) => {
     const submission = q.submissions[0] || null;

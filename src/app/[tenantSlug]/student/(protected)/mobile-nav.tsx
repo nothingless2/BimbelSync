@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, QrCode, User, CreditCard, BarChart, BookOpen, Calendar, Menu, X, ChevronRight, FileQuestion } from 'lucide-react';
@@ -8,6 +8,11 @@ import { Home, QrCode, User, CreditCard, BarChart, BookOpen, Calendar, Menu, X, 
 export function StudentMobileNav({ tenantSlug }: { tenantSlug: string }) {
   const pathname = usePathname();
   const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
+
+  useEffect(() => {
+    setPendingHref(null);
+  }, [pathname]);
 
   // 4 Primary Menu Items + 1 Menu Button
   const primaryItems = [
@@ -32,6 +37,13 @@ export function StudentMobileNav({ tenantSlug }: { tenantSlug: string }) {
 
   return (
     <>
+      {/* Top Loading Feedback Bar saat Navigasi Berlangsung */}
+      {pendingHref && (
+        <div className="fixed top-0 left-0 right-0 h-1 z-[999] bg-blue-100 dark:bg-blue-950 overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-blue-500 via-sky-400 to-indigo-600 animate-pulse w-full" />
+        </div>
+      )}
+
       {/* Backdrop for More Menu */}
       {isMoreOpen && (
         <div 
@@ -64,7 +76,11 @@ export function StudentMobileNav({ tenantSlug }: { tenantSlug: string }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={() => setIsMoreOpen(false)}
+                  prefetch={true}
+                  onClick={() => {
+                    setIsMoreOpen(false);
+                    if (pathname !== item.href) setPendingHref(item.href);
+                  }}
                   className="flex items-center gap-4 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 hover:bg-blue-50 hover:border-blue-100 dark:hover:bg-slate-800 transition-all active:scale-[0.98]"
                 >
                   <div className="bg-white dark:bg-slate-800 p-3 rounded-xl shadow-sm">
@@ -89,12 +105,19 @@ export function StudentMobileNav({ tenantSlug }: { tenantSlug: string }) {
           {/* First 2 Items (Beranda, Jadwal) */}
           {primaryItems.slice(0, 2).map((item) => {
             const active = isActive(item.href, item.exact);
+            const isPendingThis = pendingHref === item.href;
             const Icon = item.icon;
             return (
               <Link 
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center justify-center w-[20%] h-full gap-1 transition-colors ${
+                prefetch={true}
+                onClick={() => {
+                  if (pathname !== item.href) setPendingHref(item.href);
+                }}
+                className={`flex flex-col items-center justify-center w-[20%] h-full gap-1 transition-all ${
+                  isPendingThis ? 'animate-pulse scale-95 opacity-80' : ''
+                } ${
                   active 
                     ? 'text-blue-600 dark:text-blue-400' 
                     : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
@@ -109,12 +132,19 @@ export function StudentMobileNav({ tenantSlug }: { tenantSlug: string }) {
           {/* Center Action Button (Scan) */}
           {primaryItems.slice(2, 3).map((item) => {
             const active = isActive(item.href, item.exact);
+            const isPendingThis = pendingHref === item.href;
             const Icon = item.icon;
             return (
               <Link 
                 key={item.href}
                 href={item.href}
-                className="relative flex flex-col items-center justify-center w-[20%] h-full"
+                prefetch={true}
+                onClick={() => {
+                  if (pathname !== item.href) setPendingHref(item.href);
+                }}
+                className={`relative flex flex-col items-center justify-center w-[20%] h-full ${
+                  isPendingThis ? 'animate-pulse scale-95' : ''
+                }`}
               >
                 <div className={`absolute -top-5 flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-transform active:scale-95 ${
                   active 
@@ -131,12 +161,19 @@ export function StudentMobileNav({ tenantSlug }: { tenantSlug: string }) {
           {/* 4th Item (Profil) */}
           {primaryItems.slice(3, 4).map((item) => {
             const active = isActive(item.href, item.exact);
+            const isPendingThis = pendingHref === item.href;
             const Icon = item.icon;
             return (
               <Link 
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center justify-center w-[20%] h-full gap-1 transition-colors ${
+                prefetch={true}
+                onClick={() => {
+                  if (pathname !== item.href) setPendingHref(item.href);
+                }}
+                className={`flex flex-col items-center justify-center w-[20%] h-full gap-1 transition-all ${
+                  isPendingThis ? 'animate-pulse scale-95 opacity-80' : ''
+                } ${
                   active 
                     ? 'text-blue-600 dark:text-blue-400' 
                     : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'

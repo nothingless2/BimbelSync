@@ -27,9 +27,21 @@ export default async function StudentProfilePage({
       deleted_at: null,
     },
     include: {
-      academy: true,
+      academy: {
+        select: {
+          name: true,
+          path_url: true,
+        }
+      },
       enrollments: {
-        include: { program: true }
+        where: { status: 'ACTIVE' },
+        include: {
+          program: {
+            select: {
+              name: true,
+            }
+          }
+        }
       }
     }
   });

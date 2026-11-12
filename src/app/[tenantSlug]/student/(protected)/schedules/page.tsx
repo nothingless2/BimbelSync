@@ -19,37 +19,47 @@ export default async function StudentSchedulesPage({ params }: { params: Promise
 
   const session = auth.session;
 
-  const student = await prisma.student.findFirst({
-    where: {
-      id: session.id,
-      academy_id: session.academy_id,
-      deleted_at: null,
-    },
-    include: {
-      enrollments: {
-        where: { status: 'ACTIVE' },
-        include: { program: true }
+  // Query student's active programs and schedules concurrently
+  const [student, schedules] = await Promise.all([
+    prisma.student.findFirst({
+      where: {
+        id: session.id,
+        academy_id: session.academy_id,
+        deleted_at: null,
+      },
+      select: {
+        enrollments: {
+          where: { status: 'ACTIVE' },
+          select: {
+            program: {
+              select: {
+                id: true,
+                name: true,
+              }
+            }
+          }
+        }
       }
-    }
-  });
+    }),
+    prisma.schedule.findMany({
+      where: {
+        program: {
+          academy_id: session.academy_id,
+          enrollments: {
+            some: { student_id: session.id as string, status: 'ACTIVE' }
+          }
+        }
+      },
+      include: {
+        program: true,
+        tutor: { select: { name: true } },
+        room: { select: { name: true } },
+      },
+      orderBy: { start_time: "asc" },
+    })
+  ]);
 
   if (!student) redirect(`/${tenantSlug}/student/login`);
-
-  const programIds = student.enrollments.map(e => e.program_id);
-
-  // Get schedules for the active programs
-  const schedules = await prisma.schedule.findMany({
-    where: {
-      program_id: { in: programIds },
-      // Includes both SCHEDULED and CANCELLED
-    },
-    include: {
-      program: true,
-      tutor: { select: { name: true } },
-      room: { select: { name: true } },
-    },
-    orderBy: { start_time: "asc" },
-  });
 
   const programs = student.enrollments.map((e) => e.program);
 

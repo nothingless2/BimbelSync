@@ -94,6 +94,7 @@ export function StudentRecentAttendances({
           href={`/${tenantSlug}/student/attendances${
             selectedProgramId !== "ALL" ? `?programId=${selectedProgramId}` : ""
           }`}
+          prefetch={true}
           className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 self-start sm:self-auto bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-xl transition"
         >
           Lihat Semua &rarr;

@@ -19,45 +19,53 @@ export default async function StudentMaterialsPage({ params }: { params: Promise
 
   const session = auth.session;
 
-  // Get student's enrolled programs
-  const student = await prisma.student.findFirst({
-    where: {
-      id: session.id,
-      academy_id: session.academy_id,
-      deleted_at: null,
-    },
-    include: {
-      enrollments: {
-        where: { status: 'ACTIVE' },
-        include: { program: true }
+  // Query student's active programs and learning materials concurrently
+  const [student, materials] = await Promise.all([
+    prisma.student.findFirst({
+      where: {
+        id: session.id,
+        academy_id: session.academy_id,
+        deleted_at: null,
+      },
+      select: {
+        enrollments: {
+          where: { status: 'ACTIVE' },
+          select: {
+            program: {
+              select: {
+                id: true,
+                name: true,
+              }
+            }
+          }
+        }
       }
-    }
-  });
+    }),
+    prisma.learningMaterial.findMany({
+      where: {
+        academy_id: session.academy_id,
+        deleted_at: null,
+        program: {
+          enrollments: {
+            some: { student_id: session.id as string, status: 'ACTIVE' }
+          }
+        }
+      },
+      include: {
+        program: true,
+        creator: {
+          select: {
+            name: true,
+          }
+        }
+      },
+      orderBy: { created_at: "desc" },
+    })
+  ]);
 
   if (!student) redirect(`/${tenantSlug}/student/login`);
 
-  const enrolledProgramIds = student.enrollments.map(e => e.program_id);
-  const programs = student.enrollments.map(e => ({
-    id: e.program.id,
-    name: e.program.name,
-  }));
-
-  const materials = await prisma.learningMaterial.findMany({
-    where: {
-      academy_id: student.academy_id,
-      program_id: { in: enrolledProgramIds },
-      deleted_at: null
-    },
-    include: {
-      program: true,
-      creator: {
-        select: {
-          name: true,
-        }
-      }
-    },
-    orderBy: { created_at: "desc" },
-  });
+  const programs = student.enrollments.map((e) => e.program);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
