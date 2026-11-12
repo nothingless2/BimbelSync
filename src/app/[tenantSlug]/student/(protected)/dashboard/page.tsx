@@ -99,6 +99,7 @@ export default async function StudentDashboardPage({
       },
       select: {
         score: true,
+        evaluation_type: true,
       }
     }),
     prisma.learningMaterial.count({
@@ -121,6 +122,11 @@ export default async function StudentDashboardPage({
   const totalDebt = unpaidInvoices.reduce((sum, inv) => sum + inv.total_amount, 0);
   const hasUnpaid = unpaidInvoices.length > 0;
 
+  // Map riwayat presensi siswa berdasarkan ID jadwal kelas
+  const attendanceMap = new Map(
+    student.attendances.map((a) => [a.schedule_id, a.attendance_status])
+  );
+
   // Kalkulasi Milestone Progress Siswa
   const now = new Date();
   const pastSchedules = allSchedules.filter((s) => new Date(s.end_time) <= now && s.status === 'SCHEDULED');
@@ -136,6 +142,57 @@ export default async function StudentDashboardPage({
     ? validScores.reduce((a, b) => a + b, 0) / validScores.length
     : null;
 
+  const examScores = evaluations
+    .filter((e) => e.evaluation_type === 'EXAM' && e.score !== null)
+    .map((e) => Number(e.score));
+  const examAverage = examScores.length > 0
+    ? examScores.reduce((a, b) => a + b, 0) / examScores.length
+    : null;
+
+  const homeworkScores = evaluations
+    .filter((e) => e.evaluation_type === 'HOMEWORK' && e.score !== null)
+    .map((e) => Number(e.score));
+  const homeworkAverage = homeworkScores.length > 0
+    ? homeworkScores.reduce((a, b) => a + b, 0) / homeworkScores.length
+    : null;
+
+  // Kalkulasi Sliding Window Milestone Pertemuan (5 Sesi Terdekat)
+  const totalSchedules = allSchedules.length;
+  const nextScheduleIdx = allSchedules.findIndex((s) => new Date(s.end_time) > now && s.status === 'SCHEDULED');
+  const activeSessionNumber = nextScheduleIdx !== -1 ? nextScheduleIdx + 1 : (totalPastSchedules > 0 ? totalPastSchedules : 1);
+
+  let windowStart = Math.max(0, (nextScheduleIdx !== -1 ? nextScheduleIdx : totalPastSchedules) - 2);
+  let windowEnd = windowStart + 5;
+  if (windowEnd > totalSchedules) {
+    windowEnd = totalSchedules;
+    windowStart = Math.max(0, windowEnd - 5);
+  }
+
+  const slidingWindow = allSchedules.slice(windowStart, windowEnd).map((sch, localIdx) => {
+    const globalIdx = windowStart + localIdx;
+    const sessionNum = globalIdx + 1;
+    const isPast = new Date(sch.end_time) <= now;
+    const isActiveNext = globalIdx === nextScheduleIdx;
+    const attStatus = attendanceMap.get(sch.id);
+
+    let status: "PRESENT" | "ABSENT" | "EXCUSED" | "ACTIVE_NEXT" | "UPCOMING" = "UPCOMING";
+    if (isActiveNext) {
+      status = "ACTIVE_NEXT";
+    } else if (isPast) {
+      if (attStatus === "PRESENT") status = "PRESENT";
+      else if (attStatus === "EXCUSED") status = "EXCUSED";
+      else status = "ABSENT";
+    }
+
+    return {
+      sessionNumber: sessionNum,
+      dateFormatted: formatDateWIB(sch.start_time),
+      status,
+      roomName: sch.room?.name || "Kelas",
+      programName: sch.program?.name || "",
+    };
+  });
+
   const milestoneData = {
     attendance: {
       totalPastSchedules,
@@ -146,9 +203,17 @@ export default async function StudentDashboardPage({
       averageScore,
       totalEvaluations: evaluations.length,
       scoredCount: validScores.length,
+      examAverage,
+      homeworkAverage,
     },
     materials: {
       totalAvailable: materialsCount,
+    },
+    sessions: {
+      totalSchedules,
+      pastSchedulesCount: totalPastSchedules,
+      activeSessionNumber,
+      slidingWindow,
     },
   };
 
