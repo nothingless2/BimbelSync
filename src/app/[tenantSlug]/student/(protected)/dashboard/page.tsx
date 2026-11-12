@@ -98,6 +98,8 @@ export default async function StudentDashboardPage({
         status: 'PUBLISHED',
       },
       select: {
+        program_id: true,
+        title: true,
         score: true,
         evaluation_type: true,
       }
@@ -135,21 +137,36 @@ export default async function StudentDashboardPage({
     ? null
     : Math.min(100, Math.round((presentAttendancesCount / totalPastSchedules) * 100));
 
-  const validScores = evaluations
+  // Deduplikasi jika ada evaluasi dengan nama dan tipe yang sama pada program yang sama
+  const dedupedEvalsMap = new Map<string, (typeof evaluations)[0]>();
+  for (const ev of evaluations) {
+    const key = `${ev.program_id}_${ev.title.trim().toLowerCase()}_${ev.evaluation_type}`;
+    if (!dedupedEvalsMap.has(key)) {
+      dedupedEvalsMap.set(key, ev);
+    } else {
+      const existing = dedupedEvalsMap.get(key)!;
+      if (existing.score === null && ev.score !== null) {
+        dedupedEvalsMap.set(key, ev);
+      }
+    }
+  }
+  const dedupedEvaluations = Array.from(dedupedEvalsMap.values());
+
+  const validScores = dedupedEvaluations
     .filter((e) => e.score !== null)
     .map((e) => Number(e.score));
   const averageScore = validScores.length > 0
     ? validScores.reduce((a, b) => a + b, 0) / validScores.length
     : null;
 
-  const examScores = evaluations
+  const examScores = dedupedEvaluations
     .filter((e) => e.evaluation_type === 'EXAM' && e.score !== null)
     .map((e) => Number(e.score));
   const examAverage = examScores.length > 0
     ? examScores.reduce((a, b) => a + b, 0) / examScores.length
     : null;
 
-  const homeworkScores = evaluations
+  const homeworkScores = dedupedEvaluations
     .filter((e) => e.evaluation_type === 'HOMEWORK' && e.score !== null)
     .map((e) => Number(e.score));
   const homeworkAverage = homeworkScores.length > 0

@@ -44,7 +44,8 @@ export async function createEvaluationAction(data: {
     });
 
     revalidatePath(`/${data.tenantSlug}/dashboard/evaluations`);
-    revalidatePath(`/${data.tenantSlug}/student/(protected)/evaluations`);
+    revalidatePath(`/${data.tenantSlug}/student/evaluations`);
+    revalidatePath(`/${data.tenantSlug}/student/dashboard`);
     return { success: true };
   } catch (error: any) {
     console.error("Failed to create evaluation:", error);
@@ -79,12 +80,29 @@ export async function bulkCreateEvaluationsAction(data: {
   }
 
   try {
+    // Validasi pencegahan duplikasi kolom tugas dengan judul dan tipe yang sama
+    const existing = await prisma.studentEvaluation.findFirst({
+      where: {
+        academy_id: session.academy_id,
+        program_id: data.programId,
+        title: {
+          equals: data.title.trim(),
+          mode: 'insensitive'
+        },
+        evaluation_type: data.evaluationType,
+      }
+    });
+
+    if (existing) {
+      return { error: `Tugas "${data.title.trim()}" sudah ada di program ini. Silakan gunakan nama tugas lain.` };
+    }
+
     const records = data.evaluations.map(ev => ({
       academy_id: session.academy_id,
       student_id: ev.studentId,
       program_id: data.programId,
       evaluator_id: session.id,
-      title: data.title,
+      title: data.title.trim(),
       evaluation_type: data.evaluationType,
       score: ev.score,
       notes: ev.notes || null,
@@ -95,7 +113,8 @@ export async function bulkCreateEvaluationsAction(data: {
     });
 
     revalidatePath(`/${data.tenantSlug}/dashboard/evaluations`);
-    revalidatePath(`/${data.tenantSlug}/student/(protected)/evaluations`);
+    revalidatePath(`/${data.tenantSlug}/student/evaluations`);
+    revalidatePath(`/${data.tenantSlug}/student/dashboard`);
     return { success: true };
   } catch (error: any) {
     console.error("Failed to bulk create evaluations:", error);
@@ -126,7 +145,8 @@ export async function deleteEvaluationAction(id: string, tenantSlug: string) {
     });
 
     revalidatePath(`/${tenantSlug}/dashboard/evaluations`);
-    revalidatePath(`/${tenantSlug}/student/(protected)/evaluations`);
+    revalidatePath(`/${tenantSlug}/student/evaluations`);
+    revalidatePath(`/${tenantSlug}/student/dashboard`);
     return { success: true };
   } catch (error: any) {
     return { error: error.message || "Failed to delete evaluation" };
@@ -156,6 +176,8 @@ export async function updateEvaluationScoreAction(id: string, score: number | nu
       data: { score }
     });
     revalidatePath(`/${tenantSlug}/dashboard/evaluations`);
+    revalidatePath(`/${tenantSlug}/student/evaluations`);
+    revalidatePath(`/${tenantSlug}/student/dashboard`);
     return { success: true };
   } catch (error: any) {
     return { error: error.message || "Failed to update score" };
@@ -188,6 +210,8 @@ export async function deleteEvaluationColumnAction(programId: string, title: str
       }
     });
     revalidatePath(`/${tenantSlug}/dashboard/evaluations`);
+    revalidatePath(`/${tenantSlug}/student/evaluations`);
+    revalidatePath(`/${tenantSlug}/student/dashboard`);
     return { success: true };
   } catch (error: any) {
     return { error: error.message || "Failed to delete column" };
@@ -252,7 +276,8 @@ export async function publishEvaluationColumnAction(programId: string, title: st
     });
     revalidatePath(`/${tenantSlug}/dashboard/evaluations`);
     revalidatePath(`/${tenantSlug}/dashboard/evaluations/gradebook`);
-    revalidatePath(`/${tenantSlug}/student/(protected)/evaluations`);
+    revalidatePath(`/${tenantSlug}/student/evaluations`);
+    revalidatePath(`/${tenantSlug}/student/dashboard`);
     return { success: true };
   } catch (error: any) {
     return { error: error.message || "Failed to publish column" };
@@ -288,7 +313,8 @@ export async function unpublishEvaluationColumnAction(programId: string, title: 
     });
     revalidatePath(`/${tenantSlug}/dashboard/evaluations`);
     revalidatePath(`/${tenantSlug}/dashboard/evaluations/gradebook`);
-    revalidatePath(`/${tenantSlug}/student/(protected)/evaluations`);
+    revalidatePath(`/${tenantSlug}/student/evaluations`);
+    revalidatePath(`/${tenantSlug}/student/dashboard`);
     return { success: true };
   } catch (error: any) {
     return { error: error.message || "Failed to revert to draft" };

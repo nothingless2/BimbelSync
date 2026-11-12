@@ -36,7 +36,22 @@ export default async function StudentEvaluationsPage({
     orderBy: { created_at: "desc" },
   });
 
-  const evaluations = rawEvaluations.map(ev => ({
+  // Deduplikasi jika ada tugas dengan judul dan tipe yang sama pada program yang sama
+  // Prioritaskan baris yang memiliki nilai (score !== null)
+  const dedupedMap = new Map<string, (typeof rawEvaluations)[0]>();
+  for (const ev of rawEvaluations) {
+    const key = `${ev.program_id}_${ev.title.trim().toLowerCase()}_${ev.evaluation_type}`;
+    if (!dedupedMap.has(key)) {
+      dedupedMap.set(key, ev);
+    } else {
+      const existing = dedupedMap.get(key)!;
+      if (existing.score === null && ev.score !== null) {
+        dedupedMap.set(key, ev);
+      }
+    }
+  }
+
+  const evaluations = Array.from(dedupedMap.values()).map(ev => ({
     ...ev,
     score: ev.score !== null ? Number(ev.score) : null
   }));
