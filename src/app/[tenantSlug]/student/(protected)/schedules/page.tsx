@@ -51,6 +51,8 @@ export default async function StudentSchedulesPage({ params }: { params: Promise
     orderBy: { start_time: "asc" },
   });
 
+  const programs = student.enrollments.map((e) => e.program);
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
       
@@ -71,6 +73,7 @@ export default async function StudentSchedulesPage({ params }: { params: Promise
       <div className="px-4 sm:px-8 -mt-16 relative z-20 max-w-4xl mx-auto">
         <StudentSchedulesClientPage 
           schedules={schedules} 
+          programs={programs}
           tenantSlug={tenantSlug} 
         />
       </div>

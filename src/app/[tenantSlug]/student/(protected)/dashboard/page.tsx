@@ -28,7 +28,7 @@ export default async function StudentDashboardPage({
 
   const session = auth.session;
 
-  const [student, allSchedules, unpaidInvoices, academy, presentAttendancesCount, evaluations, materialsCount] = await Promise.all([
+  const [student, allSchedules, unpaidInvoices, academy, allAttendances, evaluations, learningMaterials] = await Promise.all([
     prisma.student.findFirst({
       where: {
         id: session.id,
@@ -37,6 +37,7 @@ export default async function StudentDashboardPage({
       },
       include: {
         enrollments: {
+          where: { status: 'ACTIVE' },
           include: {
             program: true
           }
@@ -86,10 +87,18 @@ export default async function StudentDashboardPage({
       where: { id: session.academy_id },
       select: { name: true, bank_name: true, bank_account: true }
     }),
-    prisma.attendance.count({
+    prisma.attendance.findMany({
       where: {
         student_id: session.id,
-        attendance_status: 'PRESENT',
+      },
+      select: {
+        schedule_id: true,
+        attendance_status: true,
+        schedule: {
+          select: {
+            program_id: true,
+          }
+        }
       }
     }),
     prisma.studentEvaluation.findMany({
@@ -98,13 +107,14 @@ export default async function StudentDashboardPage({
         status: 'PUBLISHED',
       },
       select: {
+        id: true,
         program_id: true,
         title: true,
         score: true,
         evaluation_type: true,
       }
     }),
-    prisma.learningMaterial.count({
+    prisma.learningMaterial.findMany({
       where: {
         academy_id: session.academy_id,
         deleted_at: null,
@@ -113,6 +123,10 @@ export default async function StudentDashboardPage({
             some: { student_id: session.id, status: 'ACTIVE' }
           }
         }
+      },
+      select: {
+        id: true,
+        program_id: true,
       }
     })
   ]);
@@ -124,115 +138,162 @@ export default async function StudentDashboardPage({
   const totalDebt = unpaidInvoices.reduce((sum, inv) => sum + inv.total_amount, 0);
   const hasUnpaid = unpaidInvoices.length > 0;
 
-  // Map riwayat presensi siswa berdasarkan ID jadwal kelas
-  const attendanceMap = new Map(
-    student.attendances.map((a) => [a.schedule_id, a.attendance_status])
-  );
+  // Daftar program aktif yang diikuti siswa
+  const activePrograms = student.enrollments.map((e) => ({
+    id: e.program.id,
+    name: e.program.name,
+  }));
 
-  // Kalkulasi Milestone Progress Siswa
   const now = new Date();
-  const pastSchedules = allSchedules.filter((s) => new Date(s.end_time) <= now && s.status === 'SCHEDULED');
-  const totalPastSchedules = pastSchedules.length;
-  const attendancePercentage = totalPastSchedules === 0
-    ? null
-    : Math.min(100, Math.round((presentAttendancesCount / totalPastSchedules) * 100));
 
-  // Deduplikasi jika ada evaluasi dengan nama dan tipe yang sama pada program yang sama
-  const dedupedEvalsMap = new Map<string, (typeof evaluations)[0]>();
-  for (const ev of evaluations) {
-    const key = `${ev.program_id}_${ev.title.trim().toLowerCase()}_${ev.evaluation_type}`;
-    if (!dedupedEvalsMap.has(key)) {
-      dedupedEvalsMap.set(key, ev);
-    } else {
-      const existing = dedupedEvalsMap.get(key)!;
-      if (existing.score === null && ev.score !== null) {
+  // Helper kalkulasi data milestone untuk satu set jadwal & evaluasi (per program atau gabungan)
+  function computeMilestone(
+    schedules: typeof allSchedules,
+    attendances: typeof allAttendances,
+    evals: typeof evaluations,
+    matCount: number,
+    progName?: string
+  ) {
+    const attMap = new Map(attendances.map((a) => [a.schedule_id, a.attendance_status]));
+
+    const pastSchedules = schedules.filter((s) => new Date(s.end_time) <= now && s.status === 'SCHEDULED');
+    const totalPastSchedules = pastSchedules.length;
+
+    const pastScheduleIds = new Set(pastSchedules.map((s) => s.id));
+    const attendedCount = attendances.filter(
+      (a) => pastScheduleIds.has(a.schedule_id) && a.attendance_status === 'PRESENT'
+    ).length;
+
+    const attendancePercentage = totalPastSchedules === 0
+      ? null
+      : Math.min(100, Math.round((attendedCount / totalPastSchedules) * 100));
+
+    // Deduplikasi jika ada evaluasi dengan nama dan tipe yang sama pada program yang sama
+    const dedupedEvalsMap = new Map<string, (typeof evals)[0]>();
+    for (const ev of evals) {
+      const key = `${ev.program_id}_${ev.title.trim().toLowerCase()}_${ev.evaluation_type}`;
+      if (!dedupedEvalsMap.has(key)) {
         dedupedEvalsMap.set(key, ev);
+      } else {
+        const existing = dedupedEvalsMap.get(key)!;
+        if (existing.score === null && ev.score !== null) {
+          dedupedEvalsMap.set(key, ev);
+        }
       }
     }
-  }
-  const dedupedEvaluations = Array.from(dedupedEvalsMap.values());
+    const dedupedEvaluations = Array.from(dedupedEvalsMap.values());
 
-  const validScores = dedupedEvaluations
-    .filter((e) => e.score !== null)
-    .map((e) => Number(e.score));
-  const averageScore = validScores.length > 0
-    ? validScores.reduce((a, b) => a + b, 0) / validScores.length
-    : null;
+    const validScores = dedupedEvaluations
+      .filter((e) => e.score !== null)
+      .map((e) => Number(e.score));
+    const averageScore = validScores.length > 0
+      ? validScores.reduce((a, b) => a + b, 0) / validScores.length
+      : null;
 
-  const examScores = dedupedEvaluations
-    .filter((e) => e.evaluation_type === 'EXAM' && e.score !== null)
-    .map((e) => Number(e.score));
-  const examAverage = examScores.length > 0
-    ? examScores.reduce((a, b) => a + b, 0) / examScores.length
-    : null;
+    const examScores = dedupedEvaluations
+      .filter((e) => e.evaluation_type === 'EXAM' && e.score !== null)
+      .map((e) => Number(e.score));
+    const examAverage = examScores.length > 0
+      ? examScores.reduce((a, b) => a + b, 0) / examScores.length
+      : null;
 
-  const homeworkScores = dedupedEvaluations
-    .filter((e) => e.evaluation_type === 'HOMEWORK' && e.score !== null)
-    .map((e) => Number(e.score));
-  const homeworkAverage = homeworkScores.length > 0
-    ? homeworkScores.reduce((a, b) => a + b, 0) / homeworkScores.length
-    : null;
+    const homeworkScores = dedupedEvaluations
+      .filter((e) => e.evaluation_type === 'HOMEWORK' && e.score !== null)
+      .map((e) => Number(e.score));
+    const homeworkAverage = homeworkScores.length > 0
+      ? homeworkScores.reduce((a, b) => a + b, 0) / homeworkScores.length
+      : null;
 
-  // Kalkulasi Sliding Window Milestone Pertemuan (5 Sesi Terdekat)
-  const totalSchedules = allSchedules.length;
-  const nextScheduleIdx = allSchedules.findIndex((s) => new Date(s.end_time) > now && s.status === 'SCHEDULED');
-  const activeSessionNumber = nextScheduleIdx !== -1 ? nextScheduleIdx + 1 : (totalPastSchedules > 0 ? totalPastSchedules : 1);
+    // Kalkulasi Sliding Window Milestone Pertemuan (5 Sesi Terdekat)
+    const totalSchedules = schedules.length;
+    const nextScheduleIdx = schedules.findIndex((s) => new Date(s.end_time) > now && s.status === 'SCHEDULED');
+    const activeSessionNumber = nextScheduleIdx !== -1 ? nextScheduleIdx + 1 : (totalPastSchedules > 0 ? totalPastSchedules : 1);
 
-  let windowStart = Math.max(0, (nextScheduleIdx !== -1 ? nextScheduleIdx : totalPastSchedules) - 2);
-  let windowEnd = windowStart + 5;
-  if (windowEnd > totalSchedules) {
-    windowEnd = totalSchedules;
-    windowStart = Math.max(0, windowEnd - 5);
-  }
-
-  const slidingWindow = allSchedules.slice(windowStart, windowEnd).map((sch, localIdx) => {
-    const globalIdx = windowStart + localIdx;
-    const sessionNum = globalIdx + 1;
-    const isPast = new Date(sch.end_time) <= now;
-    const isActiveNext = globalIdx === nextScheduleIdx;
-    const attStatus = attendanceMap.get(sch.id);
-
-    let status: "PRESENT" | "ABSENT" | "EXCUSED" | "ACTIVE_NEXT" | "UPCOMING" = "UPCOMING";
-    if (isActiveNext) {
-      status = "ACTIVE_NEXT";
-    } else if (isPast) {
-      if (attStatus === "PRESENT") status = "PRESENT";
-      else if (attStatus === "EXCUSED") status = "EXCUSED";
-      else status = "ABSENT";
+    let windowStart = Math.max(0, (nextScheduleIdx !== -1 ? nextScheduleIdx : totalPastSchedules) - 2);
+    let windowEnd = windowStart + 5;
+    if (windowEnd > totalSchedules) {
+      windowEnd = totalSchedules;
+      windowStart = Math.max(0, windowEnd - 5);
     }
 
-    return {
-      sessionNumber: sessionNum,
-      dateFormatted: formatDateWIB(sch.start_time),
-      status,
-      roomName: sch.room?.name || "Kelas",
-      programName: sch.program?.name || "",
-    };
-  });
+    const slidingWindow = schedules.slice(windowStart, windowEnd).map((sch, localIdx) => {
+      const globalIdx = windowStart + localIdx;
+      const sessionNum = globalIdx + 1;
+      const isPast = new Date(sch.end_time) <= now;
+      const isActiveNext = globalIdx === nextScheduleIdx;
+      const attStatus = attMap.get(sch.id);
 
-  const milestoneData = {
-    attendance: {
-      totalPastSchedules,
-      attendedCount: presentAttendancesCount,
-      percentage: attendancePercentage,
-    },
-    academic: {
-      averageScore,
-      totalEvaluations: dedupedEvaluations.length,
-      scoredCount: validScores.length,
-      examAverage,
-      homeworkAverage,
-    },
-    materials: {
-      totalAvailable: materialsCount,
-    },
-    sessions: {
-      totalSchedules,
-      pastSchedulesCount: totalPastSchedules,
-      activeSessionNumber,
-      slidingWindow,
-    },
-  };
+      let status: "PRESENT" | "ABSENT" | "EXCUSED" | "ACTIVE_NEXT" | "UPCOMING" = "UPCOMING";
+      if (isActiveNext) {
+        status = "ACTIVE_NEXT";
+      } else if (isPast) {
+        if (attStatus === "PRESENT") status = "PRESENT";
+        else if (attStatus === "EXCUSED") status = "EXCUSED";
+        else status = "ABSENT";
+      }
+
+      return {
+        sessionNumber: sessionNum,
+        dateFormatted: formatDateWIB(sch.start_time),
+        status,
+        roomName: sch.room?.name || "Kelas",
+        programName: sch.program?.name || "",
+      };
+    });
+
+    return {
+      programName: progName,
+      attendance: {
+        totalPastSchedules,
+        attendedCount,
+        percentage: attendancePercentage,
+      },
+      academic: {
+        averageScore,
+        totalEvaluations: dedupedEvaluations.length,
+        scoredCount: validScores.length,
+        examAverage,
+        homeworkAverage,
+      },
+      materials: {
+        totalAvailable: matCount,
+      },
+      sessions: {
+        totalSchedules,
+        pastSchedulesCount: totalPastSchedules,
+        activeSessionNumber,
+        slidingWindow,
+      },
+    };
+  }
+
+  // Hitung milestone gabungan (semua program)
+  const combinedMilestone = computeMilestone(
+    allSchedules,
+    allAttendances,
+    evaluations,
+    learningMaterials.length,
+    "Semua Program"
+  );
+
+  // Hitung milestone individual untuk masing-masing program
+  const programMilestones: Record<string, ReturnType<typeof computeMilestone>> = {};
+  for (const prog of activePrograms) {
+    const pSchedules = allSchedules.filter((s) => s.program_id === prog.id);
+    const pAttendances = allAttendances.filter(
+      (a) => a.schedule?.program_id === prog.id || pSchedules.some((s) => s.id === a.schedule_id)
+    );
+    const pEvaluations = evaluations.filter((e) => e.program_id === prog.id);
+    const pMatCount = learningMaterials.filter((m) => m.program_id === prog.id).length;
+
+    programMilestones[prog.id] = computeMilestone(
+      pSchedules,
+      pAttendances,
+      pEvaluations,
+      pMatCount,
+      prog.name
+    );
+  }
 
   return (
     <div className="p-4 sm:p-8 md:pt-10 space-y-6">
@@ -273,12 +334,17 @@ export default async function StudentDashboardPage({
       </div>
 
       {/* Capaian Belajar Siswa (Milestone Progress Card) */}
-      <StudentMilestoneCard milestone={milestoneData} tenantSlug={tenantSlug} />
+      <StudentMilestoneCard
+        programs={activePrograms}
+        programMilestones={programMilestones}
+        combinedMilestone={combinedMilestone}
+        tenantSlug={tenantSlug}
+      />
 
       {/* Full Schedule Calendar */}
       <div>
         <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Jadwal Kelas</h2>
-        <StudentSchedulesClientPage schedules={allSchedules} tenantSlug={tenantSlug} />
+        <StudentSchedulesClientPage schedules={allSchedules} programs={activePrograms} tenantSlug={tenantSlug} />
       </div>
 
       {/* Recent Attendance */}

@@ -5,6 +5,7 @@ import { TrendingUp, Award, BookOpen, Check, X, Minus, Star, ChevronRight, Calen
 import Link from "next/link";
 
 export interface StudentMilestoneData {
+  programName?: string;
   attendance: {
     totalPastSchedules: number;
     attendedCount: number;
@@ -34,8 +35,16 @@ export interface StudentMilestoneData {
   };
 }
 
-interface StudentMilestoneCardProps {
-  milestone: StudentMilestoneData;
+export interface ProgramOption {
+  id: string;
+  name: string;
+}
+
+export interface StudentMilestoneCardProps {
+  programs?: ProgramOption[];
+  programMilestones?: Record<string, StudentMilestoneData>;
+  combinedMilestone?: StudentMilestoneData;
+  milestone?: StudentMilestoneData;
   tenantSlug: string;
 }
 
@@ -130,8 +139,38 @@ function GlossyPinBar({
   );
 }
 
-export function StudentMilestoneCard({ milestone, tenantSlug }: StudentMilestoneCardProps) {
-  const { attendance, academic, materials, sessions } = milestone;
+export function StudentMilestoneCard({
+  programs = [],
+  programMilestones = {},
+  combinedMilestone,
+  milestone,
+  tenantSlug,
+}: StudentMilestoneCardProps) {
+  // Default ke program pertama jika ada, agar fokus pada masing-masing program (tidak langsung campur aduk)
+  const [selectedProgramId, setSelectedProgramId] = React.useState<string>(
+    programs.length > 0 ? programs[0].id : "ALL"
+  );
+
+  // Ambil milestone aktif berdasarkan program yang dipilih
+  const activeMilestone =
+    (selectedProgramId === "ALL"
+      ? (combinedMilestone || milestone)
+      : programMilestones[selectedProgramId]) ||
+    combinedMilestone ||
+    milestone || {
+      attendance: { totalPastSchedules: 0, attendedCount: 0, percentage: null },
+      academic: { averageScore: null, totalEvaluations: 0 },
+      materials: { totalAvailable: 0 },
+    };
+
+  const currentProgram = programs.find((p) => p.id === selectedProgramId);
+  const activeProgramName = currentProgram
+    ? currentProgram.name
+    : selectedProgramId === "ALL"
+    ? "Semua Program"
+    : "";
+
+  const { attendance, academic, materials, sessions } = activeMilestone;
 
   // Donut progress SVG calculations
   const attendancePct = attendance.percentage ?? 0;
@@ -144,10 +183,10 @@ export function StudentMilestoneCard({ milestone, tenantSlug }: StudentMilestone
   const slidingWindow = sessions?.slidingWindow ?? [];
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-7 shadow-sm space-y-6">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-7 shadow-sm space-y-5">
       
       {/* Header Utama Card */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-100 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
             <Award className="w-5 h-5" />
@@ -163,12 +202,68 @@ export function StudentMilestoneCard({ milestone, tenantSlug }: StudentMilestone
         </div>
 
         <Link
-          href={`/${tenantSlug}/student/evaluations`}
+          href={`/${tenantSlug}/student/evaluations${selectedProgramId !== 'ALL' ? `?programId=${selectedProgramId}` : ''}`}
           className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 self-start sm:self-auto bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 px-3 py-1.5 rounded-xl transition"
         >
           Lihat E-Rapor <ChevronRight className="w-3.5 h-3.5" />
         </Link>
       </div>
+
+      {/* Selector Program Belajar (Mobile-Friendly Horizontal Pill Tabs) */}
+      {programs.length > 1 && (
+        <div className="space-y-2 pt-0.5 pb-1">
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <span className="font-semibold uppercase tracking-wider text-[11px]">
+              Pilih Program Belajar:
+            </span>
+            <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400">
+              {activeProgramName}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 -mx-1 px-1">
+            {programs.map((p) => {
+              const isSelected = selectedProgramId === p.id;
+              const pData = programMilestones[p.id];
+              const scoreVal = pData?.academic?.averageScore;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setSelectedProgramId(p.id)}
+                  className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all shrink-0 flex items-center gap-2 ${
+                    isSelected
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-500/30 scale-[1.02]"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${isSelected ? "bg-white" : "bg-blue-500"}`} />
+                  <span>{p.name}</span>
+                  {scoreVal !== null && scoreVal !== undefined && (
+                    <span className={`px-1.5 py-0.5 rounded-lg text-[10px] font-black ${
+                      isSelected ? "bg-white/20 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
+                    }`}>
+                      {scoreVal.toFixed(0)}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+
+            <button
+              type="button"
+              onClick={() => setSelectedProgramId("ALL")}
+              className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all shrink-0 flex items-center gap-2 ${
+                selectedProgramId === "ALL"
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-500/30 scale-[1.02]"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+              }`}
+            >
+              <span>Semua Program</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Grid 2 Kolom: Kolom Kiri (Milestone Sesi) & Kolom Kanan (Nilai Siswa) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
@@ -181,9 +276,16 @@ export function StudentMilestoneCard({ milestone, tenantSlug }: StudentMilestone
           {/* Top Row: Donut Gauge + Info Sesi */}
           <div className="flex items-center justify-between gap-4">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-md">
-                Progres Pertemuan Kelas
-              </span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-md">
+                  Progres Pertemuan
+                </span>
+                {activeProgramName && (
+                  <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 bg-slate-200/70 dark:bg-slate-700/60 px-2 py-0.5 rounded-md truncate max-w-[150px]">
+                    {activeProgramName}
+                  </span>
+                )}
+              </div>
               <h4 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white mt-1">
                 {totalSchedules > 0
                   ? `Pertemuan ${activeSessionNum} dari ${totalSchedules} Sesi`
@@ -192,6 +294,8 @@ export function StudentMilestoneCard({ milestone, tenantSlug }: StudentMilestone
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 {totalSchedules > 0
                   ? `${attendance.attendedCount} sesi dihadiri (${attendancePct}% ketertiban)`
+                  : activeProgramName && activeProgramName !== "Semua Program"
+                  ? `Belum ada sesi kelas untuk program ${activeProgramName}.`
                   : "Belum ada sesi kelas yang dijadwalkan."}
               </p>
             </div>
@@ -389,7 +493,7 @@ export function StudentMilestoneCard({ milestone, tenantSlug }: StudentMilestone
               </span>
             </div>
             <Link
-              href={`/${tenantSlug}/student/materials`}
+              href={`/${tenantSlug}/student/materials${selectedProgramId !== 'ALL' ? `?programId=${selectedProgramId}` : ''}`}
               className="text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 shrink-0"
             >
               Buka &rarr;

@@ -5,10 +5,15 @@ import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Clock, MapPin, User,
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 
-export default function StudentSchedulesClientPage({ schedules, tenantSlug }: any) {
+export default function StudentSchedulesClientPage({ schedules, programs = [], tenantSlug }: any) {
+  const [selectedProgramId, setSelectedProgramId] = useState<string>("ALL");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [expandedSchedules, setExpandedSchedules] = useState<string[]>([]);
+
+  const filteredSchedules = selectedProgramId === "ALL"
+    ? schedules
+    : schedules.filter((s: any) => s.program_id === selectedProgramId);
 
   const toggleSchedule = (id: string) => {
     setExpandedSchedules(prev => 
@@ -38,10 +43,44 @@ export default function StudentSchedulesClientPage({ schedules, tenantSlug }: an
     setSelectedDate(new Date());
   };
 
-  const selectedDaySchedules = schedules.filter((s: any) => isSameDay(new Date(s.start_time), selectedDate));
+  const selectedDaySchedules = filteredSchedules.filter((s: any) => isSameDay(new Date(s.start_time), selectedDate));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      {/* Program Filter Pills */}
+      {programs.length > 1 && (
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+          <button
+            onClick={() => setSelectedProgramId("ALL")}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 ${
+              selectedProgramId === "ALL"
+                ? "bg-blue-600 text-white shadow-sm"
+                : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+            }`}
+          >
+            Semua Jadwal ({schedules.length})
+          </button>
+          {programs.map((p: any) => {
+            const count = schedules.filter((s: any) => s.program_id === p.id).length;
+            const isSelected = selectedProgramId === p.id;
+            return (
+              <button
+                key={p.id}
+                onClick={() => setSelectedProgramId(p.id)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 ${
+                  isSelected
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+                }`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-white" : "bg-blue-500"}`} />
+                {p.name} ({count})
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden flex flex-col">
         {/* Calendar Header */}
         <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center gap-4">
@@ -90,7 +129,7 @@ export default function StudentSchedulesClientPage({ schedules, tenantSlug }: an
               const isToday = isSameDay(day, new Date());
               const isSelected = isSameDay(day, selectedDate);
               
-              const daySchedules = schedules.filter((s: any) => isSameDay(new Date(s.start_time), day));
+              const daySchedules = filteredSchedules.filter((s: any) => isSameDay(new Date(s.start_time), day));
               const hasActive = daySchedules.some((s: any) => s.status !== 'CANCELLED');
               const hasCancelled = daySchedules.some((s: any) => s.status === 'CANCELLED');
 

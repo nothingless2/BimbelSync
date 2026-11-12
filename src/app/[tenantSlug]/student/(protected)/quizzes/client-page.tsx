@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   Search,
@@ -16,6 +17,7 @@ import {
 
 interface QuizItem {
   id: string;
+  programId?: string;
   title: string;
   description: string | null;
   durationMinutes: number;
@@ -34,43 +36,135 @@ interface QuizItem {
 
 export default function StudentQuizzesClientPage({
   quizzes,
+  programs = [],
   tenantSlug,
 }: {
   quizzes: QuizItem[];
+  programs?: { id: string; name: string }[];
   tenantSlug: string;
 }) {
+  const searchParams = useSearchParams();
+  const queryProgramId = searchParams.get("programId");
+
+  // Default ke query param, atau program pertama siswa jika ada, agar fokus per program
+  const [selectedProgramId, setSelectedProgramId] = useState<string>(
+    queryProgramId || (programs.length > 0 ? programs[0].id : "ALL")
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [filterTab, setFilterTab] = useState<"ALL" | "PENDING" | "COMPLETED">("ALL");
 
-  const filteredQuizzes = quizzes.filter((q) => {
-    const matchesSearch =
-      q.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      q.programName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (q.description || "").toLowerCase().includes(searchQuery.toLowerCase());
+  const currentProgram = programs.find((p) => p.id === selectedProgramId);
+  const currentProgramName = currentProgram
+    ? currentProgram.name
+    : selectedProgramId === "ALL"
+    ? "Semua Program"
+    : "";
 
+  // Filter kuis berdasarkan program yang dipilih
+  const programQuizzes = selectedProgramId === "ALL"
+    ? quizzes
+    : quizzes.filter((q) => q.programId === selectedProgramId);
+
+  const pendingCount = programQuizzes.filter((q) => !q.submission).length;
+  const completedCount = programQuizzes.filter((q) => q.submission).length;
+
+  const filteredQuizzes = programQuizzes.filter((q) => {
     const isCompleted = q.submission !== null;
     const matchesTab =
       filterTab === "ALL" ||
       (filterTab === "PENDING" && !isCompleted) ||
       (filterTab === "COMPLETED" && isCompleted);
 
-    return matchesSearch && matchesTab;
+    const matchesSearch =
+      q.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      q.programName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (q.description || "").toLowerCase().includes(searchQuery.toLowerCase());
+
+    return matchesTab && matchesSearch;
   });
 
-  const pendingCount = quizzes.filter((q) => !q.submission).length;
-  const completedCount = quizzes.filter((q) => q.submission).length;
-
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="space-y-5 animate-in fade-in duration-300">
+      
+      {/* Program Selector Tabs (Mobile-Friendly Horizontal Pills) */}
+      {programs.length > 1 && (
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-sm space-y-2.5">
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <span className="font-semibold uppercase tracking-wider text-[11px]">
+              Pilih Program Belajar:
+            </span>
+            <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400">
+              {currentProgramName}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 -mx-1 px-1">
+            {programs.map((p) => {
+              const isSelected = selectedProgramId === p.id;
+              const count = quizzes.filter((q) => q.programId === p.id).length;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setSelectedProgramId(p.id)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-2 ${
+                    isSelected
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-500/30 scale-[1.02]"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                  }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-white" : "bg-blue-500"}`} />
+                  <span>{p.name}</span>
+                  <span
+                    className={`px-1.5 py-0.5 rounded-md text-[10px] font-black ${
+                      isSelected
+                        ? "bg-white/20 text-white"
+                        : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+
+            <button
+              type="button"
+              onClick={() => setSelectedProgramId("ALL")}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-2 ${
+                selectedProgramId === "ALL"
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-500/30 scale-[1.02]"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+              }`}
+            >
+              <span>Semua Kuis</span>
+              <span
+                className={`px-1.5 py-0.5 rounded-md text-[10px] font-black ${
+                  selectedProgramId === "ALL"
+                    ? "bg-white/20 text-white"
+                    : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+                }`}
+              >
+                {quizzes.length}
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Search and Tabs Bar */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-4 space-y-3">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-3.5 sm:p-4 space-y-3">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
             <Search size={16} className="text-slate-400" />
           </div>
           <input
             type="text"
-            placeholder="Cari kuis atau program..."
+            placeholder={
+              selectedProgramId !== "ALL" && currentProgramName
+                ? `Cari kuis ${currentProgramName}...`
+                : "Cari kuis atau program..."
+            }
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="block w-full pl-9 pr-3.5 py-2.5 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50 dark:bg-slate-800/60 dark:text-slate-200"
@@ -78,22 +172,22 @@ export default function StudentQuizzesClientPage({
         </div>
 
         {/* Tab pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-0.5">
           <button
             onClick={() => setFilterTab("ALL")}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 ${
               filterTab === "ALL"
-                ? "bg-blue-600 text-white shadow-sm"
+                ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
             }`}
           >
-            Semua ({quizzes.length})
+            Semua ({programQuizzes.length})
           </button>
           <button
             onClick={() => setFilterTab("PENDING")}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 ${
               filterTab === "PENDING"
-                ? "bg-blue-600 text-white shadow-sm"
+                ? "bg-amber-500 text-white shadow-sm"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
             }`}
           >
@@ -103,7 +197,7 @@ export default function StudentQuizzesClientPage({
             onClick={() => setFilterTab("COMPLETED")}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 ${
               filterTab === "COMPLETED"
-                ? "bg-blue-600 text-white shadow-sm"
+                ? "bg-emerald-600 text-white shadow-sm"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
             }`}
           >
@@ -117,12 +211,16 @@ export default function StudentQuizzesClientPage({
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-10 text-center shadow-sm">
           <FileQuestion size={44} className="mx-auto text-slate-300 dark:text-slate-600 mb-3" />
           <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
-            {quizzes.length === 0 ? "Belum Ada Kuis Tersedia" : "Tidak Ada Kuis yang Sesuai"}
+            {selectedProgramId !== "ALL" && currentProgramName
+              ? `Belum ada kuis untuk program ${currentProgramName}`
+              : "Tidak ada kuis ditemukan"}
           </h3>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-            {quizzes.length === 0
-              ? "Tutor belum menerbitkan latihan kuis online untuk program bimbingan belajarmu."
-              : "Coba ganti filter tab atau kata kunci pencarian di atas."}
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mt-1">
+            {selectedProgramId !== "ALL" && currentProgramName
+              ? `Tutor untuk program ${currentProgramName} belum merilis kuis online untukmu.`
+              : searchQuery
+              ? "Coba gunakan kata kunci pencarian yang lain."
+              : "Belum ada kuis aktif yang tersedia untuk kategori ini."}
           </p>
         </div>
       ) : (

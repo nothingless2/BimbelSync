@@ -3,6 +3,7 @@ import { requireStudentSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import StudentMaterialsClientPage from "./client-page";
 import { BookOpen } from "lucide-react";
+import { Suspense } from "react";
 
 export const metadata = {
   title: "Materi Belajar | BimbelSync",
@@ -27,7 +28,8 @@ export default async function StudentMaterialsPage({ params }: { params: Promise
     },
     include: {
       enrollments: {
-        where: { status: 'ACTIVE' }
+        where: { status: 'ACTIVE' },
+        include: { program: true }
       }
     }
   });
@@ -35,6 +37,10 @@ export default async function StudentMaterialsPage({ params }: { params: Promise
   if (!student) redirect(`/${tenantSlug}/student/login`);
 
   const enrolledProgramIds = student.enrollments.map(e => e.program_id);
+  const programs = student.enrollments.map(e => ({
+    id: e.program.id,
+    name: e.program.name,
+  }));
 
   const materials = await prisma.learningMaterial.findMany({
     where: {
@@ -70,7 +76,9 @@ export default async function StudentMaterialsPage({ params }: { params: Promise
       </div>
 
       <div className="px-4 sm:px-8 -mt-16 relative z-20 max-w-4xl mx-auto">
-        <StudentMaterialsClientPage materials={materials} />
+        <Suspense fallback={<div className="bg-white dark:bg-slate-900 rounded-2xl p-8 text-center text-slate-400">Memuat materi belajar...</div>}>
+          <StudentMaterialsClientPage materials={materials} programs={programs} />
+        </Suspense>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import { requireStudentSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import StudentQuizzesClientPage from "./client-page";
 import { FileQuestion } from "lucide-react";
+import { Suspense } from "react";
 
 export const metadata = {
   title: "Kuis & Latihan Soal | BimbelSync",
@@ -30,10 +31,15 @@ export default async function StudentQuizzesPage({
       student_id: studentId,
       status: "ACTIVE",
     },
-    select: { program_id: true },
+    include: {
+      program: {
+        select: { id: true, name: true },
+      },
+    },
   });
 
-  const enrolledProgramIds = enrollments.map((e) => e.program_id);
+  const programs = enrollments.map((e) => e.program);
+  const enrolledProgramIds = programs.map((p) => p.id);
 
   // Ambil kuis yang tersedia untuk program siswa
   const rawQuizzes = await prisma.quiz.findMany({
@@ -80,6 +86,7 @@ export default async function StudentQuizzesPage({
     const submission = q.submissions[0] || null;
     return {
       id: q.id,
+      programId: q.program_id,
       title: q.title,
       description: q.description,
       durationMinutes: q.duration_minutes,
@@ -119,7 +126,9 @@ export default async function StudentQuizzesPage({
 
       {/* Main Content */}
       <div className="px-4 sm:px-8 -mt-16 relative z-20 max-w-4xl mx-auto">
-        <StudentQuizzesClientPage quizzes={quizzes} tenantSlug={tenantSlug} />
+        <Suspense fallback={<div className="bg-white dark:bg-slate-900 rounded-2xl p-8 text-center text-slate-400">Memuat kuis...</div>}>
+          <StudentQuizzesClientPage quizzes={quizzes} programs={programs} tenantSlug={tenantSlug} />
+        </Suspense>
       </div>
     </div>
   );
