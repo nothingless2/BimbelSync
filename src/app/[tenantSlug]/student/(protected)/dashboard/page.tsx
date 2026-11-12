@@ -5,6 +5,7 @@ import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import StudentSchedulesClientPage from '../schedules/client-page';
 import { StudentBillingBanner } from '@/components/student-billing-banner';
 import { StudentMilestoneCard } from '@/components/student/student-milestone-card';
+import { StudentRecentAttendances } from '@/components/student/student-recent-attendances';
 
 // Helper format waktu (WIB) untuk Server Component di Vercel
 const formatTimeWIB = (date: Date | string) => {
@@ -44,7 +45,7 @@ export default async function StudentDashboardPage({
         },
         attendances: {
           orderBy: { scanned_at: 'desc' },
-          take: 5,
+          take: 20,
           include: {
             schedule: {
               include: {
@@ -347,54 +348,12 @@ export default async function StudentDashboardPage({
         <StudentSchedulesClientPage schedules={allSchedules} programs={activePrograms} tenantSlug={tenantSlug} />
       </div>
 
-      {/* Recent Attendance */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold text-slate-900 dark:text-white">Riwayat Absensi</h2>
-        <a href={`/${tenantSlug}/student/attendances`} className="text-sm font-semibold text-blue-600 dark:text-blue-400">Lihat Semua</a>
-      </div>
-
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-        {student.attendances.length > 0 ? (
-          <div className="divide-y divide-slate-100 dark:divide-slate-800">
-            {student.attendances.map(record => (
-              <div key={record.id} className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className={`p-2.5 rounded-full ${
-                    record.attendance_status === 'PRESENT' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' :
-                    record.attendance_status === 'ABSENT' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' :
-                    'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400'
-                  }`}>
-                    {record.attendance_status === 'PRESENT' ? <CheckCircle2 size={20} /> :
-                     record.attendance_status === 'ABSENT' ? <XCircle size={20} /> :
-                     <AlertCircle size={20} />}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm text-slate-900 dark:text-white">
-                      {record.schedule.program.name}
-                    </p>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      {formatDateWIB(record.scanned_at)}, {formatTimeWIB(record.scanned_at)}
-                    </p>
-                  </div>
-                </div>
-                
-                <span className={`text-xs font-bold px-2 py-1 rounded-md ${
-                  record.attendance_status === 'PRESENT' ? 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20' :
-                  record.attendance_status === 'ABSENT' ? 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20' :
-                  'text-orange-700 bg-orange-50 dark:text-orange-400 dark:bg-orange-900/20'
-                }`}>
-                  {record.attendance_status === 'PRESENT' ? 'Hadir' :
-                   record.attendance_status === 'ABSENT' ? 'Alpa' : 'Izin'}
-                </span>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="p-8 text-center">
-            <p className="text-sm text-slate-500">Belum ada riwayat absensi.</p>
-          </div>
-        )}
-      </div>
+      {/* Recent Attendance (Filtered by program) */}
+      <StudentRecentAttendances
+        attendances={student.attendances}
+        programs={activePrograms}
+        tenantSlug={tenantSlug}
+      />
 
     </div>
   );

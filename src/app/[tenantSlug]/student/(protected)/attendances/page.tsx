@@ -3,6 +3,7 @@ import { requireStudentSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
 import StudentAttendancesClientPage from "./client-page";
+import { Suspense } from "react";
 
 export const metadata = {
   title: "Riwayat Absensi | BimbelSync",
@@ -18,19 +19,36 @@ export default async function StudentAttendancesPage({ params }: { params: Promi
 
   const session = auth.session;
 
-  const attendances = await prisma.attendance.findMany({
-    where: { student_id: session.id as string },
-    include: {
-      schedule: {
-        include: {
-          program: true,
-          tutor: true,
-          room: true
+  const [attendances, student] = await Promise.all([
+    prisma.attendance.findMany({
+      where: { student_id: session.id as string },
+      include: {
+        schedule: {
+          include: {
+            program: true,
+            tutor: true,
+            room: true
+          }
+        }
+      },
+      orderBy: { scanned_at: "desc" },
+    }),
+    prisma.student.findFirst({
+      where: { id: session.id as string, deleted_at: null },
+      select: {
+        enrollments: {
+          where: { status: 'ACTIVE' },
+          include: {
+            program: {
+              select: { id: true, name: true }
+            }
+          }
         }
       }
-    },
-    orderBy: { scanned_at: "desc" },
-  });
+    })
+  ]);
+
+  const programs = student?.enrollments.map((e) => e.program) || [];
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
@@ -44,12 +62,14 @@ export default async function StudentAttendancesPage({ params }: { params: Promi
             <CheckCircle2 size={40} className="text-white" />
           </div>
           <h1 className="text-2xl font-bold text-white mb-1">Riwayat Absensi</h1>
-          <p className="text-blue-100 bg-white/10 px-4 py-1.5 rounded-full text-sm font-medium">Lihat seluruh riwayat kehadiranmu</p>
+          <p className="text-blue-100 bg-white/10 px-4 py-1.5 rounded-full text-sm font-medium">Lihat riwayat kehadiran kelas per program</p>
         </div>
       </div>
 
       <div className="px-4 sm:px-8 -mt-16 relative z-20 max-w-4xl mx-auto">
-        <StudentAttendancesClientPage attendances={attendances} />
+        <Suspense fallback={<div className="bg-white dark:bg-slate-900 rounded-2xl p-8 text-center text-slate-400">Memuat riwayat absensi...</div>}>
+          <StudentAttendancesClientPage attendances={attendances} programs={programs} />
+        </Suspense>
       </div>
     </div>
   );
