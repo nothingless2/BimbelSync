@@ -355,8 +355,12 @@ export function StudentMilestoneCard({ milestone, tenantSlug }: StudentMilestone
           {/* Bar 2: Ujian & Kuis (Purple to Violet Gradient) */}
           <GlossyPinBar
             label="Ujian & Kuis"
-            value={academic.examAverage ?? academic.averageScore}
-            sublabel="Rata-rata evaluasi kuis dan ujian"
+            value={academic.examAverage ?? null}
+            sublabel={
+              academic.examAverage !== null && academic.examAverage !== undefined
+                ? "Rata-rata evaluasi kuis dan ujian"
+                : "Belum ada nilai ujian & kuis"
+            }
             gradientClass="from-fuchsia-400 via-purple-500 to-violet-600"
             pinBgClass="bg-gradient-to-r from-fuchsia-500 to-purple-600 shadow-purple-500/20"
             pinArrowClass="border-t-purple-600"
@@ -365,8 +369,12 @@ export function StudentMilestoneCard({ milestone, tenantSlug }: StudentMilestone
           {/* Bar 3: Tugas & Latihan (Amber to Orange Gradient) */}
           <GlossyPinBar
             label="Tugas & Latihan"
-            value={academic.homeworkAverage ?? academic.averageScore}
-            sublabel="Penyelesaian latihan dan tugas mandiri"
+            value={academic.homeworkAverage ?? null}
+            sublabel={
+              academic.homeworkAverage !== null && academic.homeworkAverage !== undefined
+                ? "Penyelesaian latihan dan tugas mandiri"
+                : "Belum ada tugas atau latihan"
+            }
             gradientClass="from-amber-400 via-orange-500 to-rose-500"
             pinBgClass="bg-gradient-to-r from-amber-500 to-orange-500 shadow-orange-500/20"
             pinArrowClass="border-t-orange-500"

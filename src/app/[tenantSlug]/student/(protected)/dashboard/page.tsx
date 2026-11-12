@@ -218,7 +218,7 @@ export default async function StudentDashboardPage({
     },
     academic: {
       averageScore,
-      totalEvaluations: evaluations.length,
+      totalEvaluations: dedupedEvaluations.length,
       scoredCount: validScores.length,
       examAverage,
       homeworkAverage,
