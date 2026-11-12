@@ -129,7 +129,7 @@ export default async function DashboardHome({ params }: { params: Promise<{ tena
       }
     }) : Promise.resolve(0),
 
-    // 8. Total Siswa Aktif yang Diajar oleh Tutor Ini (Hanya TUTOR)
+    // 8. Total Siswa Aktif yang Diajar atau Dievaluasi oleh Tutor Ini (Hanya TUTOR)
     isTutor ? prisma.student.count({
       where: {
         academy_id: academyId,
@@ -138,9 +138,11 @@ export default async function DashboardHome({ params }: { params: Promise<{ tena
           some: {
             status: 'ACTIVE',
             program: {
-              schedules: {
-                some: { tutor_id: session.id }
-              }
+              OR: [
+                { schedules: { some: { tutor_id: session.id } } },
+                { evaluations: { some: { evaluator_id: session.id } } },
+                { quizzes: { some: { created_by_staff_id: session.id } } },
+              ]
             }
           }
         }
