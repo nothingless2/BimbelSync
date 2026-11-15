@@ -207,6 +207,7 @@ export default function SchedulesClientPage({
           </button>
           <Link
             href={`/${tenantSlug}/dashboard/schedules/attendance`}
+            prefetch={true}
             className="inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent"
           >
             <ClipboardCheck size={15} />
@@ -222,6 +223,7 @@ export default function SchedulesClientPage({
         {pendingCount > 0 && (
           <Link
             href={`/${tenantSlug}/dashboard/schedules/attendance?filter=PENDING`}
+            prefetch={true}
             className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 hover:bg-rose-100 transition border border-rose-200 dark:border-rose-900/40 w-full sm:w-auto text-center"
           >
             <AlertTriangle size={13} />

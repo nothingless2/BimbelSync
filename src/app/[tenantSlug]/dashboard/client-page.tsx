@@ -118,6 +118,7 @@ export default function DashboardClientPage({
 
             <Link
               href={`/${tenantSlug}/dashboard/schedules/attendance?filter=PENDING`}
+              prefetch={true}
               className={`p-3 rounded-2xl shadow-sm flex flex-col justify-between min-h-[85px] text-white transition-all ${
                 pendingAttendanceCount > 0
                   ? "bg-gradient-to-br from-rose-500 to-rose-700 border border-rose-400 animate-pulse-soft"
@@ -165,6 +166,7 @@ export default function DashboardClientPage({
 
             <Link
               href={`/${tenantSlug}/dashboard/schedules/attendance?filter=PENDING`}
+              prefetch={true}
               className={`p-6 rounded-3xl bg-gradient-to-br shadow-lg relative overflow-hidden group transition-transform hover:scale-[1.02] block ${
                 pendingAttendanceCount > 0 
                   ? "from-rose-500 to-rose-700 border border-rose-600 animate-pulse-soft" 
@@ -208,6 +210,7 @@ export default function DashboardClientPage({
           </div>
           <Link
             href={`/${tenantSlug}/dashboard/schedules/attendance?filter=PENDING`}
+            prefetch={true}
             className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition shrink-0"
           >
             Isi Presensi Tertunda &rarr;

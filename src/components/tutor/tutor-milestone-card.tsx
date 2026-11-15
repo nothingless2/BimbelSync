@@ -158,6 +158,7 @@ export function TutorMilestoneCard({ milestone, tenantSlug }: TutorMilestoneCard
             {attendanceVerification.pendingCount > 0 ? (
               <Link
                 href={`/${tenantSlug}/dashboard/schedules/attendance?filter=PENDING`}
+                prefetch={true}
                 className="text-[11px] font-bold text-rose-600 hover:text-rose-700 dark:text-rose-400"
               >
                 Isi Presensi &rarr;
@@ -165,6 +166,7 @@ export function TutorMilestoneCard({ milestone, tenantSlug }: TutorMilestoneCard
             ) : (
               <Link
                 href={`/${tenantSlug}/dashboard/schedules/attendance`}
+                prefetch={true}
                 className="text-[11px] font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400"
               >
                 Cek &rarr;

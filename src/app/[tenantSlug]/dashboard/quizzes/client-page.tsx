@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   HelpCircle,
@@ -19,6 +19,7 @@ import {
   Eye,
   EyeOff,
   Star,
+  Loader2,
 } from "lucide-react";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { AddQuizModal } from "@/components/modals/add-quiz-modal";
@@ -58,15 +59,22 @@ export default function QuizzesClientPage({
   academyId,
   userRole,
 }: QuizzesClientPageProps) {
+  const [localQuizzes, setLocalQuizzes] = useState(quizzes);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterProgram, setFilterProgram] = useState("ALL");
   const [filterStatus, setFilterStatus] = useState("ALL");
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [navigatingId, setNavigatingId] = useState<string | null>(null);
+
+  // Sync local quizzes with server props when revalidated
+  useEffect(() => {
+    setLocalQuizzes(quizzes);
+  }, [quizzes]);
 
   // Filter quizzes
-  const filteredQuizzes = quizzes.filter((q) => {
+  const filteredQuizzes = localQuizzes.filter((q) => {
     const matchesSearch =
       q.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (q.description || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -81,17 +89,27 @@ export default function QuizzesClientPage({
   });
 
   // KPI metrics
-  const totalQuizzes = quizzes.length;
-  const publishedQuizzes = quizzes.filter((q) => q.isPublished).length;
-  const totalSubmissions = quizzes.reduce((acc, q) => acc + q.totalSubmissions, 0);
+  const totalQuizzes = localQuizzes.length;
+  const publishedQuizzes = localQuizzes.filter((q) => q.isPublished).length;
+  const totalSubmissions = localQuizzes.reduce((acc, q) => acc + q.totalSubmissions, 0);
 
   const handleTogglePublish = async (quizId: string, currentStatus: boolean) => {
+    const nextStatus = !currentStatus;
+    // 1. Optimistic Update: toggle state immediately for 0ms response
+    setLocalQuizzes((prev) =>
+      prev.map((q) => (q.id === quizId ? { ...q, isPublished: nextStatus } : q))
+    );
+    setTogglingId(quizId);
+
     try {
-      setTogglingId(quizId);
-      const res = await togglePublishQuizAction(quizId, !currentStatus, tenantSlug);
+      const res = await togglePublishQuizAction(quizId, nextStatus, tenantSlug);
       if (res.error) throw new Error(res.error);
-      toast.success(!currentStatus ? "Kuis berhasil diterbitkan!" : "Kuis diubah ke status draf.");
+      toast.success(nextStatus ? "Kuis berhasil diterbitkan!" : "Kuis diubah ke status draf.");
     } catch (err: any) {
+      // Rollback to previous status if server call fails
+      setLocalQuizzes((prev) =>
+        prev.map((q) => (q.id === quizId ? { ...q, isPublished: currentStatus } : q))
+      );
       toast.error(err.message || "Gagal mengubah status publikasi.");
     } finally {
       setTogglingId(null);
@@ -107,10 +125,12 @@ export default function QuizzesClientPage({
         onClick: async () => {
           try {
             setDeletingId(quizId);
+            setLocalQuizzes((prev) => prev.filter((q) => q.id !== quizId));
             const res = await deleteQuizAction(quizId, tenantSlug);
             if (res.error) throw new Error(res.error);
             toast.success("Kuis berhasil dihapus!");
           } catch (err: any) {
+            setLocalQuizzes(quizzes);
             toast.error(err.message || "Gagal menghapus kuis.");
           } finally {
             setDeletingId(null);
@@ -311,23 +331,20 @@ export default function QuizzesClientPage({
                     onClick={() => handleTogglePublish(q.id, q.isPublished)}
                     disabled={togglingId === q.id}
                     title={q.isPublished ? "Klik untuk jadikan Draf" : "Klik untuk Terbitkan"}
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition ${
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition cursor-pointer ${
                       q.isPublished
                         ? "bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100"
                         : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
                     }`}
                   >
-                    {q.isPublished ? (
-                      <>
-                        <Eye size={12} />
-                        Terbit
-                      </>
+                    {togglingId === q.id ? (
+                      <Loader2 size={12} className="animate-spin text-slate-500" />
+                    ) : q.isPublished ? (
+                      <Eye size={12} />
                     ) : (
-                      <>
-                        <EyeOff size={12} />
-                        Draf
-                      </>
+                      <EyeOff size={12} />
                     )}
+                    <span>{q.isPublished ? "Terbit" : "Draf"}</span>
                   </button>
                 </div>
 
@@ -373,10 +390,16 @@ export default function QuizzesClientPage({
               <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
                 <Link
                   href={`/${tenantSlug}/dashboard/quizzes/${q.id}`}
+                  prefetch={true}
+                  onClick={() => setNavigatingId(q.id)}
                   className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-600 hover:text-white text-blue-600 dark:text-blue-300 rounded-xl text-xs font-semibold transition"
                 >
-                  <Edit size={14} />
-                  <span>Kelola Soal & Hasil</span>
+                  {navigatingId === q.id ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <Edit size={14} />
+                  )}
+                  <span>{navigatingId === q.id ? "Membuka..." : "Kelola Soal & Hasil"}</span>
                 </Link>
 
                 <button

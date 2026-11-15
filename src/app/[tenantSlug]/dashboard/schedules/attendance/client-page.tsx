@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { format, isToday, isYesterday, parseISO } from "date-fns";
 import { id as localeId } from "date-fns/locale";
+import { CustomSelect } from "@/components/ui/custom-select";
 
 interface ProgramStudent {
   id: string;
@@ -92,6 +93,17 @@ export default function AttendanceMonitoringClient({
   const [statusFilter, setStatusFilter] = useState<string>(initialFilter);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"sessions" | "students">("sessions");
+
+  const programOptions = useMemo(
+    () => [
+      { value: "ALL", label: `Semua Program (${programs.length})` },
+      ...programs.map((p) => ({
+        value: p.id,
+        label: `${p.name} (${p.students.length} Siswa)`,
+      })),
+    ],
+    [programs]
+  );
 
   // Format Helper
   const formatDateTime = (isoDate: string) => {
@@ -199,6 +211,7 @@ export default function AttendanceMonitoringClient({
         <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500 font-medium">
           <Link
             href={`/${tenantSlug}/dashboard/schedules`}
+            prefetch={true}
             className="hover:text-blue-600 transition-colors"
           >
             Jadwal Kelas
@@ -214,6 +227,7 @@ export default function AttendanceMonitoringClient({
           <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
             <Link
               href={`/${tenantSlug}/dashboard/schedules`}
+              prefetch={true}
               className="inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent"
             >
               <Calendar size={15} />
@@ -413,18 +427,14 @@ export default function AttendanceMonitoringClient({
               <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 shrink-0">
                 Program:
               </span>
-              <select
-                value={selectedProgramId}
-                onChange={(e) => setSelectedProgramId(e.target.value)}
-                className="flex-1 sm:flex-initial px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="ALL">Semua Program ({programs.length})</option>
-                {programs.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} ({p.students.length} Siswa)
-                  </option>
-                ))}
-              </select>
+              <div className="w-full sm:w-64">
+                <CustomSelect
+                  value={selectedProgramId}
+                  onChange={(val) => setSelectedProgramId(val)}
+                  options={programOptions}
+                  placeholder="Pilih Program"
+                />
+              </div>
             </div>
 
             {/* Status Pills (Single horizontal scrollable row on mobile) */}

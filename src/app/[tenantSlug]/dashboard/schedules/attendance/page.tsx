@@ -34,77 +34,84 @@ export default async function AttendanceMonitoringPage({
   const academyId = session.academy_id;
   const now = new Date();
 
-  // 1. Fetch programs taught by tutor (or all programs if ADMIN) with active enrollments & students
-  const programs = await prisma.program.findMany({
-    where: {
-      academy_id: academyId,
-      deleted_at: null,
-      ...(isTutor
-        ? {
-            schedules: {
-              some: { tutor_id: session.id },
+  // 1. Fetch programs & schedules concurrently to eliminate network waterfall latency
+  const [programs, schedules] = await Promise.all([
+    prisma.program.findMany({
+      where: {
+        academy_id: academyId,
+        deleted_at: null,
+        ...(isTutor
+          ? {
+              schedules: {
+                some: { tutor_id: session.id },
+              },
+            }
+          : {}),
+      },
+      include: {
+        enrollments: {
+          where: {
+            status: "ACTIVE",
+            student: { deleted_at: null },
+          },
+          include: {
+            student: {
+              select: {
+                id: true,
+                full_name: true,
+                email: true,
+                parent_whatsapp: true,
+              },
             },
-          }
-        : {}),
-    },
-    include: {
-      enrollments: {
-        where: {
-          status: "ACTIVE",
-          student: { deleted_at: null },
-        },
-        include: {
-          student: true,
-        },
-        orderBy: {
-          student: {
-            full_name: "asc",
+          },
+          orderBy: {
+            student: {
+              full_name: "asc",
+            },
           },
         },
       },
-    },
-    orderBy: { name: "asc" },
-  });
-
-  // 2. Fetch schedules for these programs (and this tutor if role=TUTOR)
-  const schedules = await prisma.schedule.findMany({
-    where: {
-      program: { academy_id: academyId },
-      ...(isTutor ? { tutor_id: session.id } : {}),
-    },
-    include: {
-      program: {
-        select: {
-          id: true,
-          name: true,
+      orderBy: { name: "asc" },
+    }),
+    prisma.schedule.findMany({
+      where: {
+        program: { academy_id: academyId },
+        ...(isTutor ? { tutor_id: session.id } : {}),
+      },
+      include: {
+        program: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        room: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        tutor: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        attendances: {
+          select: {
+            id: true,
+            student_id: true,
+            attendance_status: true,
+          },
         },
       },
-      room: {
-        select: {
-          id: true,
-          name: true,
-        },
+      orderBy: {
+        start_time: "desc",
       },
-      tutor: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
-      attendances: {
-        select: {
-          id: true,
-          student_id: true,
-          attendance_status: true,
-        },
-      },
-    },
-    orderBy: {
-      start_time: "desc",
-    },
-    take: 200,
-  });
+      take: 200,
+    }),
+  ]);
 
   // Calculate quick metrics & flags
   const nowTime = now.getTime();

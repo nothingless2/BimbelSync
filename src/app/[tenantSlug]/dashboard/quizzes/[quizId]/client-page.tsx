@@ -155,6 +155,7 @@ export default function QuizDetailClientPage({
       <div>
         <Link
           href={`/${tenantSlug}/dashboard/quizzes`}
+          prefetch={true}
           className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-500 hover:text-blue-600 transition mb-2"
         >
           <ArrowLeft size={16} />
