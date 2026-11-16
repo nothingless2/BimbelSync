@@ -135,10 +135,12 @@ export function UploadProofModal({
   return (
     <>
       {triggerButton !== undefined ? (
-        <div onClick={() => setModalOpen(true)} className="cursor-pointer">
-          {triggerButton}
-        </div>
-      ) : (
+        triggerButton ? (
+          <div onClick={() => setModalOpen(true)} className="cursor-pointer">
+            {triggerButton}
+          </div>
+        ) : null
+      ) : isOpenControlled !== undefined ? null : (
         <button
           onClick={() => setModalOpen(true)}
           className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-300 rounded-lg text-xs font-semibold transition-colors"

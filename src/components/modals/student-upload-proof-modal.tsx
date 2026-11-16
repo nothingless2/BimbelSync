@@ -140,10 +140,12 @@ export function StudentUploadProofModal({
   return (
     <>
       {triggerButton !== undefined ? (
-        <div onClick={() => setModalOpen(true)} className="cursor-pointer">
-          {triggerButton}
-        </div>
-      ) : (
+        triggerButton ? (
+          <div onClick={() => setModalOpen(true)} className="cursor-pointer">
+            {triggerButton}
+          </div>
+        ) : null
+      ) : isOpenControlled !== undefined ? null : (
         <button
           type="button"
           onClick={() => setModalOpen(true)}
