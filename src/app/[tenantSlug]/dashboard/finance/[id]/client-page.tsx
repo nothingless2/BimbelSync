@@ -161,13 +161,38 @@ export default function FinanceDetailClient({
     }
   };
 
-  // Kirim pengingat tagihan via WhatsApp
+  // Kirim pengingat tagihan via WhatsApp ke Wali Siswa
   const handleOpenWhatsApp = () => {
     if (!invoice.student.parent_whatsapp) return;
     let phone = invoice.student.parent_whatsapp.replace(/[^0-9]/g, '');
-    if (phone.startsWith('0')) phone = '62' + phone.slice(1);
+    if (phone.startsWith('0')) {
+      phone = '62' + phone.slice(1);
+    } else if (phone.startsWith('8')) {
+      phone = '62' + phone;
+    }
     
-    const message = `Halo Bpk/Ibu wali dari ${invoice.student.full_name},\n\nKami menginformasikan tagihan bimbingan belajar dengan rincian berikut:\n- No. Faktur: ${invoiceNumber}\n- Total: ${formatRupiah(invoice.total_amount)}\n- Status: ${invoice.payment_status === 'PAID' ? 'LUNAS' : 'Belum Lunas'}\n\nTerima kasih atas kerja samanya.`;
+    const academyName = invoice.academy?.name || "Bimbel";
+    const statusText = invoice.payment_status === 'PAID' ? 'LUNAS' : isOverdue ? 'JATUH TEMPO' : 'BELUM LUNAS';
+    const periodText = formatBillingPeriod(invoice.billing_period);
+    const dueDateText = invoice.due_date ? format(new Date(invoice.due_date), 'd MMMM yyyy', { locale: localeId }) : "-";
+    
+    let bankDetails = "";
+    if (invoice.academy?.bank_name && invoice.academy?.bank_account) {
+      bankDetails = `\n💳 *Rekening Pembayaran:*\n${invoice.academy.bank_name} : ${invoice.academy.bank_account}\na.n. ${academyName}\n`;
+    }
+
+    const message = 
+      `Halo Bapak/Ibu wali dari *${invoice.student.full_name}*,\n\n` +
+      `Kami dari *${academyName}* menginformasikan tagihan bimbingan belajar ananda:\n\n` +
+      `📄 *No. Faktur:* ${invoiceNumber}\n` +
+      `🗓️ *Periode:* ${periodText}\n` +
+      `💰 *Total Tagihan:* ${formatRupiah(invoice.total_amount)}\n` +
+      `📅 *Jatuh Tempo:* ${dueDateText}\n` +
+      `📌 *Status:* *${statusText}*\n` +
+      bankDetails +
+      `\nMohon konfirmasi pembayaran atau unggah bukti transfer melalui portal siswa jika sudah melakukan pembayaran.\n\n` +
+      `Terima kasih atas kerja samanya.\n` +
+      `Salam hangat,\n*${academyName}*`;
     
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
   };

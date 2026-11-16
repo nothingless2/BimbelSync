@@ -36,7 +36,13 @@ export default async function AttendancePage({
       }
     },
     include: {
-      program: true,
+      program: {
+        include: {
+          academy: {
+            select: { name: true }
+          }
+        }
+      },
       room: true,
       tutor: true,
       attendances: true // Fetch existing attendances
@@ -188,6 +194,12 @@ export default async function AttendancePage({
           tenantSlug={tenantSlug}
           studentsData={studentsData}
           isEnded={new Date() > new Date(schedule.end_time)}
+          scheduleInfo={{
+            programName: schedule.program.name,
+            startTime: schedule.start_time.toISOString(),
+            endTime: schedule.end_time.toISOString(),
+            academyName: schedule.program.academy?.name || "Bimbel",
+          }}
         />
       )}
     </div>

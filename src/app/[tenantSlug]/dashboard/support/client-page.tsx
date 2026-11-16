@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, MessageCircle, Phone, FileText, Send, ChevronDown, ChevronUp } from "lucide-react";
+import { Mail, MessageCircle, Phone, FileText, Send, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { submitSupportTicketAction } from "./actions";
 
 const faqs = [
   {
@@ -27,17 +28,33 @@ const faqs = [
 export default function SupportClientPage({ tenantSlug, staffEmail }: { tenantSlug: string, staffEmail: string }) {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("billing");
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulasi pengiriman pesan (MVP)
-    setTimeout(() => {
-      toast.success("Pesan terkirim! Tim support kami akan segera merespons via email.");
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    if (!formData.get("category")) {
+      formData.set("category", selectedCategory);
+    }
+
+    try {
+      const result = await submitSupportTicketAction(formData);
+
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success(result.message || "Pesan terkirim ke tim support!");
+        form.reset();
+        setSelectedCategory("billing");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Gagal mengirimkan pesan bantuan.");
+    } finally {
       setIsSubmitting(false);
-      (e.target as HTMLFormElement).reset();
-    }, 1500);
+    }
   };
 
   return (
@@ -97,7 +114,10 @@ export default function SupportClientPage({ tenantSlug, staffEmail }: { tenantSl
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Kategori Masalah</label>
               <CustomSelect
+                name="category"
                 required
+                value={selectedCategory}
+                onChange={(val) => setSelectedCategory(val)}
                 placeholder="Pilih Kategori..."
                 options={[
                   { value: "billing", label: "Kendala Tagihan & Pembayaran" },
@@ -111,6 +131,7 @@ export default function SupportClientPage({ tenantSlug, staffEmail }: { tenantSl
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Pesan / Kendala</label>
               <textarea 
+                name="message"
                 required
                 rows={4}
                 placeholder="Jelaskan kendala Anda..."

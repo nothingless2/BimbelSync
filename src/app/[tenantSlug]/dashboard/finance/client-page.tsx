@@ -3,7 +3,8 @@
 import { useState, useTransition, useEffect } from "react";
 import { 
   Receipt, User, MoreVertical, Trash2, CheckCircle2, DollarSign, Clock, Search, Filter,
-  Landmark, Edit3, X, Loader2, Ticket, Copy, Check, Percent, Sparkles, Plus, Power, Tag, Award
+  Landmark, Edit3, X, Loader2, Ticket, Copy, Check, Percent, Sparkles, Plus, Power, Tag, Award,
+  Phone, MessageSquare
 } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { deleteInvoiceAction, updateAcademyBankInfoAction } from "./actions";
@@ -160,6 +161,44 @@ export default function FinanceClientPage({
         onClick: () => {},
       }
     });
+  };
+
+  const handleSendWhatsAppInvoice = (inv: InvoiceWithRelations) => {
+    if (!inv.student.parent_whatsapp) {
+      toast.error("Nomor WhatsApp orang tua belum terdaftar untuk siswa ini.");
+      return;
+    }
+
+    let phone = inv.student.parent_whatsapp.replace(/[^0-9]/g, "");
+    if (phone.startsWith("0")) {
+      phone = "62" + phone.slice(1);
+    } else if (phone.startsWith("8")) {
+      phone = "62" + phone;
+    }
+
+    const academyName = bankInfo?.academyName || "Bimbel";
+    const invoiceNumber = `INV-${inv.id.substring(0, 6).toUpperCase()}`;
+    const periodText = inv.billing_period || "Tagihan Reguler";
+    const statusText = inv.payment_status === "PAID" ? "LUNAS" : "BELUM LUNAS";
+
+    let bankDetails = "";
+    if (bankInfo?.bankName && bankInfo?.bankAccount) {
+      bankDetails = `\n💳 *Rekening Pembayaran:*\n${bankInfo.bankName} : ${bankInfo.bankAccount}\na.n. ${academyName}\n`;
+    }
+
+    const message =
+      `Halo Bapak/Ibu wali dari *${inv.student.full_name}*,\n\n` +
+      `Kami dari *${academyName}* menginformasikan tagihan bimbingan belajar ananda:\n\n` +
+      `📄 *No. Faktur:* ${invoiceNumber}\n` +
+      `🗓️ *Periode:* ${periodText}\n` +
+      `💰 *Total Tagihan:* ${formatRupiah(inv.total_amount)}\n` +
+      `📌 *Status:* *${statusText}*\n` +
+      bankDetails +
+      `\nMohon konfirmasi pembayaran atau unggah bukti transfer jika sudah melakukan pembayaran.\n\n` +
+      `Terima kasih atas kerja samanya.\n` +
+      `Salam hangat,\n*${academyName}*`;
+
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank");
   };
 
   // Copy voucher code handler
@@ -421,7 +460,19 @@ export default function FinanceClientPage({
                                 {invoice.student.full_name.charAt(0).toUpperCase()}
                               </div>
                               <div className="flex flex-col">
-                                <span className="font-bold text-slate-800 dark:text-slate-200">{invoice.student.full_name}</span>
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className="font-bold text-slate-800 dark:text-slate-200">{invoice.student.full_name}</span>
+                                  {invoice.student.parent_whatsapp && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSendWhatsAppInvoice(invoice)}
+                                      className="text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 p-0.5 rounded hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors cursor-pointer"
+                                      title={`Kirim tagihan ke WhatsApp Orang Tua (${invoice.student.parent_whatsapp})`}
+                                    >
+                                      <Phone size={13} />
+                                    </button>
+                                  )}
+                                </div>
                                 <span className="text-xs text-slate-500">@{invoice.student.username}</span>
                               </div>
                             </div>
@@ -477,6 +528,17 @@ export default function FinanceClientPage({
                                         <Receipt size={16} />
                                         Lihat Detail Tagihan
                                       </Link>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          handleSendWhatsAppInvoice(invoice);
+                                          setOpenDropdownId(null);
+                                        }}
+                                        className="w-full text-left px-4 py-2.5 text-sm text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 flex items-center gap-2 font-medium cursor-pointer"
+                                      >
+                                        <Phone size={16} />
+                                        Kirim ke WA Ortu
+                                      </button>
                                       <div className="border-t border-slate-100 dark:border-slate-800 my-1"></div>
                                       {!isPaid ? (
                                         <>

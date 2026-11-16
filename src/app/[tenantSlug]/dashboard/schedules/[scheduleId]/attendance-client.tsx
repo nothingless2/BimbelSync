@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, XCircle, AlertCircle, User, Loader2, Save, Clock } from "lucide-react";
+import { CheckCircle2, XCircle, AlertCircle, User, Loader2, Save, Clock, MessageSquare, Phone } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { saveAttendancesAction, AttendancePayload } from "./actions";
 import { AttendanceStatus, Student, Attendance } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { QrCode, MonitorPlay } from "lucide-react";
 import Link from "next/link";
+import { format } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
 
 type StudentWithAttendance = {
   student: Student;
@@ -19,12 +21,19 @@ export function AttendanceClient({
   scheduleId,
   tenantSlug,
   studentsData,
-  isEnded = false
+  isEnded = false,
+  scheduleInfo,
 }: {
   scheduleId: string;
   tenantSlug: string;
   studentsData: StudentWithAttendance[];
   isEnded?: boolean;
+  scheduleInfo?: {
+    programName: string;
+    startTime: string;
+    endTime: string;
+    academyName: string;
+  };
 }) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
@@ -46,6 +55,62 @@ export function AttendanceClient({
       ...prev,
       [studentId]: status
     }));
+  };
+
+  const handleSendWhatsAppReport = (student: Student, status: AttendanceStatus) => {
+    if (!student.parent_whatsapp) {
+      toast.error("Nomor WhatsApp orang tua belum terdaftar untuk siswa ini.");
+      return;
+    }
+
+    let phone = student.parent_whatsapp.replace(/[^0-9]/g, "");
+    if (phone.startsWith("0")) {
+      phone = "62" + phone.slice(1);
+    } else if (phone.startsWith("8")) {
+      phone = "62" + phone;
+    }
+
+    const academyName = scheduleInfo?.academyName || "Bimbel";
+    const programName = scheduleInfo?.programName || "Program Belajar";
+    
+    let formattedDate = "Hari ini";
+    let formattedTime = "";
+    if (scheduleInfo?.startTime) {
+      try {
+        const start = new Date(scheduleInfo.startTime);
+        formattedDate = format(start, "EEEE, d MMMM yyyy", { locale: idLocale });
+        formattedTime = format(start, "HH:mm") + " WIB";
+        if (scheduleInfo.endTime) {
+          const end = new Date(scheduleInfo.endTime);
+          formattedTime = `${format(start, "HH:mm")} - ${format(end, "HH:mm")} WIB`;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    let statusText = "Hadir";
+    let statusEmoji = "✅";
+    if (status === "EXCUSED") {
+      statusText = "Izin (Berhalangan)";
+      statusEmoji = "ℹ️";
+    } else if (status === "ABSENT") {
+      statusText = "Alpa (Tidak Hadir)";
+      statusEmoji = "❌";
+    }
+
+    const message = 
+      `Halo Bapak/Ibu wali dari *${student.full_name}*,\n\n` +
+      `Kami dari *${academyName}* menginformasikan laporan presensi belajar ananda untuk kelas berikut:\n\n` +
+      `📚 *Program:* ${programName}\n` +
+      `📅 *Tanggal:* ${formattedDate}\n` +
+      (formattedTime ? `⏰ *Waktu:* ${formattedTime}\n` : "") +
+      `📌 *Status Presensi:* ${statusEmoji} *${statusText}*\n\n` +
+      `Demikian informasi ini kami sampaikan. Terima kasih atas perhatian dan kerja samanya.\n\n` +
+      `Salam hangat,\n` +
+      `*${academyName}*`;
+
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank");
   };
 
   const handleSave = async () => {
@@ -161,38 +226,56 @@ export function AttendanceClient({
                   </div>
                 </div>
 
-                {/* Radio Toggles */}
-                <div className="grid grid-cols-3 sm:flex w-full sm:w-auto rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 p-1 bg-slate-100 dark:bg-slate-900 gap-1">
-                  <button
-                    onClick={() => handleStatusChange(student.id, 'PRESENT')}
-                    className={`px-3 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
-                      currentVal === 'PRESENT' 
-                        ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-sm ring-1 ring-emerald-500/20' 
-                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                    }`}
-                  >
-                    <CheckCircle2 size={15} /> Hadir
-                  </button>
-                  <button
-                    onClick={() => handleStatusChange(student.id, 'EXCUSED')}
-                    className={`px-3 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
-                      currentVal === 'EXCUSED' 
-                        ? 'bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 shadow-sm ring-1 ring-amber-500/20' 
-                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                    }`}
-                  >
-                    <AlertCircle size={15} /> Izin
-                  </button>
-                  <button
-                    onClick={() => handleStatusChange(student.id, 'ABSENT')}
-                    className={`px-3 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
-                      currentVal === 'ABSENT' 
-                        ? 'bg-white dark:bg-slate-800 text-red-600 dark:text-red-400 shadow-sm ring-1 ring-red-500/20' 
-                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                    }`}
-                  >
-                    <XCircle size={15} /> Alpa
-                  </button>
+                {/* Actions: Radio Toggles + WhatsApp Button */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <div className="grid grid-cols-3 sm:flex w-full sm:w-auto rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 p-1 bg-slate-100 dark:bg-slate-900 gap-1">
+                    <button
+                      onClick={() => handleStatusChange(student.id, 'PRESENT')}
+                      className={`px-3 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                        currentVal === 'PRESENT' 
+                          ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-sm ring-1 ring-emerald-500/20' 
+                          : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                      }`}
+                    >
+                      <CheckCircle2 size={15} /> Hadir
+                    </button>
+                    <button
+                      onClick={() => handleStatusChange(student.id, 'EXCUSED')}
+                      className={`px-3 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                        currentVal === 'EXCUSED' 
+                          ? 'bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 shadow-sm ring-1 ring-amber-500/20' 
+                          : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                      }`}
+                    >
+                      <AlertCircle size={15} /> Izin
+                    </button>
+                    <button
+                      onClick={() => handleStatusChange(student.id, 'ABSENT')}
+                      className={`px-3 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                        currentVal === 'ABSENT' 
+                          ? 'bg-white dark:bg-slate-800 text-red-600 dark:text-red-400 shadow-sm ring-1 ring-red-500/20' 
+                          : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                      }`}
+                    >
+                      <XCircle size={15} /> Alpa
+                    </button>
+                  </div>
+
+                  {student.parent_whatsapp ? (
+                    <button
+                      type="button"
+                      onClick={() => handleSendWhatsAppReport(student, currentVal)}
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-800/60 transition-colors shadow-2xs cursor-pointer"
+                      title={`Kirim laporan presensi ke WhatsApp orang tua (${student.parent_whatsapp})`}
+                    >
+                      <Phone size={13} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <span>WA Ortu</span>
+                    </button>
+                  ) : (
+                    <span className="text-[10px] text-slate-400 italic text-center px-1 self-center">
+                      Tanpa No. WA
+                    </span>
+                  )}
                 </div>
               </div>
             );
