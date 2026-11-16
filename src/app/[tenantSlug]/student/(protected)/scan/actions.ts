@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma';
 import { requireStudentSession } from '@/lib/session';
 import { decryptQrData } from '@/lib/qr-crypto';
 import { revalidatePath } from 'next/cache';
+import { checkAndCompleteEnrollment } from '@/lib/enrollment-completion';
 
 export async function processQrScanAction(tenantSlug: string, qrDataRaw: string) {
   try {
@@ -121,6 +122,9 @@ export async function processQrScanAction(tenantSlug: string, qrDataRaw: string)
         data: { attendance_status: 'PRESENT' }
       });
 
+      // Otomatis cek pemenuhan kuota pertemuan program
+      await checkAndCompleteEnrollment(student.id, schedule.program_id);
+
       revalidatePath(`/${tenantSlug}/dashboard/schedules/attendance`);
       revalidatePath(`/${tenantSlug}/dashboard/schedules/${schedule.id}`);
       revalidatePath(`/${tenantSlug}/student/attendances`);
@@ -136,6 +140,9 @@ export async function processQrScanAction(tenantSlug: string, qrDataRaw: string)
         attendance_status: 'PRESENT'
       }
     });
+
+    // Otomatis cek pemenuhan kuota pertemuan program
+    await checkAndCompleteEnrollment(student.id, schedule.program_id);
 
     revalidatePath(`/${tenantSlug}/dashboard/schedules/attendance`);
     revalidatePath(`/${tenantSlug}/dashboard/schedules/${schedule.id}`);

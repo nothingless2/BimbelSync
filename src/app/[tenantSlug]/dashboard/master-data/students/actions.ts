@@ -85,7 +85,10 @@ export async function createStudentAction(formData: FormData) {
           billing_period: currentMonthPeriod,
           items: {
             create: {
-              description: `Pendaftaran ${program.name}`,
+              program_id: program.id,
+              description: program.billing_type === 'ONE_TIME'
+                ? `Biaya Paket Program ${program.name} (Sekali Bayar)`
+                : `Pendaftaran & SPP Bulan Pertama - ${program.name}`,
               amount: program.monthly_fee
             }
           }
@@ -227,6 +230,11 @@ export async function enrollStudentAction(studentId: string, programId: string) 
   const session = auth.session;
 
   try {
+    const program = await prisma.program.findFirst({
+      where: { id: programId, academy_id: session.academy_id, deleted_at: null }
+    });
+    if (!program) return { error: "Program tidak ditemukan." };
+
     const existingEnrollment = await prisma.enrollment.findUnique({
       where: {
         student_id_program_id: {
@@ -237,7 +245,7 @@ export async function enrollStudentAction(studentId: string, programId: string) 
     });
 
     if (existingEnrollment) {
-      if (existingEnrollment.status === 'WITHDRAWN') {
+      if (existingEnrollment.status === 'WITHDRAWN' || (existingEnrollment.status as string) === 'COMPLETED') {
         // Re-activate enrollment
         await prisma.enrollment.update({
           where: { id: existingEnrollment.id },
@@ -257,6 +265,29 @@ export async function enrollStudentAction(studentId: string, programId: string) 
         data: {
           student_id: studentId,
           program_id: programId,
+        }
+      });
+    }
+
+    if (program.monthly_fee > 0) {
+      const currentMonthPeriod = new Date().toISOString().substring(0, 7);
+      await prisma.invoice.create({
+        data: {
+          academy_id: session.academy_id as string,
+          student_id: studentId,
+          total_amount: program.monthly_fee,
+          payment_option: "FULL",
+          payment_status: "UNPAID",
+          billing_period: currentMonthPeriod,
+          items: {
+            create: {
+              program_id: program.id,
+              description: program.billing_type === 'ONE_TIME'
+                ? `Biaya Paket Program ${program.name} (Sekali Bayar)`
+                : `Pendaftaran & SPP Bulan Pertama - ${program.name}`,
+              amount: program.monthly_fee
+            }
+          }
         }
       });
     }
@@ -378,7 +409,10 @@ export async function bulkCreateStudentsAction(programId: string, studentsToImpo
             billing_period: currentMonthPeriod,
             items: {
               create: {
-                description: `Pendaftaran ${program.name}`,
+                program_id: program.id,
+                description: program.billing_type === 'ONE_TIME'
+                  ? `Biaya Paket Program ${program.name} (Sekali Bayar)`
+                  : `Pendaftaran & SPP Bulan Pertama - ${program.name}`,
                 amount: program.monthly_fee
               }
             }

@@ -6,6 +6,7 @@ import { id as idLocale } from "date-fns/locale";
 import { createAuditLog } from "@/lib/audit";
 import { decrypt } from "@/lib/auth";
 import { cookies } from "next/headers";
+import { checkAndCompleteEnrollment } from "@/lib/enrollment-completion";
 
 const CRON_SECRET = process.env.CRON_SECRET;
 
@@ -64,6 +65,7 @@ export async function POST(request: Request) {
     });
 
     let totalInvoicesCreated = 0;
+    let totalCompletedEnrollments = 0;
 
     // 3. Ambil SELURUH Invoice yang sudah ada untuk periode ini sekaligus (O(1) query)
     const existingInvoices = await prisma.invoice.findMany({
@@ -77,6 +79,30 @@ export async function POST(request: Request) {
     // Buat Set berisi ID siswa yang sudah ditagih bulan ini agar pencarian lebih cepat (O(1) lookup)
     const billedStudentIds = new Set(existingInvoices.map(inv => inv.student_id));
 
+    // Ambil riwayat item invoice yang pernah ditagihkan ke siswa untuk verifikasi program ONE_TIME (agar tidak ditagih ulang)
+    const existingProgramInvoices = await prisma.invoiceItem.findMany({
+      where: {
+        invoice: {
+          ...(academy_id ? { academy_id: academy_id } : {}),
+          payment_status: { not: "VOID" },
+        },
+      },
+      select: {
+        program_id: true,
+        description: true,
+        invoice: {
+          select: { student_id: true }
+        }
+      }
+    });
+
+    const billedStudentProgramKeys = new Set<string>();
+    for (const item of existingProgramInvoices) {
+      if (item.program_id) {
+        billedStudentProgramKeys.add(`${item.invoice.student_id}_${item.program_id}`);
+      }
+    }
+
     const createPromises = [];
     const generatedCountPerAcademy = new Map<string, number>();
 
@@ -85,21 +111,60 @@ export async function POST(request: Request) {
       for (const student of academy.students) {
         if (student.enrollments.length === 0) continue; 
         
-        // Cek secara instan di memory, BUKAN query ke database!
+        // Cek secara instan di memory apakah sudah pernah ada invoice untuk periode ini
         if (billedStudentIds.has(student.id)) continue; 
 
-        // 5. Calculate totals and create Invoice items
+        // Evaluasi setiap enrollment untuk auto-complete (kuota pertemuan / durasi habis) dan skema pembayaran (ONE_TIME vs MONTHLY)
+        const eligibleInvoiceItems = [];
         let totalAmount = 0;
-        const invoiceItemsData = student.enrollments.map((enrollment) => {
-          const amount = enrollment.program.monthly_fee;
-          totalAmount += amount;
-          return {
-            description: `Tagihan SPP - ${enrollment.program.name} (${format(today, "MMMM yyyy", { locale: idLocale })})`,
-            amount: amount
-          };
-        });
 
-        if (totalAmount === 0) continue;
+        for (const enrollment of student.enrollments) {
+          // 1. Cek auto-stop / auto-complete jika kuota pertemuan atau durasi bulan terpenuhi
+          const checkRes = await checkAndCompleteEnrollment(student.id, enrollment.program_id);
+          if (checkRes.completed) {
+            totalCompletedEnrollments++;
+            continue; // Langsung lewati program yang telah selesai, TIDAK DITAGIH LAGI
+          }
+
+          // 2. Cek program Sekali Bayar (ONE_TIME / Uang Dibayar Dimuka)
+          if (enrollment.program.billing_type === "ONE_TIME") {
+            const key = `${student.id}_${enrollment.program_id}`;
+            // Jika siswa sudah pernah ditagih untuk program ini (atau ada item dengan nama program), JANGAN TAGIH LAGI
+            const hasBeenBilled = billedStudentProgramKeys.has(key) ||
+              existingProgramInvoices.some(
+                item => item.invoice.student_id === student.id && item.description.includes(enrollment.program.name)
+              );
+
+            if (hasBeenBilled) {
+              continue; // Program sekali bayar / bayar dimuka yang sudah pernah dibuat tagihannya tidak akan ditagih lagi
+            }
+
+            // Jika belum pernah ditagih sama sekali (initial enrollment), buat tagihan paket 1x
+            if (enrollment.program.monthly_fee > 0) {
+              totalAmount += enrollment.program.monthly_fee;
+              eligibleInvoiceItems.push({
+                program_id: enrollment.program.id,
+                description: `Biaya Paket Program ${enrollment.program.name} (Sekali Bayar)`,
+                amount: enrollment.program.monthly_fee,
+              });
+              billedStudentProgramKeys.add(key);
+            }
+            continue;
+          }
+
+          // 3. Program Berulang Bulanan (MONTHLY)
+          if (enrollment.program.monthly_fee > 0) {
+            totalAmount += enrollment.program.monthly_fee;
+            eligibleInvoiceItems.push({
+              program_id: enrollment.program.id,
+              description: `Tagihan SPP - ${enrollment.program.name} (${format(today, "MMMM yyyy", { locale: idLocale })})`,
+              amount: enrollment.program.monthly_fee,
+            });
+          }
+        }
+
+        // Jika tidak ada item yang harus ditagih (misal semua program sudah selesai atau sudah lunas dimuka), lewati
+        if (eligibleInvoiceItems.length === 0 || totalAmount === 0) continue;
 
         // 6. Kumpulkan tugas pembuatan (Promises)
         const createInvoiceTask = prisma.invoice.create({
@@ -112,7 +177,7 @@ export async function POST(request: Request) {
             billing_period: currentMonthPeriod,
             due_date: dueDate,
             items: {
-              create: invoiceItemsData
+              create: eligibleInvoiceItems
             }
           }
         });
@@ -224,11 +289,13 @@ export async function POST(request: Request) {
       }
     }
 
+    const completedMsg = totalCompletedEnrollments > 0 ? ` (${totalCompletedEnrollments} kepesertaan program ditandai selesai otomatis)` : "";
     const extraMsg = emailSentCount > 0 ? ` serta mengirimkan ${emailSentCount} email notifikasi tagihan ke siswa.` : ".";
     return NextResponse.json({ 
       success: true, 
-      message: `Berhasil menerbitkan ${totalInvoicesCreated} tagihan otomatis untuk periode ${currentMonthPeriod}${extraMsg}`,
+      message: `Berhasil menerbitkan ${totalInvoicesCreated} tagihan otomatis untuk periode ${currentMonthPeriod}${completedMsg}${extraMsg}`,
       invoicesCreated: totalInvoicesCreated,
+      completedEnrollments: totalCompletedEnrollments,
       emailsSent: emailSentCount,
     });
 

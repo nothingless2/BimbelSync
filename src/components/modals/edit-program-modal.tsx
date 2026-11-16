@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, AlertCircle } from "lucide-react";
+import { X, AlertCircle, CalendarDays, Coins, Info } from "lucide-react";
 import { updateProgramAction } from "@/app/[tenantSlug]/dashboard/master-data/programs/actions";
 import { Program } from "@prisma/client";
 
@@ -16,6 +16,9 @@ export function EditProgramModal({
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [billingType, setBillingType] = useState<"MONTHLY" | "ONE_TIME">(
+    (program.billing_type as "MONTHLY" | "ONE_TIME") || "MONTHLY"
+  );
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -69,6 +72,46 @@ export function EditProgramModal({
             />
           </div>
 
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+              Skema Penagihan & Pembayaran *
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setBillingType("MONTHLY")}
+                className={`p-3 rounded-xl border text-left flex items-start gap-3 transition-all ${
+                  billingType === "MONTHLY"
+                    ? "border-blue-500 bg-blue-50/60 dark:bg-blue-900/20 ring-2 ring-blue-500/20"
+                    : "border-slate-200 dark:border-slate-800 hover:border-slate-300 bg-white dark:bg-slate-950"
+                }`}
+              >
+                <CalendarDays className={`w-5 h-5 shrink-0 mt-0.5 ${billingType === "MONTHLY" ? "text-blue-600 dark:text-blue-400" : "text-slate-400"}`} />
+                <div>
+                  <div className="font-semibold text-sm text-slate-900 dark:text-slate-100">SPP Bulanan</div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Ditagih berulang setiap bulan via sistem otomatis</p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setBillingType("ONE_TIME")}
+                className={`p-3 rounded-xl border text-left flex items-start gap-3 transition-all ${
+                  billingType === "ONE_TIME"
+                    ? "border-emerald-500 bg-emerald-50/60 dark:bg-emerald-900/20 ring-2 ring-emerald-500/20"
+                    : "border-slate-200 dark:border-slate-800 hover:border-slate-300 bg-white dark:bg-slate-950"
+                }`}
+              >
+                <Coins className={`w-5 h-5 shrink-0 mt-0.5 ${billingType === "ONE_TIME" ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"}`} />
+                <div>
+                  <div className="font-semibold text-sm text-slate-900 dark:text-slate-100">Sekali Bayar / Paket</div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Uang dibayar di muka (lunas di awal), tanpa tagihan bulanan</p>
+                </div>
+              </button>
+            </div>
+            <input type="hidden" name="billing_type" value={billingType} />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <label htmlFor="max_capacity" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
@@ -118,7 +161,7 @@ export function EditProgramModal({
 
           <div className="space-y-2">
             <label htmlFor="monthly_fee" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-              Biaya Bulanan (Rp)
+              {billingType === "ONE_TIME" ? "Biaya Paket / Bayar Dimuka (Rp)" : "Biaya SPP Bulanan (Rp)"}
             </label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">Rp</span>
@@ -129,9 +172,17 @@ export function EditProgramModal({
                 required
                 min="0"
                 defaultValue={program.monthly_fee}
-                placeholder="Contoh: 250000"
+                placeholder={billingType === "ONE_TIME" ? "Contoh: 1500000" : "Contoh: 250000"}
                 className="w-full pl-12 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
               />
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-1">
+              <Info size={13} className="shrink-0" />
+              <span>
+                {billingType === "ONE_TIME"
+                  ? "Siswa hanya ditagih sekali saat awal pendaftaran dan tidak akan ditagih di bulan berikutnya."
+                  : "Jika total pertemuan atau durasi diisi, sistem otomatis menghentikan penagihan saat kuota selesai."}
+              </span>
             </div>
           </div>
 

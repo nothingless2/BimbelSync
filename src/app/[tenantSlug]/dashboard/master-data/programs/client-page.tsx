@@ -87,18 +87,18 @@ export default function ProgramsClientPage({
             <thead className="text-xs text-slate-500 uppercase bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th scope="col" className="px-6 py-4 font-semibold w-16">No.</th>
-                <th scope="col" className="px-6 py-4 font-semibold">Nama Program</th>
+                <th scope="col" className="px-6 py-4 font-semibold">Nama Program & Skema</th>
                 <th scope="col" className="px-6 py-4 font-semibold">Kapasitas Maks.</th>
                 <th scope="col" className="px-6 py-4 font-semibold">Durasi</th>
                 <th scope="col" className="px-6 py-4 font-semibold">Total Pertemuan</th>
-                <th scope="col" className="px-6 py-4 font-semibold">Biaya per Bulan</th>
+                <th scope="col" className="px-6 py-4 font-semibold">Biaya</th>
                 <th scope="col" className="px-6 py-4 font-semibold text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {currentData.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
+                  <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
                     <BookOpen className="mx-auto h-12 w-12 text-slate-300 dark:text-slate-700 mb-3" />
                     Belum ada data program.<br/>Klik "Tambah Program" untuk mulai membuat.
                   </td>
@@ -110,7 +110,18 @@ export default function ProgramsClientPage({
                       {(currentPage - 1) * itemsPerPage + index + 1}
                     </td>
                     <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-200">
-                      {program.name}
+                      <div className="flex flex-col gap-1.5 items-start">
+                        <span className="font-semibold text-slate-900 dark:text-slate-100">{program.name}</span>
+                        {program.billing_type === 'ONE_TIME' ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
+                            Sekali Bayar / Paket
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50">
+                            SPP Bulanan
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
@@ -132,7 +143,14 @@ export default function ProgramsClientPage({
                       )}
                     </td>
                     <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-200">
-                      {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(program.monthly_fee)}
+                      <div className="flex flex-col">
+                        <span className="font-semibold">
+                          {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(program.monthly_fee)}
+                        </span>
+                        <span className="text-[11px] text-slate-400">
+                          {program.billing_type === 'ONE_TIME' ? 'di muka / paket' : '/ bulan'}
+                        </span>
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-3">

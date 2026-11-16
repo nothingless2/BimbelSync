@@ -95,7 +95,9 @@ export default function ProgramDetailClientPage({
               <Wallet size={24} />
             </div>
             <div>
-              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Biaya per Bulan</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                {program.billing_type === 'ONE_TIME' ? 'Biaya Paket (Sekali Bayar)' : 'Biaya SPP per Bulan'}
+              </p>
               <p className="text-lg font-bold text-slate-900 dark:text-slate-100 mt-1">
                 {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(program.monthly_fee)}
               </p>

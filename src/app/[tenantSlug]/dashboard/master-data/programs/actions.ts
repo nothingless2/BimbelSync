@@ -20,6 +20,9 @@ export async function createProgramAction(formData: FormData) {
   const rawMeetings = formData.get("total_meetings") as string;
   const totalMeetings = rawMeetings ? parseInt(rawMeetings, 10) : null;
 
+  const rawBillingType = formData.get("billing_type") as string;
+  const billingType = rawBillingType === "ONE_TIME" ? "ONE_TIME" : "MONTHLY";
+
   if (!name || isNaN(maxCapacity) || maxCapacity < 1 || isNaN(monthlyFee) || monthlyFee < 0) {
     return { error: "Data program tidak valid. Harap periksa kembali isian form Anda." };
   }
@@ -33,6 +36,7 @@ export async function createProgramAction(formData: FormData) {
         monthly_fee: monthlyFee,
         duration_months: durationMonths,
         total_meetings: totalMeetings,
+        billing_type: billingType,
       }
     });
 
@@ -41,7 +45,7 @@ export async function createProgramAction(formData: FormData) {
       staff_id: session.id,
       action: "CREATE",
       entity_type: "Program",
-      details: { name, max_capacity: maxCapacity, monthly_fee: monthlyFee }
+      details: { name, max_capacity: maxCapacity, monthly_fee: monthlyFee, billing_type: billingType }
     });
 
     revalidatePath(`/${session.tenant_slug}/dashboard/master-data/programs`);
@@ -67,6 +71,9 @@ export async function updateProgramAction(programId: string, formData: FormData)
   const rawMeetings = formData.get("total_meetings") as string;
   const totalMeetings = rawMeetings ? parseInt(rawMeetings, 10) : null;
 
+  const rawBillingType = formData.get("billing_type") as string;
+  const billingType = rawBillingType === "ONE_TIME" ? "ONE_TIME" : "MONTHLY";
+
   if (!name || isNaN(maxCapacity) || maxCapacity < 1 || isNaN(monthlyFee) || monthlyFee < 0) {
     return { error: "Data program tidak valid. Harap periksa kembali isian form Anda." };
   }
@@ -86,6 +93,7 @@ export async function updateProgramAction(programId: string, formData: FormData)
         monthly_fee: monthlyFee,
         duration_months: durationMonths,
         total_meetings: totalMeetings,
+        billing_type: billingType,
       }
     });
 
@@ -95,7 +103,7 @@ export async function updateProgramAction(programId: string, formData: FormData)
       action: "UPDATE",
       entity_type: "Program",
       entity_id: programId,
-      details: { name, max_capacity: maxCapacity, monthly_fee: monthlyFee }
+      details: { name, max_capacity: maxCapacity, monthly_fee: monthlyFee, billing_type: billingType }
     });
 
     revalidatePath(`/${session.tenant_slug}/dashboard/master-data/programs`);

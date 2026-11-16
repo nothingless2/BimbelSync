@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Users, Pencil, Trash2, Phone, Mail, BookOpen, MoreVertical, LogOut, CheckCircle2, Search } from "lucide-react";
+import { Users, Pencil, Trash2, Phone, Mail, BookOpen, MoreVertical, LogOut, CheckCircle2, Search, GraduationCap } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { deleteStudentAction, withdrawEnrollmentAction } from "./actions";
 import { EditStudentModal } from "@/components/modals/edit-student-modal";
@@ -176,6 +176,7 @@ export default function StudentsClientPage({
               ) : (
                 currentData.map((student, index) => {
                   const activeEnrollments = student.enrollments.filter(e => e.status === 'ACTIVE');
+                  const completedEnrollments = student.enrollments.filter(e => (e.status as string) === 'COMPLETED');
                   
                   return (
                     <tr key={student.id} className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${deletingId === student.id ? 'opacity-50' : ''}`}>
@@ -208,23 +209,35 @@ export default function StudentsClientPage({
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-wrap gap-2">
-                          {activeEnrollments.length > 0 ? (
-                            activeEnrollments.map(e => (
-                              <div key={e.id} className="group relative">
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
-                                  <CheckCircle2 size={12} />
-                                  {e.program.name}
-                                </span>
-                                {/* Hover to withdraw */}
-                                <button 
-                                  onClick={() => handleWithdraw(e.id, e.program.name, student.full_name)}
-                                  className="absolute -top-2 -right-2 bg-red-100 text-red-600 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm border border-red-200"
-                                  title={`Keluarkan dari ${e.program.name}`}
+                          {activeEnrollments.length > 0 || completedEnrollments.length > 0 ? (
+                            <>
+                              {activeEnrollments.map(e => (
+                                <div key={e.id} className="group relative">
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
+                                    <CheckCircle2 size={12} />
+                                    {e.program.name}
+                                  </span>
+                                  {/* Hover to withdraw */}
+                                  <button 
+                                    onClick={() => handleWithdraw(e.id, e.program.name, student.full_name)}
+                                    className="absolute -top-2 -right-2 bg-red-100 text-red-600 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm border border-red-200"
+                                    title={`Keluarkan dari ${e.program.name}`}
+                                  >
+                                    <LogOut size={12} />
+                                  </button>
+                                </div>
+                              ))}
+                              {completedEnrollments.map(e => (
+                                <span 
+                                  key={e.id} 
+                                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700"
+                                  title={e.withdrawn_notes || "Program telah selesai"}
                                 >
-                                  <LogOut size={12} />
-                                </button>
-                              </div>
-                            ))
+                                  <GraduationCap size={13} className="text-slate-500 shrink-0" />
+                                  <span>{e.program.name} (Selesai)</span>
+                                </span>
+                              ))}
+                            </>
                           ) : (
                             <span className="text-slate-400 italic text-xs">Belum ada program aktif</span>
                           )}

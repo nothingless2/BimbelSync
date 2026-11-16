@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, AlertCircle, Plus, LogOut } from "lucide-react";
+import { X, AlertCircle, Plus, LogOut, GraduationCap } from "lucide-react";
 import { enrollStudentAction, withdrawEnrollmentAction } from "@/app/[tenantSlug]/dashboard/master-data/students/actions";
 import { Student, Program, Enrollment } from "@prisma/client";
 import { CustomSelect } from "@/components/ui/custom-select";
@@ -26,6 +26,7 @@ export function ManageEnrollmentsModal({
   const [localEnrollments, setLocalEnrollments] = useState<any[]>(
     student.enrollments.filter((e: any) => e.status === 'ACTIVE')
   );
+  const completedEnrollments = student.enrollments.filter((e: any) => e.status === 'COMPLETED');
 
   const handleEnroll = async () => {
     if (!selectedProgramId) return;
@@ -132,6 +133,23 @@ export function ManageEnrollmentsModal({
                     </button>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {completedEnrollments.length > 0 && (
+              <div className="space-y-2 pt-2">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Riwayat Program Selesai</h4>
+                <div className="space-y-1.5">
+                  {completedEnrollments.map((enrollment: any) => (
+                    <div key={enrollment.id} className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl text-xs">
+                      <div className="flex items-center gap-2">
+                        <GraduationCap size={14} className="text-slate-400" />
+                        <span className="font-medium text-slate-700 dark:text-slate-300">{enrollment.program.name}</span>
+                      </div>
+                      <span className="text-slate-400 italic font-medium">Selesai</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

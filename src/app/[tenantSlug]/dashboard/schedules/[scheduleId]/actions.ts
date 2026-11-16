@@ -5,6 +5,7 @@ import { decrypt } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { AttendanceStatus } from "@prisma/client";
+import { checkAndCompleteEnrollment } from "@/lib/enrollment-completion";
 
 export type AttendancePayload = {
   student_id: string;
@@ -100,6 +101,15 @@ export async function saveAttendancesAction(scheduleId: string, attendances: Att
         })
       )
     );
+
+    // 4. Otomatis cek apakah kuota pertemuan program siswa telah terpenuhi
+    if (schedule.program_id) {
+      for (const attendance of updatedAttendances) {
+        if (attendance.finalStatus === "PRESENT" || attendance.finalStatus === "EXCUSED") {
+          await checkAndCompleteEnrollment(attendance.student_id, schedule.program_id);
+        }
+      }
+    }
 
     revalidatePath(`/${session.tenant_slug}/dashboard/schedules`);
     revalidatePath(`/${session.tenant_slug}/dashboard/schedules/attendance`);

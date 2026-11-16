@@ -188,26 +188,33 @@ model Student {
 }
 
 model Program {
-  id              String    @id @default(uuid()) @db.Uuid
-  academy_id      String    @db.Uuid
+  id              String             @id @default(uuid()) @db.Uuid
+  academy_id      String             @db.Uuid
   name            String
   max_capacity    Int
   monthly_fee     Int
   duration_months Int?
   total_meetings  Int?
-  weight_exam     Int       @default(70)
-  weight_homework Int       @default(30)
+  billing_type    ProgramBillingType @default(MONTHLY)
+  weight_exam     Int                @default(70)
+  weight_homework Int                @default(30)
   deleted_at      DateTime?
 
-  academy     Academy      @relation(fields: [academy_id], references: [id])
-  schedules   Schedule[]
-  enrollments Enrollment[]
-  materials   LearningMaterial[]
-  evaluations StudentEvaluation[]
-  quizzes     Quiz[]
-  vouchers    PromoVoucher[]
+  academy       Academy             @relation(fields: [academy_id], references: [id])
+  schedules     Schedule[]
+  enrollments   Enrollment[]
+  materials     LearningMaterial[]
+  evaluations   StudentEvaluation[]
+  quizzes       Quiz[]
+  vouchers      PromoVoucher[]
+  invoice_items InvoiceItem[]
 
   @@index([academy_id])
+}
+
+enum ProgramBillingType {
+  MONTHLY
+  ONE_TIME
 }
 
 model Schedule {
@@ -272,6 +279,7 @@ model Enrollment {
 enum EnrollmentStatus {
   ACTIVE
   WITHDRAWN
+  COMPLETED
 }
 
 enum WithdrawnReason {
@@ -330,12 +338,16 @@ enum PaymentStatus {
 }
 
 model InvoiceItem {
-  id          String @id @default(uuid()) @db.Uuid
-  invoice_id  String @db.Uuid
+  id          String   @id @default(uuid()) @db.Uuid
+  invoice_id  String   @db.Uuid
+  program_id  String?  @db.Uuid
   description String
   amount      Int
 
-  invoice Invoice @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
+  invoice Invoice  @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
+  program Program? @relation(fields: [program_id], references: [id], onDelete: SetNull)
+
+  @@index([program_id])
 }
 
 model Installment {
