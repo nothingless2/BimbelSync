@@ -3,6 +3,7 @@
 import prisma from '@/lib/prisma';
 import { requireStudentSession } from '@/lib/session';
 import { decryptQrData } from '@/lib/qr-crypto';
+import { revalidatePath } from 'next/cache';
 
 export async function processQrScanAction(tenantSlug: string, qrDataRaw: string) {
   try {
@@ -119,6 +120,11 @@ export async function processQrScanAction(tenantSlug: string, qrDataRaw: string)
         where: { id: existingAttendance.id },
         data: { attendance_status: 'PRESENT' }
       });
+
+      revalidatePath(`/${tenantSlug}/dashboard/schedules/attendance`);
+      revalidatePath(`/${tenantSlug}/dashboard/schedules/${schedule.id}`);
+      revalidatePath(`/${tenantSlug}/student/attendances`);
+      revalidatePath(`/${tenantSlug}/student/dashboard`);
       return { success: true, message: 'Status absen berhasil diubah menjadi Hadir.' };
     }
 
@@ -131,6 +137,10 @@ export async function processQrScanAction(tenantSlug: string, qrDataRaw: string)
       }
     });
 
+    revalidatePath(`/${tenantSlug}/dashboard/schedules/attendance`);
+    revalidatePath(`/${tenantSlug}/dashboard/schedules/${schedule.id}`);
+    revalidatePath(`/${tenantSlug}/student/attendances`);
+    revalidatePath(`/${tenantSlug}/student/dashboard`);
     return { success: true, message: 'Absensi berhasil!' };
 
   } catch (error) {

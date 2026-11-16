@@ -83,6 +83,15 @@ export default async function AttendanceMonitoringPage({
           select: {
             id: true,
             name: true,
+            enrollments: {
+              where: {
+                status: "ACTIVE",
+                student: { deleted_at: null },
+              },
+              select: {
+                id: true,
+              },
+            },
           },
         },
         room: {
@@ -122,8 +131,18 @@ export default async function AttendanceMonitoringPage({
       new Date(sch.end_time).getTime() >= nowTime;
     const isUpcoming = new Date(sch.start_time).getTime() > nowTime;
     const isCancelled = sch.status === "CANCELLED";
+    const totalEnrolled = sch.program.enrollments?.length ?? 0;
     const attendancesCount = sch.attendances.length;
-    const isLupaAbsen = isPast && !isCancelled && attendancesCount === 0;
+
+    // Sesi dianggap tuntas jika seluruh siswa terdaftar sudah memiliki record kehadiran
+    // (Misal: 10 dari 10 siswa scan QR -> otomatis tuntas, tidak perlu tutor simpan lagi)
+    const isRecorded =
+      totalEnrolled > 0
+        ? attendancesCount >= totalEnrolled
+        : attendancesCount > 0;
+
+    // Sesi dianggap lupa absen jika sudah lewat jam kelas, tidak dibatalkan, tapi belum semua siswa tercatat
+    const isLupaAbsen = isPast && !isCancelled && !isRecorded;
 
     const presentCount = sch.attendances.filter(
       (a) => a.attendance_status === "PRESENT"
@@ -148,6 +167,8 @@ export default async function AttendanceMonitoringPage({
       isOngoing,
       isUpcoming,
       isLupaAbsen,
+      isRecorded,
+      totalEnrolled,
       attendancesCount,
       presentCount,
       excusedCount,

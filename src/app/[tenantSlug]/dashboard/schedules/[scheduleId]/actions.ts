@@ -102,6 +102,7 @@ export async function saveAttendancesAction(scheduleId: string, attendances: Att
     );
 
     revalidatePath(`/${session.tenant_slug}/dashboard/schedules`);
+    revalidatePath(`/${session.tenant_slug}/dashboard/schedules/attendance`);
     revalidatePath(`/${session.tenant_slug}/dashboard/schedules/${scheduleId}`);
     
     if (hasLimitReached) {

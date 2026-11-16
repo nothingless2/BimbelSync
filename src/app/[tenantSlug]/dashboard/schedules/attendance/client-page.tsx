@@ -54,6 +54,8 @@ interface ScheduleItem {
   isOngoing: boolean;
   isUpcoming: boolean;
   isLupaAbsen: boolean;
+  isRecorded: boolean;
+  totalEnrolled: number;
   attendancesCount: number;
   presentCount: number;
   excusedCount: number;
@@ -134,7 +136,7 @@ export default function AttendanceMonitoringClient({
       if (statusFilter === "PENDING" && !s.isLupaAbsen) {
         return false;
       }
-      if (statusFilter === "RECORDED" && s.attendancesCount === 0) {
+      if (statusFilter === "RECORDED" && !s.isRecorded) {
         return false;
       }
       if (statusFilter === "UPCOMING" && !s.isUpcoming && !s.isOngoing) {
@@ -345,7 +347,7 @@ export default function AttendanceMonitoringClient({
             Sudah Diabsen
           </p>
           <p className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 sm:mt-1">
-            {schedules.filter((s) => s.attendancesCount > 0).length}
+            {schedules.filter((s) => s.isRecorded).length}
           </p>
         </div>
 
@@ -473,7 +475,7 @@ export default function AttendanceMonitoringClient({
                 >
                   <CheckCircle2 size={12} />
                   Sudah Diabsen (
-                  {schedules.filter((s) => s.attendancesCount > 0).length})
+                  {schedules.filter((s) => s.isRecorded).length})
                 </button>
 
                 <button
@@ -537,19 +539,23 @@ export default function AttendanceMonitoringClient({
                       <div className="flex flex-wrap items-center gap-2">
                         {/* Status Badge */}
                         {sch.isLupaAbsen ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500 text-white animate-pulse">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold text-white ${
+                            sch.attendancesCount > 0 ? "bg-amber-600 dark:bg-amber-700" : "bg-rose-500"
+                          }`}>
                             <AlertTriangle size={12} />
-                            Lupa Diabsen (Selesai)
+                            {sch.attendancesCount > 0
+                              ? `Perlu Rekap (${sch.attendancesCount}/${sch.totalEnrolled} Scan)`
+                              : "Lupa Diabsen (Selesai)"}
                           </span>
-                        ) : sch.attendancesCount > 0 ? (
+                        ) : sch.isRecorded ? (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
                             <CheckCircle2 size={12} />
-                            Presensi Terisi
+                            Presensi Lengkap ({sch.attendancesCount}/{sch.totalEnrolled})
                           </span>
                         ) : sch.isOngoing ? (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300">
                             <Clock size={12} />
-                            Sedang Berlangsung
+                            Sedang Berlangsung ({sch.attendancesCount}/{sch.totalEnrolled})
                           </span>
                         ) : sch.status === "CANCELLED" ? (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-400 line-through">
@@ -558,7 +564,7 @@ export default function AttendanceMonitoringClient({
                         ) : (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
                             <Clock size={12} />
-                            Mendatang
+                            Mendatang ({sch.totalEnrolled} Siswa)
                           </span>
                         )}
 
@@ -580,26 +586,35 @@ export default function AttendanceMonitoringClient({
                         </span>
                       </div>
 
-                      {/* Attendance Breakdown (If Recorded) */}
+                      {/* Attendance Breakdown (If Recorded or Partially Scanned) */}
                       {sch.attendancesCount > 0 ? (
-                        <div className="flex items-center gap-2 text-xs">
+                        <div className="flex flex-wrap items-center gap-2 text-xs">
                           <span className="text-slate-500 dark:text-slate-400">
                             Kehadiran:
                           </span>
                           <span className="px-2 py-0.5 rounded-md font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
                             {sch.presentCount} Hadir
                           </span>
-                          <span className="px-2 py-0.5 rounded-md font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
-                            {sch.excusedCount} Izin
-                          </span>
-                          <span className="px-2 py-0.5 rounded-md font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300">
-                            {sch.absentCount} Alpa
-                          </span>
+                          {sch.excusedCount > 0 && (
+                            <span className="px-2 py-0.5 rounded-md font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
+                              {sch.excusedCount} Izin
+                            </span>
+                          )}
+                          {sch.absentCount > 0 && (
+                            <span className="px-2 py-0.5 rounded-md font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300">
+                              {sch.absentCount} Alpa
+                            </span>
+                          )}
+                          {sch.isLupaAbsen && sch.totalEnrolled > sch.attendancesCount && (
+                            <span className="text-amber-700 dark:text-amber-400 font-semibold text-[11px] bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-900/50">
+                              {sch.totalEnrolled - sch.attendancesCount} siswa belum diabsen
+                            </span>
+                          )}
                         </div>
                       ) : (
                         <p className="text-xs text-slate-500 dark:text-slate-400">
                           {sch.isLupaAbsen
-                            ? "Sesi telah berakhir, absensi siswa belum tercatat."
+                            ? "Sesi telah berakhir, 0 siswa tercatat. Buka sesi untuk rekap."
                             : "Presensi dibuka otomatis saat kelas berlangsung."}
                         </p>
                       )}
@@ -622,14 +637,14 @@ export default function AttendanceMonitoringClient({
                           className="flex-[2] sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition shadow-sm shadow-rose-600/20"
                         >
                           <CheckCircle2 size={14} />
-                          Isi Presensi &rarr;
+                          {sch.attendancesCount > 0 ? "Rekap & Selesaikan →" : "Isi Presensi →"}
                         </Link>
                       ) : (
                         <Link
                           href={`/${tenantSlug}/dashboard/schedules/${sch.id}`}
                           className="flex-[2] sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-300 rounded-xl text-xs font-semibold transition"
                         >
-                          {sch.attendancesCount > 0 ? "Edit Presensi" : "Buka Presensi"}
+                          {sch.isRecorded ? "Edit Presensi" : "Buka Presensi"}
                           <ChevronRight size={14} />
                         </Link>
                       )}

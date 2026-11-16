@@ -111,12 +111,12 @@ export function AttendanceClient({
       </div>
 
     {isEnded && (
-      <div className="mx-6 mt-4 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-xl flex items-start gap-3 text-amber-900 dark:text-amber-200 text-sm">
+      <div className="mx-4 sm:mx-6 mt-4 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-xl flex items-start gap-3 text-amber-900 dark:text-amber-200 text-sm">
         <Clock size={18} className="shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
         <div>
           <p className="font-semibold">Sesi Kelas Telah Berakhir</p>
           <p className="text-amber-800/90 dark:text-amber-300/80 text-xs mt-0.5 leading-relaxed">
-            Waktu pelaksanaan kelas telah selesai. Presensi mandiri siswa via scan QR code telah otomatis ditutup. Anda tetap dapat menyimpan atau memperbarui status kehadiran siswa secara manual di tabel ini.
+            Siswa yang telah scan QR otomatis tercatat Hadir. Siswa yang tidak scan otomatis terpilih Alpa (dapat Anda ubah ke Izin jika berhalangan). Klik tombol <strong>Simpan Presensi</strong> di bawah untuk menyelesaikan rekap sesi ini.
           </p>
         </div>
       </div>
@@ -140,8 +140,17 @@ export function AttendanceClient({
                     {student.full_name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <h4 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                    <h4 className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 flex-wrap">
                       {student.full_name}
+                      {studentData.currentStatus === "PRESENT" ? (
+                        <span className="text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <CheckCircle2 size={10} /> Scan QR Hadir
+                        </span>
+                      ) : !studentData.currentStatus ? (
+                        <span className="text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded-full">
+                          Tidak Scan (Default Alpa)
+                        </span>
+                      ) : null}
                       {studentData.isWithdrawn && (
                         <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                           (Diberhentikan)
