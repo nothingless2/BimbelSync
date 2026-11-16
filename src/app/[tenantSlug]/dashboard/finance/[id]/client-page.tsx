@@ -9,7 +9,8 @@ import { id as localeId } from "date-fns/locale";
 import { 
   ArrowLeft, CheckCircle2, AlertCircle, Clock, 
   CreditCard, Banknote, RefreshCcw, Loader2, Calendar,
-  Mail, Send, Copy, Check, MessageSquare, Printer, Lock, ChevronRight, Ticket
+  Mail, Send, Copy, Check, MessageSquare, Printer, Lock, ChevronRight, Ticket,
+  Eye, Image as ImageIcon
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "@/components/ui/sonner";
@@ -17,6 +18,7 @@ import { verifyPaymentAction, verifyInstallmentAction, sendInvoiceEmailAction } 
 import { SplitInstallmentModal } from "@/components/modals/split-installment-modal";
 import { SendInvoiceEmailModal } from "@/components/modals/send-invoice-email-modal";
 import { ConfirmVerifyPaymentModal } from "@/components/modals/confirm-verify-payment-modal";
+import { ViewProofModal } from "@/components/modals/view-proof-modal";
 
 type InvoiceWithDetails = Invoice & {
   academy?: {
@@ -46,6 +48,7 @@ export default function FinanceDetailClient({
 }) {
   const router = useRouter();
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isViewingProof, setIsViewingProof] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [verifyingInstallmentId, setVerifyingInstallmentId] = useState<string | null>(null);
   const [isSplitModalOpen, setIsSplitModalOpen] = useState(false);
@@ -516,6 +519,71 @@ export default function FinanceDetailClient({
         {/* Kolom Kanan: Panel Tindakan & Saluran Tagihan (4 Kolom) */}
         <div className="lg:col-span-4 space-y-4 print:hidden">
           
+          {/* Kartu Bukti Transfer Siswa (Jika Ada) */}
+          {invoice.proof_of_payment_url && (
+            <div className="bg-white dark:bg-[#111827] rounded-2xl border border-blue-200 dark:border-blue-900/50 p-5 shadow-2xs space-y-3.5 bg-gradient-to-b from-blue-50/30 to-transparent dark:from-blue-950/10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400">
+                    <ImageIcon size={16} />
+                  </div>
+                  <div>
+                    <h2 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                      Bukti Transfer Siswa
+                    </h2>
+                    <p className="text-[11px] text-slate-500">Struk pembayaran diunggah siswa</p>
+                  </div>
+                </div>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                  isPaid
+                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                    : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                }`}>
+                  {isPaid ? 'Terverifikasi' : 'Perlu Verifikasi'}
+                </span>
+              </div>
+
+              {/* Preview Thumbnail */}
+              <div
+                onClick={() => setIsViewingProof(true)}
+                className="group relative rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 aspect-video max-h-40 cursor-pointer flex items-center justify-center"
+              >
+                <img
+                  src={invoice.proof_of_payment_url}
+                  alt="Bukti Transfer Siswa"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 text-white text-xs font-semibold">
+                  <Eye size={14} />
+                  Klik untuk Zoom / Perbesar
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => setIsViewingProof(true)}
+                  className="w-full py-2 px-3 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                >
+                  <Eye size={14} />
+                  <span>Lihat Bukti Transfer Penuh</span>
+                </button>
+
+                {!isPaid && (
+                  <button
+                    type="button"
+                    onClick={() => handleOpenVerifyModal("MANUAL_TRANSFER")}
+                    disabled={isVerifying}
+                    className="w-full py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs shadow-emerald-600/20 disabled:opacity-50"
+                  >
+                    <CheckCircle2 size={14} />
+                    <span>Verifikasi Bukti & Tandai Lunas</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Kartu Tindakan Pembayaran */}
           <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-2xs space-y-3.5">
             <div>
@@ -745,6 +813,25 @@ export default function FinanceDetailClient({
           amount={verifyModalState.amount}
           method={verifyModalState.method}
           termNumber={verifyModalState.termNumber}
+        />
+      )}
+
+      {/* Modal Lihat Bukti Pembayaran Siswa */}
+      {invoice.proof_of_payment_url && (
+        <ViewProofModal
+          isOpen={isViewingProof}
+          onClose={() => setIsViewingProof(false)}
+          imageUrl={invoice.proof_of_payment_url}
+          invoiceTitle={invoiceNumber}
+          invoicePeriod={formatBillingPeriod(invoice.billing_period)}
+          invoiceAmount={formatRupiah(invoice.total_amount)}
+          academyName={invoice.student.full_name}
+          isPaid={isPaid}
+          onVerify={!isPaid ? () => {
+            setIsViewingProof(false);
+            handleOpenVerifyModal("MANUAL_TRANSFER");
+          } : undefined}
+          isVerifying={isVerifying}
         />
       )}
 

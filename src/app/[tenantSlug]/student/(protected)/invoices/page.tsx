@@ -147,10 +147,11 @@ export default async function StudentInvoicesPage({
                 <div>
                   <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-md uppercase tracking-wider inline-block ${
                     invoice.payment_status === 'PAID' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800/40' :
+                    invoice.proof_of_payment_url ? 'bg-blue-50 text-blue-700 border border-blue-200/60 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800/40' :
                     hasOverdue ? 'bg-red-50 text-red-700 border border-red-200/60 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800/40' :
                     'bg-amber-50 text-amber-700 border border-amber-200/60 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800/40'
                   }`}>
-                    {invoice.payment_status === 'PAID' ? 'LUNAS' : hasOverdue ? 'LEWAT JATUH TEMPO' : 'BELUM LUNAS'}
+                    {invoice.payment_status === 'PAID' ? 'LUNAS' : invoice.proof_of_payment_url ? 'MENUNGGU VERIFIKASI' : hasOverdue ? 'LEWAT JATUH TEMPO' : 'BELUM LUNAS'}
                   </span>
                   {isInstallment && invoice.payment_status !== 'PAID' && (
                     <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-medium">Sisa {unpaidInstallments} Termin</p>

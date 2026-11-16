@@ -4,7 +4,7 @@ import { useState, useTransition, useEffect } from "react";
 import { 
   Receipt, User, MoreVertical, Trash2, CheckCircle2, DollarSign, Clock, Search, Filter,
   Landmark, Edit3, X, Loader2, Ticket, Copy, Check, Percent, Sparkles, Plus, Power, Tag, Award,
-  Phone, MessageSquare
+  Phone, MessageSquare, Image as ImageIcon
 } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { deleteInvoiceAction, updateAcademyBankInfoAction } from "./actions";
@@ -498,9 +498,17 @@ export default function FinanceClientPage({
                                 <span className="text-[10px] text-emerald-600 dark:text-emerald-500 font-medium">via {invoice.payment_method}</span>
                               </div>
                             ) : (
-                              <span className="inline-flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50">
-                                BELUM DIBAYAR
-                              </span>
+                              <div className="flex flex-col gap-1">
+                                <span className="inline-flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50">
+                                  BELUM DIBAYAR
+                                </span>
+                                {invoice.proof_of_payment_url && (
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-1.5 py-0.5 rounded border border-blue-200/60 dark:border-blue-800/40 w-fit">
+                                    <ImageIcon size={10} />
+                                    Struk Terkirim
+                                  </span>
+                                )}
+                              </div>
                             )}
                           </td>
                           <td className="px-6 py-4 text-right">
@@ -528,6 +536,15 @@ export default function FinanceClientPage({
                                         <Receipt size={16} />
                                         Lihat Detail Tagihan
                                       </Link>
+                                      {invoice.proof_of_payment_url && (
+                                        <Link 
+                                          href={`./finance/${invoice.id}`}
+                                          className="w-full text-left px-4 py-2.5 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/20 flex items-center gap-2 font-medium"
+                                        >
+                                          <ImageIcon size={16} />
+                                          Lihat Bukti Bayar
+                                        </Link>
+                                      )}
                                       <button
                                         type="button"
                                         onClick={() => {
