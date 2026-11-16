@@ -98,10 +98,15 @@ export default function AttendanceMonitoringClient({
 
   const programOptions = useMemo(
     () => [
-      { value: "ALL", label: `Semua Program (${programs.length})` },
+      {
+        value: "ALL",
+        label: "Semua Program",
+        badge: `${programs.length} Program`,
+      },
       ...programs.map((p) => ({
         value: p.id,
-        label: `${p.name} (${p.students.length} Siswa)`,
+        label: p.name,
+        badge: `${p.students.length} Siswa`,
       })),
     ],
     [programs]
@@ -377,9 +382,9 @@ export default function AttendanceMonitoringClient({
       </div>
 
       {/* Main Container Card */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm relative">
         {/* Controls Bar & View Switcher */}
-        <div className="p-3.5 sm:p-6 border-b border-slate-200 dark:border-slate-800 space-y-3 sm:space-y-4">
+        <div className="p-3.5 sm:p-6 border-b border-slate-200 dark:border-slate-800 space-y-3 sm:space-y-4 relative z-20">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
             {/* View Mode Toggle */}
             <div className="grid grid-cols-2 sm:flex bg-slate-100 dark:bg-slate-800 rounded-xl p-1 w-full sm:w-auto">
@@ -429,12 +434,13 @@ export default function AttendanceMonitoringClient({
               <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 shrink-0">
                 Program:
               </span>
-              <div className="w-full sm:w-64">
+              <div className="w-full sm:w-72">
                 <CustomSelect
                   value={selectedProgramId}
                   onChange={(val) => setSelectedProgramId(val)}
                   options={programOptions}
                   placeholder="Pilih Program"
+                  placement="bottom"
                 />
               </div>
             </div>
@@ -498,7 +504,7 @@ export default function AttendanceMonitoringClient({
             VIEW MODE 1: DAFTAR SESI KELAS (SESSION LIST)
         ======================================================== */}
         {viewMode === "sessions" && (
-          <div className="divide-y divide-slate-100 dark:divide-slate-800/80">
+          <div className="divide-y divide-slate-100 dark:divide-slate-800/80 rounded-b-3xl overflow-hidden">
             {filteredSchedules.length === 0 ? (
               <div className="p-12 text-center flex flex-col items-center justify-center">
                 <div className="w-14 h-14 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-3">
@@ -660,7 +666,7 @@ export default function AttendanceMonitoringClient({
             VIEW MODE 2: REKAP SISWA PER PROGRAM (STUDENT MATRIX)
         ======================================================== */}
         {viewMode === "students" && (
-          <div className="p-4 sm:p-6 space-y-4">
+          <div className="p-4 sm:p-6 space-y-4 rounded-b-3xl">
             {!activeProgram ? (
               <div className="p-8 text-center text-slate-500 text-sm">
                 Belum ada program yang dipilih.

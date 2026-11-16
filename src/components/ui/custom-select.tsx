@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 export interface CustomSelectOption {
   value: string;
   label: string;
+  subLabel?: string;
+  badge?: string;
 }
 
 export interface CustomSelectProps {
@@ -57,7 +59,8 @@ export function CustomSelect({
         const rect = containerRef.current.getBoundingClientRect();
         const spaceBelow = window.innerHeight - rect.bottom;
         const spaceAbove = rect.top;
-        if (spaceBelow < 220 && spaceAbove > spaceBelow) {
+        // Hanya buka ke atas jika ruang di bawah sempit (< 220px) DAN ruang di atas benar-benar cukup (>= 220px)
+        if (spaceBelow < 220 && spaceAbove >= 220) {
           setOpenUpwards(true);
         } else {
           setOpenUpwards(false);
@@ -156,8 +159,15 @@ export function CustomSelect({
                         : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
                     }`}
                   >
-                    <span className="truncate pr-2">{opt.label}</span>
-                    {value === opt.value && <Check size={15} className="text-blue-600 dark:text-blue-400 shrink-0" />}
+                    <div className="flex items-center gap-2 truncate pr-2">
+                      <span className="truncate">{opt.label}</span>
+                      {opt.badge && (
+                        <span className="shrink-0 text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                          {opt.badge}
+                        </span>
+                      )}
+                    </div>
+                    {value === opt.value && <Check size={15} className="text-blue-600 dark:text-blue-400 shrink-0 ml-1" />}
                   </li>
                 ))
               )}
