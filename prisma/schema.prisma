@@ -106,6 +106,7 @@ model Academy {
   materials         LearningMaterial[]
   evaluations       StudentEvaluation[]
   quizzes           Quiz[]
+  vouchers          PromoVoucher[]
 }
 
 enum SubscriptionStatus {
@@ -204,6 +205,7 @@ model Program {
   materials   LearningMaterial[]
   evaluations StudentEvaluation[]
   quizzes     Quiz[]
+  vouchers    PromoVoucher[]
 
   @@index([academy_id])
 }
@@ -294,10 +296,13 @@ model Invoice {
   created_at           DateTime      @default(now())
   due_date             DateTime?     @db.Date
   billing_period       String?
+  voucher_id           String?       @db.Uuid
+  discount_amount      Int           @default(0)
 
   academy      Academy       @relation(fields: [academy_id], references: [id])
   student      Student       @relation(fields: [student_id], references: [id])
   verified_by  Staff?        @relation("StaffVerifiesInvoice", fields: [verified_by_staff_id], references: [id])
+  voucher      PromoVoucher? @relation(fields: [voucher_id], references: [id])
   items        InvoiceItem[]
   installments Installment[]
 
@@ -486,5 +491,37 @@ model QuizSubmission {
 
   @@unique([quiz_id, student_id])
   @@index([student_id])
+}
+
+model PromoVoucher {
+  id              String       @id @default(uuid()) @db.Uuid
+  academy_id      String       @db.Uuid
+  code            String
+  name            String
+  discount_type   DiscountType @default(PERCENTAGE)
+  discount_value  Int
+  max_discount    Int?
+  min_purchase    Int?
+  start_date      DateTime     @default(now())
+  end_date        DateTime?
+  usage_limit     Int?
+  used_count      Int          @default(0)
+  is_active       Boolean      @default(true)
+  program_id      String?      @db.Uuid
+  deleted_at      DateTime?
+  created_at      DateTime     @default(now())
+  updated_at      DateTime     @updatedAt
+
+  academy         Academy      @relation(fields: [academy_id], references: [id])
+  program         Program?     @relation(fields: [program_id], references: [id])
+  invoices        Invoice[]
+
+  @@unique([academy_id, code])
+  @@index([academy_id, is_active])
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
 }
 

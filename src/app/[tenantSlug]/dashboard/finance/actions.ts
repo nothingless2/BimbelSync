@@ -17,6 +17,7 @@ export async function createInvoiceAction(formData: FormData) {
   const studentId = formData.get("student_id") as string;
   const descriptions = formData.getAll("item_description[]") as string[];
   const amounts = formData.getAll("item_amount[]") as string[];
+  const voucherCode = (formData.get("voucher_code") as string)?.trim().toUpperCase() || null;
 
   if (!studentId) {
     return { error: "Siswa harus dipilih." };
@@ -44,26 +45,93 @@ export async function createInvoiceAction(formData: FormData) {
     return { error: "Setidaknya harus ada satu item tagihan dengan nominal lebih dari 0." };
   }
 
-  const totalAmount = itemsData.reduce((acc, curr) => acc + curr.amount, 0);
+  const subtotal = itemsData.reduce((acc, curr) => acc + curr.amount, 0);
 
   try {
+    let appliedVoucherId: string | null = null;
+    let calculatedDiscount = 0;
+    let finalTotal = subtotal;
+
     await prisma.$transaction(async (tx) => {
+      if (voucherCode) {
+        const voucher = await tx.promoVoucher.findFirst({
+          where: {
+            academy_id: session.academy_id,
+            code: voucherCode,
+            deleted_at: null,
+          },
+        });
+
+        if (!voucher) {
+          throw new Error(`Kode voucher "${voucherCode}" tidak ditemukan.`);
+        }
+        if (!voucher.is_active) {
+          throw new Error(`Kode voucher "${voucherCode}" saat ini tidak aktif.`);
+        }
+        const now = new Date();
+        if (voucher.start_date && new Date(voucher.start_date) > now) {
+          throw new Error(`Voucher "${voucherCode}" belum mulai berlaku.`);
+        }
+        if (voucher.end_date && new Date(voucher.end_date) < now) {
+          throw new Error(`Voucher "${voucherCode}" telah kedaluwarsa.`);
+        }
+        if (voucher.usage_limit && voucher.used_count >= voucher.usage_limit) {
+          throw new Error(`Batas kuota penggunaan voucher "${voucherCode}" telah habis.`);
+        }
+        if (voucher.min_purchase && subtotal < voucher.min_purchase) {
+          const formattedMin = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(voucher.min_purchase);
+          throw new Error(`Minimal transaksi tagihan untuk voucher "${voucherCode}" adalah ${formattedMin}.`);
+        }
+
+        if (voucher.discount_type === "PERCENTAGE") {
+          calculatedDiscount = Math.round((subtotal * voucher.discount_value) / 100);
+          if (voucher.max_discount && calculatedDiscount > voucher.max_discount) {
+            calculatedDiscount = voucher.max_discount;
+          }
+        } else {
+          calculatedDiscount = voucher.discount_value;
+        }
+
+        calculatedDiscount = Math.min(calculatedDiscount, subtotal);
+        appliedVoucherId = voucher.id;
+
+        // Increment used_count pada voucher
+        await tx.promoVoucher.update({
+          where: { id: voucher.id },
+          data: { used_count: { increment: 1 } },
+        });
+      }
+
+      finalTotal = Math.max(0, subtotal - calculatedDiscount);
+
       const invoice = await tx.invoice.create({
         data: {
           academy_id: session.academy_id as string,
           student_id: studentId,
-          total_amount: totalAmount,
+          total_amount: finalTotal,
+          discount_amount: calculatedDiscount,
+          voucher_id: appliedVoucherId,
           payment_option: "FULL",
           payment_status: "UNPAID",
         }
       });
 
-      await tx.invoiceItem.createMany({
-        data: itemsData.map(item => ({
+      const finalItems = itemsData.map(item => ({
+        invoice_id: invoice.id,
+        description: item.description,
+        amount: item.amount
+      }));
+
+      if (calculatedDiscount > 0 && voucherCode) {
+        finalItems.push({
           invoice_id: invoice.id,
-          description: item.description,
-          amount: item.amount
-        }))
+          description: `Diskon Voucher Promo (${voucherCode})`,
+          amount: -calculatedDiscount,
+        });
+      }
+
+      await tx.invoiceItem.createMany({
+        data: finalItems,
       });
     });
 
@@ -72,14 +140,20 @@ export async function createInvoiceAction(formData: FormData) {
       staff_id: session.id,
       action: "CREATE",
       entity_type: "Invoice",
-      details: { total_amount: totalAmount, items: itemsData.length }
+      details: {
+        total_amount: finalTotal,
+        subtotal: subtotal,
+        voucher_code: voucherCode,
+        discount_amount: calculatedDiscount,
+        items: itemsData.length,
+      }
     });
 
     revalidatePath(`/${session.tenant_slug}/dashboard/finance`);
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating invoice:", error);
-    return { error: "Terjadi kesalahan internal saat membuat tagihan." };
+    return { error: error?.message || "Terjadi kesalahan internal saat membuat tagihan." };
   }
 }
 

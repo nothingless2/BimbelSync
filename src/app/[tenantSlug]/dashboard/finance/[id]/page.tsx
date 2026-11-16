@@ -45,7 +45,8 @@ export default async function InvoiceDetailPage({
           verified_by: true
         }
       },
-      verified_by: true
+      verified_by: true,
+      voucher: true,
     }
   });
 

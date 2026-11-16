@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X, AlertCircle, Trash2, Receipt } from "lucide-react";
+import { Plus, X, AlertCircle, Trash2, Receipt, Ticket, CheckCircle2, Loader2 } from "lucide-react";
 import { createInvoiceAction } from "@/app/[tenantSlug]/dashboard/finance/actions";
+import { validateVoucherAction } from "@/app/[tenantSlug]/dashboard/finance/voucher-actions";
 import { Student } from "@prisma/client";
 import { CustomSelect } from "@/components/ui/custom-select";
 
@@ -13,6 +14,18 @@ export function AddInvoiceModal({ students }: { students: Student[] }) {
   
   // Dynamic items state
   const [items, setItems] = useState([{ id: 1, description: "", amount: "" }]);
+
+  // Voucher state
+  const [voucherInput, setVoucherInput] = useState("");
+  const [isValidatingVoucher, setIsValidatingVoucher] = useState(false);
+  const [voucherError, setVoucherError] = useState<string | null>(null);
+  const [appliedVoucher, setAppliedVoucher] = useState<{
+    code: string;
+    name: string;
+    discountType: "PERCENTAGE" | "FIXED_AMOUNT";
+    discountValue: number;
+    maxDiscount?: number | null;
+  } | null>(null);
 
   const addItem = () => {
     setItems([...items, { id: Date.now(), description: "", amount: "" }]);
@@ -33,10 +46,60 @@ export function AddInvoiceModal({ students }: { students: Student[] }) {
     }));
   };
 
-  const totalAmount = items.reduce((acc, curr) => {
+  const subtotal = items.reduce((acc, curr) => {
     const num = parseInt(curr.amount.replace(/[^0-9]/g, ""), 10) || 0;
     return acc + num;
   }, 0);
+
+  // Hitung diskon aktif secara dinamis terhadap subtotal terkini
+  let dynamicDiscount = 0;
+  if (appliedVoucher && subtotal > 0) {
+    if (appliedVoucher.discountType === "PERCENTAGE") {
+      dynamicDiscount = Math.round((subtotal * appliedVoucher.discountValue) / 100);
+      if (appliedVoucher.maxDiscount && dynamicDiscount > appliedVoucher.maxDiscount) {
+        dynamicDiscount = appliedVoucher.maxDiscount;
+      }
+    } else {
+      dynamicDiscount = appliedVoucher.discountValue;
+    }
+    dynamicDiscount = Math.min(dynamicDiscount, subtotal);
+  }
+
+  const finalTotal = Math.max(0, subtotal - dynamicDiscount);
+
+  const handleApplyVoucher = async () => {
+    const cleanCode = voucherInput.trim().toUpperCase();
+    if (!cleanCode) return;
+    if (subtotal <= 0) {
+      setVoucherError("Isi rincian item tagihan terlebih dahulu sebelum menerapkan voucher.");
+      return;
+    }
+
+    setIsValidatingVoucher(true);
+    setVoucherError(null);
+
+    const res = await validateVoucherAction(cleanCode, subtotal);
+    setIsValidatingVoucher(false);
+
+    if (res.error) {
+      setVoucherError(res.error);
+    } else if (res.success && res.voucher) {
+      setAppliedVoucher({
+        code: res.voucher.code,
+        name: res.voucher.name,
+        discountType: res.voucher.discountType,
+        discountValue: res.voucher.discountValue,
+        maxDiscount: res.voucher.maxDiscount,
+      });
+      setVoucherError(null);
+    }
+  };
+
+  const handleRemoveVoucher = () => {
+    setAppliedVoucher(null);
+    setVoucherInput("");
+    setVoucherError(null);
+  };
 
   const formatRupiah = (num: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
@@ -48,6 +111,10 @@ export function AddInvoiceModal({ students }: { students: Student[] }) {
     setErrorMsg(null);
 
     const formData = new FormData(e.currentTarget);
+    if (appliedVoucher) {
+      formData.set("voucher_code", appliedVoucher.code);
+    }
+
     const result = await createInvoiceAction(formData);
 
     if (result?.error) {
@@ -55,6 +122,9 @@ export function AddInvoiceModal({ students }: { students: Student[] }) {
     } else if (result?.success) {
       setIsOpen(false);
       setItems([{ id: Date.now(), description: "", amount: "" }]); // reset
+      setAppliedVoucher(null);
+      setVoucherInput("");
+      setVoucherError(null);
     }
     
     setIsLoading(false);
@@ -170,9 +240,101 @@ export function AddInvoiceModal({ students }: { students: Student[] }) {
                 </div>
               </div>
 
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 flex justify-between items-center">
-                <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Grand Total</span>
-                <span className="text-xl font-bold text-slate-900 dark:text-white">{formatRupiah(totalAmount)}</span>
+              {/* Voucher Promo Section */}
+              <div className="p-4 bg-blue-50/50 dark:bg-blue-950/20 rounded-xl border border-blue-100 dark:border-blue-900/40 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    <Ticket size={15} className="text-blue-600 dark:text-blue-400" />
+                    <span>Kode Voucher Promo (Opsional)</span>
+                  </div>
+                  {appliedVoucher && (
+                    <span className="text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <CheckCircle2 size={11} /> Tersambung
+                    </span>
+                  )}
+                </div>
+
+                {appliedVoucher ? (
+                  <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-900 rounded-lg border border-emerald-200 dark:border-emerald-900/60 shadow-xs">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-bold text-emerald-700 dark:text-emerald-400 text-xs px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/40 rounded border border-emerald-200 dark:border-emerald-800">
+                          {appliedVoucher.code}
+                        </span>
+                        <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                          {appliedVoucher.name}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                        Potongan diskon {formatRupiah(dynamicDiscount)} berhasil diterapkan.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveVoucher}
+                      className="text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 px-2.5 py-1.5 rounded-lg border border-rose-200 dark:border-rose-900/50 font-medium transition-colors"
+                    >
+                      Batal Gunakan
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Contoh: UTBK-HEMAT"
+                        value={voucherInput}
+                        onChange={(e) => setVoucherInput(e.target.value.toUpperCase().replace(/\s+/g, "-"))}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleApplyVoucher();
+                          }
+                        }}
+                        className="flex-1 px-3 py-2 text-xs font-mono font-bold tracking-wider rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white uppercase focus:ring-2 focus:ring-blue-500 outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleApplyVoucher}
+                        disabled={isValidatingVoucher || !voucherInput.trim() || subtotal <= 0}
+                        className="px-4 py-2 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1.5 shrink-0"
+                      >
+                        {isValidatingVoucher ? <Loader2 size={13} className="animate-spin" /> : "Gunakan"}
+                      </button>
+                    </div>
+                    {voucherError && (
+                      <p className="text-[11px] text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                        <AlertCircle size={12} className="shrink-0" />
+                        {voucherError}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Rincian Ringkasan & Grand Total */}
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                {appliedVoucher && dynamicDiscount > 0 ? (
+                  <>
+                    <div className="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400">
+                      <span>Subtotal Tagihan</span>
+                      <span className="font-mono font-medium">{formatRupiah(subtotal)}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                      <span>Potongan Diskon ({appliedVoucher.code})</span>
+                      <span className="font-mono font-bold">- {formatRupiah(dynamicDiscount)}</span>
+                    </div>
+                    <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                      <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Total Tagihan Bersih</span>
+                      <span className="text-xl font-bold text-slate-900 dark:text-white">{formatRupiah(finalTotal)}</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Grand Total</span>
+                    <span className="text-xl font-bold text-slate-900 dark:text-white">{formatRupiah(subtotal)}</span>
+                  </div>
+                )}
               </div>
 
               <div className="pt-2 flex gap-3 justify-end border-t border-slate-100 dark:border-slate-800">
@@ -185,7 +347,7 @@ export function AddInvoiceModal({ students }: { students: Student[] }) {
                 </button>
                 <button
                   type="submit"
-                  disabled={isLoading || totalAmount === 0}
+                  disabled={isLoading || subtotal === 0}
                   className="mt-4 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2"
                 >
                   {isLoading ? "Menyimpan..." : "Terbitkan Tagihan"}

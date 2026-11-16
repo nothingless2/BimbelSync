@@ -85,12 +85,19 @@ export default function StudentInvoiceDetailClient({
         <div className="bg-white dark:bg-[#111827] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
           <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">Rincian Pembayaran</h3>
           <div className="space-y-4">
-            {invoice.items.map((item, idx) => (
-              <div key={idx} className="flex justify-between items-start text-sm">
-                <span className="text-slate-600 dark:text-slate-300 pr-4">{item.description}</span>
-                <span className="font-semibold text-slate-900 dark:text-white shrink-0">{formatRupiah(item.amount)}</span>
-              </div>
-            ))}
+            {invoice.items.map((item, idx) => {
+              const isDiscount = item.amount < 0;
+              return (
+                <div key={idx} className="flex justify-between items-start text-sm">
+                  <span className={`${isDiscount ? 'text-emerald-600 dark:text-emerald-400 font-medium' : 'text-slate-600 dark:text-slate-300'} pr-4`}>
+                    {item.description}
+                  </span>
+                  <span className={`font-semibold shrink-0 ${isDiscount ? 'text-emerald-600 dark:text-emerald-400 font-mono' : 'text-slate-900 dark:text-white'}`}>
+                    {isDiscount ? `- ${formatRupiah(Math.abs(item.amount))}` : formatRupiah(item.amount)}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
 

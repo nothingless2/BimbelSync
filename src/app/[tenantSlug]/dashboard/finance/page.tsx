@@ -39,7 +39,7 @@ export default async function FinancePage({
   }
 
   // Calculate global stats using aggregations (fast, O(1) memory)
-  const [totalInvoices, paidAgg, unpaidAgg] = await Promise.all([
+  const [totalInvoices, paidAgg, unpaidAgg, discountAgg] = await Promise.all([
     prisma.invoice.count({ where: { academy_id: session.academy_id } }),
     prisma.invoice.aggregate({
       _sum: { total_amount: true },
@@ -50,6 +50,10 @@ export default async function FinancePage({
       _sum: { total_amount: true },
       _count: { id: true },
       where: { academy_id: session.academy_id, payment_status: 'UNPAID' }
+    }),
+    prisma.invoice.aggregate({
+      _sum: { discount_amount: true },
+      where: { academy_id: session.academy_id }
     })
   ]);
 
@@ -57,9 +61,10 @@ export default async function FinancePage({
   const potentialRevenue = unpaidAgg._sum.total_amount || 0;
   const paidCount = paidAgg._count.id;
   const unpaidCount = unpaidAgg._count.id;
+  const totalDiscountGiven = discountAgg._sum.discount_amount || 0;
 
-  // Fetch invoices akademi (client-side state murni seperti Superadmin Billing agar filter instan 0ms)
-  const [invoices, students, academy] = await Promise.all([
+  // Fetch invoices, students, programs, and promo vouchers milik akademi
+  const [invoices, students, academy, rawVouchers, programs] = await Promise.all([
     prisma.invoice.findMany({
       where: { academy_id: session.academy_id },
       include: {
@@ -84,6 +89,29 @@ export default async function FinancePage({
     prisma.academy.findUnique({
       where: { id: session.academy_id },
       select: { bank_name: true, bank_account: true, name: true, is_smtp_active: true }
+    }),
+    prisma.promoVoucher.findMany({
+      where: {
+        academy_id: session.academy_id,
+        deleted_at: null
+      },
+      include: {
+        program: {
+          select: { id: true, name: true }
+        },
+        _count: {
+          select: { invoices: true }
+        }
+      },
+      orderBy: { created_at: 'desc' }
+    }),
+    prisma.program.findMany({
+      where: {
+        academy_id: session.academy_id,
+        deleted_at: null
+      },
+      select: { id: true, name: true },
+      orderBy: { name: 'asc' }
     })
   ]);
 
@@ -91,6 +119,31 @@ export default async function FinancePage({
     bankName: academy?.bank_name || "",
     bankAccount: academy?.bank_account || "",
     academyName: academy?.name || "Bimbel"
+  };
+
+  const serializedVouchers = rawVouchers.map((v) => ({
+    id: v.id,
+    code: v.code,
+    name: v.name,
+    discountType: v.discount_type,
+    discountValue: v.discount_value,
+    maxDiscount: v.max_discount,
+    minPurchase: v.min_purchase,
+    startDate: v.start_date.toISOString(),
+    endDate: v.end_date ? v.end_date.toISOString() : null,
+    usageLimit: v.usage_limit,
+    usedCount: v.used_count,
+    isActive: v.is_active,
+    programId: v.program_id,
+    programName: v.program?.name || "Semua Program",
+    createdAt: v.created_at.toISOString(),
+  }));
+
+  const voucherStats = {
+    totalVouchers: serializedVouchers.length,
+    activeVouchers: serializedVouchers.filter((v) => v.isActive).length,
+    totalUsedVouchers: serializedVouchers.reduce((acc, v) => acc + v.usedCount, 0),
+    totalDiscountGiven: totalDiscountGiven,
   };
 
   return (
@@ -146,6 +199,9 @@ export default async function FinancePage({
       <FinanceClientPage 
         invoices={invoices} 
         initialBankInfo={bankInfo}
+        vouchers={serializedVouchers}
+        programs={programs}
+        voucherStats={voucherStats}
       />
     </div>
   );

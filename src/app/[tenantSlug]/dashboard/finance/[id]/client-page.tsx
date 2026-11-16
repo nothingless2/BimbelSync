@@ -3,13 +3,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Invoice, InvoiceItem, Student, Installment, Staff } from "@prisma/client";
+import { Invoice, InvoiceItem, Student, Installment, Staff, PromoVoucher } from "@prisma/client";
 import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
 import { 
   ArrowLeft, CheckCircle2, AlertCircle, Clock, 
   CreditCard, Banknote, RefreshCcw, Loader2, Calendar,
-  Mail, Send, Copy, Check, MessageSquare, Printer, Lock, ChevronRight
+  Mail, Send, Copy, Check, MessageSquare, Printer, Lock, ChevronRight, Ticket
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "@/components/ui/sonner";
@@ -28,6 +28,7 @@ type InvoiceWithDetails = Invoice & {
   items: InvoiceItem[];
   installments: (Installment & { verified_by?: Staff | null })[];
   verified_by: Staff | null;
+  voucher?: PromoVoucher | null;
 };
 
 export default function FinanceDetailClient({
@@ -326,29 +327,49 @@ export default function FinanceDetailClient({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50 dark:divide-slate-800/60">
-                  {invoice.items.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors">
-                      <td className="py-3 text-slate-800 dark:text-slate-200 font-medium">
-                        {item.description}
-                      </td>
-                      <td className="py-3 text-slate-500 text-center">
-                        1x
-                      </td>
-                      <td className="py-3 text-slate-900 dark:text-white font-semibold font-mono text-right">
-                        {formatRupiah(item.amount)}
-                      </td>
-                    </tr>
-                  ))}
+                  {invoice.items.map((item, idx) => {
+                    const isDiscountItem = item.amount < 0;
+                    return (
+                      <tr key={idx} className={`transition-colors ${isDiscountItem ? 'bg-emerald-50/40 dark:bg-emerald-950/20' : 'hover:bg-slate-50/50 dark:hover:bg-slate-900/30'}`}>
+                        <td className={`py-3 font-medium ${isDiscountItem ? 'text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5' : 'text-slate-800 dark:text-slate-200'}`}>
+                          {isDiscountItem && <Ticket size={14} className="shrink-0" />}
+                          {item.description}
+                        </td>
+                        <td className="py-3 text-slate-500 text-center">
+                          {isDiscountItem ? "-" : "1x"}
+                        </td>
+                        <td className={`py-3 font-semibold font-mono text-right ${isDiscountItem ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-900 dark:text-white'}`}>
+                          {isDiscountItem ? `- ${formatRupiah(Math.abs(item.amount))}` : formatRupiah(item.amount)}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
 
               {/* Rincian Ringkasan Finansial */}
               <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
-                <div className="w-full sm:w-64 space-y-2 text-xs">
-                  <div className="flex justify-between text-slate-500">
-                    <span>Subtotal:</span>
-                    <span className="font-mono">{formatRupiah(invoice.total_amount)}</span>
-                  </div>
+                <div className="w-full sm:w-72 space-y-2 text-xs">
+                  {invoice.discount_amount > 0 ? (
+                    <>
+                      <div className="flex justify-between text-slate-500">
+                        <span>Subtotal Tagihan:</span>
+                        <span className="font-mono">{formatRupiah(invoice.total_amount + invoice.discount_amount)}</span>
+                      </div>
+                      <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium">
+                        <span className="flex items-center gap-1">
+                          <Ticket size={12} />
+                          Diskon ({invoice.voucher?.code || "Voucher"}):
+                        </span>
+                        <span className="font-mono font-bold">- {formatRupiah(invoice.discount_amount)}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex justify-between text-slate-500">
+                      <span>Subtotal:</span>
+                      <span className="font-mono">{formatRupiah(invoice.total_amount)}</span>
+                    </div>
+                  )}
 
                   {isInstallment && (
                     <>
@@ -364,8 +385,8 @@ export default function FinanceDetailClient({
                   )}
 
                   <div className="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-900 dark:text-white">
-                    <span>Total Akhir:</span>
-                    <span className="font-mono text-base">{formatRupiah(invoice.total_amount)}</span>
+                    <span>Total Tagihan Bersih:</span>
+                    <span className="font-mono text-base text-blue-600 dark:text-blue-400">{formatRupiah(invoice.total_amount)}</span>
                   </div>
                 </div>
               </div>

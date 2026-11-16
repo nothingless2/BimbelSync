@@ -150,9 +150,6 @@ export default function QuizzesClientPage({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
-            <span className="p-2 bg-blue-50 dark:bg-blue-900/40 text-blue-600 rounded-xl">
-              <FileQuestion size={24} />
-            </span>
             Kuis & Latihan Soal
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
