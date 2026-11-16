@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CreditCard, CheckCircle2, Clock, AlertTriangle, ShieldCheck, Download, Eye, Upload, Calendar, Sparkles, ArrowRight, Zap } from "lucide-react";
+import { CreditCard, CheckCircle2, Clock, AlertTriangle, ShieldCheck, Download, Eye, Upload, ArrowRight } from "lucide-react";
 import { UploadProofModal } from "@/components/modals/upload-proof-modal";
 import { ViewProofModal } from "@/components/modals/view-proof-modal";
 
@@ -77,29 +77,19 @@ export default function SubscriptionClientPage({ academy, tenantSlug }: Props) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Status Card */}
-        <div className="col-span-1 lg:col-span-2 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-7 shadow-xs relative overflow-hidden flex flex-col justify-between">
-          {/* Subtle Ambient Background Watermark */}
-          <div className="absolute -right-6 -bottom-6 text-slate-100 dark:text-slate-800/40 pointer-events-none">
-            <ShieldCheck size={180} />
-          </div>
-
-          <div className="relative z-10 space-y-6">
-            {/* Top Row: Plan Identity & Upgrade CTA */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20 flex items-center justify-center shrink-0">
-                  <ShieldCheck size={28} />
+        <div className="col-span-1 lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            {/* Header: Info Paket & Tombol Aksi */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/40 flex items-center justify-center shrink-0">
+                  <ShieldCheck size={22} />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                      Paket Aktif Saat Ini
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                      TIER {academy.plan.name.toUpperCase()}
-                    </span>
-                  </div>
-                  <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5">
+                  <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                    Paket Langganan
+                  </span>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">
                     {academy.plan.name}
                   </h3>
                 </div>
@@ -110,55 +100,37 @@ export default function SubscriptionClientPage({ academy, tenantSlug }: Props) {
                   href={`https://wa.me/6285173392350?text=${encodeURIComponent(`Halo tim BimbelSync, saya ingin upgrade ke paket ${academy.plan.name.toLowerCase() === "starter" ? "growth" : "pro"}` + (tenantSlug ? ` (Akademi: ${tenantSlug})` : ""))}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md shadow-blue-500/25 hover:scale-[1.02] active:scale-[0.98] cursor-pointer w-fit"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl text-xs font-semibold transition-colors shadow-sm cursor-pointer w-fit"
                 >
-                  <Sparkles size={15} className="animate-pulse" />
                   <span>Upgrade ke Paket {academy.plan.name.toLowerCase() === "starter" ? "Growth" : "Pro"}</span>
-                  <ArrowRight size={15} />
+                  <ArrowRight size={14} />
                 </a>
               )}
             </div>
 
-            {/* Bottom Row: 2 Clean High-Density Status Tiles */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              {/* Tile 1: Status Akses */}
-              <div className="bg-slate-50/80 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center gap-3.5">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                  academy.subscription_status === 'ACTIVE' 
-                    ? 'bg-emerald-100/80 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' 
-                    : 'bg-amber-100/80 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
-                }`}>
-                  {currentStatus.icon}
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Status Akses</p>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    {academy.subscription_status === 'ACTIVE' && (
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                      </span>
-                    )}
-                    <span className={`text-sm font-bold ${currentStatus.class.replace("bg-", "text-").replace("dark:bg-", "dark:text-").split(" ")[1]}`}>
-                      {currentStatus.label}
-                    </span>
-                  </div>
+            {/* Metadata: Status & Masa Berlaku */}
+            <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-1.5">
+                  Status Akses
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${academy.subscription_status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                  <span className={`text-sm font-semibold ${academy.subscription_status === 'ACTIVE' ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400'}`}>
+                    {currentStatus.label}
+                  </span>
                 </div>
               </div>
 
-              {/* Tile 2: Masa Berlaku */}
-              <div className="bg-slate-50/80 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-blue-100/80 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 flex items-center justify-center shrink-0">
-                  <Calendar size={18} />
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Berlaku Hingga</p>
-                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-0.5">
-                    {academy.subscription_due_date
-                      ? new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(new Date(academy.subscription_due_date))
-                      : "Akses Penuh Selamanya"}
-                  </p>
-                </div>
+              <div>
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-1.5">
+                  Berlaku Hingga
+                </span>
+                <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                  {academy.subscription_due_date
+                    ? new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" }).format(new Date(academy.subscription_due_date))
+                    : "Selamanya"}
+                </p>
               </div>
             </div>
           </div>

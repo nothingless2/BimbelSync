@@ -193,66 +193,63 @@ export default function QuizzesClientPage({
       </div>
 
       {/* KPI Cards Desktop (hidden sm:grid) */}
-      <div className="hidden sm:grid grid-cols-3 gap-5">
+      <div className="hidden sm:grid grid-cols-3 gap-4">
         {/* Card 1: Total Kuis */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs hover:shadow-md transition-all duration-200 relative overflow-hidden group">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Total Kuis
             </span>
-            <div className="w-11 h-11 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs">
-              <FileQuestion size={20} />
+            <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+              <FileQuestion size={18} />
             </div>
           </div>
-          <div>
-            <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          <div className="mt-3">
+            <div className="text-2xl font-bold text-slate-900 dark:text-white">
               {totalQuizzes}
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></span>
-              Paket soal terdaftar di sistem
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Paket soal terdaftar
             </p>
           </div>
         </div>
 
         {/* Card 2: Kuis Aktif */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs hover:shadow-md transition-all duration-200 relative overflow-hidden group">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Kuis Aktif (Terbit)
             </span>
-            <div className="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs">
-              <CheckCircle2 size={20} />
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              <CheckCircle2 size={18} />
             </div>
           </div>
-          <div>
-            <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
+          <div className="mt-3">
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
               {publishedQuizzes}
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
-              Siap diakses & dikerjakan siswa
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Siap dikerjakan siswa
             </p>
           </div>
         </div>
 
         {/* Card 3: Total Pengerjaan */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs hover:shadow-md transition-all duration-200 relative overflow-hidden group">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Total Pengerjaan Siswa
             </span>
-            <div className="w-11 h-11 rounded-2xl bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs">
-              <Users size={20} />
+            <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+              <Users size={18} />
             </div>
           </div>
-          <div>
-            <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          <div className="mt-3">
+            <div className="text-2xl font-bold text-slate-900 dark:text-white">
               {totalSubmissions}
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
-              Respon kuis telah diselesaikan
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Kali diselesaikan
             </p>
           </div>
         </div>
