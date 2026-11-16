@@ -150,7 +150,7 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
   });
   
   // Replace with actual WA URL
-  const WA_URL = "https://wa.me/6281234567890?text=Halo%20tim%20BimbelSync,%20saya%20ingin%20berlangganan%20paket%20BimbelSync.";
+  const WA_URL = "https://wa.me/6285173392350?text=Halo%20tim%20BimbelSync,%20saya%20ingin%20berlangganan%20paket%20BimbelSync.";
 
   const semesterDiscountBadge = displayPlans.find(p => p.discount_6_months)?.discount_6_months || 10;
   const yearlyDiscountBadge = displayPlans.find(p => p.discount_12_months)?.discount_12_months || 17;

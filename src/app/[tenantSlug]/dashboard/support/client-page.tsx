@@ -55,20 +55,28 @@ export default function SupportClientPage({ tenantSlug, staffEmail }: { tenantSl
           </p>
           
           <div className="space-y-4 relative z-10">
-            <div className="flex items-center gap-3 bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/20">
-              <div className="p-2 bg-white/20 rounded-lg"><Phone size={18} /></div>
+            <a 
+              href="https://wa.me/6285173392350?text=Halo%20Tim%20Support%20BimbelSync,%20saya%20butuh%20bantuan." 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 bg-white/10 hover:bg-white/20 transition rounded-xl p-3 backdrop-blur-sm border border-white/20 group cursor-pointer"
+            >
+              <div className="p-2 bg-white/20 rounded-lg group-hover:scale-110 transition-transform"><Phone size={18} /></div>
               <div>
                 <p className="text-xs text-blue-200">WhatsApp Support</p>
-                <p className="font-semibold">+62 812-3456-7890</p>
+                <p className="font-semibold">+62 851-7339-2350</p>
               </div>
-            </div>
-            <div className="flex items-center gap-3 bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/20">
-              <div className="p-2 bg-white/20 rounded-lg"><Mail size={18} /></div>
+            </a>
+            <a 
+              href="mailto:admin@bimbelsync.web.id"
+              className="flex items-center gap-3 bg-white/10 hover:bg-white/20 transition rounded-xl p-3 backdrop-blur-sm border border-white/20 group cursor-pointer"
+            >
+              <div className="p-2 bg-white/20 rounded-lg group-hover:scale-110 transition-transform"><Mail size={18} /></div>
               <div>
                 <p className="text-xs text-blue-200">Email Support</p>
-                <p className="font-semibold">bantuan@bimbelsync.web.id</p>
+                <p className="font-semibold">admin@bimbelsync.web.id</p>
               </div>
-            </div>
+            </a>
           </div>
         </div>
 

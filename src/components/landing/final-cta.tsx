@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 
 export function FinalCTA() {
-  const WA_URL = "https://wa.me/6281234567890?text=Halo%20tim%20BimbelSync,%20saya%20ingin%20tanya%20tentang%20layanan%20Anda.";
+  const WA_URL = "https://wa.me/6285173392350?text=Halo%20tim%20BimbelSync,%20saya%20ingin%20tanya%20tentang%20layanan%20Anda.";
 
   return (
     <section className="py-24 bg-white relative overflow-hidden">

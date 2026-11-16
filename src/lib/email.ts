@@ -3,7 +3,7 @@ import nodemailer from "nodemailer";
 export async function sendOtpEmail(toEmail: string, otpCode: string, recipientName: string): Promise<{ success: boolean; error?: string }> {
   // 1. Kredensial Brevo (REST API atau SMTP Relay)
   const brevoApiKey = process.env.BREVO_API_KEY;
-  const brevoSenderEmail = process.env.BREVO_SENDER_EMAIL || process.env.EMAIL_FROM || "noreply@bimbelsync.web.id";
+  const brevoSenderEmail = process.env.BREVO_SENDER_EMAIL || process.env.EMAIL_FROM || "admin@bimbelsync.web.id";
   const brevoSenderName = process.env.BREVO_SENDER_NAME || "BimbelSync";
 
   // 2. Kredensial SMTP Umum (Bisa Brevo SMTP atau Gmail SMTP)
@@ -169,7 +169,7 @@ export async function sendPasswordResetOtpEmail(
   recipientName: string
 ): Promise<{ success: boolean; error?: string }> {
   const brevoApiKey = process.env.BREVO_API_KEY;
-  const brevoSenderEmail = process.env.BREVO_SENDER_EMAIL || process.env.EMAIL_FROM || "noreply@bimbelsync.web.id";
+  const brevoSenderEmail = process.env.BREVO_SENDER_EMAIL || process.env.EMAIL_FROM || "admin@bimbelsync.web.id";
   const brevoSenderName = process.env.BREVO_SENDER_NAME || "BimbelSync";
 
   const smtpUser = process.env.SMTP_USER;

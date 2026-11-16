@@ -19,7 +19,7 @@ import { TextReveal } from '@/components/ui/text-reveal';
 import { ParallaxElement } from '@/components/ui/parallax-element';
 import { CustomCursor } from '@/components/ui/custom-cursor';
 
-const WA_URL = "https://wa.me/6281234567890?text=Halo%20tim%20BimbelSync,%20saya%20tertarik%20menggunakan%20platform%20ini.";
+const WA_URL = "https://wa.me/6285173392350?text=Halo%20tim%20BimbelSync,%20saya%20tertarik%20menggunakan%20platform%20ini.";
 
 export const metadata: Metadata = {
   title: "BimbelSync | Software Manajemen & Operasional Bimbel Terbaik",

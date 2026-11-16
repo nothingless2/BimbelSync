@@ -54,7 +54,7 @@ export default function PrivacyPage() {
 
           <h2 className="text-xl font-bold text-slate-900 mt-12 mb-6">4. Hubungi Kami</h2>
           <p>
-            Jika Anda memiliki pertanyaan mengenai Kebijakan Privasi ini, silakan hubungi kami melalui email di <a href="mailto:privacy@bimbelsync.web.id" className="text-blue-600 hover:text-blue-800 font-medium transition-colors">privacy@bimbelsync.web.id</a>.
+            Jika Anda memiliki pertanyaan mengenai Kebijakan Privasi ini, silakan hubungi kami melalui email di <a href="mailto:admin@bimbelsync.web.id" className="text-blue-600 hover:text-blue-800 font-medium transition-colors">admin@bimbelsync.web.id</a>.
           </p>
         </div>
       </main>
