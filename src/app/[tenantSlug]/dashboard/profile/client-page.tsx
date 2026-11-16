@@ -86,7 +86,8 @@ export default function ProfileClientPage({ staff }: { staff: any }) {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden mt-6">
+    <>
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden mt-6">
       
       {/* Header Banner Identitas Profil */}
       <div className="p-6 sm:p-8 bg-slate-50/60 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
@@ -321,7 +322,6 @@ export default function ProfileClientPage({ staff }: { staff: any }) {
           </div>
         </div>
       )}
-
-    </div>
+    </>
   );
 }
