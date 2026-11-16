@@ -179,24 +179,24 @@ export default function FinanceClientPage({
     const academyName = bankInfo?.academyName || "Bimbel";
     const invoiceNumber = `INV-${inv.id.substring(0, 6).toUpperCase()}`;
     const periodText = inv.billing_period || "Tagihan Reguler";
-    const statusText = inv.payment_status === "PAID" ? "LUNAS" : "BELUM LUNAS";
+    const statusText = inv.payment_status === "PAID" ? "Lunas" : "Belum Lunas";
 
     let bankDetails = "";
     if (bankInfo?.bankName && bankInfo?.bankAccount) {
-      bankDetails = `\n💳 *Rekening Pembayaran:*\n${bankInfo.bankName} : ${bankInfo.bankAccount}\na.n. ${academyName}\n`;
+      bankDetails = `\nRekening Pembayaran:\n${bankInfo.bankName} : ${bankInfo.bankAccount}\na.n. ${academyName}\n`;
     }
 
     const message =
-      `Halo Bapak/Ibu wali dari *${inv.student.full_name}*,\n\n` +
-      `Kami dari *${academyName}* menginformasikan tagihan bimbingan belajar ananda:\n\n` +
-      `📄 *No. Faktur:* ${invoiceNumber}\n` +
-      `🗓️ *Periode:* ${periodText}\n` +
-      `💰 *Total Tagihan:* ${formatRupiah(inv.total_amount)}\n` +
-      `📌 *Status:* *${statusText}*\n` +
+      `Yth. Orang Tua / Wali dari ananda *${inv.student.full_name}*,\n\n` +
+      `Berikut kami sampaikan rincian tagihan bimbingan belajar dari *${academyName}*:\n\n` +
+      `- No. Faktur: ${invoiceNumber}\n` +
+      `- Periode: ${periodText}\n` +
+      `- Total Tagihan: ${formatRupiah(inv.total_amount)}\n` +
+      `- Status Pembayaran: *${statusText}*\n` +
       bankDetails +
-      `\nMohon konfirmasi pembayaran atau unggah bukti transfer jika sudah melakukan pembayaran.\n\n` +
-      `Terima kasih atas kerja samanya.\n` +
-      `Salam hangat,\n*${academyName}*`;
+      `\nMohon melakukan konfirmasi pembayaran atau mengunggah bukti transfer apabila pembayaran telah dilakukan.\n\n` +
+      `Atas perhatian dan kerja sama Bapak/Ibu, kami ucapkan terima kasih.\n\n` +
+      `Hormat kami,\n*${academyName}*`;
 
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank");
   };

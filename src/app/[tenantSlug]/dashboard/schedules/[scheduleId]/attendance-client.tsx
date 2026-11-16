@@ -90,24 +90,21 @@ export function AttendanceClient({
     }
 
     let statusText = "Hadir";
-    let statusEmoji = "✅";
     if (status === "EXCUSED") {
-      statusText = "Izin (Berhalangan)";
-      statusEmoji = "ℹ️";
+      statusText = "Izin";
     } else if (status === "ABSENT") {
-      statusText = "Alpa (Tidak Hadir)";
-      statusEmoji = "❌";
+      statusText = "Tidak Hadir (Alpa)";
     }
 
     const message = 
-      `Halo Bapak/Ibu wali dari *${student.full_name}*,\n\n` +
-      `Kami dari *${academyName}* menginformasikan laporan presensi belajar ananda untuk kelas berikut:\n\n` +
-      `📚 *Program:* ${programName}\n` +
-      `📅 *Tanggal:* ${formattedDate}\n` +
-      (formattedTime ? `⏰ *Waktu:* ${formattedTime}\n` : "") +
-      `📌 *Status Presensi:* ${statusEmoji} *${statusText}*\n\n` +
-      `Demikian informasi ini kami sampaikan. Terima kasih atas perhatian dan kerja samanya.\n\n` +
-      `Salam hangat,\n` +
+      `Yth. Orang Tua / Wali dari ananda *${student.full_name}*,\n\n` +
+      `Berikut kami sampaikan laporan presensi kegiatan belajar dari *${academyName}*:\n\n` +
+      `- Program: ${programName}\n` +
+      `- Tanggal: ${formattedDate}\n` +
+      (formattedTime ? `- Waktu: ${formattedTime}\n` : "") +
+      `- Status Presensi: *${statusText}*\n\n` +
+      `Demikian pemberitahuan ini kami sampaikan. Atas perhatian dan kerja sama Bapak/Ibu, kami ucapkan terima kasih.\n\n` +
+      `Hormat kami,\n` +
       `*${academyName}*`;
 
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank");

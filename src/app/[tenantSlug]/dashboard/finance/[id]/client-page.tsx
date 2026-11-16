@@ -172,27 +172,27 @@ export default function FinanceDetailClient({
     }
     
     const academyName = invoice.academy?.name || "Bimbel";
-    const statusText = invoice.payment_status === 'PAID' ? 'LUNAS' : isOverdue ? 'JATUH TEMPO' : 'BELUM LUNAS';
+    const statusText = invoice.payment_status === 'PAID' ? 'Lunas' : isOverdue ? 'Jatuh Tempo' : 'Belum Lunas';
     const periodText = formatBillingPeriod(invoice.billing_period);
     const dueDateText = invoice.due_date ? format(new Date(invoice.due_date), 'd MMMM yyyy', { locale: localeId }) : "-";
     
     let bankDetails = "";
     if (invoice.academy?.bank_name && invoice.academy?.bank_account) {
-      bankDetails = `\n💳 *Rekening Pembayaran:*\n${invoice.academy.bank_name} : ${invoice.academy.bank_account}\na.n. ${academyName}\n`;
+      bankDetails = `\nRekening Pembayaran:\n${invoice.academy.bank_name} : ${invoice.academy.bank_account}\na.n. ${academyName}\n`;
     }
 
     const message = 
-      `Halo Bapak/Ibu wali dari *${invoice.student.full_name}*,\n\n` +
-      `Kami dari *${academyName}* menginformasikan tagihan bimbingan belajar ananda:\n\n` +
-      `📄 *No. Faktur:* ${invoiceNumber}\n` +
-      `🗓️ *Periode:* ${periodText}\n` +
-      `💰 *Total Tagihan:* ${formatRupiah(invoice.total_amount)}\n` +
-      `📅 *Jatuh Tempo:* ${dueDateText}\n` +
-      `📌 *Status:* *${statusText}*\n` +
+      `Yth. Orang Tua / Wali dari ananda *${invoice.student.full_name}*,\n\n` +
+      `Berikut kami sampaikan rincian tagihan bimbingan belajar dari *${academyName}*:\n\n` +
+      `- No. Faktur: ${invoiceNumber}\n` +
+      `- Periode: ${periodText}\n` +
+      `- Total Tagihan: ${formatRupiah(invoice.total_amount)}\n` +
+      `- Jatuh Tempo: ${dueDateText}\n` +
+      `- Status Pembayaran: *${statusText}*\n` +
       bankDetails +
-      `\nMohon konfirmasi pembayaran atau unggah bukti transfer melalui portal siswa jika sudah melakukan pembayaran.\n\n` +
-      `Terima kasih atas kerja samanya.\n` +
-      `Salam hangat,\n*${academyName}*`;
+      `\nMohon melakukan konfirmasi pembayaran atau mengunggah bukti transfer melalui portal siswa apabila pembayaran telah dilakukan.\n\n` +
+      `Atas perhatian dan kerja sama Bapak/Ibu, kami ucapkan terima kasih.\n\n` +
+      `Hormat kami,\n*${academyName}*`;
     
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
   };
