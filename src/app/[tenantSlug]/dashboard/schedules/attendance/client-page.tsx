@@ -46,6 +46,7 @@ interface ScheduleItem {
   programId: string;
   programName: string;
   roomName: string;
+  tutorId?: string;
   tutorName: string;
   startTime: string;
   endTime: string;
@@ -95,6 +96,30 @@ export default function AttendanceMonitoringClient({
   const [statusFilter, setStatusFilter] = useState<string>(initialFilter);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"sessions" | "students">("sessions");
+  const [selectedTutorId, setSelectedTutorId] = useState<string>("ALL");
+
+  const tutorOptions = useMemo(() => {
+    const tutorMap = new Map<string, string>();
+    schedules.forEach((s) => {
+      if (s.tutorId && s.tutorName) {
+        tutorMap.set(s.tutorId, s.tutorName);
+      } else if (s.tutorName) {
+        tutorMap.set(s.tutorName, s.tutorName);
+      }
+    });
+
+    return [
+      {
+        value: "ALL",
+        label: "Semua Tutor",
+        badge: `${tutorMap.size} Tutor`,
+      },
+      ...Array.from(tutorMap.entries()).map(([id, name]) => ({
+        value: id,
+        label: name,
+      })),
+    ];
+  }, [schedules]);
 
   const programOptions = useMemo(
     () => [
@@ -118,6 +143,17 @@ export default function AttendanceMonitoringClient({
     return format(d, "EEEE, d MMM yyyy", { locale: localeId });
   };
 
+  const handleFilterLupaAbsen = () => {
+    setViewMode("sessions");
+    setStatusFilter("PENDING");
+    setTimeout(() => {
+      const el = document.getElementById("sessions-table-container");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 50);
+  };
+
   const formatTimeRange = (startIso: string, endIso: string) => {
     const start = parseISO(startIso);
     const end = parseISO(endIso);
@@ -134,6 +170,15 @@ export default function AttendanceMonitoringClient({
     return schedules.filter((s) => {
       // Program Filter
       if (selectedProgramId !== "ALL" && s.programId !== selectedProgramId) {
+        return false;
+      }
+
+      // Tutor Filter
+      if (
+        selectedTutorId !== "ALL" &&
+        s.tutorId !== selectedTutorId &&
+        s.tutorName !== selectedTutorId
+      ) {
         return false;
       }
 
@@ -159,7 +204,7 @@ export default function AttendanceMonitoringClient({
 
       return true;
     });
-  }, [schedules, selectedProgramId, statusFilter, searchQuery]);
+  }, [schedules, selectedProgramId, selectedTutorId, statusFilter, searchQuery]);
 
   // Selected Program for Student Matrix
   const activeProgram = useMemo(() => {
@@ -292,8 +337,8 @@ export default function AttendanceMonitoringClient({
             </div>
 
             <button
-              onClick={() => setStatusFilter("PENDING")}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition shadow-sm"
+              onClick={handleFilterLupaAbsen}
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white rounded-xl text-xs font-bold transition shadow-sm cursor-pointer shrink-0"
             >
               Filter Jadwal Lupa Absen &rarr;
             </button>
@@ -321,6 +366,10 @@ export default function AttendanceMonitoringClient({
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     {formatDateTime(sch.startTime)} • {sch.roomName}
                   </p>
+                  <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+                    <User size={13} className="text-rose-500 shrink-0" />
+                    <span className="truncate">Tutor: <strong className="font-semibold text-slate-900 dark:text-white">{sch.tutorName}</strong></span>
+                  </div>
                 </div>
 
                 <Link
@@ -382,7 +431,7 @@ export default function AttendanceMonitoringClient({
       </div>
 
       {/* Main Container Card */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm relative">
+      <div id="sessions-table-container" className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm relative">
         {/* Controls Bar & View Switcher */}
         <div className="p-3.5 sm:p-6 border-b border-slate-200 dark:border-slate-800 space-y-3 sm:space-y-4 relative z-20">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
@@ -419,7 +468,7 @@ export default function AttendanceMonitoringClient({
               </div>
               <input
                 type="text"
-                placeholder="Cari program / ruangan..."
+                placeholder="Cari program / ruangan / tutor..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:text-slate-200 placeholder:text-slate-400"
@@ -428,21 +477,41 @@ export default function AttendanceMonitoringClient({
           </div>
 
           {/* Filters Bar */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-            {/* Program Dropdown Selector */}
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 shrink-0">
-                Program:
-              </span>
-              <div className="w-full sm:w-72">
-                <CustomSelect
-                  value={selectedProgramId}
-                  onChange={(val) => setSelectedProgramId(val)}
-                  options={programOptions}
-                  placeholder="Pilih Program"
-                  placement="bottom"
-                />
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto flex-wrap">
+              {/* Program Dropdown Selector */}
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 shrink-0">
+                  Program:
+                </span>
+                <div className="w-full sm:w-64">
+                  <CustomSelect
+                    value={selectedProgramId}
+                    onChange={(val) => setSelectedProgramId(val)}
+                    options={programOptions}
+                    placeholder="Pilih Program"
+                    placement="bottom"
+                  />
+                </div>
               </div>
+
+              {/* Tutor Dropdown Selector (Hanya jika bukan tutor yang terkunci atau admin) */}
+              {!isTutor && (
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 shrink-0">
+                    Tutor:
+                  </span>
+                  <div className="w-full sm:w-56">
+                    <CustomSelect
+                      value={selectedTutorId}
+                      onChange={(val) => setSelectedTutorId(val)}
+                      options={tutorOptions}
+                      placeholder="Pilih Tutor"
+                      placement="bottom"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Status Pills (Single horizontal scrollable row on mobile) */}
@@ -583,12 +652,16 @@ export default function AttendanceMonitoringClient({
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <h4 className="font-bold text-base text-slate-900 dark:text-white">
                           {sch.programName}
                         </h4>
                         <span className="text-xs px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
                           {sch.roomName}
+                        </span>
+                        <span className="text-xs px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-medium flex items-center gap-1 border border-blue-100 dark:border-blue-900/50">
+                          <User size={12} className="text-blue-500" />
+                          Tutor: {sch.tutorName}
                         </span>
                       </div>
 
