@@ -36,81 +36,91 @@ export function TenantNav({
         
         {userRole !== 'TUTOR' && (
           <>
-            <div className="pt-6 pb-2">
+            <div className="pt-5 pb-2">
               <p className="px-3 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 Master Data
               </p>
             </div>
             <NavItem 
-              href={`/${tenantSlug}/dashboard/master-data/rooms`} 
-              icon={<Box size={18} />} 
-              label="Rooms" 
-              active={isRouteActive(`/${tenantSlug}/dashboard/master-data/rooms`)} 
-            />
-            <NavItem 
-              href={`/${tenantSlug}/dashboard/master-data/programs`} 
-              icon={<BookOpen size={18} />} 
-              label="Programs" 
-              active={isRouteActive(`/${tenantSlug}/dashboard/master-data/programs`)} 
-            />
-            <NavItem 
               href={`/${tenantSlug}/dashboard/master-data/students`} 
               icon={<Users size={18} />} 
-              label="Students" 
+              label="Siswa" 
               active={isRouteActive(`/${tenantSlug}/dashboard/master-data/students`)} 
             />
             <NavItem 
               href={`/${tenantSlug}/dashboard/master-data/staff`} 
               icon={<UserCog size={18} />} 
-              label="Staff" 
+              label="Staf & Tutor" 
               active={isRouteActive(`/${tenantSlug}/dashboard/master-data/staff`)} 
             />
-
-
+            <NavItem 
+              href={`/${tenantSlug}/dashboard/master-data/programs`} 
+              icon={<BookOpen size={18} />} 
+              label="Program Belajar" 
+              active={isRouteActive(`/${tenantSlug}/dashboard/master-data/programs`)} 
+            />
+            <NavItem 
+              href={`/${tenantSlug}/dashboard/master-data/rooms`} 
+              icon={<Box size={18} />} 
+              label="Ruangan Kelas" 
+              active={isRouteActive(`/${tenantSlug}/dashboard/master-data/rooms`)} 
+            />
           </>
         )}
 
-        <div className="pt-6 pb-2">
+        <div className="pt-5 pb-2">
           <p className="px-3 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Operational
+            Operasional
           </p>
         </div>
         <NavItem 
           href={`/${tenantSlug}/dashboard/schedules`} 
           icon={<Calendar size={18} />} 
-          label="Schedules & Attendance" 
+          label="Jadwal & Presensi" 
           active={isRouteActive(`/${tenantSlug}/dashboard/schedules`)} 
         />
+
+        <div className="pt-5 pb-2">
+          <p className="px-3 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            Akademik
+          </p>
+        </div>
         <NavItem 
           href={`/${tenantSlug}/dashboard/materials`} 
           icon={<Library size={18} />} 
-          label="Learning Materials" 
+          label="Materi Pembelajaran" 
           active={isRouteActive(`/${tenantSlug}/dashboard/materials`)} 
         />
         <NavItem 
           href={`/${tenantSlug}/dashboard/quizzes`} 
           icon={<FileQuestion size={18} />} 
-          label="Quizzes & Exercises" 
+          label="Kuis & Latihan Soal" 
           active={isRouteActive(`/${tenantSlug}/dashboard/quizzes`)} 
         />
         <NavItem 
           href={`/${tenantSlug}/dashboard/evaluations`} 
           icon={<BarChart size={18} />} 
-          label="Evaluations" 
+          label="Evaluasi & E-Rapor" 
           active={isRouteActive(`/${tenantSlug}/dashboard/evaluations`)} 
         />
+
         {userRole !== 'TUTOR' && (
           <>
+            <div className="pt-5 pb-2">
+              <p className="px-3 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Keuangan
+              </p>
+            </div>
             <NavItem 
               href={`/${tenantSlug}/dashboard/finance`} 
               icon={<CreditCard size={18} />} 
-              label="Finance" 
+              label="Tagihan Siswa" 
               active={isRouteActive(`/${tenantSlug}/dashboard/finance`)} 
             />
             <NavItem 
               href={`/${tenantSlug}/dashboard/reports`} 
               icon={<FileText size={18} />} 
-              label="Financial Report" 
+              label="Laporan Keuangan" 
               active={isRouteActive(`/${tenantSlug}/dashboard/reports`)} 
             />
           </>
@@ -118,9 +128,9 @@ export function TenantNav({
         
         {userRole === 'ADMIN' && (
           <>
-            <div className="pt-6 pb-2">
+            <div className="pt-5 pb-2">
               <p className="px-3 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                System
+                Sistem
               </p>
             </div>
             <NavItem 
