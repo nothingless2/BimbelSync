@@ -20,6 +20,13 @@ export function FeatureLockBanner({
   currentPlanName,
   readOnlyNotice = false,
 }: FeatureLockBannerProps) {
+  const targetPlan = requiredPlan.toLowerCase();
+  const waMessage = encodeURIComponent(
+    `Halo tim BimbelSync, saya ingin upgrade ke paket ${targetPlan}` +
+    (tenantSlug ? ` untuk akademi ${tenantSlug}.` : ".")
+  );
+  const waUrl = `https://wa.me/6285173392350?text=${waMessage}`;
+
   if (readOnlyNotice) {
     return (
       <div className="mb-6 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 text-amber-950 dark:text-amber-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -37,13 +44,15 @@ export function FeatureLockBanner({
             </p>
           </div>
         </div>
-        <Link
-          href={`/${tenantSlug}/dashboard/subscription`}
-          className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white rounded-xl text-xs font-bold transition shadow-xs"
+        <a
+          href={waUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
         >
           Tingkatkan Paket
           <ArrowRight size={14} />
-        </Link>
+        </a>
       </div>
     );
   }
@@ -72,13 +81,15 @@ export function FeatureLockBanner({
         </p>
 
         <div className="space-y-2.5">
-          <Link
-            href={`/${tenantSlug}/dashboard/subscription`}
-            className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl text-sm font-bold transition shadow-md shadow-blue-600/20"
+          <a
+            href={waUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl text-sm font-bold transition shadow-md shadow-blue-600/20 cursor-pointer"
           >
             Upgrade ke Paket {requiredPlan}
             <ArrowRight size={16} />
-          </Link>
+          </a>
 
           {currentPlanName && (
             <p className="text-xs text-slate-400 dark:text-slate-500">

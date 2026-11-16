@@ -79,14 +79,27 @@ export default function SubscriptionClientPage({ academy, tenantSlug }: Props) {
         {/* Status Card */}
         <div className="col-span-1 lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
           <div className="space-y-4 flex-1">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center">
-                <ShieldCheck size={24} />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center">
+                  <ShieldCheck size={24} />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Paket Saat Ini</p>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">{academy.plan.name}</h3>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Paket Saat Ini</p>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">{academy.plan.name}</h3>
-              </div>
+
+              {academy.plan.name.toLowerCase() !== "pro" && (
+                <a
+                  href={`https://wa.me/6285173392350?text=${encodeURIComponent(`Halo tim BimbelSync, saya ingin upgrade ke paket ${academy.plan.name.toLowerCase() === "starter" ? "growth" : "pro"}` + (tenantSlug ? ` (Akademi: ${tenantSlug})` : ""))}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl text-xs font-bold transition shadow-sm shadow-blue-500/20 cursor-pointer w-fit"
+                >
+                  Upgrade ke Paket {academy.plan.name.toLowerCase() === "starter" ? "Growth" : "Pro"} &rarr;
+                </a>
+              )}
             </div>
 
             <div className="flex flex-wrap gap-4 pt-2">
@@ -117,7 +130,12 @@ export default function SubscriptionClientPage({ academy, tenantSlug }: Props) {
             <h3 className="text-lg font-bold">Butuh Bantuan?</h3>
             <p className="text-blue-100 text-sm">Untuk mengubah paket, perpanjangan massal, atau pertanyaan tagihan, hubungi tim dukungan BimbelSync.</p>
           </div>
-          <a href="mailto:admin@bimbelsync.web.id" className="relative z-10 mt-6 inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-white text-blue-700 hover:bg-blue-50 rounded-xl font-bold text-sm transition">
+          <a 
+            href={`https://wa.me/6285173392350?text=${encodeURIComponent(`Halo tim BimbelSync, saya butuh bantuan seputar langganan atau ingin upgrade paket untuk bimbel kami (${academy.name || tenantSlug}).`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative z-10 mt-6 inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-white text-blue-700 hover:bg-blue-50 rounded-xl font-bold text-sm transition shadow-sm cursor-pointer"
+          >
             Hubungi Support
           </a>
         </div>
