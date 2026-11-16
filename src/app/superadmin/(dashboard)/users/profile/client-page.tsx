@@ -80,166 +80,191 @@ export default function ProfileClientPage({ user }: { user: any }) {
         <p className="text-slate-500 dark:text-slate-400 mt-1">Kelola informasi pribadi dan keamanan akun Anda.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Kolom Kiri: Avatar & Info Pribadi */}
-        <div className="lg:col-span-2 space-y-8">
-          
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden p-6">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Informasi Dasar</h2>
-            
-            <div className="flex items-center gap-6 mb-8">
-              <div className="relative group">
-                <UserAvatar id={user.id} email={user.email} avatarUrl={user.avatar_url} size={80} className="border-4 border-white dark:border-slate-800 shadow-lg" />
-                
-                <button 
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploadingAvatar}
-                  className="absolute bottom-0 right-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-md border-2 border-white dark:border-slate-900 hover:bg-blue-700 transition"
-                  title="Ganti Foto Profil"
-                >
-                  {uploadingAvatar ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
-                </button>
-                <input 
-                  type="file" 
-                  ref={fileInputRef} 
-                  onChange={handleFileChange} 
-                  accept="image/jpeg, image/png" 
-                  className="hidden" 
-                />
-              </div>
-              <div>
-                <p className="font-semibold text-slate-900 dark:text-slate-100">{user.name || "Superadmin"}</p>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{user.email}</p>
-                <p className="text-xs text-slate-400 font-mono mt-1">Role: Superadmin</p>
-              </div>
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        {/* Header Banner Identitas Profil */}
+        <div className="p-6 sm:p-8 bg-slate-50/60 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="flex items-center gap-5">
+            <div className="relative group">
+              <UserAvatar id={user.id} email={user.email} avatarUrl={user.avatar_url} size={76} className="border-4 border-white dark:border-slate-800 shadow-md" />
+              
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingAvatar}
+                className="absolute bottom-0 right-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-md border-2 border-white dark:border-slate-900 hover:bg-blue-700 transition"
+                title="Ganti Foto Profil"
+              >
+                {uploadingAvatar ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
+              </button>
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileChange} 
+                accept="image/jpeg, image/png" 
+                className="hidden" 
+              />
             </div>
+            <div>
+              <div className="flex items-center gap-2.5">
+                <h3 className="font-bold text-xl text-slate-900 dark:text-white">
+                  {user.name || "Superadmin"}
+                </h3>
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50">
+                  Superadmin
+                </span>
+              </div>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{user.email}</p>
+            </div>
+          </div>
+        </div>
 
-            <form action={handleProfileSubmit} className="space-y-5">
-              {msgProfile.text && (
-                <div className={`p-3 rounded-xl border text-sm font-medium ${msgProfile.type === 'error' ? 'bg-red-50 border-red-200 text-red-600 dark:bg-red-900/20 dark:border-red-800/50 dark:text-red-400' : 'bg-emerald-50 border-emerald-200 text-emerald-600 dark:bg-emerald-900/20 dark:border-emerald-800/50 dark:text-emerald-400'}`}>
-                  {msgProfile.text}
+        {/* Konten Form Terpadu (2 Kolom Seimbang di Dalam 1 Card) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-100 dark:divide-slate-800">
+          
+          {/* Kolom Kiri: Informasi Dasar */}
+          <div className="p-6 sm:p-8 space-y-6 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                  <User size={20} />
                 </div>
-              )}
+                <div>
+                  <h4 className="font-bold text-base text-slate-900 dark:text-white">Informasi Dasar</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Data identitas profil akun Anda</p>
+                </div>
+              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="space-y-1.5">
+              <form action={handleProfileSubmit} id="form-profile" className="space-y-5">
+                {msgProfile.text && (
+                  <div className={`p-3 rounded-xl border text-sm font-medium ${msgProfile.type === 'error' ? 'bg-red-50 border-red-200 text-red-600 dark:bg-red-900/20 dark:border-red-800/50 dark:text-red-400' : 'bg-emerald-50 border-emerald-200 text-emerald-600 dark:bg-emerald-900/20 dark:border-emerald-800/50 dark:text-emerald-400'}`}>
+                    {msgProfile.text}
+                  </div>
+                )}
+
+                <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                      <User size={16} />
+                    </span>
                     <input 
                       type="text" 
                       name="name"
                       defaultValue={user.name || ""}
                       placeholder="Masukkan nama Anda"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-900 dark:text-white text-sm"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition text-sm"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-1.5 opacity-60 cursor-not-allowed">
+                <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Alamat Email</label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                      <Mail size={16} />
+                    </span>
                     <input 
                       type="email" 
                       name="email"
                       disabled
                       defaultValue={user.email}
-                      title="Email tidak dapat diubah"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl outline-none text-slate-500 dark:text-slate-400 text-sm cursor-not-allowed"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 text-slate-400 cursor-not-allowed outline-none text-sm"
                     />
                   </div>
-                  <p className="text-xs text-slate-400 mt-1">Alamat email superadmin tidak dapat diubah.</p>
+                  <p className="text-[11px] text-slate-400 mt-1">Alamat email superadmin tidak dapat diubah.</p>
                 </div>
-              </div>
 
-              <div className="pt-2 flex justify-end">
-                <button 
-                  type="submit" 
-                  disabled={loadingProfile}
-                  className="px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  {loadingProfile ? <Loader2 size={18} className="animate-spin mr-2"/> : <CheckCircle2 size={18} className="mr-2" />}
-                  Simpan Perubahan
-                </button>
-              </div>
-            </form>
+                <div className="pt-4 flex justify-end">
+                  <button 
+                    type="submit" 
+                    disabled={loadingProfile}
+                    className="px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all shadow-sm shadow-blue-500/20 disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {loadingProfile ? <Loader2 size={16} className="animate-spin mr-1"/> : <CheckCircle2 size={16} className="mr-1" />}
+                    Simpan Perubahan
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
 
-        </div>
-
-        {/* Kolom Kanan: Ganti Password */}
-        <div className="space-y-8">
-          
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden p-6">
+          {/* Kolom Kanan: Keamanan Akun */}
+          <div className="p-6 sm:p-8 space-y-6">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400 shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-500 shrink-0">
                 <ShieldAlert size={20} />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">Keamanan Akun</h2>
-                <p className="text-xs text-slate-500">Ubah kata sandi Anda</p>
+                <h4 className="font-bold text-base text-slate-900 dark:text-white">Keamanan Akun</h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Ubah kata sandi Anda</p>
               </div>
             </div>
 
             <form id="form-password" action={handlePasswordSubmit} className="space-y-5">
               {msgPassword.text && (
-                <div className={`p-3 rounded-xl border text-xs font-medium ${msgPassword.type === 'error' ? 'bg-red-50 border-red-200 text-red-600 dark:bg-red-900/20 dark:border-red-800/50 dark:text-red-400' : 'bg-emerald-50 border-emerald-200 text-emerald-600 dark:bg-emerald-900/20 dark:border-emerald-800/50 dark:text-emerald-400'}`}>
+                <div className={`p-3 rounded-xl border text-sm font-medium ${msgPassword.type === 'error' ? 'bg-red-50 border-red-200 text-red-600 dark:bg-red-900/20 dark:border-red-800/50 dark:text-red-400' : 'bg-emerald-50 border-emerald-200 text-emerald-600 dark:bg-emerald-900/20 dark:border-emerald-800/50 dark:text-emerald-400'}`}>
                   {msgPassword.text}
                 </div>
               )}
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Password Saat Ini</label>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Password Saat Ini</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                    <Lock size={16} />
+                  </span>
                   <input 
                     type="password" 
                     name="old_password"
                     required
-                    className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-slate-900 dark:text-white text-sm"
+                    placeholder="Masukkan password saat ini"
+                    className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Password Baru</label>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Password Baru</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                    <Lock size={16} />
+                  </span>
                   <input 
                     type="password" 
                     name="new_password"
                     required
                     minLength={8}
                     placeholder="Minimal 8 karakter"
-                    className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-slate-900 dark:text-white text-sm"
+                    className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                   />
                 </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Gunakan huruf besar, kecil, angka, & simbol spesial.</p>
+                <p className="text-[11px] text-slate-400">Gunakan huruf besar, kecil, angka, & simbol spesial.</p>
               </div>
 
-              <div className="space-y-1.5 mb-2">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Ulangi Password Baru</label>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Ulangi Password Baru</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                    <Lock size={16} />
+                  </span>
                   <input 
                     type="password" 
                     name="confirm_password"
                     required
                     minLength={8}
-                    className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-slate-900 dark:text-white text-sm"
+                    placeholder="Ulangi password baru"
+                    className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                   />
                 </div>
               </div>
               
-              <div className="pt-2">
+              <div className="pt-4 flex justify-end">
                 <button 
                   type="submit" 
                   disabled={loadingPassword}
-                  className="w-full py-2.5 text-sm font-semibold text-white bg-slate-900 dark:bg-slate-800 rounded-xl hover:bg-slate-800 dark:hover:bg-slate-700 border border-slate-800 dark:border-slate-700 transition flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold text-white bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-700 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {loadingPassword ? <Loader2 size={16} className="animate-spin mr-2"/> : "Perbarui Password"}
+                  {loadingPassword ? <Loader2 size={16} className="animate-spin mr-1"/> : <Lock size={16} className="mr-1" />}
+                  Perbarui Password
                 </button>
               </div>
             </form>
