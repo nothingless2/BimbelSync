@@ -75,13 +75,13 @@ export default function StudentInvoiceDetailClient({
           
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Status Pembayaran</p>
           <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">
-            {invoice.payment_status === 'PAID' ? 'LUNAS' : hasOverdue ? 'LEWAT JATUH TEMPO' : 'UNPAID'}
+            {invoice.payment_status === 'PAID' ? 'LUNAS' : hasOverdue ? 'LEWAT JATUH TEMPO' : 'BELUM DIBAYAR'}
           </h2>
           
           <div className="w-full h-px bg-slate-100 dark:bg-slate-800 my-4"></div>
           
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Total Tagihan</p>
-          <p className="text-3xl font-black text-blue-600 dark:text-blue-400">{formatRupiah(invoice.total_amount)}</p>
+          <p className="text-3xl font-bold font-mono text-slate-900 dark:text-white">{formatRupiah(invoice.total_amount)}</p>
           <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 font-mono">INV-{invoice.id.split('-')[0].toUpperCase()}</p>
         </div>
 
@@ -249,9 +249,14 @@ export default function StudentInvoiceDetailClient({
           </div>
         ) : invoice.payment_status !== 'PAID' ? (
           <div className="bg-white dark:bg-[#111827] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-            <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-bold">
-              <Upload size={18} className="text-blue-600 dark:text-blue-400" />
-              <h3>Unggah Bukti Pembayaran</h3>
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                <Upload size={18} />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Unggah Bukti Pembayaran</h3>
+                <p className="text-[11px] text-slate-500">Konfirmasi transfer bank</p>
+              </div>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
               Sudah melakukan transfer? Silakan unggah foto struk ATM atau tangkapan layar (screenshot) m-Banking Anda agar staf administrasi dapat segera memverifikasi tagihan Anda.
@@ -259,10 +264,10 @@ export default function StudentInvoiceDetailClient({
             <button
               type="button"
               onClick={() => setIsUploadProofOpen(true)}
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-2xl shadow-sm shadow-blue-500/20 flex items-center justify-center gap-2 transition cursor-pointer"
+              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Upload size={16} />
-              Unggah Foto Bukti Transfer
+              <Upload size={15} />
+              <span>Unggah Foto Bukti Transfer</span>
             </button>
           </div>
         ) : null}

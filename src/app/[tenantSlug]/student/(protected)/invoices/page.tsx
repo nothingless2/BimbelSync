@@ -1,8 +1,10 @@
 import { requireStudentSession } from "@/lib/session";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { CreditCard, ArrowRight, CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { CreditCard, CheckCircle2, ChevronRight, Calendar } from "lucide-react";
 import Link from "next/link";
+import { format } from "date-fns";
+import { id as localeId } from "date-fns/locale";
 import { StudentBillingBanner } from "@/components/student-billing-banner";
 
 export default async function StudentInvoicesPage({
@@ -105,68 +107,100 @@ export default async function StudentInvoicesPage({
           </div>
         )}
 
-        {/* Invoices List (Matching Mockup) */}
-        {invoices.map((invoice) => {
-          const isInstallment = invoice.payment_option === 'INSTALLMENT';
-          const unpaidInstallments = invoice.installments.filter(i => i.status !== 'PAID').length;
-          const hasOverdue = invoice.payment_status === 'OVERDUE' || invoice.installments.some(i => i.status === 'OVERDUE');
+        {/* Invoices List */}
+        <div className="space-y-3">
+          {invoices.map((invoice) => {
+            const isInstallment = invoice.payment_option === 'INSTALLMENT';
+            const unpaidInstallments = invoice.installments.filter(i => i.status !== 'PAID').length;
+            const hasOverdue = invoice.payment_status === 'OVERDUE' || invoice.installments.some(i => i.status === 'OVERDUE');
+            const isPaid = invoice.payment_status === 'PAID';
+            const isPendingProof = !isPaid && !!invoice.proof_of_payment_url;
 
-          return (
-            <Link 
-              href={`/${tenantSlug}/student/invoices/${invoice.id}`}
-              key={invoice.id} 
-              className="block bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-100 dark:border-slate-800 shadow-sm hover:border-slate-200 dark:hover:border-slate-700 active:scale-[0.99] transition-all"
-            >
-              <div className="flex justify-between items-start gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-                    invoice.payment_status === 'PAID' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400' :
-                    hasOverdue ? 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400' :
-                    'bg-amber-50 text-amber-500 dark:bg-amber-950/40 dark:text-amber-400'
-                  }`}>
-                    {invoice.payment_status === 'PAID' ? <CheckCircle2 size={18} /> :
-                     hasOverdue ? <AlertCircle size={18} /> :
-                     <Clock size={18} />}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-bold text-slate-900 dark:text-white text-sm tracking-tight truncate">
-                      INV-{invoice.id.split('-')[0].toUpperCase()}
-                    </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
-                      {invoice.items[0]?.description || "Tagihan SPP Bimbel"} 
-                      {invoice.items.length > 1 && ` (+${invoice.items.length - 1} item)`}
-                    </p>
-                  </div>
-                </div>
-                <ArrowRight size={16} className="text-slate-300 dark:text-slate-600 shrink-0 mt-1" />
-              </div>
+            const invoiceCode = `INV-${invoice.id.split('-')[0].toUpperCase()}`;
+            const primaryItemTitle = invoice.items[0]?.description || "Tagihan SPP Bimbel";
+            const extraItemsCount = invoice.items.length - 1;
 
-              <div className="my-3.5 border-t border-slate-100 dark:border-slate-800 border-dashed"></div>
-
-              <div className="flex items-end justify-between">
-                <div>
-                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-md uppercase tracking-wider inline-block ${
-                    invoice.payment_status === 'PAID' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800/40' :
-                    invoice.proof_of_payment_url ? 'bg-blue-50 text-blue-700 border border-blue-200/60 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800/40' :
-                    hasOverdue ? 'bg-red-50 text-red-700 border border-red-200/60 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800/40' :
-                    'bg-amber-50 text-amber-700 border border-amber-200/60 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800/40'
-                  }`}>
-                    {invoice.payment_status === 'PAID' ? 'LUNAS' : invoice.proof_of_payment_url ? 'MENUNGGU VERIFIKASI' : hasOverdue ? 'LEWAT JATUH TEMPO' : 'BELUM LUNAS'}
+            return (
+              <Link 
+                href={`/${tenantSlug}/student/invoices/${invoice.id}`}
+                key={invoice.id} 
+                className="group block bg-white dark:bg-[#111827] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-slate-800 shadow-2xs hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200"
+              >
+                {/* Header Baris Atas: Kode Faktur & Status Badge */}
+                <div className="flex items-center justify-between gap-2 mb-2.5">
+                  <span className="font-mono text-xs font-semibold text-slate-500 dark:text-slate-400 tracking-wider">
+                    {invoiceCode}
                   </span>
-                  {isInstallment && invoice.payment_status !== 'PAID' && (
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-medium">Sisa {unpaidInstallments} Termin</p>
-                  )}
+
+                  {/* Status Badge Terstandardisasi */}
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
+                    isPaid
+                      ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60'
+                      : isPendingProof
+                      ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border-blue-200 dark:border-blue-800/60'
+                      : hasOverdue
+                      ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 border-rose-200 dark:border-rose-800/60'
+                      : 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200 dark:border-amber-800/60'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${
+                      isPaid
+                        ? 'bg-emerald-500'
+                        : isPendingProof
+                        ? 'bg-blue-500 animate-pulse'
+                        : hasOverdue
+                        ? 'bg-rose-500'
+                        : 'bg-amber-500'
+                    }`} />
+                    <span>
+                      {isPaid ? 'Lunas' : isPendingProof ? 'Menunggu Verifikasi' : hasOverdue ? 'Jatuh Tempo' : 'Belum Dibayar'}
+                    </span>
+                  </span>
                 </div>
-                <div className="text-right">
-                  <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500 mb-0.5">Total</p>
-                  <p className="font-extrabold text-base sm:text-lg text-blue-600 dark:text-blue-400 leading-tight">
-                    {formatRupiah(invoice.total_amount)}
-                  </p>
+
+                {/* Body Utama: Nama Program / Layanan & Tanggal */}
+                <div className="space-y-1">
+                  <h3 className="font-bold text-slate-900 dark:text-white text-base leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
+                    {primaryItemTitle}
+                    {extraItemsCount > 0 && (
+                      <span className="ml-1.5 text-xs font-normal text-slate-400 dark:text-slate-500">
+                        (+{extraItemsCount} item)
+                      </span>
+                    )}
+                  </h3>
+
+                  <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                    <Calendar size={13} className="text-slate-400 shrink-0" />
+                    <span>
+                      {invoice.due_date 
+                        ? `Jatuh tempo: ${format(new Date(invoice.due_date), 'd MMM yyyy', { locale: localeId })}`
+                        : `Diterbitkan: ${format(new Date(invoice.created_at), 'd MMM yyyy', { locale: localeId })}`}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          );
-        })}
+
+                {/* Footer Baris Bawah: Skema Pembayaran & Nominal Tagihan */}
+                <div className="mt-3.5 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3">
+                  <div className="text-xs text-slate-500 dark:text-slate-400">
+                    {isInstallment ? (
+                      <span className="font-medium text-slate-700 dark:text-slate-300">
+                        Cicilan {isPaid ? 'Selesai' : `(Sisa ${unpaidInstallments} Termin)`}
+                      </span>
+                    ) : (
+                      <span className="text-slate-500 dark:text-slate-400">Sekali Bayar</span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-mono font-bold text-base sm:text-lg text-slate-900 dark:text-white">
+                      {formatRupiah(invoice.total_amount)}
+                    </span>
+                    <ChevronRight size={16} className="text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200 group-hover:translate-x-0.5 transition-all" />
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
