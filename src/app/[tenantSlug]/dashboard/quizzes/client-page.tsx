@@ -165,78 +165,95 @@ export default function QuizzesClientPage({
         </button>
       </div>
 
-      {/* KPI Metrics: Mobile Compact 3-Column / Desktop Cards */}
+      {/* KPI Metrics: Mobile Compact / Desktop Cards */}
       <div className="grid grid-cols-3 gap-2 sm:hidden">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 shadow-xs text-center flex flex-col justify-between min-h-[75px]">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 shadow-xs text-center flex flex-col justify-between min-h-[85px]">
           <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tight">
             Total Kuis
           </span>
-          <p className="text-xl font-black text-slate-900 dark:text-white mt-1">{totalQuizzes}</p>
+          <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">{totalQuizzes}</p>
+          <span className="text-[9px] text-slate-400">paket soal</span>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 shadow-xs text-center flex flex-col justify-between min-h-[75px]">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 shadow-xs text-center flex flex-col justify-between min-h-[85px]">
           <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-tight">
             Kuis Aktif
           </span>
-          <p className="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-1">{publishedQuizzes}</p>
+          <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">{publishedQuizzes}</p>
+          <span className="text-[9px] text-emerald-600/70">dapat dikerjakan</span>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 shadow-xs text-center flex flex-col justify-between min-h-[75px]">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 shadow-xs text-center flex flex-col justify-between min-h-[85px]">
           <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-tight">
             Pengerjaan
           </span>
-          <p className="text-xl font-black text-slate-900 dark:text-white mt-1">{totalSubmissions}</p>
+          <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">{totalSubmissions}</p>
+          <span className="text-[9px] text-slate-400">selesai</span>
         </div>
       </div>
 
       {/* KPI Cards Desktop (hidden sm:grid) */}
-      <div className="hidden sm:grid grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-          <div className="flex items-center justify-between">
+      <div className="hidden sm:grid grid-cols-3 gap-5">
+        {/* Card 1: Total Kuis */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs hover:shadow-md transition-all duration-200 relative overflow-hidden group">
+          <div className="flex items-center justify-between mb-4">
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Total Kuis
             </span>
-            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center">
-              <FileQuestion size={18} />
+            <div className="w-11 h-11 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs">
+              <FileQuestion size={20} />
             </div>
           </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-extrabold text-slate-900 dark:text-white">{totalQuizzes}</span>
-            <span className="text-xs text-slate-500">paket soal</span>
+          <div>
+            <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+              {totalQuizzes}
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></span>
+              Paket soal terdaftar di sistem
+            </p>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-          <div className="flex items-center justify-between">
+        {/* Card 2: Kuis Aktif */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs hover:shadow-md transition-all duration-200 relative overflow-hidden group">
+          <div className="flex items-center justify-between mb-4">
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Kuis Aktif (Terbit)
             </span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center">
-              <CheckCircle2 size={18} />
+            <div className="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs">
+              <CheckCircle2 size={20} />
             </div>
           </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">
+          <div>
+            <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
               {publishedQuizzes}
-            </span>
-            <span className="text-xs text-slate-500">dapat dikerjakan siswa</span>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+              Siap diakses & dikerjakan siswa
+            </p>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-          <div className="flex items-center justify-between">
+        {/* Card 3: Total Pengerjaan */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs hover:shadow-md transition-all duration-200 relative overflow-hidden group">
+          <div className="flex items-center justify-between mb-4">
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Total Pengerjaan Siswa
             </span>
-            <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/30 text-amber-600 flex items-center justify-center">
-              <Users size={18} />
+            <div className="w-11 h-11 rounded-2xl bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs">
+              <Users size={20} />
             </div>
           </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-extrabold text-slate-900 dark:text-white">
+          <div>
+            <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
               {totalSubmissions}
-            </span>
-            <span className="text-xs text-slate-500">kali diselesaikan</span>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+              Respon kuis telah diselesaikan
+            </p>
           </div>
         </div>
       </div>
