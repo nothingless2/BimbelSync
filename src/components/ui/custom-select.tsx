@@ -20,6 +20,7 @@ export interface CustomSelectProps {
   disabled?: boolean;
   className?: string;
   id?: string;
+  placement?: "auto" | "bottom" | "top";
 }
 
 export function CustomSelect({
@@ -33,15 +34,37 @@ export function CustomSelect({
   disabled = false,
   className = "",
   id,
+  placement = "auto",
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [internalValue, setInternalValue] = useState<string>(defaultValue || "");
+  const [openUpwards, setOpenUpwards] = useState(placement === "top");
   const containerRef = useRef<HTMLDivElement>(null);
 
   const isControlled = controlledValue !== undefined;
   const value = isControlled ? controlledValue : internalValue;
 
   const selectedOption = options.find((opt) => opt.value === value);
+
+  // Auto calculate placement when opening
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      if (placement === "top") {
+        setOpenUpwards(true);
+      } else if (placement === "bottom") {
+        setOpenUpwards(false);
+      } else {
+        const rect = containerRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        if (spaceBelow < 220 && spaceAbove > spaceBelow) {
+          setOpenUpwards(true);
+        } else {
+          setOpenUpwards(false);
+        }
+      }
+    }
+  }, [isOpen, placement]);
 
   // Close when clicking outside
   useEffect(() => {
@@ -111,28 +134,30 @@ export function CustomSelect({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            initial={{ opacity: 0, y: openUpwards ? 10 : -10, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute z-50 min-w-full w-max mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg shadow-slate-200/20 dark:shadow-black/40 overflow-hidden"
+            exit={{ opacity: 0, y: openUpwards ? 10 : -10, scale: 0.96 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            className={`absolute z-50 w-full min-w-[200px] left-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl shadow-slate-900/10 dark:shadow-black/50 overflow-hidden ${
+              openUpwards ? "bottom-full mb-1.5" : "top-full mt-1.5"
+            }`}
           >
-            <ul className="max-h-60 overflow-y-auto custom-scrollbar p-1">
+            <ul className="max-h-56 overflow-y-auto custom-scrollbar p-1">
               {options.length === 0 ? (
-                <li className="px-4 py-3 text-sm text-slate-500 text-center">Tidak ada opsi</li>
+                <li className="px-4 py-3 text-xs sm:text-sm text-slate-500 text-center">Tidak ada opsi</li>
               ) : (
                 options.map((opt) => (
                   <li
                     key={opt.value}
                     onClick={() => handleSelect(opt.value)}
-                    className={`flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer transition-colors text-sm ${
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors text-xs sm:text-sm ${
                       value === opt.value
                         ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                         : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
                     }`}
                   >
-                    <span className="whitespace-nowrap pr-4">{opt.label}</span>
-                    {value === opt.value && <Check size={16} className="text-blue-600 dark:text-blue-400" />}
+                    <span className="truncate pr-2">{opt.label}</span>
+                    {value === opt.value && <Check size={15} className="text-blue-600 dark:text-blue-400 shrink-0" />}
                   </li>
                 ))
               )}
