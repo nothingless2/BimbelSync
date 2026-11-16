@@ -278,6 +278,32 @@ export default function FinanceClientPage({
     return new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }).format(d);
   };
 
+  const formatPaymentMethod = (method?: string | null) => {
+    if (!method) return null;
+    switch (method) {
+      case "MANUAL_TRANSFER":
+        return "Transfer Bank";
+      case "CASH":
+        return "Tunai";
+      case "MIDTRANS":
+      case "XENDIT":
+      case "GATEWAY":
+        return "Otomatis";
+      default:
+        return method;
+    }
+  };
+
+  const formatBillingPeriod = (period?: string | null) => {
+    if (!period) return null;
+    if (/^\d{4}-\d{2}$/.test(period)) {
+      const [year, month] = period.split("-");
+      const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+      return new Intl.DateTimeFormat("id-ID", { month: "short", year: "numeric" }).format(date);
+    }
+    return period;
+  };
+
   return (
     <>
       {/* Navigation Tabs: Tagihan vs Voucher */}
@@ -433,78 +459,105 @@ export default function FinanceClientPage({
                   ) : (
                     currentData.map((invoice, index) => {
                       const isPaid = invoice.payment_status === 'PAID';
+                      const isOverdue = invoice.payment_status === 'OVERDUE';
+                      const invoiceCode = `INV-${invoice.id.split('-')[0].toUpperCase()}`;
+                      const formattedPeriod = formatBillingPeriod(invoice.billing_period);
+                      const paymentMethodLabel = formatPaymentMethod(invoice.payment_method);
+                      const primaryItemTitle = invoice.items[0]?.description || "Tagihan Siswa";
                       
                       return (
-                        <tr key={invoice.id} className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${deletingId === invoice.id ? 'opacity-50' : ''} ${isPaid ? 'bg-emerald-50/20 dark:bg-emerald-900/5' : ''}`}>
-                          <td className="px-6 py-4 font-medium text-slate-500">
-                            {(currentPage - 1) * 10 + index + 1}
+                        <tr 
+                          key={invoice.id} 
+                          className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors ${deletingId === invoice.id ? 'opacity-50' : ''}`}
+                        >
+                          <td className="px-6 py-4 text-xs font-medium text-slate-400 dark:text-slate-500 w-12">
+                            {(currentPage - 1) * itemsPerPage + index + 1}
                           </td>
                           <td className="px-6 py-4">
-                            <div className="flex flex-col gap-1.5">
-                              <span className="font-mono font-semibold text-slate-900 dark:text-slate-100 text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded w-fit border border-slate-200 dark:border-slate-700">
-                                INV-{invoice.id.substring(0, 6).toUpperCase()}
-                              </span>
+                            <div className="flex flex-col gap-1 min-w-0">
                               <div className="flex items-center gap-2">
-                                <span className="text-xs text-slate-500">{invoice.items.length} Item(s)</span>
-                                {invoice.billing_period && (
-                                  <span className="text-[10px] font-medium bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 px-1.5 py-0.5 rounded border border-blue-100 dark:border-blue-800">
-                                    {invoice.billing_period}
+                                <Link
+                                  href={`./finance/${invoice.id}`}
+                                  className="font-mono text-xs font-bold text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                  title="Lihat Detail Faktur"
+                                >
+                                  {invoiceCode}
+                                </Link>
+                                {formattedPeriod && (
+                                  <span className="text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded border border-slate-200/60 dark:border-slate-700/60">
+                                    {formattedPeriod}
                                   </span>
                                 )}
                               </div>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px]" title={primaryItemTitle}>
+                                {primaryItemTitle}
+                                {invoice.items.length > 1 && (
+                                  <span className="text-slate-400 font-normal"> (+{invoice.items.length - 1})</span>
+                                )}
+                              </p>
                             </div>
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-xs shadow-inner">
+                              <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center font-bold text-xs border border-slate-200/60 dark:border-slate-700 shrink-0">
                                 {invoice.student.full_name.charAt(0).toUpperCase()}
                               </div>
-                              <div className="flex flex-col">
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  <span className="font-bold text-slate-800 dark:text-slate-200">{invoice.student.full_name}</span>
+                              <div className="flex flex-col min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-semibold text-slate-900 dark:text-slate-100 text-xs sm:text-sm truncate">
+                                    {invoice.student.full_name}
+                                  </span>
                                   {invoice.student.parent_whatsapp && (
                                     <button
                                       type="button"
                                       onClick={() => handleSendWhatsAppInvoice(invoice)}
-                                      className="text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 p-0.5 rounded hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors cursor-pointer"
-                                      title={`Kirim tagihan ke WhatsApp Orang Tua (${invoice.student.parent_whatsapp})`}
+                                      className="p-1 rounded-md text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors cursor-pointer shrink-0"
+                                      title={`Kirim notifikasi tagihan ke WhatsApp Orang Tua (${invoice.student.parent_whatsapp})`}
                                     >
-                                      <Phone size={13} />
+                                      <Phone size={12} />
                                     </button>
                                   )}
                                 </div>
-                                <span className="text-xs text-slate-500">@{invoice.student.username}</span>
+                                <span className="text-xs text-slate-400 truncate">@{invoice.student.username}</span>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="flex flex-col gap-1">
-                              <span className="font-bold text-slate-900 dark:text-slate-100">
+                            <div className="flex flex-col gap-0.5">
+                              <span className="font-mono font-bold text-slate-900 dark:text-white text-sm">
                                 {formatRupiah(invoice.total_amount)}
                               </span>
-                              {invoice.payment_option === 'INSTALLMENT' ? (
-                                <span className="text-[10px] font-bold text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded w-fit">CICILAN</span>
-                              ) : (
-                                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded w-fit">FULL (BAYAR DIMUKA)</span>
-                              )}
+                              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                                {invoice.payment_option === 'INSTALLMENT' ? 'Cicilan' : 'Sekali Bayar'}
+                              </span>
                             </div>
                           </td>
                           <td className="px-6 py-4">
                             {isPaid ? (
                               <div className="flex flex-col gap-1">
-                                <span className="inline-flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
-                                  LUNAS
+                                <span className="inline-flex w-fit items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                  Lunas
                                 </span>
-                                <span className="text-[10px] text-emerald-600 dark:text-emerald-500 font-medium">via {invoice.payment_method}</span>
+                                {paymentMethodLabel && (
+                                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                                    via {paymentMethodLabel}
+                                  </span>
+                                )}
                               </div>
                             ) : (
                               <div className="flex flex-col gap-1">
-                                <span className="inline-flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50">
-                                  BELUM DIBAYAR
+                                <span className={`inline-flex w-fit items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                  isOverdue
+                                    ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200 dark:border-rose-800/60'
+                                    : 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60'
+                                }`}>
+                                  <span className={`w-1.5 h-1.5 rounded-full ${isOverdue ? 'bg-rose-500' : 'bg-amber-500'}`} />
+                                  {isOverdue ? 'Jatuh Tempo' : 'Belum Dibayar'}
                                 </span>
                                 {invoice.proof_of_payment_url && (
-                                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-1.5 py-0.5 rounded border border-blue-200/60 dark:border-blue-800/40 w-fit">
-                                    <ImageIcon size={10} />
+                                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded-md border border-blue-200/60 dark:border-blue-800/40 w-fit">
+                                    <ImageIcon size={11} />
                                     Struk Terkirim
                                   </span>
                                 )}
