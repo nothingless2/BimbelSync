@@ -133,7 +133,7 @@ export default async function StudentInvoicesPage({
                   </span>
 
                   {/* Status Badge Terstandardisasi */}
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
+                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
                     isPaid
                       ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60'
                       : isPendingProof
@@ -142,18 +142,7 @@ export default async function StudentInvoicesPage({
                       ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 border-rose-200 dark:border-rose-800/60'
                       : 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200 dark:border-amber-800/60'
                   }`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${
-                      isPaid
-                        ? 'bg-emerald-500'
-                        : isPendingProof
-                        ? 'bg-blue-500 animate-pulse'
-                        : hasOverdue
-                        ? 'bg-rose-500'
-                        : 'bg-amber-500'
-                    }`} />
-                    <span>
-                      {isPaid ? 'Lunas' : isPendingProof ? 'Menunggu Verifikasi' : hasOverdue ? 'Jatuh Tempo' : 'Belum Dibayar'}
-                    </span>
+                    {isPaid ? 'Lunas' : isPendingProof ? 'Menunggu Verifikasi' : hasOverdue ? 'Jatuh Tempo' : 'Belum Dibayar'}
                   </span>
                 </div>
 
