@@ -85,11 +85,13 @@ export default async function AttendanceMonitoringPage({
             name: true,
             enrollments: {
               where: {
-                status: "ACTIVE",
                 student: { deleted_at: null },
               },
               select: {
                 id: true,
+                enrolled_date: true,
+                status: true,
+                withdrawn_at: true,
               },
             },
           },
@@ -131,7 +133,21 @@ export default async function AttendanceMonitoringPage({
       new Date(sch.end_time).getTime() >= nowTime;
     const isUpcoming = new Date(sch.start_time).getTime() > nowTime;
     const isCancelled = sch.status === "CANCELLED";
-    const totalEnrolled = sch.program.enrollments?.length ?? 0;
+
+    // Hitung siswa yang sudah terdaftar saat jadwal berlangsung (Historical Enrollment)
+    // Sesuai dengan filter presensi di /dashboard/schedules/[scheduleId]
+    const activeEnrollmentsAtSchedule = (sch.program.enrollments || []).filter((e) => {
+      const isEnrolledBeforeOrAtClass =
+        new Date(e.enrolled_date).getTime() <= new Date(sch.start_time).getTime();
+      const isWithdrawnAfterClass =
+        e.status === "ACTIVE" ||
+        (e.status === "WITHDRAWN" &&
+          e.withdrawn_at &&
+          new Date(e.withdrawn_at).getTime() >= new Date(sch.start_time).getTime());
+      return isEnrolledBeforeOrAtClass && isWithdrawnAfterClass;
+    });
+
+    const totalEnrolled = Math.max(activeEnrollmentsAtSchedule.length, sch.attendances.length);
     const attendancesCount = sch.attendances.length;
 
     // Sesi dianggap tuntas jika seluruh siswa terdaftar sudah memiliki record kehadiran
