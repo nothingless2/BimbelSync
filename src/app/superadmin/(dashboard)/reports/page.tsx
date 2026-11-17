@@ -60,6 +60,7 @@ export default async function SuperadminReportsPage() {
       billing_period: inv.billing_period.toISOString(),
       amount: inv.amount,
       due_date: inv.due_date.toISOString(),
+      duration_months: inv.duration_months,
       paid_at: inv.paid_at!.toISOString(),
       payment_status: inv.payment_status,
       verified_by: inv.verified_by ? { name: inv.verified_by.name, email: inv.verified_by.email } : null,

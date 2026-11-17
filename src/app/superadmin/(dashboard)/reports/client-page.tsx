@@ -23,6 +23,7 @@ type InvoiceData = {
   billing_period?: string;
   amount: number;
   due_date?: string;
+  duration_months?: number;
   paid_at: string;
   payment_status?: string;
   verified_by?: { name: string | null; email: string } | null;
@@ -562,21 +563,28 @@ export default function ReportsClientPage({
       `}} />
 
       {/* Dedicated Modern Corporate Financial Report */}
-      <div className="hidden print:block text-slate-900 font-sans leading-normal">
+      <div className="hidden print:block print-container text-slate-900 font-sans leading-normal">
         {/* Document Header */}
         <div className="pb-5 mb-5 border-b-2 border-slate-800">
           <div className="flex justify-between items-start gap-6">
             {/* Left: Platform Identification */}
-            <div className="space-y-2 max-w-[55%]">
+            <div className="space-y-1.5 max-w-[55%]">
+              <div className="mb-2">
+                <img 
+                  src="/logo.png" 
+                  alt="BimbelSync" 
+                  className="max-h-10 w-auto max-w-[160px] object-contain"
+                />
+              </div>
               <div>
-                <span className="inline-block text-[9.5px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">
+                <span className="inline-block text-[9px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">
                   Dokumen Resmi Platform
                 </span>
                 <h1 className="text-xl font-extrabold text-slate-900 tracking-tight mt-1">
                   BimbelSync Platform Management
                 </h1>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  Sistem Orkestrasi Penjadwalan & Otomasi Keuangan Bimbel (B2B SaaS)
+                <p className="text-[10.5px] text-slate-500 mt-0.5">
+                  Sistem Orkestrasi Penjadwalan &amp; Otomasi Keuangan Bimbel (B2B SaaS)
                 </p>
               </div>
             </div>
@@ -587,7 +595,7 @@ export default function ReportsClientPage({
                 PLATFORM FINANCIAL REPORT
               </h2>
               <p className="text-xs text-slate-600 font-medium">
-                Penerimaan Langganan Platform Bimbel
+                BimbelSync Platform Management
               </p>
               <div className="pt-2 space-y-0.5 text-xs text-slate-600">
                 <p>
@@ -606,55 +614,76 @@ export default function ReportsClientPage({
           </div>
         </div>
 
-        {/* Executive Summary Cards */}
+        {/* Section I: PLATFORM FINANCIAL OVERVIEW */}
         <div className="mb-6 break-inside-avoid">
-          <div className="grid grid-cols-3 gap-3">
-            {/* KPI 1 */}
-            <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Total Pendapatan Platform
+          <div className="flex items-center justify-between pb-1.5 border-b border-slate-300 mb-2.5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+              I. PLATFORM FINANCIAL OVERVIEW
+            </h3>
+            <span className="text-[10px] text-slate-500 font-medium">
+              Ringkasan metrik keuangan dan performa pendapatan platform
+            </span>
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            {/* Metric 1 */}
+            <div className="p-3 bg-slate-50/80 rounded-lg border border-slate-200">
+              <span className="text-[9.5px] font-bold uppercase tracking-wider text-slate-500">
+                Total Pendapatan
               </span>
-              <p className="text-lg font-extrabold text-slate-900 mt-0.5 tabular-nums">
+              <p className="text-base font-extrabold text-slate-900 mt-0.5 tabular-nums">
                 {formatRupiah(filteredTotalRevenue)}
               </p>
-              <p className="text-[10px] text-slate-500 mt-0.5">
+              <p className="text-[9px] text-slate-500 mt-0.5">
                 Langganan terverifikasi lunas
               </p>
             </div>
 
-            {/* KPI 2 */}
-            <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Jumlah Faktur Terbayar
+            {/* Metric 2 */}
+            <div className="p-3 bg-slate-50/80 rounded-lg border border-slate-200">
+              <span className="text-[9.5px] font-bold uppercase tracking-wider text-slate-500">
+                Transaksi Berhasil
               </span>
-              <p className="text-lg font-extrabold text-slate-900 mt-0.5 tabular-nums">
-                {filteredInvoices.length} Transaksi
+              <p className="text-base font-extrabold text-slate-900 mt-0.5 tabular-nums">
+                {filteredInvoices.length} Faktur
               </p>
-              <p className="text-[10px] text-slate-500 mt-0.5">
-                Tagihan langganan bimbel
+              <p className="text-[9px] text-slate-500 mt-0.5">
+                Faktur langganan PAID
               </p>
             </div>
 
-            {/* KPI 3 */}
-            <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Rata-rata Pendapatan (ARPU)
+            {/* Metric 3 */}
+            <div className="p-3 bg-slate-50/80 rounded-lg border border-slate-200">
+              <span className="text-[9.5px] font-bold uppercase tracking-wider text-slate-500">
+                Bimbel Berbayar Aktif
               </span>
-              <p className="text-lg font-extrabold text-slate-900 mt-0.5 tabular-nums">
-                {formatRupiah(filteredInvoices.length > 0 ? Math.round(filteredTotalRevenue / filteredInvoices.length) : 0)}
+              <p className="text-base font-extrabold text-slate-900 mt-0.5 tabular-nums">
+                {new Set(filteredInvoices.map(i => i.academy_id)).size} Akademi
               </p>
-              <p className="text-[10px] text-slate-500 mt-0.5">
-                Rata-rata per transaksi langganan
+              <p className="text-[9px] text-slate-500 mt-0.5">
+                Tenant berlangganan aktif
+              </p>
+            </div>
+
+            {/* Metric 4 */}
+            <div className="p-3 bg-slate-50/80 rounded-lg border border-slate-200">
+              <span className="text-[9.5px] font-bold uppercase tracking-wider text-slate-500">
+                Rata-rata ARPU
+              </span>
+              <p className="text-base font-extrabold text-slate-900 mt-0.5 tabular-nums">
+                {formatRupiah(Math.round(filteredArpu))}
+              </p>
+              <p className="text-[9px] text-slate-500 mt-0.5">
+                Rata-rata per tenant berbayar
               </p>
             </div>
           </div>
         </div>
 
-        {/* Section I: Alokasi Pendapatan per Paket Langganan */}
+        {/* Section II: ALOKASI PENDAPATAN PER PAKET LANGGANAN */}
         <div className="mb-7 break-inside-avoid">
           <div className="flex items-center justify-between pb-1.5 border-b border-slate-300 mb-2">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
-              I. Alokasi Pendapatan per Paket Langganan
+              II. ALOKASI PENDAPATAN PER PAKET LANGGANAN
             </h3>
             <span className="text-[10px] text-slate-500 font-medium">
               Distribusi penerimaan berdasarkan paket berlangganan bimbel
@@ -708,48 +737,59 @@ export default function ReportsClientPage({
           </table>
         </div>
 
-        {/* Section II: Buku Besar Transaksi Platform */}
+        {/* Section III: BUKU BESAR TRANSAKSI PLATFORM */}
         <div className="mb-6">
           <div className="flex items-center justify-between pb-1.5 border-b border-slate-300 mb-1">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
-              II. Buku Besar Transaksi Platform (General Ledger)
+              III. BUKU BESAR TRANSAKSI PLATFORM
             </h3>
             <span className="text-[10px] text-slate-500 font-medium">
               Total {filteredInvoices.length} baris transaksi
             </span>
           </div>
           <p className="text-[10px] text-slate-500 mb-2.5">
-            Daftar seluruh tagihan (invoice) langganan yang telah diselesaikan oleh bimbel terkait selama periode pelaporan ini dicatat di bawah ini untuk keperluan audit dan kepatuhan.
+            Daftar seluruh transaksi pembayaran langganan yang telah diselesaikan oleh bimbel selama periode pelaporan ini dicatat di bawah ini untuk keperluan audit dan kepatuhan.
           </p>
 
           <table className="w-full border-collapse text-xs">
             <thead>
               <tr className="bg-slate-100 text-slate-700 text-[9.5px] font-bold uppercase tracking-wider border-y border-slate-300">
-                <th className="py-2 px-2.5 text-left w-36">Tanggal & Waktu</th>
+                <th className="py-2 px-2.5 text-left w-32">Tanggal &amp; Waktu</th>
+                <th className="py-2 px-2.5 text-left w-28">No. Faktur</th>
                 <th className="py-2 px-2.5 text-left">Nama Bimbel</th>
-                <th className="py-2 px-2.5 text-center w-28">Paket</th>
-                <th className="py-2 px-2.5 text-right w-36">Pendapatan</th>
+                <th className="py-2 px-2.5 text-center w-32">Paket Langganan</th>
+                <th className="py-2 px-2.5 text-center w-20">Status</th>
+                <th className="py-2 px-2.5 text-right w-32">Pendapatan</th>
               </tr>
             </thead>
             <tbody>
               {filteredInvoices.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="py-6 px-4 text-center text-slate-500 font-medium text-xs border-b border-slate-200">
+                  <td colSpan={6} className="py-6 px-4 text-center text-slate-500 font-medium text-xs border-b border-slate-200">
                     Tidak ada rincian transaksi pada rentang tanggal yang dipilih.
                   </td>
                 </tr>
               ) : (
                 filteredInvoices.map((inv) => (
-                  <tr key={inv.id} className="border-b border-slate-200/80 even:bg-slate-50/40 text-[10.5px]">
-                    <td className="py-2 px-2.5 text-slate-700 whitespace-nowrap font-mono text-[10px]">
+                  <tr key={inv.id} className="border-b border-slate-200/80 even:bg-slate-50/40 text-[10px]">
+                    <td className="py-2 px-2.5 text-slate-700 whitespace-nowrap font-mono text-[9.5px]">
                       {format(new Date(inv.paid_at), "dd MMM yyyy, HH:mm", { locale: localeId })} WIB
+                    </td>
+                    <td className="py-2 px-2.5 font-mono text-[9.5px] text-slate-600 whitespace-nowrap">
+                      INV-{inv.id.slice(0, 8).toUpperCase()}
                     </td>
                     <td className="py-2 px-2.5 font-semibold text-slate-900 break-words">
                       {inv.academy_name}
                     </td>
                     <td className="py-2 px-2.5 text-center whitespace-nowrap">
-                      <span className="border border-slate-300 bg-slate-50 text-slate-700 px-2.5 py-0.5 rounded-full text-[10px] font-bold">
+                      <span className="border border-slate-200 bg-slate-50 text-slate-700 px-2 py-0.5 rounded text-[9.5px] font-semibold">
                         {inv.plan_name}
+                        {inv.duration_months ? ` (${inv.duration_months === 12 ? '1 Thn' : inv.duration_months === 6 ? '6 Bln' : '1 Bln'})` : ''}
+                      </span>
+                    </td>
+                    <td className="py-2 px-2.5 text-center whitespace-nowrap">
+                      <span className="inline-block border border-emerald-200 bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider">
+                        LUNAS
                       </span>
                     </td>
                     <td className="py-2 px-2.5 text-right font-bold text-slate-900 tabular-nums whitespace-nowrap">
@@ -762,7 +802,7 @@ export default function ReportsClientPage({
             {filteredInvoices.length > 0 && (
               <tfoot>
                 <tr className="bg-slate-100 font-bold text-slate-900 text-xs border-t-2 border-slate-400">
-                  <td colSpan={3} className="py-2 px-2.5 text-right uppercase tracking-wider">
+                  <td colSpan={5} className="py-2 px-2.5 text-right uppercase tracking-wider">
                     Total Pendapatan ({filteredInvoices.length} Transaksi):
                   </td>
                   <td className="py-2 px-2.5 text-right tabular-nums">
@@ -775,12 +815,12 @@ export default function ReportsClientPage({
         </div>
 
         {/* Document Signoff & Corporate Footer */}
-        <div className="mt-8 pt-4 border-t border-slate-300 flex justify-between items-end text-[10px] text-slate-500 break-inside-avoid">
+        <div className="mt-8 pt-4 border-t border-slate-300 flex justify-between items-end text-[9.5px] text-slate-500 break-inside-avoid">
           <div className="space-y-0.5">
-            <p className="font-semibold text-slate-700">Diverifikasi & Diterbitkan Oleh:</p>
-            <p className="text-slate-800 font-medium">BimbelSync Superadmin Central Operations</p>
-            <p className="text-[9px] text-slate-400">
-              Dokumen ini dihasilkan secara otomatis dan memiliki validitas hukum pembukuan internal.
+            <p className="font-semibold text-slate-700">Diverifikasi &amp; Diterbitkan Oleh:</p>
+            <p className="text-slate-800 font-semibold">BimbelSync Superadmin Central Operations</p>
+            <p className="text-[8.5px] text-slate-400">
+              Dokumen ini dihasilkan secara otomatis dari sistem platform dan memiliki validitas hukum pembukuan internal.
             </p>
           </div>
           <div className="text-right space-y-0.5">
@@ -788,8 +828,8 @@ export default function ReportsClientPage({
             <p className="text-slate-800 font-medium">
               {format(new Date(), "dd MMMM yyyy, HH:mm:ss 'WIB'", { locale: localeId })}
             </p>
-            <p className="font-mono text-[9px] text-slate-400">
-              Dokumen Platform • Halaman Resmi
+            <p className="font-mono text-[8.5px] text-slate-400">
+              BimbelSync Platform Audit Ledger • Dokumen Resmi
             </p>
           </div>
         </div>
