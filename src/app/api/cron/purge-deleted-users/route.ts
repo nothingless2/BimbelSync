@@ -5,17 +5,18 @@ import { purgeExpiredTenantUsers } from "@/lib/user-cleanup";
 import { cookies } from "next/headers";
 import { decrypt } from "@/lib/auth";
 
+// [FIX C1] Startup guard: lempar error jika CRON_SECRET tidak dikonfigurasi di .env
 const CRON_SECRET = process.env.CRON_SECRET;
+if (!CRON_SECRET) {
+  throw new Error("CRITICAL: CRON_SECRET belum diatur di file .env! Endpoint cron tidak dapat beroperasi tanpa secret.");
+}
 
 async function handlePurgeRequest(request: Request) {
   try {
+    // [FIX C2] Hanya terima secret via Authorization header — query string dihapus
+    // karena query string muncul di server logs, CDN logs, dan browser history.
     const authHeader = request.headers.get("authorization");
-    const { searchParams } = new URL(request.url);
-    const querySecret = searchParams.get("secret");
-
-    const isCronAuth =
-      (CRON_SECRET && authHeader === `Bearer ${CRON_SECRET}`) ||
-      (CRON_SECRET && querySecret === CRON_SECRET);
+    const isCronAuth = authHeader === `Bearer ${CRON_SECRET}`;
 
     if (!isCronAuth) {
       const cookieStore = await cookies();

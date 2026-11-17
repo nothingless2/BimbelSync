@@ -9,7 +9,11 @@ import { createAuditLog } from "@/lib/audit";
 import { decrypt } from "@/lib/auth";
 import { cookies } from "next/headers";
 
+// [FIX C1] Startup guard: lempar error jika CRON_SECRET tidak dikonfigurasi di .env
 const CRON_SECRET = process.env.CRON_SECRET;
+if (!CRON_SECRET) {
+  throw new Error("CRITICAL: CRON_SECRET belum diatur di file .env! Endpoint cron tidak dapat beroperasi tanpa secret.");
+}
 
 /**
  * Automasi Pengingat Tagihan SPP (Cron Job):
@@ -21,7 +25,7 @@ export async function POST(request: Request) {
   try {
     // 1. Otorisasi
     const authHeader = request.headers.get("authorization");
-    const isCronAuth = CRON_SECRET && authHeader === `Bearer ${CRON_SECRET}`;
+    const isCronAuth = authHeader === `Bearer ${CRON_SECRET}`;
 
     let sessionAcademyId: string | null = null;
 
