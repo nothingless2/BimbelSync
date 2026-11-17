@@ -40,6 +40,7 @@ export default function SuperadminLoginPage() {
             src="/photo-1.avif"
             alt="Suasana Belajar Bimbingan Belajar"
             fill
+            unoptimized
             className="object-cover opacity-65 filter brightness-105 contrast-100"
             priority
           />

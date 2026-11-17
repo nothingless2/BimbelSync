@@ -34,6 +34,7 @@ export interface TenantUser {
   academyId: string | null;
   academyName: string;
   academySlug: string;
+  avatarUrl?: string | null;
   deletedAt?: string | null;
   isDeleted: boolean;
   userDeleted?: boolean;
@@ -502,7 +503,13 @@ export default function SystemUsersClient({
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <UserAvatar id={user.id} email={user.email || user.identifier} size={32} />
+                          <UserAvatar
+                            id={user.id}
+                            name={user.name}
+                            email={user.email || user.identifier}
+                            avatarUrl={user.avatarUrl}
+                            size={32}
+                          />
                           <div>
                             <p className="font-semibold text-slate-900 dark:text-slate-100">{user.name}</p>
                             <p className="text-xs text-slate-500 font-mono truncate max-w-[180px]">{user.identifier}</p>
@@ -707,7 +714,13 @@ export default function SystemUsersClient({
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <UserAvatar id={user.id} email={user.email} avatarUrl={user.avatar_url} size={32} />
+                          <UserAvatar
+                            id={user.id}
+                            name={user.name}
+                            email={user.email}
+                            avatarUrl={user.avatar_url}
+                            size={32}
+                          />
                           <div>
                             <div className="flex items-center gap-1.5">
                               <p className="font-semibold text-slate-900 dark:text-slate-100">{user.name || user.email}</p>
@@ -951,7 +964,9 @@ export default function SystemUsersClient({
               <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/60 flex items-center gap-3">
                 <UserAvatar
                   id={selectedUserForStatus.id}
+                  name={selectedUserForStatus.name}
                   email={selectedUserForStatus.email || selectedUserForStatus.identifier}
+                  avatarUrl={selectedUserForStatus.avatarUrl}
                   size={36}
                 />
                 <div className="flex-1 min-w-0">
@@ -1065,7 +1080,9 @@ export default function SystemUsersClient({
               <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/60 flex items-center gap-3">
                 <UserAvatar
                   id={selectedUserForDelete.id}
+                  name={selectedUserForDelete.name}
                   email={selectedUserForDelete.email || selectedUserForDelete.identifier}
+                  avatarUrl={selectedUserForDelete.avatarUrl}
                   size={36}
                 />
                 <div className="flex-1 min-w-0">

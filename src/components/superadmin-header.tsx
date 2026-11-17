@@ -39,7 +39,7 @@ export function SuperadminHeader({ user }: SuperadminHeaderProps) {
       <div className="flex items-center gap-5">
         <ThemeToggle />
         <Link href="/superadmin/users/profile" className="block hover:opacity-80 transition cursor-pointer" title="Edit Profile">
-          <UserAvatar id={user.id} email={user.email} avatarUrl={user.avatar_url} size={32} />
+          <UserAvatar id={user.id} name={user.name} email={user.email} avatarUrl={user.avatar_url} size={32} />
         </Link>
       </div>
     </header>

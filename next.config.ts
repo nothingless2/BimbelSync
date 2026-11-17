@@ -49,8 +49,8 @@ const nextConfig: NextConfig = {
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com",
               // Style: izinkan inline (Tailwind CSS v4 menggunakan style injection)
               "style-src 'self' 'unsafe-inline'",
-              // Gambar: domain sendiri + data URI (untuk bukti bayar base64) + CDN Supabase
-              "img-src 'self' data: blob: https://*.supabase.co https://*.supabase.com",
+              // Gambar: domain sendiri + data URI (untuk bukti bayar base64) + CDN Supabase + Dicebear
+              "img-src 'self' data: blob: https://*.supabase.co https://*.supabase.com https://api.dicebear.com",
               // Font: domain sendiri
               "font-src 'self'",
               // Koneksi API: domain sendiri + Supabase + Google Analytics
