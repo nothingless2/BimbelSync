@@ -381,7 +381,7 @@ export default function ReportsClientPage({
   ];
 
   return (
-    <div className="space-y-6 print-container">
+    <div className="space-y-6">
       {/* Header & Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 no-print">
         <div>
@@ -525,6 +525,9 @@ export default function ReportsClientPage({
         }
         @media print {
           html, body {
+            height: auto !important;
+            min-height: 100% !important;
+            overflow: visible !important;
             margin: 0 !important;
             padding: 0 !important;
             background: #ffffff !important;
@@ -533,26 +536,36 @@ export default function ReportsClientPage({
             print-color-adjust: exact !important;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
           }
+          /* CRITICAL: Overwrite any fixed height or overflow on all parent elements during print */
+          html, body, div, main, section {
+            overflow: visible !important;
+            height: auto !important;
+            max-height: none !important;
+          }
           body * {
             visibility: hidden;
           }
-          .print-container, .print-container * {
+          .print-report, .print-report * {
             visibility: visible;
           }
-          .print-container {
+          .print-report {
             position: static !important;
+            display: block !important;
             width: 100% !important;
+            height: auto !important;
             box-sizing: border-box !important;
             margin: 0 !important;
             background: #ffffff !important;
+            overflow: visible !important;
           }
           .no-print, header, aside, nav {
             display: none !important;
           }
           table {
-            page-break-inside: auto;
-            border-collapse: collapse;
-            width: 100%;
+            page-break-inside: auto !important;
+            break-inside: auto !important;
+            border-collapse: collapse !important;
+            width: 100% !important;
           }
           thead {
             display: table-header-group !important;
@@ -576,27 +589,27 @@ export default function ReportsClientPage({
       `}} />
 
       {/* Dedicated Modern Corporate Financial Report */}
-      <div className="hidden print:block print-container text-slate-900 font-sans leading-normal p-10 sm:p-12">
+      <div className="hidden print:block print-report text-slate-900 font-sans leading-normal p-10 sm:p-12">
         {/* Document Header */}
-        <div className="pb-5 mb-5 border-b-2 border-slate-800">
+        <div className="pb-4 mb-5 border-b border-slate-300">
           <div className="flex justify-between items-start gap-6">
             {/* Left: Platform Identification */}
-            <div className="space-y-1.5 max-w-[55%]">
+            <div className="space-y-1 max-w-[55%]">
               <div className="mb-2">
                 <img 
                   src="/logo.png" 
                   alt="BimbelSync" 
-                  className="max-h-10 w-auto max-w-[160px] object-contain"
+                  className="max-h-9 w-auto max-w-[150px] object-contain"
                 />
               </div>
               <div>
-                <span className="inline-block text-[9px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                   Dokumen Resmi Platform
-                </span>
-                <h1 className="text-xl font-extrabold text-slate-900 tracking-tight mt-1">
+                </p>
+                <h1 className="text-base font-bold text-slate-900 mt-0.5">
                   BimbelSync Platform Management
                 </h1>
-                <p className="text-[10.5px] text-slate-600 mt-0.5">
+                <p className="text-xs text-slate-600 mt-0.5">
                   Sistem Orkestrasi Penjadwalan &amp; Otomasi Keuangan Bimbel (B2B SaaS)
                 </p>
               </div>
@@ -604,22 +617,22 @@ export default function ReportsClientPage({
 
             {/* Right: Report Title & Period Details */}
             <div className="text-right space-y-1">
-              <h2 className="text-2xl font-black tracking-tight text-slate-900 uppercase">
+              <h2 className="text-base font-bold text-slate-900 uppercase tracking-wide">
                 PLATFORM FINANCIAL REPORT
               </h2>
-              <p className="text-xs text-slate-600 font-medium">
-                BimbelSync Platform Management
+              <p className="text-xs text-slate-600">
+                Penerimaan Pembayaran Langganan Bimbel
               </p>
               <div className="pt-2 space-y-0.5 text-xs text-slate-600">
                 <p>
-                  <span className="text-slate-400">Periode: </span>
+                  <span className="text-slate-500">Periode: </span>
                   <span className="font-semibold text-slate-800">{formatPeriodText(startDate, endDate)}</span>
                 </p>
                 <p>
-                  <span className="text-slate-400">Tanggal Terbit: </span>
+                  <span className="text-slate-500">Tanggal Terbit: </span>
                   <span className="font-medium text-slate-700">{format(new Date(), "dd MMMM yyyy, HH:mm 'WIB'", { locale: localeId })}</span>
                 </p>
-                <p className="font-mono text-[10px] text-slate-400">
+                <p className="font-mono text-[10px] text-slate-500">
                   REF: SA/FIN/{format(new Date(), "yyyyMMdd-HHmm")}
                 </p>
               </div>
