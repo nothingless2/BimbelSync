@@ -56,6 +56,15 @@ export default function ReportsClientPage({
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
   };
 
+  const toTitleCase = (str: string) => {
+    if (!str) return "";
+    return str
+      .toLowerCase()
+      .split(" ")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+  };
+
   const formatCompactRupiah = (val: number) => {
     if (val === 0) return "Rp 0";
     if (val >= 1_000_000_000) {
@@ -512,7 +521,7 @@ export default function ReportsClientPage({
       <style dangerouslySetInnerHTML={{__html: `
         @page {
           size: A4 portrait;
-          margin: 14mm 15mm 15mm 15mm;
+          margin: 0;
         }
         @media print {
           html, body {
@@ -533,7 +542,7 @@ export default function ReportsClientPage({
           .print-container {
             position: static !important;
             width: 100% !important;
-            padding: 0 !important;
+            box-sizing: border-box !important;
             margin: 0 !important;
             background: #ffffff !important;
           }
@@ -555,6 +564,10 @@ export default function ReportsClientPage({
             page-break-inside: avoid !important;
             break-inside: avoid !important;
           }
+          tbody tr {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
           .break-inside-avoid {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
@@ -563,7 +576,7 @@ export default function ReportsClientPage({
       `}} />
 
       {/* Dedicated Modern Corporate Financial Report */}
-      <div className="hidden print:block print-container text-slate-900 font-sans leading-normal">
+      <div className="hidden print:block print-container text-slate-900 font-sans leading-normal p-10 sm:p-12">
         {/* Document Header */}
         <div className="pb-5 mb-5 border-b-2 border-slate-800">
           <div className="flex justify-between items-start gap-6">
@@ -583,7 +596,7 @@ export default function ReportsClientPage({
                 <h1 className="text-xl font-extrabold text-slate-900 tracking-tight mt-1">
                   BimbelSync Platform Management
                 </h1>
-                <p className="text-[10.5px] text-slate-500 mt-0.5">
+                <p className="text-[10.5px] text-slate-600 mt-0.5">
                   Sistem Orkestrasi Penjadwalan &amp; Otomasi Keuangan Bimbel (B2B SaaS)
                 </p>
               </div>
@@ -620,59 +633,59 @@ export default function ReportsClientPage({
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
               I. PLATFORM FINANCIAL OVERVIEW
             </h3>
-            <span className="text-[10px] text-slate-500 font-medium">
+            <span className="text-[10px] text-slate-600 font-medium">
               Ringkasan metrik keuangan dan performa pendapatan platform
             </span>
           </div>
           <div className="grid grid-cols-4 gap-3">
             {/* Metric 1 */}
             <div className="p-3 bg-slate-50/80 rounded-lg border border-slate-200">
-              <span className="text-[9.5px] font-bold uppercase tracking-wider text-slate-500">
+              <span className="text-[9.5px] font-bold uppercase tracking-wider text-slate-600">
                 Total Pendapatan
               </span>
               <p className="text-base font-extrabold text-slate-900 mt-0.5 tabular-nums">
                 {formatRupiah(filteredTotalRevenue)}
               </p>
-              <p className="text-[9px] text-slate-500 mt-0.5">
+              <p className="text-[9px] text-slate-600 font-medium mt-0.5">
                 Langganan terverifikasi lunas
               </p>
             </div>
 
             {/* Metric 2 */}
             <div className="p-3 bg-slate-50/80 rounded-lg border border-slate-200">
-              <span className="text-[9.5px] font-bold uppercase tracking-wider text-slate-500">
+              <span className="text-[9.5px] font-bold uppercase tracking-wider text-slate-600">
                 Transaksi Berhasil
               </span>
               <p className="text-base font-extrabold text-slate-900 mt-0.5 tabular-nums">
                 {filteredInvoices.length} Faktur
               </p>
-              <p className="text-[9px] text-slate-500 mt-0.5">
+              <p className="text-[9px] text-slate-600 font-medium mt-0.5">
                 Faktur langganan PAID
               </p>
             </div>
 
             {/* Metric 3 */}
             <div className="p-3 bg-slate-50/80 rounded-lg border border-slate-200">
-              <span className="text-[9.5px] font-bold uppercase tracking-wider text-slate-500">
+              <span className="text-[9.5px] font-bold uppercase tracking-wider text-slate-600">
                 Bimbel Berbayar Aktif
               </span>
               <p className="text-base font-extrabold text-slate-900 mt-0.5 tabular-nums">
                 {new Set(filteredInvoices.map(i => i.academy_id)).size} Akademi
               </p>
-              <p className="text-[9px] text-slate-500 mt-0.5">
+              <p className="text-[9px] text-slate-600 font-medium mt-0.5">
                 Tenant berlangganan aktif
               </p>
             </div>
 
             {/* Metric 4 */}
             <div className="p-3 bg-slate-50/80 rounded-lg border border-slate-200">
-              <span className="text-[9.5px] font-bold uppercase tracking-wider text-slate-500">
+              <span className="text-[9.5px] font-bold uppercase tracking-wider text-slate-600">
                 Rata-rata ARPU
               </span>
               <p className="text-base font-extrabold text-slate-900 mt-0.5 tabular-nums">
                 {formatRupiah(Math.round(filteredArpu))}
               </p>
-              <p className="text-[9px] text-slate-500 mt-0.5">
+              <p className="text-[9px] text-slate-600 font-medium mt-0.5">
                 Rata-rata per tenant berbayar
               </p>
             </div>
@@ -685,7 +698,7 @@ export default function ReportsClientPage({
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
               II. ALOKASI PENDAPATAN PER PAKET LANGGANAN
             </h3>
-            <span className="text-[10px] text-slate-500 font-medium">
+            <span className="text-[10px] text-slate-600 font-medium">
               Distribusi penerimaan berdasarkan paket berlangganan bimbel
             </span>
           </div>
@@ -701,7 +714,7 @@ export default function ReportsClientPage({
             <tbody>
               {filteredPlanRevenueData.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="py-4 px-3 text-center text-slate-500 italic border-b border-slate-200">
+                  <td colSpan={3} className="py-4 px-3 text-center text-slate-600 italic border-b border-slate-200">
                     Belum ada pendapatan paket yang tercatat pada periode ini.
                   </td>
                 </tr>
@@ -711,7 +724,7 @@ export default function ReportsClientPage({
                     ? ((prog.value / filteredTotalRevenue) * 100).toFixed(1)
                     : "0.0";
                   return (
-                    <tr key={idx} className="border-b border-slate-200/80 even:bg-slate-50/40">
+                    <tr key={idx} className="border-b border-slate-200/80 even:bg-slate-50/40 break-inside-avoid">
                       <td className="py-2 px-3 text-slate-800 font-medium">{prog.name}</td>
                       <td className="py-2 px-3 text-center font-mono text-[11px] text-slate-600">{sharePercent}%</td>
                       <td className="py-2 px-3 text-right font-semibold text-slate-900 tabular-nums">
@@ -724,7 +737,7 @@ export default function ReportsClientPage({
             </tbody>
             {filteredPlanRevenueData.length > 0 && (
               <tfoot>
-                <tr className="bg-slate-100 font-bold text-slate-900 text-xs border-t-2 border-slate-300">
+                <tr className="bg-slate-100 font-bold text-slate-900 text-xs border-t-2 border-slate-300 break-inside-avoid">
                   <td colSpan={2} className="py-2 px-3 text-left uppercase tracking-wider">
                     Total Pendapatan Seluruh Paket
                   </td>
@@ -743,11 +756,11 @@ export default function ReportsClientPage({
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
               III. BUKU BESAR TRANSAKSI PLATFORM
             </h3>
-            <span className="text-[10px] text-slate-500 font-medium">
+            <span className="text-[10px] text-slate-600 font-medium">
               Total {filteredInvoices.length} baris transaksi
             </span>
           </div>
-          <p className="text-[10px] text-slate-500 mb-2.5">
+          <p className="text-[10px] text-slate-600 mb-2.5">
             Daftar seluruh transaksi pembayaran langganan yang telah diselesaikan oleh bimbel selama periode pelaporan ini dicatat di bawah ini untuk keperluan audit dan kepatuhan.
           </p>
 
@@ -765,21 +778,21 @@ export default function ReportsClientPage({
             <tbody>
               {filteredInvoices.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-6 px-4 text-center text-slate-500 font-medium text-xs border-b border-slate-200">
+                  <td colSpan={6} className="py-6 px-4 text-center text-slate-600 font-medium text-xs border-b border-slate-200">
                     Tidak ada rincian transaksi pada rentang tanggal yang dipilih.
                   </td>
                 </tr>
               ) : (
                 filteredInvoices.map((inv) => (
-                  <tr key={inv.id} className="border-b border-slate-200/80 even:bg-slate-50/40 text-[10px]">
+                  <tr key={inv.id} className="border-b border-slate-200/80 even:bg-slate-50/40 text-[10px] break-inside-avoid">
                     <td className="py-2 px-2.5 text-slate-700 whitespace-nowrap font-mono text-[9.5px]">
                       {format(new Date(inv.paid_at), "dd MMM yyyy, HH:mm", { locale: localeId })} WIB
                     </td>
                     <td className="py-2 px-2.5 font-mono text-[9.5px] text-slate-600 whitespace-nowrap">
                       INV-{inv.id.slice(0, 8).toUpperCase()}
                     </td>
-                    <td className="py-2 px-2.5 font-semibold text-slate-900 break-words">
-                      {inv.academy_name}
+                    <td className="py-2 px-2.5 font-semibold text-slate-900 break-words capitalize">
+                      {toTitleCase(inv.academy_name)}
                     </td>
                     <td className="py-2 px-2.5 text-center whitespace-nowrap">
                       <span className="border border-slate-200 bg-slate-50 text-slate-700 px-2 py-0.5 rounded text-[9.5px] font-semibold">
@@ -801,7 +814,7 @@ export default function ReportsClientPage({
             </tbody>
             {filteredInvoices.length > 0 && (
               <tfoot>
-                <tr className="bg-slate-100 font-bold text-slate-900 text-xs border-t-2 border-slate-400">
+                <tr className="bg-slate-100 font-bold text-slate-900 text-xs border-t-2 border-slate-400 break-inside-avoid">
                   <td colSpan={5} className="py-2 px-2.5 text-right uppercase tracking-wider">
                     Total Pendapatan ({filteredInvoices.length} Transaksi):
                   </td>
@@ -815,11 +828,11 @@ export default function ReportsClientPage({
         </div>
 
         {/* Document Signoff & Corporate Footer */}
-        <div className="mt-8 pt-4 border-t border-slate-300 flex justify-between items-end text-[9.5px] text-slate-500 break-inside-avoid">
+        <div className="mt-8 pt-4 border-t border-slate-300 flex justify-between items-end text-[9.5px] text-slate-600 break-inside-avoid">
           <div className="space-y-0.5">
             <p className="font-semibold text-slate-700">Diverifikasi &amp; Diterbitkan Oleh:</p>
             <p className="text-slate-800 font-semibold">BimbelSync Superadmin Central Operations</p>
-            <p className="text-[8.5px] text-slate-400">
+            <p className="text-[8.5px] text-slate-600 font-medium">
               Dokumen ini dihasilkan secara otomatis dari sistem platform dan memiliki validitas hukum pembukuan internal.
             </p>
           </div>
@@ -828,7 +841,7 @@ export default function ReportsClientPage({
             <p className="text-slate-800 font-medium">
               {format(new Date(), "dd MMMM yyyy, HH:mm:ss 'WIB'", { locale: localeId })}
             </p>
-            <p className="font-mono text-[8.5px] text-slate-400">
+            <p className="font-mono text-[8.5px] text-slate-600 font-medium">
               BimbelSync Platform Audit Ledger • Dokumen Resmi
             </p>
           </div>

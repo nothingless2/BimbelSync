@@ -62,6 +62,15 @@ export default function TenantReportsClientPage({
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
   };
 
+  const toTitleCase = (str: string) => {
+    if (!str) return "";
+    return str
+      .toLowerCase()
+      .split(" ")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+  };
+
   const formatCompactRupiah = (val: number) => {
     if (val === 0) return "Rp 0";
     if (val >= 1_000_000_000) {
@@ -489,7 +498,7 @@ export default function TenantReportsClientPage({
       <style dangerouslySetInnerHTML={{__html: `
         @page {
           size: A4 portrait;
-          margin: 14mm 15mm 15mm 15mm;
+          margin: 0;
         }
         @media print {
           html, body {
@@ -510,7 +519,7 @@ export default function TenantReportsClientPage({
           .print-container {
             position: static !important;
             width: 100% !important;
-            padding: 0 !important;
+            box-sizing: border-box !important;
             margin: 0 !important;
             background: #ffffff !important;
           }
@@ -532,6 +541,10 @@ export default function TenantReportsClientPage({
             page-break-inside: avoid !important;
             break-inside: avoid !important;
           }
+          tbody tr {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
           .break-inside-avoid {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
@@ -540,7 +553,7 @@ export default function TenantReportsClientPage({
       `}} />
 
       {/* Dedicated Modern Corporate Financial Report */}
-      <div className="hidden print:block text-slate-900 font-sans leading-normal">
+      <div className="hidden print:block print-container text-slate-900 font-sans leading-normal p-10 sm:p-12">
         {/* Document Header */}
         <div className="pb-5 mb-5 border-b-2 border-slate-800">
           <div className="flex justify-between items-start gap-6">
@@ -563,11 +576,11 @@ export default function TenantReportsClientPage({
                   {academyName}
                 </h1>
                 {academyPhone && (
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-slate-600 mt-0.5">
                     Kontak: {academyPhone}
                   </p>
                 )}
-                <p className="text-[11px] text-slate-500 mt-0.5">
+                <p className="text-[11px] text-slate-600 mt-0.5">
                   Platform Manajemen Bimbingan Belajar BimbelSync
                 </p>
               </div>
@@ -603,39 +616,39 @@ export default function TenantReportsClientPage({
           <div className="grid grid-cols-3 gap-3">
             {/* KPI 1: Total Pendapatan */}
             <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600">
                 Total Pendapatan (Lunas)
               </span>
               <p className="text-lg font-extrabold text-slate-900 mt-0.5 tabular-nums">
                 {formatRupiah(filteredTotalRevenue)}
               </p>
-              <p className="text-[10px] text-slate-500 mt-0.5">
+              <p className="text-[10px] text-slate-600 font-medium mt-0.5">
                 Penerimaan terverifikasi lunas
               </p>
             </div>
 
             {/* KPI 2: Jumlah Transaksi */}
             <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600">
                 Jumlah Transaksi Berhasil
               </span>
               <p className="text-lg font-extrabold text-slate-900 mt-0.5 tabular-nums">
                 {filteredInvoices.length} Transaksi
               </p>
-              <p className="text-[10px] text-slate-500 mt-0.5">
+              <p className="text-[10px] text-slate-600 font-medium mt-0.5">
                 Faktur lunas pada periode ini
               </p>
             </div>
 
             {/* KPI 3: Rata-rata per Transaksi */}
             <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600">
                 Rata-rata Transaksi (ARPU)
               </span>
               <p className="text-lg font-extrabold text-slate-900 mt-0.5 tabular-nums">
                 {formatRupiah(filteredInvoices.length > 0 ? Math.round(filteredTotalRevenue / filteredInvoices.length) : 0)}
               </p>
-              <p className="text-[10px] text-slate-500 mt-0.5">
+              <p className="text-[10px] text-slate-600 font-medium mt-0.5">
                 Nilai rata-rata pembayaran per siswa
               </p>
             </div>
@@ -648,7 +661,7 @@ export default function TenantReportsClientPage({
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
               I. Alokasi Pendapatan per Program
             </h3>
-            <span className="text-[10px] text-slate-500 font-medium">
+            <span className="text-[10px] text-slate-600 font-medium">
               Distribusi penerimaan berdasarkan program bimbingan belajar
             </span>
           </div>
@@ -664,7 +677,7 @@ export default function TenantReportsClientPage({
             <tbody>
               {filteredProgramRevenueData.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="py-4 px-3 text-center text-slate-500 italic border-b border-slate-200">
+                  <td colSpan={3} className="py-4 px-3 text-center text-slate-600 italic border-b border-slate-200">
                     Belum ada pendapatan program yang tercatat pada periode ini.
                   </td>
                 </tr>
@@ -674,7 +687,7 @@ export default function TenantReportsClientPage({
                     ? ((prog.value / filteredTotalRevenue) * 100).toFixed(1)
                     : "0.0";
                   return (
-                    <tr key={idx} className="border-b border-slate-200/80 even:bg-slate-50/40">
+                    <tr key={idx} className="border-b border-slate-200/80 even:bg-slate-50/40 break-inside-avoid">
                       <td className="py-2 px-3 text-slate-800 font-medium break-words">{prog.name}</td>
                       <td className="py-2 px-3 text-center font-mono text-[11px] text-slate-600">{sharePercent}%</td>
                       <td className="py-2 px-3 text-right font-semibold text-slate-900 tabular-nums">
@@ -687,7 +700,7 @@ export default function TenantReportsClientPage({
             </tbody>
             {filteredProgramRevenueData.length > 0 && (
               <tfoot>
-                <tr className="bg-slate-100 font-bold text-slate-900 text-xs border-t-2 border-slate-300">
+                <tr className="bg-slate-100 font-bold text-slate-900 text-xs border-t-2 border-slate-300 break-inside-avoid">
                   <td colSpan={2} className="py-2 px-3 text-left uppercase tracking-wider">
                     Total Pendapatan Seluruh Program
                   </td>
@@ -706,11 +719,11 @@ export default function TenantReportsClientPage({
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
               II. Buku Besar Transaksi (General Ledger)
             </h3>
-            <span className="text-[10px] text-slate-500 font-medium">
+            <span className="text-[10px] text-slate-600 font-medium">
               Total {filteredInvoices.length} baris transaksi
             </span>
           </div>
-          <p className="text-[10px] text-slate-500 mb-2.5">
+          <p className="text-[10px] text-slate-600 mb-2.5">
             Daftar seluruh transaksi pembayaran yang telah diselesaikan oleh siswa selama periode pelaporan untuk keperluan audit dan pembukuan internal.
           </p>
 
@@ -727,7 +740,7 @@ export default function TenantReportsClientPage({
             <tbody>
               {filteredInvoices.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-6 px-4 text-center text-slate-500 font-medium text-xs border-b border-slate-200">
+                  <td colSpan={5} className="py-6 px-4 text-center text-slate-600 font-medium text-xs border-b border-slate-200">
                     Tidak ada rincian transaksi pada rentang tanggal yang dipilih.
                   </td>
                 </tr>
@@ -739,15 +752,15 @@ export default function TenantReportsClientPage({
                     : "Tagihan SPP Siswa";
 
                   return (
-                    <tr key={inv.id} className="border-b border-slate-200/80 even:bg-slate-50/40 text-[10.5px]">
+                    <tr key={inv.id} className="border-b border-slate-200/80 even:bg-slate-50/40 text-[10.5px] break-inside-avoid">
                       <td className="py-2 px-2.5 text-slate-700 whitespace-nowrap font-mono text-[10px]">
                         {format(new Date(inv.paid_at), "dd MMM yyyy, HH:mm", { locale: localeId })} WIB
                       </td>
                       <td className="py-2 px-2.5 font-mono text-[10px] font-semibold text-slate-600 whitespace-nowrap" title={inv.id}>
                         {invoiceCode}
                       </td>
-                      <td className="py-2 px-2.5 font-semibold text-slate-900 break-words">
-                        {inv.student_name}
+                      <td className="py-2 px-2.5 font-semibold text-slate-900 break-words capitalize">
+                        {toTitleCase(inv.student_name)}
                       </td>
                       <td className="py-2 px-2.5 text-slate-600 leading-snug break-words">
                         {details}
@@ -762,7 +775,7 @@ export default function TenantReportsClientPage({
             </tbody>
             {filteredInvoices.length > 0 && (
               <tfoot>
-                <tr className="bg-slate-100 font-bold text-slate-900 text-xs border-t-2 border-slate-400">
+                <tr className="bg-slate-100 font-bold text-slate-900 text-xs border-t-2 border-slate-400 break-inside-avoid">
                   <td colSpan={4} className="py-2 px-2.5 text-right uppercase tracking-wider">
                     Total Pendapatan ({filteredInvoices.length} Transaksi):
                   </td>
@@ -776,11 +789,11 @@ export default function TenantReportsClientPage({
         </div>
 
         {/* Document Signoff & Corporate Footer */}
-        <div className="mt-8 pt-4 border-t border-slate-300 flex justify-between items-end text-[10px] text-slate-500 break-inside-avoid">
+        <div className="mt-8 pt-4 border-t border-slate-300 flex justify-between items-end text-[10px] text-slate-600 break-inside-avoid">
           <div className="space-y-0.5">
             <p className="font-semibold text-slate-700">Diverifikasi & Diterbitkan Oleh:</p>
             <p className="text-slate-800 font-medium">{academyName} • BimbelSync Financial Cloud</p>
-            <p className="text-[9px] text-slate-400">
+            <p className="text-[9.5px] text-slate-600 font-medium">
               Dokumen ini dihasilkan secara otomatis dan memiliki validitas hukum pembukuan internal.
             </p>
           </div>
@@ -789,7 +802,7 @@ export default function TenantReportsClientPage({
             <p className="text-slate-800 font-medium">
               {format(new Date(), "dd MMMM yyyy, HH:mm:ss 'WIB'", { locale: localeId })}
             </p>
-            <p className="font-mono text-[9px] text-slate-400">
+            <p className="font-mono text-[9.5px] text-slate-600 font-medium">
               Dokumen Keuangan • Halaman Resmi
             </p>
           </div>
