@@ -82,6 +82,21 @@ export default async function FinancePage({
         academy_id: session.academy_id,
         deleted_at: null
       },
+      include: {
+        enrollments: {
+          where: { status: 'ACTIVE' },
+          include: {
+            program: {
+              select: {
+                id: true,
+                name: true,
+                monthly_fee: true,
+                billing_type: true,
+              }
+            }
+          }
+        }
+      },
       orderBy: {
         full_name: 'asc'
       }

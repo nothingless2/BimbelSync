@@ -1,16 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X, AlertCircle, Trash2, Receipt, Ticket, CheckCircle2, Loader2 } from "lucide-react";
+import { Plus, X, AlertCircle, Trash2, Receipt, Ticket, CheckCircle2, Loader2, Sparkles } from "lucide-react";
 import { createInvoiceAction } from "@/app/[tenantSlug]/dashboard/finance/actions";
 import { validateVoucherAction } from "@/app/[tenantSlug]/dashboard/finance/voucher-actions";
 import { Student } from "@prisma/client";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { format } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
 
-export function AddInvoiceModal({ students }: { students: Student[] }) {
+export type StudentWithEnrollments = Student & {
+  enrollments?: Array<{
+    program: {
+      id: string;
+      name: string;
+      monthly_fee: number;
+      billing_type: string;
+    };
+  }>;
+};
+
+export function AddInvoiceModal({ students }: { students: StudentWithEnrollments[] }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [selectedStudentId, setSelectedStudentId] = useState("");
+  const [isAutoFilled, setIsAutoFilled] = useState(false);
   
   // Dynamic items state
   const [items, setItems] = useState([{ id: 1, description: "", amount: "" }]);
@@ -26,6 +41,54 @@ export function AddInvoiceModal({ students }: { students: Student[] }) {
     discountValue: number;
     maxDiscount?: number | null;
   } | null>(null);
+
+  // Otomatis isi deskripsi dan nominal saat murid dipilih
+  const handleStudentSelect = (studentId: string) => {
+    setSelectedStudentId(studentId);
+    setErrorMsg(null);
+
+    const selected = students.find((s) => s.id === studentId);
+    if (!selected) return;
+
+    const currentMonthYear = format(new Date(), "MMMM yyyy", { locale: idLocale });
+
+    if (selected.enrollments && selected.enrollments.length > 0) {
+      const populatedItems = selected.enrollments.map((en, idx) => {
+        const p = en.program;
+        const isOneTime = p.billing_type === "ONE_TIME";
+        const desc = isOneTime
+          ? `Biaya Program ${p.name} (Sekali Bayar)`
+          : `Tagihan SPP - ${p.name} (${currentMonthYear})`;
+        
+        return {
+          id: Date.now() + idx,
+          description: desc,
+          amount: p.monthly_fee > 0 ? p.monthly_fee.toString() : "",
+        };
+      });
+
+      setItems(populatedItems);
+      setIsAutoFilled(true);
+    } else {
+      // Siswa belum memiliki program aktif, isi default dengan template bulan ini
+      setItems([{
+        id: Date.now(),
+        description: `Tagihan SPP (${currentMonthYear})`,
+        amount: "",
+      }]);
+      setIsAutoFilled(false);
+    }
+  };
+
+  const resetForm = () => {
+    setSelectedStudentId("");
+    setIsAutoFilled(false);
+    setItems([{ id: Date.now(), description: "", amount: "" }]);
+    setAppliedVoucher(null);
+    setVoucherInput("");
+    setVoucherError(null);
+    setErrorMsg(null);
+  };
 
   const addItem = () => {
     setItems([...items, { id: Date.now(), description: "", amount: "" }]);
@@ -121,10 +184,7 @@ export function AddInvoiceModal({ students }: { students: Student[] }) {
       setErrorMsg(result.error);
     } else if (result?.success) {
       setIsOpen(false);
-      setItems([{ id: Date.now(), description: "", amount: "" }]); // reset
-      setAppliedVoucher(null);
-      setVoucherInput("");
-      setVoucherError(null);
+      resetForm();
     }
     
     setIsLoading(false);
@@ -133,8 +193,11 @@ export function AddInvoiceModal({ students }: { students: Student[] }) {
   return (
     <>
       <button
-        onClick={() => setIsOpen(true)}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 font-medium shadow-sm transition-colors text-sm"
+        onClick={() => {
+          resetForm();
+          setIsOpen(true);
+        }}
+        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 font-medium shadow-sm transition-colors text-sm cursor-pointer"
       >
         <Plus size={16} />
         Buat Tagihan (Invoice)
@@ -155,8 +218,11 @@ export function AddInvoiceModal({ students }: { students: Student[] }) {
               </div>
               <button 
                 type="button"
-                onClick={() => setIsOpen(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                onClick={() => {
+                  setIsOpen(false);
+                  resetForm();
+                }}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
               >
                 <X size={20} />
               </button>
@@ -172,28 +238,43 @@ export function AddInvoiceModal({ students }: { students: Student[] }) {
 
               <div className="space-y-2">
                 <label htmlFor="student_id" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  Pilih Siswa</label>
+                  Pilih Siswa
+                </label>
                 <CustomSelect
                   id="student_id"
                   name="student_id"
                   required
                   placeholder="Pilih Siswa..."
-                  options={students.map((s) => ({
-                    value: s.id,
-                    label: `${s.full_name} (@${s.username})`
-                  }))}
+                  value={selectedStudentId}
+                  onChange={handleStudentSelect}
+                  options={students.map((s) => {
+                    const activePrograms = s.enrollments?.map((e) => e.program.name).join(", ");
+                    return {
+                      value: s.id,
+                      label: `${s.full_name} (@${s.username})`,
+                      subLabel: activePrograms ? `Program: ${activePrograms}` : "Belum ada program aktif",
+                    };
+                  })}
                 />
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                    Rincian Item Tagihan
-                  </label>
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                      Rincian Item Tagihan
+                    </label>
+                    {isAutoFilled && (
+                      <span className="text-[11px] font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800/60 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <Sparkles size={11} className="text-blue-600 dark:text-blue-400" />
+                        Terisi otomatis dari program siswa
+                      </span>
+                    )}
+                  </div>
                   <button
                     type="button"
                     onClick={addItem}
-                    className="text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center gap-1"
+                    className="text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center gap-1 cursor-pointer"
                   >
                     <Plus size={14} /> Tambah Item
                   </button>
