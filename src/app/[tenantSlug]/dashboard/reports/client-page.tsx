@@ -30,6 +30,8 @@ type PeriodFilter = "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
 
 export default function TenantReportsClientPage({
   academyName = "Bimbel",
+  academyLogoUrl = null,
+  academyPhone = null,
   programRevenueData: initialProgramRevenueData,
   invoices,
   activeStudentsCount,
@@ -39,6 +41,8 @@ export default function TenantReportsClientPage({
   tenantSlug
 }: {
   academyName?: string;
+  academyLogoUrl?: string | null;
+  academyPhone?: string | null;
   programRevenueData: ProgramData[];
   invoices: InvoiceData[];
   activeStudentsCount: number;
@@ -481,165 +485,315 @@ export default function TenantReportsClientPage({
         </div>
       </div>
 
-      {/* Print Specific CSS: Suppress browser default header/footer completely */}
+      {/* Print Specific CSS: Modern Corporate Layout with Natural Multi-Page Pagination */}
       <style dangerouslySetInnerHTML={{__html: `
         @page {
-          size: auto;
-          margin: 0mm;
+          size: A4 portrait;
+          margin: 14mm 15mm 15mm 15mm;
         }
         @media print {
           html, body {
             margin: 0 !important;
             padding: 0 !important;
             background: #ffffff !important;
+            color: #0f172a !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
           }
           body * {
             visibility: hidden;
           }
           .print-container, .print-container * {
             visibility: visible;
-            color: #000000 !important;
-            border-color: #000000 !important;
           }
           .print-container {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
+            position: static !important;
             width: 100% !important;
-            padding: 20mm 15mm !important;
+            padding: 0 !important;
             margin: 0 !important;
             background: #ffffff !important;
           }
-          .no-print {
+          .no-print, header, aside, nav {
             display: none !important;
-          }
-          .print-serif {
-            font-family: "Times New Roman", Times, serif !important;
           }
           table {
             page-break-inside: auto;
-          }
-          tr {
-            page-break-inside: avoid;
-            break-inside: avoid;
+            border-collapse: collapse;
+            width: 100%;
           }
           thead {
-            display: table-header-group;
+            display: table-header-group !important;
+          }
+          tfoot {
+            display: table-footer-group !important;
+          }
+          tr {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          .break-inside-avoid {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
           }
         }
       `}} />
 
-      {/* Dedicated Clean Print Report (Only Alokasi Pendapatan & Buku Besar Transaksi) */}
-      <div className="hidden print:block text-black print-serif leading-relaxed">
-        {/* Judul Besar PDF (Only visible in Print mode) */}
-        <div className="text-center mb-6 pb-4 border-b-2 border-black">
-          <h1 className="text-2xl font-bold uppercase tracking-wider text-black print-serif">
-            LAPORAN KEUANGAN
-          </h1>
-          <p className="text-sm font-semibold text-black mt-1 print-serif">{academyName}</p>
-          <p className="text-xs text-black mt-0.5 print-serif">
-            Periode: <strong>{formatPeriodText(startDate, endDate)}</strong>
-          </p>
+      {/* Dedicated Modern Corporate Financial Report */}
+      <div className="hidden print:block text-slate-900 font-sans leading-normal">
+        {/* Document Header */}
+        <div className="pb-5 mb-5 border-b-2 border-slate-800">
+          <div className="flex justify-between items-start gap-6">
+            {/* Left: Academy Identification & Logo */}
+            <div className="space-y-2 max-w-[55%]">
+              {academyLogoUrl ? (
+                <div className="mb-2">
+                  <img 
+                    src={academyLogoUrl} 
+                    alt={academyName} 
+                    className="max-h-12 w-auto max-w-[180px] object-contain"
+                  />
+                </div>
+              ) : null}
+              <div>
+                <span className="inline-block text-[9.5px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">
+                  Dokumen Resmi Keuangan
+                </span>
+                <h1 className="text-xl font-extrabold text-slate-900 tracking-tight mt-1">
+                  {academyName}
+                </h1>
+                {academyPhone && (
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Kontak: {academyPhone}
+                  </p>
+                )}
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Platform Manajemen Bimbingan Belajar BimbelSync
+                </p>
+              </div>
+            </div>
+
+            {/* Right: Report Title & Period Details */}
+            <div className="text-right space-y-1">
+              <h2 className="text-2xl font-black tracking-tight text-slate-900 uppercase">
+                LAPORAN KEUANGAN
+              </h2>
+              <p className="text-xs text-slate-600 font-medium">
+                Penerimaan Pembayaran & Kas Masuk
+              </p>
+              <div className="pt-2 space-y-0.5 text-xs text-slate-600">
+                <p>
+                  <span className="text-slate-400">Periode: </span>
+                  <span className="font-semibold text-slate-800">{formatPeriodText(startDate, endDate)}</span>
+                </p>
+                <p>
+                  <span className="text-slate-400">Tanggal Terbit: </span>
+                  <span className="font-medium text-slate-700">{format(new Date(), "dd MMMM yyyy, HH:mm 'WIB'", { locale: localeId })}</span>
+                </p>
+                <p className="font-mono text-[10px] text-slate-400">
+                  REF: FIN/{tenantSlug.toUpperCase()}/{format(new Date(), "yyyyMMdd-HHmm")}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <h2 className="text-lg font-bold mb-3 uppercase border-b border-black pb-1.5 tracking-wide">
-          ALOKASI PENDAPATAN PER PROGRAM
-        </h2>
-        <table className="w-full mb-8 border-collapse text-sm">
-          <thead>
-            <tr>
-              <th className="border border-black px-4 py-2.5 text-left bg-gray-100 font-bold">Nama Program</th>
-              <th className="border border-black px-4 py-2.5 text-right bg-gray-100 font-bold">Total Pendapatan</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredProgramRevenueData.map((prog, idx) => (
-              <tr key={idx}>
-                <td className="border border-black px-4 py-2">{prog.name}</td>
-                <td className="border border-black px-4 py-2 text-right font-medium">{formatRupiah(prog.value)}</td>
-              </tr>
-            ))}
-            {filteredProgramRevenueData.length === 0 && (
-              <tr>
-                <td colSpan={2} className="border border-black px-4 py-3 text-center text-gray-500">
-                  Belum ada pendapatan program yang tercatat pada periode ini.
-                </td>
-              </tr>
-            )}
-          </tbody>
-          {filteredProgramRevenueData.length > 0 && (
-            <tfoot>
-              <tr className="bg-gray-100 font-bold">
-                <td className="border border-black px-4 py-2 text-left uppercase">Total Pendapatan</td>
-                <td className="border border-black px-4 py-2 text-right">{formatRupiah(filteredTotalRevenue)}</td>
-              </tr>
-            </tfoot>
-          )}
-        </table>
+        {/* Executive Summary Cards */}
+        <div className="mb-6 break-inside-avoid">
+          <div className="grid grid-cols-3 gap-3">
+            {/* KPI 1: Total Pendapatan */}
+            <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                Total Pendapatan (Lunas)
+              </span>
+              <p className="text-lg font-extrabold text-slate-900 mt-0.5 tabular-nums">
+                {formatRupiah(filteredTotalRevenue)}
+              </p>
+              <p className="text-[10px] text-slate-500 mt-0.5">
+                Penerimaan terverifikasi lunas
+              </p>
+            </div>
 
-        <h2 className="text-lg font-bold mb-2 uppercase border-b border-black pb-1.5 mt-6 tracking-wide">
-          BUKU BESAR TRANSAKSI
-        </h2>
-        <p className="mb-4 text-xs text-black print-serif">
-          Daftar seluruh transaksi pembayaran yang telah diselesaikan oleh siswa terkait selama periode pelaporan ini dicatat di bawah ini untuk keperluan audit dan kepatuhan.
-        </p>
+            {/* KPI 2: Jumlah Transaksi */}
+            <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                Jumlah Transaksi Berhasil
+              </span>
+              <p className="text-lg font-extrabold text-slate-900 mt-0.5 tabular-nums">
+                {filteredInvoices.length} Transaksi
+              </p>
+              <p className="text-[10px] text-slate-500 mt-0.5">
+                Faktur lunas pada periode ini
+              </p>
+            </div>
 
-        <table className="w-full border-collapse text-xs">
-          <thead>
-            <tr>
-              <th className="border border-black px-3 py-2.5 text-left font-bold uppercase tracking-wider bg-gray-100">Tanggal</th>
-              <th className="border border-black px-3 py-2.5 text-left font-bold uppercase tracking-wider bg-gray-100">ID Transaksi</th>
-              <th className="border border-black px-3 py-2.5 text-left font-bold uppercase tracking-wider bg-gray-100">Nama Siswa</th>
-              <th className="border border-black px-3 py-2.5 text-left font-bold uppercase tracking-wider bg-gray-100">Program / Rincian</th>
-              <th className="border border-black px-3 py-2.5 text-right font-bold uppercase tracking-wider bg-gray-100">Pendapatan</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredInvoices.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="border border-black px-4 py-6 text-center text-gray-500 font-medium text-sm">
-                  Tidak ada rincian transaksi pada rentang tanggal yang dipilih.
-                </td>
+            {/* KPI 3: Rata-rata per Transaksi */}
+            <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                Rata-rata Transaksi (ARPU)
+              </span>
+              <p className="text-lg font-extrabold text-slate-900 mt-0.5 tabular-nums">
+                {formatRupiah(filteredInvoices.length > 0 ? Math.round(filteredTotalRevenue / filteredInvoices.length) : 0)}
+              </p>
+              <p className="text-[10px] text-slate-500 mt-0.5">
+                Nilai rata-rata pembayaran per siswa
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Section I: Alokasi Pendapatan per Program */}
+        <div className="mb-7 break-inside-avoid">
+          <div className="flex items-center justify-between pb-1.5 border-b border-slate-300 mb-2">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+              I. Alokasi Pendapatan per Program
+            </h3>
+            <span className="text-[10px] text-slate-500 font-medium">
+              Distribusi penerimaan berdasarkan program bimbingan belajar
+            </span>
+          </div>
+
+          <table className="w-full border-collapse text-xs">
+            <thead>
+              <tr className="bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-wider border-y border-slate-300">
+                <th className="py-2 px-3 text-left">Nama Program</th>
+                <th className="py-2 px-3 text-center w-28">Porsi (%)</th>
+                <th className="py-2 px-3 text-right w-44">Total Pendapatan</th>
               </tr>
-            ) : (
-              filteredInvoices.map((inv) => (
-                <tr key={inv.id}>
-                  <td className="border border-black px-3 py-2 whitespace-nowrap">
-                    {format(new Date(inv.paid_at), "dd MMM yyyy, HH:mm", { locale: localeId })}
-                  </td>
-                  <td className="border border-black px-3 py-2 font-mono text-[10px]">
-                    {inv.id}
-                  </td>
-                  <td className="border border-black px-3 py-2 font-medium">
-                    {inv.student_name}
-                  </td>
-                  <td className="border border-black px-3 py-2 text-[11px]">
-                    {inv.items && inv.items.length > 0
-                      ? inv.items.map(it => it.description).join(", ")
-                      : "-"}
-                  </td>
-                  <td className="border border-black px-3 py-2 text-right font-medium">
-                    {formatRupiah(inv.amount)}
+            </thead>
+            <tbody>
+              {filteredProgramRevenueData.length === 0 ? (
+                <tr>
+                  <td colSpan={3} className="py-4 px-3 text-center text-slate-500 italic border-b border-slate-200">
+                    Belum ada pendapatan program yang tercatat pada periode ini.
                   </td>
                 </tr>
-              ))
+              ) : (
+                filteredProgramRevenueData.map((prog, idx) => {
+                  const sharePercent = filteredTotalRevenue > 0
+                    ? ((prog.value / filteredTotalRevenue) * 100).toFixed(1)
+                    : "0.0";
+                  return (
+                    <tr key={idx} className="border-b border-slate-200/80 even:bg-slate-50/40">
+                      <td className="py-2 px-3 text-slate-800 font-medium break-words">{prog.name}</td>
+                      <td className="py-2 px-3 text-center font-mono text-[11px] text-slate-600">{sharePercent}%</td>
+                      <td className="py-2 px-3 text-right font-semibold text-slate-900 tabular-nums">
+                        {formatRupiah(prog.value)}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+            {filteredProgramRevenueData.length > 0 && (
+              <tfoot>
+                <tr className="bg-slate-100 font-bold text-slate-900 text-xs border-t-2 border-slate-300">
+                  <td colSpan={2} className="py-2 px-3 text-left uppercase tracking-wider">
+                    Total Pendapatan Seluruh Program
+                  </td>
+                  <td className="py-2 px-3 text-right tabular-nums">
+                    {formatRupiah(filteredTotalRevenue)}
+                  </td>
+                </tr>
+              </tfoot>
             )}
-          </tbody>
-          {filteredInvoices.length > 0 && (
-            <tfoot>
-              <tr className="bg-gray-100 font-bold">
-                <td colSpan={4} className="border border-black px-3 py-2 text-right uppercase">
-                  Total Pendapatan ({filteredInvoices.length} Transaksi):
-                </td>
-                <td className="border border-black px-3 py-2 text-right">
-                  {formatRupiah(filteredTotalRevenue)}
-                </td>
+          </table>
+        </div>
+
+        {/* Section II: Buku Besar Transaksi */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between pb-1.5 border-b border-slate-300 mb-1">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+              II. Buku Besar Transaksi (General Ledger)
+            </h3>
+            <span className="text-[10px] text-slate-500 font-medium">
+              Total {filteredInvoices.length} baris transaksi
+            </span>
+          </div>
+          <p className="text-[10px] text-slate-500 mb-2.5">
+            Daftar seluruh transaksi pembayaran yang telah diselesaikan oleh siswa selama periode pelaporan untuk keperluan audit dan pembukuan internal.
+          </p>
+
+          <table className="w-full border-collapse text-xs">
+            <thead>
+              <tr className="bg-slate-100 text-slate-700 text-[9.5px] font-bold uppercase tracking-wider border-y border-slate-300">
+                <th className="py-2 px-2.5 text-left w-36">Tanggal & Waktu</th>
+                <th className="py-2 px-2.5 text-left w-24">No. Faktur</th>
+                <th className="py-2 px-2.5 text-left w-40">Nama Siswa</th>
+                <th className="py-2 px-2.5 text-left">Program / Rincian Biaya</th>
+                <th className="py-2 px-2.5 text-right w-32">Pendapatan</th>
               </tr>
-            </tfoot>
-          )}
-        </table>
+            </thead>
+            <tbody>
+              {filteredInvoices.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-6 px-4 text-center text-slate-500 font-medium text-xs border-b border-slate-200">
+                    Tidak ada rincian transaksi pada rentang tanggal yang dipilih.
+                  </td>
+                </tr>
+              ) : (
+                filteredInvoices.map((inv) => {
+                  const invoiceCode = `INV-${inv.id.slice(0, 8).toUpperCase()}`;
+                  const details = inv.items && inv.items.length > 0
+                    ? inv.items.map(it => it.description).join(", ")
+                    : "Tagihan SPP Siswa";
+
+                  return (
+                    <tr key={inv.id} className="border-b border-slate-200/80 even:bg-slate-50/40 text-[10.5px]">
+                      <td className="py-2 px-2.5 text-slate-700 whitespace-nowrap font-mono text-[10px]">
+                        {format(new Date(inv.paid_at), "dd MMM yyyy, HH:mm", { locale: localeId })} WIB
+                      </td>
+                      <td className="py-2 px-2.5 font-mono text-[10px] font-semibold text-slate-600 whitespace-nowrap" title={inv.id}>
+                        {invoiceCode}
+                      </td>
+                      <td className="py-2 px-2.5 font-semibold text-slate-900 break-words">
+                        {inv.student_name}
+                      </td>
+                      <td className="py-2 px-2.5 text-slate-600 leading-snug break-words">
+                        {details}
+                      </td>
+                      <td className="py-2 px-2.5 text-right font-bold text-slate-900 tabular-nums whitespace-nowrap">
+                        {formatRupiah(inv.amount)}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+            {filteredInvoices.length > 0 && (
+              <tfoot>
+                <tr className="bg-slate-100 font-bold text-slate-900 text-xs border-t-2 border-slate-400">
+                  <td colSpan={4} className="py-2 px-2.5 text-right uppercase tracking-wider">
+                    Total Pendapatan ({filteredInvoices.length} Transaksi):
+                  </td>
+                  <td className="py-2 px-2.5 text-right tabular-nums">
+                    {formatRupiah(filteredTotalRevenue)}
+                  </td>
+                </tr>
+              </tfoot>
+            )}
+          </table>
+        </div>
+
+        {/* Document Signoff & Corporate Footer */}
+        <div className="mt-8 pt-4 border-t border-slate-300 flex justify-between items-end text-[10px] text-slate-500 break-inside-avoid">
+          <div className="space-y-0.5">
+            <p className="font-semibold text-slate-700">Diverifikasi & Diterbitkan Oleh:</p>
+            <p className="text-slate-800 font-medium">{academyName} • BimbelSync Financial Cloud</p>
+            <p className="text-[9px] text-slate-400">
+              Dokumen ini dihasilkan secara otomatis dan memiliki validitas hukum pembukuan internal.
+            </p>
+          </div>
+          <div className="text-right space-y-0.5">
+            <p className="font-semibold text-slate-700">Waktu Cetak:</p>
+            <p className="text-slate-800 font-medium">
+              {format(new Date(), "dd MMMM yyyy, HH:mm:ss 'WIB'", { locale: localeId })}
+            </p>
+            <p className="font-mono text-[9px] text-slate-400">
+              Dokumen Keuangan • Halaman Resmi
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Screen Summary Cards */}

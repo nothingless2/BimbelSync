@@ -32,7 +32,7 @@ export default async function TenantReportsPage({
     const [academy, invoices, activeStudentsCount, unpaidInvoices] = await Promise.all([
       prisma.academy.findUnique({
         where: { id: session.academy_id },
-        select: { name: true }
+        select: { name: true, logo_url: true, phone: true }
       }),
       prisma.invoice.findMany({
         where: {
@@ -135,6 +135,8 @@ export default async function TenantReportsPage({
     return (
       <TenantReportsClientPage 
         academyName={academy?.name || "Bimbel"}
+        academyLogoUrl={academy?.logo_url || null}
+        academyPhone={academy?.phone || null}
         programRevenueData={programRevenueData}
         invoices={serializedInvoices}
         activeStudentsCount={activeStudentsCount}
