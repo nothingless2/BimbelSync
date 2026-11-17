@@ -3,8 +3,9 @@
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
 import { encrypt, encryptOtpPending } from "@/lib/auth";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { checkRateLimit, resetRateLimit, RATE_LIMIT_PRESETS } from "@/lib/rate-limit";
 
 export async function loginAction(prevState: any, formData: FormData) {
   // 1. Anti-bot Honeypot Check (field tak terlihat)
@@ -18,6 +19,24 @@ export async function loginAction(prevState: any, formData: FormData) {
 
   if (!identifier || !password) {
     return { error: "Email/Username dan password wajib diisi." };
+  }
+
+  // 2. Rate Limiting — batasi percobaan login per IP dan per identifier
+  const headerStore = await headers();
+  const ip =
+    headerStore.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    headerStore.get("x-real-ip") ||
+    "unknown";
+
+  const rateLimitKey = `login:${ip}:${identifier.toLowerCase()}`;
+  const rateCheck = checkRateLimit(rateLimitKey, RATE_LIMIT_PRESETS.login);
+
+  if (!rateCheck.allowed) {
+    const minutesLeft = Math.ceil(rateCheck.retryAfterMs / 60000);
+    return {
+      error: `Terlalu banyak percobaan login. Silakan coba lagi dalam ${minutesLeft} menit.`,
+      rateLimited: true,
+    };
   }
 
   let redirectPath = "";
@@ -101,6 +120,8 @@ export async function loginAction(prevState: any, formData: FormData) {
       });
 
       redirectPath = `/${staff.academy.path_url}/dashboard`;
+      // Reset rate limit setelah login sukses
+      resetRateLimit(rateLimitKey);
       break;
     }
 
@@ -143,6 +164,8 @@ export async function loginAction(prevState: any, formData: FormData) {
           });
 
           redirectPath = `/${student.academy.path_url}/student/dashboard`;
+          // Reset rate limit setelah login sukses
+          resetRateLimit(rateLimitKey);
           break;
         }
       }
