@@ -45,18 +45,22 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              // Script: hanya dari domain sendiri + inline Next.js + Google Analytics + KaTeX CDN (rumus kuis)
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://cdn.jsdelivr.net",
+              // Script: hanya dari domain sendiri + inline Next.js + WebAssembly (QR Scanner) + Google Analytics + KaTeX CDN
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://www.googletagmanager.com https://cdn.jsdelivr.net",
               // Style: izinkan inline (Tailwind CSS v4) + KaTeX CSS CDN
               "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
               // Gambar: domain sendiri + data/blob URI + thumbnail YouTube + Supabase + sumber HTTPS (logo/gambar soal kuis)
               "img-src 'self' data: blob: https://i.ytimg.com https://img.youtube.com https://*.supabase.co https://*.supabase.com https://api.dicebear.com https://grainy-gradients.vercel.app https:",
+              // Media: kamera stream (blob) & bunyi beep QR scanner (data:audio/mp3)
+              "media-src 'self' data: blob:",
               // Font: domain sendiri + KaTeX fonts CDN
               "font-src 'self' data: https://cdn.jsdelivr.net",
               // Iframe keluar: izinkan embed video demo YouTube (youtube-nocookie & youtube)
               "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com",
-              // Koneksi API: domain sendiri + Supabase + Google Analytics
-              "connect-src 'self' https://*.supabase.co https://*.supabase.com https://www.google-analytics.com https://analytics.google.com",
+              // Worker: service worker PWA & web worker lokal
+              "worker-src 'self' blob:",
+              // Koneksi API: domain sendiri + Supabase + Google Analytics + jsDelivr CDN (zxing_reader.wasm untuk QR Scanner)
+              "connect-src 'self' https://*.supabase.co https://*.supabase.com https://www.google-analytics.com https://analytics.google.com https://fastly.jsdelivr.net https://cdn.jsdelivr.net",
               // Form action: hanya domain sendiri
               "form-action 'self'",
               // Frame: tidak diizinkan (konsisten dengan X-Frame-Options: DENY)
