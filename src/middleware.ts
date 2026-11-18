@@ -50,8 +50,19 @@ const PUBLIC_ROUTES = /^\/(login|register|verify-otp|forgot-password|reset-passw
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Lewati semua rute publik dan aset statis
-  if (PUBLIC_ROUTES.test(pathname)) {
+  // Lewati halaman utama (landing page), rute publik, dan seluruh file aset statis (file berekstensi seperti .avif, .png, .mp4, dll.)
+  if (pathname === "/" || PUBLIC_ROUTES.test(pathname) || pathname.match(/\.[a-zA-Z0-9]+$/)) {
+    return NextResponse.next();
+  }
+
+  // Hanya wajibkan pengecekan session pada area rute yang memang dilindungi
+  const isProtectedRoute =
+    SUPERADMIN_ROUTES.test(pathname) ||
+    TENANT_DASHBOARD_ROUTES.test(pathname) ||
+    STUDENT_PROTECTED_ROUTES.test(pathname) ||
+    ONBOARDING_ROUTE.test(pathname);
+
+  if (!isProtectedRoute) {
     return NextResponse.next();
   }
 
@@ -178,8 +189,8 @@ export const config = {
      * - _next/static  (file statis Next.js)
      * - _next/image   (image optimization)
      * - favicon.ico   (browser favicon)
-     * - File aset publik (.png, .svg, .webp, dll.)
+     * - File aset publik (.png, .svg, .webp, .avif, .mp4, dll.)
      */
-    "/((?!_next/static|_next/image|favicon.ico|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|mp4|webm|ico|css|js|woff|woff2|ttf|eot|webmanifest|xml|txt)$).*)",
   ],
 };
