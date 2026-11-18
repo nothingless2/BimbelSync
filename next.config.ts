@@ -45,14 +45,16 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              // Script: hanya dari domain sendiri + inline Next.js (diperlukan untuk hydration)
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com",
-              // Style: izinkan inline (Tailwind CSS v4 menggunakan style injection)
-              "style-src 'self' 'unsafe-inline'",
-              // Gambar: domain sendiri + data URI (untuk bukti bayar base64) + CDN Supabase + Dicebear
-              "img-src 'self' data: blob: https://*.supabase.co https://*.supabase.com https://api.dicebear.com",
-              // Font: domain sendiri
-              "font-src 'self'",
+              // Script: hanya dari domain sendiri + inline Next.js + Google Analytics + KaTeX CDN (rumus kuis)
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://cdn.jsdelivr.net",
+              // Style: izinkan inline (Tailwind CSS v4) + KaTeX CSS CDN
+              "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+              // Gambar: domain sendiri + data/blob URI + thumbnail YouTube + Supabase + sumber HTTPS (logo/gambar soal kuis)
+              "img-src 'self' data: blob: https://i.ytimg.com https://img.youtube.com https://*.supabase.co https://*.supabase.com https://api.dicebear.com https://grainy-gradients.vercel.app https:",
+              // Font: domain sendiri + KaTeX fonts CDN
+              "font-src 'self' data: https://cdn.jsdelivr.net",
+              // Iframe keluar: izinkan embed video demo YouTube (youtube-nocookie & youtube)
+              "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com",
               // Koneksi API: domain sendiri + Supabase + Google Analytics
               "connect-src 'self' https://*.supabase.co https://*.supabase.com https://www.google-analytics.com https://analytics.google.com",
               // Form action: hanya domain sendiri
