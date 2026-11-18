@@ -37,6 +37,12 @@ const formatFullDateWIB = (date: Date | string) => {
   }).format(new Date(date));
 };
 
+const formatRoomName = (name?: string | null) => {
+  if (!name || !name.trim()) return "Ruang Kelas";
+  const trimmed = name.trim();
+  return /^ruang\b/i.test(trimmed) ? trimmed : `Ruang ${trimmed}`;
+};
+
 export default function StudentAttendancesClientPage({
   attendances,
   programs = [],
@@ -68,6 +74,7 @@ export default function StudentAttendancesClientPage({
     { value: "PRESENT", label: "Hadir" },
     { value: "ABSENT", label: "Alpa" },
     { value: "PERMIT", label: "Izin" },
+    { value: "UNRECORDED", label: "Belum Direkap" },
   ];
 
   // Filter absensi berdasarkan program yang dipilih
@@ -79,8 +86,10 @@ export default function StudentAttendancesClientPage({
   const presentCount = programAttendances.filter((a: any) => a.attendance_status === "PRESENT").length;
   const permitCount = programAttendances.filter((a: any) => a.attendance_status === "PERMIT" || a.attendance_status === "EXCUSED").length;
   const absentCount = programAttendances.filter((a: any) => a.attendance_status === "ABSENT").length;
+  const unrecordedCount = programAttendances.filter((a: any) => a.attendance_status === "UNRECORDED").length;
+  const recappedCount = presentCount + permitCount + absentCount;
   const totalRecords = programAttendances.length;
-  const presentRate = totalRecords > 0 ? Math.round((presentCount / totalRecords) * 100) : null;
+  const presentRate = recappedCount > 0 ? Math.round((presentCount / recappedCount) * 100) : null;
 
   // Filter lanjutan berdasarkan pencarian teks dan status
   const filteredAttendances = programAttendances.filter((a: any) => {
@@ -223,8 +232,8 @@ export default function StudentAttendancesClientPage({
             <span className="text-xl font-black text-slate-900 dark:text-white">
               {totalRecords}
             </span>
-            <span className="block text-[10px] text-slate-400 mt-0.5 truncate">
-              {currentProgramName || "Semua"}
+            <span className="block text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+              {unrecordedCount > 0 ? `${unrecordedCount} belum direkap` : currentProgramName || "Semua"}
             </span>
           </div>
         </div>
@@ -287,6 +296,8 @@ export default function StudentAttendancesClientPage({
             {currentData.map((record: any) => {
               const isPresent = record.attendance_status === "PRESENT";
               const isAbsent = record.attendance_status === "ABSENT";
+              const isUnrecorded = record.attendance_status === "UNRECORDED";
+              const sessionTime = record.schedule?.start_time || record.scanned_at;
 
               return (
                 <div
@@ -299,7 +310,7 @@ export default function StudentAttendancesClientPage({
                         {record.schedule?.program?.name}
                       </span>
                       <h4 className="font-bold text-slate-900 dark:text-white text-sm mt-1">
-                        Ruang {record.schedule?.room?.name || "Kelas"}
+                        {formatRoomName(record.schedule?.room?.name)}
                       </h4>
                     </div>
 
@@ -309,6 +320,8 @@ export default function StudentAttendancesClientPage({
                           ? "text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/40"
                           : isAbsent
                           ? "text-rose-700 bg-rose-50 dark:text-rose-400 dark:bg-rose-950/40"
+                          : isUnrecorded
+                          ? "text-slate-600 bg-slate-100 dark:text-slate-300 dark:bg-slate-800"
                           : "text-amber-700 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/40"
                       }`}
                     >
@@ -316,20 +329,22 @@ export default function StudentAttendancesClientPage({
                         <CheckCircle2 size={13} />
                       ) : isAbsent ? (
                         <XCircle size={13} />
+                      ) : isUnrecorded ? (
+                        <Clock size={13} />
                       ) : (
                         <AlertCircle size={13} />
                       )}
-                      {isPresent ? "Hadir" : isAbsent ? "Alpa" : "Izin"}
+                      {isPresent ? "Hadir" : isAbsent ? "Alpa" : isUnrecorded ? "Belum Direkap" : "Izin"}
                     </span>
                   </div>
 
                   <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                     <div className="flex items-center gap-1.5">
                       <Calendar size={13} className="text-slate-400" />
-                      <span>{formatDateWIB(record.scanned_at)}</span>
+                      <span>{formatDateWIB(sessionTime)}</span>
                       <span>•</span>
                       <span className="font-semibold text-slate-700 dark:text-slate-300">
-                        {formatTimeWIB(record.scanned_at)}
+                        {formatTimeWIB(sessionTime)}
                       </span>
                     </div>
                     <span className="text-[11px] text-slate-400 truncate max-w-[140px]">
@@ -352,58 +367,71 @@ export default function StudentAttendancesClientPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {currentData.map((record: any) => (
-                  <tr key={record.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
-                    <td className="px-6 py-4">
-                      <div className="font-bold text-slate-900 dark:text-white text-base">
-                        {record.schedule?.program?.name}
-                      </div>
-                      <div className="text-slate-500 mt-1 text-xs">
-                        Tutor: {record.schedule?.tutor?.name || record.schedule?.tutor?.email || "Tutor"}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3 mb-1.5">
-                        <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md text-xs">
-                          <Calendar size={13} />
-                          <span>{formatFullDateWIB(record.scanned_at)}</span>
+                {currentData.map((record: any) => {
+                  const isPresent = record.attendance_status === "PRESENT";
+                  const isAbsent = record.attendance_status === "ABSENT";
+                  const isUnrecorded = record.attendance_status === "UNRECORDED";
+                  const sessionTime = record.schedule?.start_time || record.scanned_at;
+
+                  return (
+                    <tr key={record.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                      <td className="px-6 py-4">
+                        <div className="font-bold text-slate-900 dark:text-white text-base">
+                          {record.schedule?.program?.name}
                         </div>
-                        <div className="flex items-center gap-1.5 text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 font-bold px-2 py-1 rounded-md text-xs">
-                          <Clock size={13} />
-                          <span>{formatTimeWIB(record.scanned_at)}</span>
+                        <div className="text-slate-500 mt-1 text-xs">
+                          Tutor: {record.schedule?.tutor?.name || record.schedule?.tutor?.email || "Tutor"}
                         </div>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-xs px-1">
-                        <MapPin size={13} />
-                        <span>Ruang {record.schedule?.room?.name || "Kelas"}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <span
-                        className={`inline-flex items-center gap-1.5 font-bold px-3 py-1.5 rounded-lg text-sm ${
-                          record.attendance_status === "PRESENT"
-                            ? "text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-900/20"
-                            : record.attendance_status === "ABSENT"
-                            ? "text-rose-700 bg-rose-50 dark:text-rose-400 dark:bg-rose-900/20"
-                            : "text-amber-700 bg-amber-50 dark:text-amber-400 dark:bg-amber-900/20"
-                        }`}
-                      >
-                        {record.attendance_status === "PRESENT" ? (
-                          <CheckCircle2 size={16} />
-                        ) : record.attendance_status === "ABSENT" ? (
-                          <XCircle size={16} />
-                        ) : (
-                          <AlertCircle size={16} />
-                        )}
-                        {record.attendance_status === "PRESENT"
-                          ? "Hadir"
-                          : record.attendance_status === "ABSENT"
-                          ? "Alpa"
-                          : "Izin"}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3 mb-1.5">
+                          <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md text-xs">
+                            <Calendar size={13} />
+                            <span>{formatFullDateWIB(sessionTime)}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 font-bold px-2 py-1 rounded-md text-xs">
+                            <Clock size={13} />
+                            <span>{formatTimeWIB(sessionTime)}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-xs px-1">
+                          <MapPin size={13} />
+                          <span>{formatRoomName(record.schedule?.room?.name)}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span
+                          className={`inline-flex items-center gap-1.5 font-bold px-3 py-1.5 rounded-lg text-sm ${
+                            isPresent
+                              ? "text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-900/20"
+                              : isAbsent
+                              ? "text-rose-700 bg-rose-50 dark:text-rose-400 dark:bg-rose-900/20"
+                              : isUnrecorded
+                              ? "text-slate-600 bg-slate-100 dark:text-slate-300 dark:bg-slate-800"
+                              : "text-amber-700 bg-amber-50 dark:text-amber-400 dark:bg-amber-900/20"
+                          }`}
+                        >
+                          {isPresent ? (
+                            <CheckCircle2 size={16} />
+                          ) : isAbsent ? (
+                            <XCircle size={16} />
+                          ) : isUnrecorded ? (
+                            <Clock size={15} />
+                          ) : (
+                            <AlertCircle size={16} />
+                          )}
+                          {isPresent
+                            ? "Hadir"
+                            : isAbsent
+                            ? "Alpa"
+                            : isUnrecorded
+                            ? "Belum Direkap"
+                            : "Izin"}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

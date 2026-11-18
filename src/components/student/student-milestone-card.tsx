@@ -1,13 +1,14 @@
 "use client";
 
 import React from "react";
-import { TrendingUp, Award, BookOpen, Check, X, Minus, Star, ChevronRight, Calendar } from "lucide-react";
+import { TrendingUp, Award, BookOpen, Check, X, Minus, Star, ChevronRight, Calendar, Clock } from "lucide-react";
 import Link from "next/link";
 
 export interface StudentMilestoneData {
   programName?: string;
   attendance: {
     totalPastSchedules: number;
+    recappedCount?: number;
     attendedCount: number;
     percentage: number | null;
   };
@@ -28,7 +29,7 @@ export interface StudentMilestoneData {
     slidingWindow: {
       sessionNumber: number;
       dateFormatted: string;
-      status: "PRESENT" | "ABSENT" | "EXCUSED" | "ACTIVE_NEXT" | "UPCOMING";
+      status: "PRESENT" | "ABSENT" | "EXCUSED" | "UNRECORDED" | "ACTIVE_NEXT" | "UPCOMING";
       roomName?: string;
       programName?: string;
     }[];
@@ -294,7 +295,11 @@ export function StudentMilestoneCard({
               </h4>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 {totalSchedules > 0
-                  ? `${attendance.attendedCount} sesi dihadiri (${attendancePct}% ketertiban)`
+                  ? attendance.recappedCount !== undefined && attendance.recappedCount > 0
+                    ? `${attendance.attendedCount} hadir dari ${attendance.recappedCount} sesi direkap (${attendancePct}% ketertiban)`
+                    : attendance.totalPastSchedules > 0
+                    ? `${attendance.totalPastSchedules} sesi berlangsung • menunggu rekap tutor`
+                    : `${attendance.attendedCount} sesi dihadiri`
                   : activeProgramName && activeProgramName !== "Semua Program"
                   ? `Belum ada sesi kelas untuk program ${activeProgramName}.`
                   : "Belum ada sesi kelas yang dijadwalkan."}
@@ -362,8 +367,20 @@ export function StudentMilestoneCard({
                   const isPresent = step.status === "PRESENT";
                   const isAbsent = step.status === "ABSENT";
                   const isExcused = step.status === "EXCUSED";
+                  const isUnrecorded = step.status === "UNRECORDED";
                   const isActiveNext = step.status === "ACTIVE_NEXT";
-                  const isUpcoming = step.status === "UPCOMING";
+
+                  const statusLabel = isPresent
+                    ? "Hadir"
+                    : isAbsent
+                    ? "Alpa"
+                    : isExcused
+                    ? "Izin"
+                    : isUnrecorded
+                    ? "Belum direkap tutor"
+                    : isActiveNext
+                    ? "Sesi berikutnya"
+                    : "Akan datang";
 
                   return (
                     <div
@@ -379,11 +396,13 @@ export function StudentMilestoneCard({
                             ? "bg-rose-500 text-white ring-2 ring-rose-100 dark:ring-rose-950"
                             : isExcused
                             ? "bg-amber-500 text-white ring-2 ring-amber-100 dark:ring-amber-950"
+                            : isUnrecorded
+                            ? "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 ring-2 ring-slate-100 dark:ring-slate-800"
                             : isActiveNext
                             ? "bg-blue-600 text-white ring-4 ring-blue-100 dark:ring-blue-900/60 shadow-md animate-pulse"
                             : "bg-white dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700"
                         }`}
-                        title={`Sesi ${step.sessionNumber} - ${step.dateFormatted}`}
+                        title={`Sesi ${step.sessionNumber} (${step.dateFormatted}) — ${statusLabel}`}
                       >
                         {isPresent ? (
                           <Check size={14} strokeWidth={3} />
@@ -391,6 +410,8 @@ export function StudentMilestoneCard({
                           <X size={14} strokeWidth={3} />
                         ) : isExcused ? (
                           <Minus size={14} strokeWidth={3} />
+                        ) : isUnrecorded ? (
+                          <Clock size={13} strokeWidth={2.5} />
                         ) : isActiveNext ? (
                           <Star size={13} className="fill-white" />
                         ) : (

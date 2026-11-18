@@ -18,8 +18,9 @@ export default async function StudentAttendancesPage({ params }: { params: Promi
   }
 
   const session = auth.session;
+  const now = new Date();
 
-  const [attendances, student] = await Promise.all([
+  const [rawAttendances, student, pastSchedules] = await Promise.all([
     prisma.attendance.findMany({
       where: { student_id: session.id as string },
       include: {
@@ -38,17 +39,65 @@ export default async function StudentAttendancesPage({ params }: { params: Promi
       select: {
         enrollments: {
           where: { status: 'ACTIVE' },
-          include: {
+          select: {
+            program_id: true,
+            enrolled_date: true,
             program: {
               select: { id: true, name: true }
             }
           }
         }
       }
+    }),
+    prisma.schedule.findMany({
+      where: {
+        status: 'SCHEDULED',
+        end_time: { lte: now },
+        program: {
+          academy_id: session.academy_id,
+          enrollments: {
+            some: { student_id: session.id as string, status: 'ACTIVE' }
+          }
+        }
+      },
+      include: {
+        program: true,
+        tutor: true,
+        room: true,
+      },
+      orderBy: { start_time: "desc" },
     })
   ]);
 
   const programs = student?.enrollments.map((e) => e.program) || [];
+  const enrollmentDateMap = new Map(
+    (student?.enrollments || []).map((e) => [e.program_id, new Date(e.enrolled_date)])
+  );
+
+  // Gabungkan record absensi nyata + sesi lewat yang belum direkap tutor agar sinkron dengan Beranda
+  const attendanceByScheduleId = new Map(rawAttendances.map((a) => [a.schedule_id, a]));
+
+  const unrecordedEntries = pastSchedules
+    .filter((sch) => {
+      if (attendanceByScheduleId.has(sch.id)) return false;
+      const enrolledAt = enrollmentDateMap.get(sch.program_id);
+      if (!enrolledAt) return true;
+      return new Date(sch.start_time) >= enrolledAt;
+    })
+    .map((sch) => ({
+      id: `unrecorded-${sch.id}`,
+      schedule_id: sch.id,
+      student_id: session.id as string,
+      attendance_status: "UNRECORDED",
+      scanned_at: sch.start_time,
+      schedule: sch,
+    }));
+
+  const attendances = [...rawAttendances, ...unrecordedEntries].sort((a, b) => {
+    const timeA = new Date(a.schedule?.start_time || a.scanned_at).getTime();
+    const timeB = new Date(b.schedule?.start_time || b.scanned_at).getTime();
+    return timeB - timeA;
+  });
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">

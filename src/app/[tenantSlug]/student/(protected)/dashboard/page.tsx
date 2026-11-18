@@ -139,11 +139,23 @@ export default async function StudentDashboardPage({
   const totalDebt = unpaidInvoices.reduce((sum, inv) => sum + inv.total_amount, 0);
   const hasUnpaid = unpaidInvoices.length > 0;
 
-  // Daftar program aktif yang diikuti siswa
+  // Daftar program aktif yang diikuti siswa beserta tanggal mulai pendaftaran
   const activePrograms = student.enrollments.map((e) => ({
     id: e.program.id,
     name: e.program.name,
   }));
+  const enrollmentDateMap = new Map(
+    student.enrollments.map((e) => [e.program_id, new Date(e.enrolled_date)])
+  );
+  const allAttendanceScheduleIds = new Set(allAttendances.map((a) => a.schedule_id));
+
+  // Filter jadwal historis: hanya hitung jadwal sejak siswa terdaftar (atau yang sudah memiliki record absensi)
+  const eligibleSchedules = allSchedules.filter((s) => {
+    if (allAttendanceScheduleIds.has(s.id)) return true;
+    const enrolledAt = enrollmentDateMap.get(s.program_id);
+    if (!enrolledAt) return true;
+    return new Date(s.start_time) >= enrolledAt;
+  });
 
   const now = new Date();
 
@@ -161,13 +173,14 @@ export default async function StudentDashboardPage({
     const totalPastSchedules = pastSchedules.length;
 
     const pastScheduleIds = new Set(pastSchedules.map((s) => s.id));
+    const recappedCount = pastSchedules.filter((s) => attMap.has(s.id)).length;
     const attendedCount = attendances.filter(
       (a) => pastScheduleIds.has(a.schedule_id) && a.attendance_status === 'PRESENT'
     ).length;
 
-    const attendancePercentage = totalPastSchedules === 0
+    const attendancePercentage = recappedCount === 0
       ? null
-      : Math.min(100, Math.round((attendedCount / totalPastSchedules) * 100));
+      : Math.min(100, Math.round((attendedCount / recappedCount) * 100));
 
     // Deduplikasi jika ada evaluasi dengan nama dan tipe yang sama pada program yang sama
     const dedupedEvalsMap = new Map<string, (typeof evals)[0]>();
@@ -224,13 +237,14 @@ export default async function StudentDashboardPage({
       const isActiveNext = globalIdx === nextScheduleIdx;
       const attStatus = attMap.get(sch.id);
 
-      let status: "PRESENT" | "ABSENT" | "EXCUSED" | "ACTIVE_NEXT" | "UPCOMING" = "UPCOMING";
+      let status: "PRESENT" | "ABSENT" | "EXCUSED" | "UNRECORDED" | "ACTIVE_NEXT" | "UPCOMING" = "UPCOMING";
       if (isActiveNext) {
         status = "ACTIVE_NEXT";
       } else if (isPast) {
         if (attStatus === "PRESENT") status = "PRESENT";
         else if (attStatus === "EXCUSED") status = "EXCUSED";
-        else status = "ABSENT";
+        else if (attStatus === "ABSENT") status = "ABSENT";
+        else status = "UNRECORDED";
       }
 
       return {
@@ -246,6 +260,7 @@ export default async function StudentDashboardPage({
       programName: progName,
       attendance: {
         totalPastSchedules,
+        recappedCount,
         attendedCount,
         percentage: attendancePercentage,
       },
@@ -270,7 +285,7 @@ export default async function StudentDashboardPage({
 
   // Hitung milestone gabungan (semua program)
   const combinedMilestone = computeMilestone(
-    allSchedules,
+    eligibleSchedules,
     allAttendances,
     evaluations,
     learningMaterials.length,
@@ -280,7 +295,7 @@ export default async function StudentDashboardPage({
   // Hitung milestone individual untuk masing-masing program
   const programMilestones: Record<string, ReturnType<typeof computeMilestone>> = {};
   for (const prog of activePrograms) {
-    const pSchedules = allSchedules.filter((s) => s.program_id === prog.id);
+    const pSchedules = eligibleSchedules.filter((s) => s.program_id === prog.id);
     const pAttendances = allAttendances.filter(
       (a) => a.schedule?.program_id === prog.id || pSchedules.some((s) => s.id === a.schedule_id)
     );
