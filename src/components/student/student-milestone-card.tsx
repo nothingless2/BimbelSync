@@ -147,10 +147,8 @@ export function StudentMilestoneCard({
   milestone,
   tenantSlug,
 }: StudentMilestoneCardProps) {
-  // Default ke program pertama jika ada, agar fokus pada masing-masing program (tidak langsung campur aduk)
-  const [selectedProgramId, setSelectedProgramId] = React.useState<string>(
-    programs.length > 0 ? programs[0].id : "ALL"
-  );
+  // Default ke Semua Program agar siswa langsung melihat ringkasan menyeluruh
+  const [selectedProgramId, setSelectedProgramId] = React.useState<string>("ALL");
 
   // Ambil milestone aktif berdasarkan program yang dipilih
   const activeMilestone =
@@ -224,6 +222,18 @@ export function StudentMilestoneCard({
           </div>
 
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 -mx-1 px-1">
+            <button
+              type="button"
+              onClick={() => setSelectedProgramId("ALL")}
+              className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all shrink-0 flex items-center gap-2 ${
+                selectedProgramId === "ALL"
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-500/30 scale-[1.02]"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+              }`}
+            >
+              <span>Semua Program</span>
+            </button>
+
             {programs.map((p) => {
               const isSelected = selectedProgramId === p.id;
               const pData = programMilestones[p.id];
@@ -251,18 +261,6 @@ export function StudentMilestoneCard({
                 </button>
               );
             })}
-
-            <button
-              type="button"
-              onClick={() => setSelectedProgramId("ALL")}
-              className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all shrink-0 flex items-center gap-2 ${
-                selectedProgramId === "ALL"
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-500/30 scale-[1.02]"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
-              }`}
-            >
-              <span>Semua Program</span>
-            </button>
           </div>
         </div>
       )}

@@ -46,9 +46,9 @@ export default function StudentQuizzesClientPage({
   const searchParams = useSearchParams();
   const queryProgramId = searchParams.get("programId");
 
-  // Default ke query param, atau program pertama siswa jika ada, agar fokus per program
+  // Default ke query param jika ada, selain itu tampilkan Semua Program terlebih dahulu
   const [selectedProgramId, setSelectedProgramId] = useState<string>(
-    queryProgramId || (programs.length > 0 ? programs[0].id : "ALL")
+    queryProgramId || "ALL"
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [filterTab, setFilterTab] = useState<"ALL" | "PENDING" | "COMPLETED">("ALL");
@@ -99,6 +99,27 @@ export default function StudentQuizzesClientPage({
           </div>
 
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 -mx-1 px-1">
+            <button
+              type="button"
+              onClick={() => setSelectedProgramId("ALL")}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-2 ${
+                selectedProgramId === "ALL"
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-500/30 scale-[1.02]"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+              }`}
+            >
+              <span>Semua Program</span>
+              <span
+                className={`px-1.5 py-0.5 rounded-md text-[10px] font-black ${
+                  selectedProgramId === "ALL"
+                    ? "bg-white/20 text-white"
+                    : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+                }`}
+              >
+                {quizzes.length}
+              </span>
+            </button>
+
             {programs.map((p) => {
               const isSelected = selectedProgramId === p.id;
               const count = quizzes.filter((q) => q.programId === p.id).length;
@@ -127,27 +148,6 @@ export default function StudentQuizzesClientPage({
                 </button>
               );
             })}
-
-            <button
-              type="button"
-              onClick={() => setSelectedProgramId("ALL")}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-2 ${
-                selectedProgramId === "ALL"
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-500/30 scale-[1.02]"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
-              }`}
-            >
-              <span>Semua Kuis</span>
-              <span
-                className={`px-1.5 py-0.5 rounded-md text-[10px] font-black ${
-                  selectedProgramId === "ALL"
-                    ? "bg-white/20 text-white"
-                    : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
-                }`}
-              >
-                {quizzes.length}
-              </span>
-            </button>
           </div>
         </div>
       )}

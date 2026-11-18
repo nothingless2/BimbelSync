@@ -54,10 +54,8 @@ export function StudentRecentAttendances({
   programs?: { id: string; name: string }[];
   tenantSlug: string;
 }) {
-  // Default ke program pertama jika ada, agar sinkron dengan komponen lainnya
-  const [selectedProgramId, setSelectedProgramId] = useState<string>(
-    programs.length > 0 ? programs[0].id : "ALL"
-  );
+  // Default ke Semua Program agar sinkron dengan komponen lainnya
+  const [selectedProgramId, setSelectedProgramId] = useState<string>("ALL");
 
   const currentProgram = programs.find((p) => p.id === selectedProgramId);
   const currentProgramName = currentProgram
@@ -104,6 +102,27 @@ export function StudentRecentAttendances({
       {/* Program Selector Tabs (Mobile-Friendly, No-Scrollbar) */}
       {programs.length > 1 && (
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+          <button
+            type="button"
+            onClick={() => setSelectedProgramId("ALL")}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
+              selectedProgramId === "ALL"
+                ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"
+                : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+            }`}
+          >
+            <span>Semua Program</span>
+            <span
+              className={`px-1.5 py-0.2 rounded-md text-[10px] font-bold ${
+                selectedProgramId === "ALL"
+                  ? "bg-white/20 text-white"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-500"
+              }`}
+            >
+              {attendances.length}
+            </span>
+          </button>
+
           {programs.map((p) => {
             const isSelected = selectedProgramId === p.id;
             const count = attendances.filter(
@@ -140,27 +159,6 @@ export function StudentRecentAttendances({
               </button>
             );
           })}
-
-          <button
-            type="button"
-            onClick={() => setSelectedProgramId("ALL")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
-              selectedProgramId === "ALL"
-                ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"
-                : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
-            }`}
-          >
-            <span>Semua</span>
-            <span
-              className={`px-1.5 py-0.2 rounded-md text-[10px] font-bold ${
-                selectedProgramId === "ALL"
-                  ? "bg-white/20 text-white"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-500"
-              }`}
-            >
-              {attendances.length}
-            </span>
-          </button>
         </div>
       )}
 
