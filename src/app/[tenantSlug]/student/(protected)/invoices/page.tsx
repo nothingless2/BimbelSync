@@ -58,19 +58,22 @@ export default async function StudentInvoicesPage({
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 font-sans">
       
       {/* Header Profile Style */}
-      <div className="bg-blue-600 pt-10 sm:pt-14 pb-20 sm:pb-24 px-4 text-center relative overflow-hidden">
+      <div className="bg-gradient-to-b from-blue-600 to-blue-800 pt-16 pb-24 px-6 text-center relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-xl -ml-8 -mb-8"></div>
+
         <div className="relative z-10 flex flex-col items-center">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-white/30 shadow-lg mb-3">
-            <CreditCard size={32} className="text-white sm:w-9 sm:h-9" />
+          <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border-4 border-white/30 shadow-xl mb-4">
+            <CreditCard size={40} className="text-white" />
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white mb-2 tracking-tight">Tagihan Saya</h1>
-          <span className="text-blue-100 bg-blue-500/50 border border-blue-400/30 px-4 py-1 rounded-full text-xs font-normal inline-block shadow-xs">
+          <h1 className="text-2xl font-bold text-white mb-1">Tagihan Saya</h1>
+          <p className="text-blue-100 bg-white/10 px-4 py-1.5 rounded-full text-sm font-medium">
             Kelola pembayaran SPP dan biaya lainnya
-          </span>
+          </p>
         </div>
       </div>
 
-      <div className="px-4 sm:px-6 -mt-14 sm:-mt-16 relative z-20 space-y-3.5 max-w-md mx-auto">
+      <div className="px-4 sm:px-6 -mt-16 relative z-20 space-y-3.5 max-w-md mx-auto">
         {/* Prominent Floating Card (Matching Mockup) */}
         <StudentBillingBanner
           hasUnpaid={unpaidInvoices.length > 0}
