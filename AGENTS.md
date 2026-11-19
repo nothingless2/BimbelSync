@@ -118,3 +118,43 @@ Seluruh kalkulasi biaya berlangganan platform **WAJIB** menggunakan modul terpus
 - **Atomic Quota Gating:** Penambahan siswa/staf/ruangan wajib dibungkus dalam `executeWithQuotaLock` yang mengunci baris `Academy` dengan query `SELECT ... FOR UPDATE` di dalam transaksi Prisma.
 - **Soft Delete:** Entitas master (`Academy`, `Staff`, `Student`, `Program`, `Room`, `Plan`) menggunakan `deleted_at: null`. Jangan lakukan hard delete fisik (`DELETE`).
 - **Maintenance Integrity:** Pertahankan seluruh komentar kode dan docstring yang sudah ada di codebase.
+
+---
+
+## 7. Prinsip Rekayasa Perangkat Lunak & Arsitektur Sistem (Advanced Engineering Principles)
+
+Setiap agen AI yang mengembangkan atau merefaktor fitur di **BimbelSync** wajib mematuhi standar rekayasa berikut:
+
+### A. Asinkronitas & Kontrol Konkurensi
+1. **Asynchronous Non-Blocking:** Seluruh operasi I/O (database, API eksternal, auth token) wajib asynchronous menggunakan `async/await`.
+2. **Pola Eksekusi Bersamaan (Concurrency):**
+   - Gunakan `Promise.all([p1, p2])` untuk tugas independen yang aman gagal bersamaan (misal: ambil daftar program dan ruangan).
+   - Gunakan `Promise.allSettled([...])` untuk tugas broadcast (misal: pengiriman email/notifikasi massal ke puluhan user) agar kegagalan 1 entitas tidak membatalkan yang lain.
+   - Hindari *waterfalling sequential await* pada data yang tidak saling bergantung.
+3. **Pessimistic Locking & Anti-Race-Condition:**
+   - Semua mutasi penambahan kuota (siswa, staf, ruangan) **WAJIB** dibungkus dalam `executeWithQuotaLock` (`src/lib/subscription.ts`) yang menerapkan `SELECT ... FOR UPDATE` pada baris `Academy`. Jangan pernah membuat fungsi bypass.
+
+### B. Idempotensi (Pertahanan Dobel Transaksi)
+1. **Lapis Frontend:** Tombol formulir atau aksi penting wajib memiliki *state guard* (`isLoading` / `isPending`), tombol di-`disabled`, dan menampilkan spinner visual saat proses berjalan.
+2. **Lapis Backend:** Server Action dan API Route wajib memeriksa status awal entitas sebelum mutasi (misal: tolak verifikasi jika tagihan sudah berstatus `PAID` atau `VOID`).
+
+### C. Kinerja Database & Pencegahan *N+1 Query*
+1. **Eager Loading Relasional:** DILARANG mengeksekusi query Prisma di dalam looping (`for`, `map`, `forEach`). Selalu gunakan klausa `include` atau `select` bersarang agar Prisma menghasilkan query SQL yang optimal.
+2. **Indeks & Filter Efektif:** Setiap query wajib mengikutsertakan filter `deleted_at: null` dan `academy_id` untuk memanfaatkan B-Tree composite index.
+
+### D. Ketahanan Sistem (*Graceful Degradation*)
+1. **Isolasi Kegagalan Non-Kritis:** Proses sekunder seperti pencatatan jejak audit (`createAuditLog`), pengiriman webhook, atau email notifikasi tidak boleh membatalkan (*rollback*) transaksi bisnis utama jika terjadi gangguan jaringan. Bungkus dengan `try ... catch` aman.
+2. **Layanan Eksternal Multi-Fallback:** Integrasi pihak ketiga (seperti provider email/SMS/WA) wajib memiliki alur fallback cadangan (misal: Brevo API $\rightarrow$ SMTP Relay $\rightarrow$ log dev).
+
+### E. Pemisahan Beban Komputasi (*Background Jobs & Cron*)
+1. **Zero Heavy Jobs in User Request:** Proses massal (seperti pembuatan tagihan SPP bulanan ribuan siswa atau pengiriman reminder massal) dilarang dieksekusi di dalam siklus HTTP request pengguna biasa.
+2. **Cron Security:** Seluruh background automasi wajib ditempatkan di rute terisolasi `src/app/api/cron/*` dan dilindungi otorisasi ketat `Authorization: Bearer CRON_SECRET`.
+
+### F. Integritas Data & Isolasi Multi-Tenant
+1. **Zero Physical Hard Delete:** Pantang menghapus data entitas master secara fisik (`DELETE`). Selalu perbarui `deleted_at = new Date()`.
+2. **Zero Tenant Leakage:** Pastikan tidak ada kebocoran data antar akademi. Seluruh query tenant harus mengunci `academy_id` dari sesi terautentikasi (`session.academy_id`), bukan mempercayai parameter input mentah dari client.
+
+### G. Performa Antarmuka Pengguna Modern (Next.js 16 & React 19)
+1. **Streaming & Suspense:** Gunakan file konvensi `loading.tsx` atau bungkus komponen pemuat data berat dengan `<Suspense fallback={<Skeleton />}>` agar browser tidak menampilkan layar putih kosong.
+2. **Debounced Search Inputs:** Seluruh input pencarian teks ke router atau server wajib memiliki debouncing minimal 300ms untuk mencegah banjir request.
+3. **Type-Safe Dynamic Route Params:** Di Next.js 16 App Router, selalu perlakukan `params` dan `searchParams` sebagai `Promise` yang di-`await` secara type-safe.
