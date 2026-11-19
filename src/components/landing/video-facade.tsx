@@ -12,6 +12,8 @@ export function VideoFacade({
   title = 'BimbelSync Demo Video',
 }: VideoFacadeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [imgSrc, setImgSrc] = useState(`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`);
+  const [hasError, setHasError] = useState(false);
 
   if (isPlaying) {
     return (
@@ -43,13 +45,25 @@ export function VideoFacade({
       aria-label={`Putar video: ${title}`}
       className="relative max-w-4xl mx-auto rounded-2xl sm:rounded-3xl overflow-hidden aspect-video bg-black shadow-2xl shadow-blue-500/10 border border-slate-200 group cursor-pointer select-none"
     >
-      {/* Real YouTube Thumbnail */}
+      {/* Real YouTube Thumbnail with CORS and fallback support */}
       <img
-        src={`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`}
+        src={imgSrc}
         alt={title}
         width={1280}
         height={720}
         loading="lazy"
+        crossOrigin="anonymous"
+        referrerPolicy="no-referrer"
+        onError={() => {
+          if (!imgSrc.includes('img.youtube.com')) {
+            // Fallback 1: Domain alternatif YouTube
+            setImgSrc(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
+          } else if (!hasError) {
+            // Fallback 2: Poster lokal berkualitas tinggi agar tidak pernah blank
+            setHasError(true);
+            setImgSrc('/features/schedule.jpg');
+          }
+        }}
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
       />
 
