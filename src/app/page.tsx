@@ -21,6 +21,8 @@ import { CustomCursor } from '@/components/ui/custom-cursor';
 
 const WA_URL = "https://wa.me/6285173392350?text=Halo%20tim%20BimbelSync,%20saya%20tertarik%20menggunakan%20platform%20ini.";
 
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   title: "BimbelSync | Software Manajemen & Operasional Bimbel Terbaik",
   description: "BimbelSync adalah platform orkestrasi untuk bimbingan belajar. Kelola jadwal tutor, presensi QR cerdas, dan tagihan invoice otomatis dengan verifikasi pembayaran mudah. Coba sekarang!",
