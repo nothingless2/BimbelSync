@@ -78,8 +78,11 @@ export default async function StudentEvaluationsPage({
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
       {/* Header Profile Style */}
       {/* Editorial Header Banner */}
-      <div className="bg-gradient-to-r from-blue-700 via-blue-800 to-slate-900 pt-8 pb-16 px-4 sm:px-8">
-        <div className="max-w-3xl mx-auto">
+      <div className="bg-gradient-to-b from-blue-600 via-blue-700 to-blue-800 pt-8 pb-16 px-4 sm:px-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-36 h-36 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-28 h-28 bg-white/10 rounded-full blur-xl -ml-8 -mb-8 pointer-events-none" />
+
+        <div className="max-w-3xl mx-auto relative z-10">
           <p className="text-[11px] font-bold uppercase tracking-wider text-blue-200">
             Portal Siswa
           </p>
