@@ -15,6 +15,7 @@ export async function createQuizAction(data: {
   durationMinutes: number;
   evaluationType?: "EXAM" | "HOMEWORK";
   isPublished: boolean;
+  showResultImmediately?: boolean;
   tenantSlug: string;
 }) {
   const auth = await requireStaffSession();
@@ -49,6 +50,8 @@ export async function createQuizAction(data: {
         duration_minutes: Number(data.durationMinutes) || 30,
         evaluation_type: data.evaluationType || "EXAM",
         is_published: data.isPublished,
+        show_result_immediately: data.showResultImmediately ?? false,
+        is_results_released: false,
       },
     });
 
@@ -71,6 +74,7 @@ export async function updateQuizAction(data: {
   evaluationType?: "EXAM" | "HOMEWORK";
   programId: string;
   isPublished: boolean;
+  showResultImmediately?: boolean;
   tenantSlug: string;
 }) {
   const auth = await requireStaffSession();
@@ -95,6 +99,9 @@ export async function updateQuizAction(data: {
         evaluation_type: data.evaluationType || "EXAM",
         program_id: data.programId,
         is_published: data.isPublished,
+        ...(data.showResultImmediately !== undefined && {
+          show_result_immediately: data.showResultImmediately,
+        }),
       },
     });
 
@@ -104,6 +111,95 @@ export async function updateQuizAction(data: {
   } catch (err: any) {
     console.error("Error updating quiz:", err);
     return { error: err.message || "Gagal memperbarui kuis." };
+  }
+}
+
+/**
+ * Server action untuk merilis (publish) atau menahan (hold) nilai kuis bagi seluruh siswa.
+ * Mensinkronisasikan status StudentEvaluation (E-Rapor) antara DRAFT dan PUBLISHED.
+ */
+export async function toggleReleaseResultsAction(data: {
+  quizId: string;
+  tenantSlug: string;
+}) {
+  const auth = await requireStaffSession();
+  if ("error" in auth) return { error: auth.error };
+  const session = auth.session;
+
+  const quiz = await prisma.quiz.findFirst({
+    where: { id: data.quizId, academy_id: session.academy_id, deleted_at: null },
+  });
+  if (!quiz) return { error: "Kuis tidak ditemukan." };
+
+  const newReleasedState = !quiz.is_results_released;
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      // 1. Perbarui status rilis kuis
+      await tx.quiz.update({
+        where: { id: quiz.id },
+        data: { is_results_released: newReleasedState },
+      });
+
+      // 2. Sinkronkan nilai kuis pada StudentEvaluation (E-Rapor)
+      await tx.studentEvaluation.updateMany({
+        where: {
+          academy_id: session.academy_id,
+          program_id: quiz.program_id,
+          title: `[Kuis Online] ${quiz.title}`,
+        },
+        data: {
+          status: newReleasedState ? "PUBLISHED" : "DRAFT",
+        },
+      });
+    });
+
+    revalidatePath(`/${data.tenantSlug}/dashboard/quizzes/${quiz.id}`);
+    revalidatePath(`/${data.tenantSlug}/dashboard/quizzes`);
+    revalidatePath(`/${data.tenantSlug}/dashboard/evaluations`);
+    revalidatePath(`/${data.tenantSlug}/student/quizzes/${quiz.id}`);
+    revalidatePath(`/${data.tenantSlug}/student/quizzes`);
+    revalidatePath(`/${data.tenantSlug}/student/evaluations`);
+    revalidatePath(`/${data.tenantSlug}/student/dashboard`);
+
+    return { success: true, isResultsReleased: newReleasedState };
+  } catch (err: any) {
+    console.error("Error toggling release results:", err);
+    return { error: err.message || "Gagal mengubah status rilis nilai kuis." };
+  }
+}
+
+/**
+ * Server action untuk mengubah opsi apakah nilai kuis tampil seketika setelah submit.
+ */
+export async function toggleShowResultImmediatelyAction(data: {
+  quizId: string;
+  tenantSlug: string;
+}) {
+  const auth = await requireStaffSession();
+  if ("error" in auth) return { error: auth.error };
+  const session = auth.session;
+
+  const quiz = await prisma.quiz.findFirst({
+    where: { id: data.quizId, academy_id: session.academy_id, deleted_at: null },
+  });
+  if (!quiz) return { error: "Kuis tidak ditemukan." };
+
+  const newImmediateState = !quiz.show_result_immediately;
+
+  try {
+    await prisma.quiz.update({
+      where: { id: quiz.id },
+      data: { show_result_immediately: newImmediateState },
+    });
+
+    revalidatePath(`/${data.tenantSlug}/dashboard/quizzes/${quiz.id}`);
+    revalidatePath(`/${data.tenantSlug}/student/quizzes/${quiz.id}`);
+
+    return { success: true, showResultImmediately: newImmediateState };
+  } catch (err: any) {
+    console.error("Error toggling showResultImmediately:", err);
+    return { error: err.message || "Gagal mengubah pengaturan hasil kuis." };
   }
 }
 

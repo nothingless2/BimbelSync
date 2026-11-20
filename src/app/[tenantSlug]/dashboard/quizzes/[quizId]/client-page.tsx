@@ -23,9 +23,10 @@ import {
 } from "lucide-react";
 import { AddQuestionModal } from "@/components/modals/add-question-modal";
 import { deleteQuestionAction } from "./actions";
-import { togglePublishQuizAction } from "../actions";
+import { togglePublishQuizAction, toggleReleaseResultsAction } from "../actions";
 import { toast } from "@/components/ui/sonner";
 import { MathText } from "@/components/math-text";
+import { Loader2 } from "lucide-react";
 
 interface QuestionItem {
   id: string;
@@ -63,6 +64,8 @@ interface QuizDetailProps {
     durationMinutes: number;
     evaluationType?: "EXAM" | "HOMEWORK" | "MONTHLY_REPORT" | string;
     isPublished: boolean;
+    showResultImmediately?: boolean;
+    isResultsReleased?: boolean;
     programId: string;
     programName: string;
     creatorName: string;
@@ -86,6 +89,7 @@ export default function QuizDetailClientPage({
   const [editingQuestion, setEditingQuestion] = useState<QuestionItem | null>(null);
   const [deletingQuestionId, setDeletingQuestionId] = useState<string | null>(null);
   const [isTogglingPublish, setIsTogglingPublish] = useState(false);
+  const [isTogglingRelease, setIsTogglingRelease] = useState(false);
 
   // Identify students who haven't submitted yet
   const submittedStudentIds = new Set(submissions.map((s) => s.studentId));
@@ -147,6 +151,23 @@ export default function QuizDetailClientPage({
     }
   };
 
+  const handleToggleRelease = async () => {
+    try {
+      setIsTogglingRelease(true);
+      const res = await toggleReleaseResultsAction({ quizId: quiz.id, tenantSlug });
+      if (res.error) throw new Error(res.error);
+      toast.success(
+        res.isResultsReleased
+          ? "Nilai kuis berhasil dirilis ke seluruh siswa!"
+          : "Nilai kuis kembali ditahan dari siswa."
+      );
+    } catch (err: any) {
+      toast.error(err.message || "Gagal mengubah status rilis nilai.");
+    } finally {
+      setIsTogglingRelease(false);
+    }
+  };
+
   const optionLabels = ["A", "B", "C", "D"];
 
   return (
@@ -188,6 +209,23 @@ export default function QuizDetailClientPage({
                 <FileQuestion size={12} />
                 {questions.length} Butir Soal
               </span>
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border transition ${
+                quiz.isResultsReleased || quiz.showResultImmediately
+                  ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
+                  : "bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800"
+              }`}>
+                {quiz.isResultsReleased || quiz.showResultImmediately ? (
+                  <>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>Nilai Telah Dirilis</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                    <span>Nilai Masih Ditahan</span>
+                  </>
+                )}
+              </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
               {quiz.title}
@@ -199,13 +237,40 @@ export default function QuizDetailClientPage({
             )}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            {!quiz.showResultImmediately && (
+              <button
+                type="button"
+                onClick={handleToggleRelease}
+                disabled={isTogglingRelease}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition shadow-sm active:scale-95 ${
+                  quiz.isResultsReleased
+                    ? "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-amber-50 hover:text-amber-800 hover:border-amber-300 border border-slate-200 dark:border-slate-700"
+                    : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20"
+                }`}
+              >
+                {isTogglingRelease ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : quiz.isResultsReleased ? (
+                  <>
+                    <EyeOff size={16} />
+                    <span>Tahan Nilai Kembali</span>
+                  </>
+                ) : (
+                  <>
+                    <Eye size={16} />
+                    <span>Rilis Nilai ke Siswa</span>
+                  </>
+                )}
+              </button>
+            )}
+
             <button
               onClick={handleTogglePublish}
               disabled={isTogglingPublish}
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition ${
                 quiz.isPublished
-                  ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100"
+                  ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 border border-emerald-200 dark:border-emerald-800/50"
                   : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200"
               }`}
             >

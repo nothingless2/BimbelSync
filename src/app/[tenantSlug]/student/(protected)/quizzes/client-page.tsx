@@ -25,10 +25,13 @@ interface QuizItem {
   creatorName: string;
   totalQuestions: number;
   createdAt: string;
+  showResultImmediately?: boolean;
+  isResultsReleased?: boolean;
+  canViewResults?: boolean;
   submission: {
     id: string;
-    score: number;
-    totalCorrect: number;
+    score: number | null;
+    totalCorrect: number | null;
     totalQuestions: number;
     submittedAt: string;
   } | null;
@@ -227,6 +230,7 @@ export default function StudentQuizzesClientPage({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredQuizzes.map((quiz) => {
             const isCompleted = quiz.submission !== null;
+            const canViewResults = quiz.canViewResults ?? Boolean(quiz.showResultImmediately || quiz.isResultsReleased);
 
             return (
               <div
@@ -242,10 +246,17 @@ export default function StudentQuizzesClientPage({
                     </span>
 
                     {isCompleted ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300">
-                        <CheckCircle2 size={12} />
-                        Selesai
-                      </span>
+                      canViewResults ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300">
+                          <CheckCircle2 size={12} />
+                          Selesai
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300">
+                          <CheckCircle2 size={12} />
+                          Terkumpul
+                        </span>
+                      )
                     ) : (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300">
                         <Clock size={12} />
@@ -279,21 +290,37 @@ export default function StudentQuizzesClientPage({
                     </span>
                   </div>
 
-                  {/* Score box if completed */}
+                  {/* Score or Status box if completed */}
                   {isCompleted && quiz.submission && (
-                    <div className="p-3 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 flex items-center justify-between">
-                      <div>
-                        <p className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">
-                          Skor Pengerjaan
-                        </p>
-                        <p className="text-xs text-emerald-700 dark:text-emerald-400">
-                          {quiz.submission.totalCorrect} dari {quiz.submission.totalQuestions} soal benar
-                        </p>
+                    canViewResults ? (
+                      <div className="p-3 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 flex items-center justify-between">
+                        <div>
+                          <p className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">
+                            Skor Pengerjaan
+                          </p>
+                          <p className="text-xs text-emerald-700 dark:text-emerald-400">
+                            {quiz.submission.totalCorrect} dari {quiz.submission.totalQuestions} soal benar
+                          </p>
+                        </div>
+                        <div className="text-xl font-extrabold text-emerald-700 dark:text-emerald-300">
+                          {quiz.submission.score}
+                        </div>
                       </div>
-                      <div className="text-xl font-extrabold text-emerald-700 dark:text-emerald-300">
-                        {quiz.submission.score}
+                    ) : (
+                      <div className="p-3 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/40 flex items-center justify-between">
+                        <div>
+                          <p className="text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+                            Jawaban Terkumpul
+                          </p>
+                          <p className="text-xs text-amber-700 dark:text-amber-400">
+                            Menunggu rilis nilai dari tutor
+                          </p>
+                        </div>
+                        <span className="px-2 py-0.5 text-[10px] font-semibold bg-amber-200/70 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 rounded-full">
+                          Menunggu Rilis
+                        </span>
                       </div>
-                    </div>
+                    )
                   )}
                 </div>
 
@@ -307,7 +334,13 @@ export default function StudentQuizzesClientPage({
                         : "bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/20"
                     }`}
                   >
-                    <span>{isCompleted ? "Lihat Hasil & Pembahasan" : "Mulai Kerjakan Kuis"}</span>
+                    <span>
+                      {isCompleted
+                        ? canViewResults
+                          ? "Lihat Hasil & Pembahasan"
+                          : "Cek Status Nilai"
+                        : "Mulai Kerjakan Kuis"}
+                    </span>
                     <ArrowRight size={14} />
                   </Link>
                 </div>

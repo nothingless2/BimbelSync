@@ -65,25 +65,26 @@ export default async function StudentQuizPlayPage({
 
   const submission = quiz.submissions[0] || null;
   const isCompleted = submission !== null;
+  const canViewResults = quiz.show_result_immediately || quiz.is_results_released;
 
   // Sanitasi data soal:
-  // Jika siswa belum submit, jangan kirimkan `correct_answer_index` atau `explanation` ke client
-  // untuk mencegah kecurangan via inspect element / devtools.
+  // Hanya kirimkan `correct_answer_index` atau `explanation` jika kuis sudah selesai DAN hasilnya sudah dirilis/boleh dilihat
+  // untuk mencegah kebocoran kunci jawaban via inspect element / devtools.
   const sanitizedQuestions = quiz.questions.map((q) => ({
     id: q.id,
     questionText: q.question_text,
     options: Array.isArray(q.options) ? (q.options as string[]) : [],
     points: q.points,
     orderIndex: q.order_index,
-    correctAnswerIndex: isCompleted ? q.correct_answer_index : undefined,
-    explanation: isCompleted ? q.explanation : undefined,
+    correctAnswerIndex: isCompleted && canViewResults ? q.correct_answer_index : undefined,
+    explanation: isCompleted && canViewResults ? q.explanation : undefined,
   }));
 
   const serializedSubmission = submission
     ? {
         id: submission.id,
-        score: Number(submission.score),
-        totalCorrect: submission.total_correct,
+        score: canViewResults ? Number(submission.score) : 0,
+        totalCorrect: canViewResults ? submission.total_correct : 0,
         totalQuestions: submission.total_questions,
         answers: submission.answers as Record<string, number>,
         submittedAt: submission.submitted_at.toISOString(),
@@ -98,6 +99,7 @@ export default async function StudentQuizPlayPage({
         description: quiz.description,
         durationMinutes: quiz.duration_minutes,
         programName: quiz.program.name,
+        canViewResults,
       }}
       questions={sanitizedQuestions}
       submission={serializedSubmission}

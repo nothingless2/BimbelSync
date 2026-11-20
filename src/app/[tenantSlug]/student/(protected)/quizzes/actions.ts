@@ -112,6 +112,7 @@ export async function submitQuizAction(data: {
       });
 
       // Sinkronisasi otomatis ke StudentEvaluation (E-Rapor)
+      const canViewResults = quiz.show_result_immediately || quiz.is_results_released;
       if (evaluatorId) {
         await tx.studentEvaluation.create({
           data: {
@@ -123,7 +124,7 @@ export async function submitQuizAction(data: {
             evaluation_type: quiz.evaluation_type || "EXAM",
             score: finalScore,
             notes: `Hasil kuis online: ${totalCorrect} dari ${totalQuestions} soal terjawab benar (Skor: ${finalScore}/100).`,
-            status: "PUBLISHED",
+            status: canViewResults ? "PUBLISHED" : "DRAFT",
           },
         });
       }
@@ -140,12 +141,15 @@ export async function submitQuizAction(data: {
     revalidatePath(`/${data.tenantSlug}/dashboard/evaluations`);
     revalidatePath(`/${data.tenantSlug}/dashboard`);
 
+    const canViewResults = quiz.show_result_immediately || quiz.is_results_released;
+
     return {
       success: true,
-      score: finalScore,
-      totalCorrect,
+      score: canViewResults ? finalScore : undefined,
+      totalCorrect: canViewResults ? totalCorrect : undefined,
       totalQuestions,
       submissionId: submission.id,
+      canViewResults,
     };
   } catch (err: any) {
     console.error("Error submitting quiz:", err);

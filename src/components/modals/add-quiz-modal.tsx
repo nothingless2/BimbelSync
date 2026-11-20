@@ -25,6 +25,7 @@ export function AddQuizModal({ isOpen, onClose, tenantSlug, academyId, programs 
     description: "",
     evaluationType: "EXAM" as "EXAM" | "HOMEWORK",
     isPublished: true,
+    showResultImmediately: false,
   });
 
   if (!isOpen) return null;
@@ -50,6 +51,7 @@ export function AddQuizModal({ isOpen, onClose, tenantSlug, academyId, programs 
         durationMinutes: Number(formData.durationMinutes) || 30,
         evaluationType: formData.evaluationType,
         isPublished: formData.isPublished,
+        showResultImmediately: formData.showResultImmediately,
         tenantSlug,
       });
 
@@ -191,6 +193,22 @@ export function AddQuizModal({ isOpen, onClose, tenantSlug, academyId, programs 
               className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition text-sm resize-none"
               placeholder="Contoh: Kerjakan 10 butir soal pilihan ganda berikut dengan teliti. Nilai akan otomatis masuk ke rapor evaluasi."
             />
+          </div>
+
+          <div className="pt-2 flex items-center justify-between border-t border-slate-100 dark:border-slate-800">
+            <div>
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">Rilis Nilai Seketika</p>
+              <p className="text-xs text-slate-500">Jika mati, nilai & pembahasan disembunyikan sampai Anda merilisnya.</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.showResultImmediately}
+                onChange={(e) => setFormData({ ...formData, showResultImmediately: e.target.checked })}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
+            </label>
           </div>
 
           <div className="pt-2 flex items-center justify-between border-t border-slate-100 dark:border-slate-800">

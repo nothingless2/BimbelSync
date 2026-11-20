@@ -50,6 +50,7 @@ interface StudentQuizPlayProps {
     description: string | null;
     durationMinutes: number;
     programName: string;
+    canViewResults?: boolean;
   };
   questions: QuizQuestionItem[];
   submission: SubmissionData | null;
@@ -133,7 +134,11 @@ export default function StudentQuizPlayClientPage({
         tenantSlug,
       });
       if (res.error) throw new Error(res.error);
-      toast.success(`Kuis selesai! Skor kamu: ${res.score}/100`);
+      if (res.canViewResults) {
+        toast.success(`Kuis selesai! Skor kamu: ${res.score}/100`);
+      } else {
+        toast.success("Kuis berhasil dikumpulkan! Nilai akan diumumkan oleh tutormu.");
+      }
       setIsSubmitModalOpen(false);
       router.refresh();
     } catch (err: any) {
@@ -160,6 +165,80 @@ export default function StudentQuizPlayClientPage({
   // REVIEW MODE (Sudah Selesai Mengerjakan)
   // -------------------------------------------------------------
   if (isReviewMode && submission) {
+    const canViewResults = quiz.canViewResults ?? true;
+
+    if (!canViewResults) {
+      return (
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20 pt-6 px-4 sm:px-6">
+          <div className="max-w-xl mx-auto space-y-6">
+            {/* Back link */}
+            <Link
+              href={`/${tenantSlug}/student/quizzes`}
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-500 hover:text-blue-600 transition"
+            >
+              <ArrowLeft size={16} />
+              Kembali ke Daftar Kuis
+            </Link>
+
+            {/* Held Submission Celebration Card */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm text-center relative overflow-hidden space-y-5">
+              <div className="w-20 h-20 mx-auto rounded-full bg-emerald-50 dark:bg-emerald-950/40 border-4 border-emerald-100 dark:border-emerald-900/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-md">
+                <CheckCircle2 size={44} />
+              </div>
+
+              <div className="space-y-2">
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+                  Jawaban Berhasil Dikumpulkan!
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
+                  Terima kasih telah menyelesaikan kuis <strong className="text-slate-800 dark:text-slate-200">{quiz.title}</strong>. Nilai dan pembahasan butir soal masih ditahan dan akan diumumkan secara serentak oleh tutormu setelah periode kuis berakhir.
+                </p>
+              </div>
+
+              {/* Status Badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-xs font-bold border border-amber-200 dark:border-amber-800/50">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                <span>Status: Menunggu Pengumuman Nilai dari Tutor</span>
+              </div>
+
+              {/* Submission Information Breakdown */}
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 text-left space-y-2.5 text-xs sm:text-sm">
+                <div className="flex justify-between items-center text-slate-600 dark:text-slate-300">
+                  <span className="text-slate-500 dark:text-slate-400">Program Belajar:</span>
+                  <span className="font-semibold text-slate-800 dark:text-white">{quiz.programName}</span>
+                </div>
+                <div className="flex justify-between items-center text-slate-600 dark:text-slate-300">
+                  <span className="text-slate-500 dark:text-slate-400">Jumlah Soal Terjawab:</span>
+                  <span className="font-semibold text-slate-800 dark:text-white">
+                    {Object.keys(submission.answers).length} dari {questions.length} Soal
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-slate-600 dark:text-slate-300">
+                  <span className="text-slate-500 dark:text-slate-400">Waktu Pengumpulan:</span>
+                  <span className="font-semibold text-slate-800 dark:text-white">
+                    {new Intl.DateTimeFormat("id-ID", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                      timeZone: "Asia/Jakarta",
+                    }).format(new Date(submission.submittedAt))} WIB
+                  </span>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <Link
+                  href={`/${tenantSlug}/student/quizzes`}
+                  className="w-full inline-flex items-center justify-center py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-sm transition active:scale-98"
+                >
+                  Kembali ke Daftar Kuis
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     const isPassing = submission.score >= 70;
 
     return (

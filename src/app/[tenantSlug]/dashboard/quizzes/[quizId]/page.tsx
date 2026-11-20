@@ -114,6 +114,8 @@ export default async function QuizDetailPage({
         durationMinutes: quiz.duration_minutes,
         evaluationType: quiz.evaluation_type,
         isPublished: quiz.is_published,
+        showResultImmediately: quiz.show_result_immediately,
+        isResultsReleased: quiz.is_results_released,
         programId: quiz.program_id,
         programName: quiz.program.name,
         creatorName: quiz.creator?.name || "Tutor",

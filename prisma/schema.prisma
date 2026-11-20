@@ -457,10 +457,12 @@ model Quiz {
   created_by_staff_id String?          @db.Uuid
   title               String
   description         String?
-  duration_minutes    Int              @default(30)
-  evaluation_type     EvaluationType   @default(EXAM)
-  is_published        Boolean          @default(true)
-  created_at          DateTime         @default(now())
+  duration_minutes        Int              @default(30)
+  evaluation_type         EvaluationType   @default(EXAM)
+  is_published            Boolean          @default(true)
+  show_result_immediately Boolean          @default(false)
+  is_results_released     Boolean          @default(false)
+  created_at              DateTime         @default(now())
   updated_at          DateTime         @updatedAt
   deleted_at          DateTime?
 

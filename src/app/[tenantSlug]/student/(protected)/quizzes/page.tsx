@@ -87,6 +87,8 @@ export default async function StudentQuizzesPage({
 
   const quizzes = rawQuizzes.map((q) => {
     const submission = q.submissions[0] || null;
+    const canViewResults = q.show_result_immediately || q.is_results_released;
+
     return {
       id: q.id,
       programId: q.program_id,
@@ -97,11 +99,14 @@ export default async function StudentQuizzesPage({
       creatorName: q.creator?.name || "Tutor",
       totalQuestions: q._count.questions,
       createdAt: q.created_at.toISOString(),
+      showResultImmediately: q.show_result_immediately,
+      isResultsReleased: q.is_results_released,
+      canViewResults,
       submission: submission
         ? {
             id: submission.id,
-            score: Number(submission.score),
-            totalCorrect: submission.total_correct,
+            score: canViewResults ? Number(submission.score) : null,
+            totalCorrect: canViewResults ? submission.total_correct : null,
             totalQuestions: submission.total_questions,
             submittedAt: submission.submitted_at.toISOString(),
           }
