@@ -19,15 +19,15 @@ export function StudentMobileNav({ tenantSlug }: { tenantSlug: string }) {
     { href: `/${tenantSlug}/student/dashboard`, icon: Home, label: 'Beranda', exact: true },
     { href: `/${tenantSlug}/student/evaluations`, icon: BarChart, label: 'Evaluasi' },
     { href: `/${tenantSlug}/student/scan`, icon: QrCode, label: 'Scan', isAction: true }, // Highlighted action
-    { href: `/${tenantSlug}/student/profile`, icon: User, label: 'Profil' },
+    { href: `/${tenantSlug}/student/materials`, icon: BookOpen, label: 'Materi' },
   ];
 
   // Secondary Menu Items (inside the "Lainnya" drawer)
   const secondaryItems = [
-    { href: `/${tenantSlug}/student/quizzes`, icon: FileQuestion, label: 'Kuis & Latihan', desc: 'Latihan soal online dan evaluasi' },
     { href: `/${tenantSlug}/student/attendances`, icon: Calendar, label: 'Riwayat Absensi', desc: 'Lihat daftar kehadiran kelas' },
-    { href: `/${tenantSlug}/student/materials`, icon: BookOpen, label: 'Materi Belajar', desc: 'Akses modul dan video pembelajaran' },
+    { href: `/${tenantSlug}/student/quizzes`, icon: FileQuestion, label: 'Kuis & Latihan', desc: 'Latihan soal online dan evaluasi' },
     { href: `/${tenantSlug}/student/invoices`, icon: CreditCard, label: 'Tagihan Saya', desc: 'Kelola SPP dan riwayat pembayaran' },
+    { href: `/${tenantSlug}/student/profile`, icon: User, label: 'Profil Saya', desc: 'Kelola data diri, akun, dan kata sandi' },
   ];
 
   const isActive = (href: string, exact?: boolean) => {
