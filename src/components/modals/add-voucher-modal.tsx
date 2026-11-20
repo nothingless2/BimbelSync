@@ -370,7 +370,7 @@ export function AddVoucherModal({ programs, onSuccess, trigger }: AddVoucherModa
                       onChange={(val) => setProgramId(val)}
                       placeholder="Pilih Program..."
                       options={[
-                        { value: "ALL", label: "🌟 Berlaku untuk Semua Program" },
+                        { value: "ALL", label: "Semua Program (Universal)" },
                         ...programs.map((p) => ({ value: p.id, label: p.name })),
                       ]}
                     />

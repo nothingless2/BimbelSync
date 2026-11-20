@@ -396,7 +396,7 @@ export async function sendSupportTicketEmail({
       </div>
 
       <div style="background-color: #eff6ff; border-radius: 8px; padding: 12px 16px; font-size: 12px; color: #1d4ed8;">
-        💡 <strong>Tips:</strong> Anda dapat langsung membalas email ini untuk mengirimkan tanggapan kepada pengirim (${senderEmail}).
+        <strong>Catatan:</strong> Anda dapat langsung membalas email ini untuk mengirimkan tanggapan kepada pengirim (${senderEmail}).
       </div>
 
       <div style="text-align: center; margin-top: 24px; color: #94a3b8; font-size: 11px;">

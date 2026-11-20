@@ -50,84 +50,48 @@ export interface StudentMilestoneCardProps {
 }
 
 /**
- * Komponen Progress Bar dengan Efek Gradasi Berkilau (Glossy Striped) 
- * dan Pin Balon Persentase Mengambang (Floating Pin Bubble).
+ * Komponen Progress Bar Minimalis Modern (Clean, Solid & Accessible)
  */
-function GlossyPinBar({
+function CleanProgressBar({
   label,
   value,
   sublabel,
-  gradientClass,
-  pinBgClass,
-  pinArrowClass,
+  barColorClass,
   badgeText,
 }: {
   label: string;
   value: number | null;
   sublabel?: string;
-  gradientClass: string;
-  pinBgClass: string;
-  pinArrowClass: string;
+  barColorClass: string;
   badgeText?: string;
 }) {
-  // Clamp pin position between 7% and 93% agar balon tidak terpotong di tepi kiri/kanan
-  const clampedPct = value !== null ? Math.min(Math.max(value, 7), 93) : 0;
   const fillWidth = value !== null ? Math.min(100, Math.max(0, value)) : 0;
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1.5">
       {/* Label & Nilai Numerik */}
       <div className="flex items-center justify-between text-xs">
         <span className="font-semibold text-slate-700 dark:text-slate-300">
           {label}
         </span>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           {badgeText && (
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
               {badgeText}
             </span>
           )}
-          <span className="font-extrabold text-slate-900 dark:text-white">
-            {value !== null ? `${value.toFixed(0)}/100` : "—"}
+          <span className="font-bold text-slate-900 dark:text-white tabular-nums">
+            {value !== null ? `${Math.round(value)}/100` : "—"}
           </span>
         </div>
       </div>
 
-      {/* Bar Container dengan Ruang Pin Mengambang di Atasnya */}
-      <div className="relative pt-6 pb-0.5">
-        {/* Floating Pin Bubble dengan Panah ke Bawah */}
-        {value !== null && (
-          <div
-            className="absolute top-0 transition-all duration-700 ease-out z-10 flex flex-col items-center pointer-events-none"
-            style={{ left: `${clampedPct}%`, transform: "translateX(-50%)" }}
-          >
-            <div
-              className={`px-2 py-0.5 rounded-full text-[10px] font-black text-white shadow-sm flex items-center justify-center leading-none ${pinBgClass}`}
-            >
-              {Math.round(value)}%
-            </div>
-            <div
-              className={`w-0 h-0 border-x-[3.5px] border-x-transparent border-t-[4px] -mt-px ${pinArrowClass}`}
-            />
-          </div>
-        )}
-
-        {/* Track Bar Bergaris Diagonal (Glossy Texture) */}
-        <div className="w-full bg-slate-100 dark:bg-slate-800 h-3.5 sm:h-4 rounded-full overflow-hidden relative shadow-inner p-0.5 border border-slate-200/40 dark:border-slate-700/40">
-          <div
-            className={`h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r ${gradientClass} relative overflow-hidden`}
-            style={{ width: `${fillWidth}%` }}
-          >
-            {/* Pola Garis Miring Halus (Glossy Stripes) */}
-            <div
-              className="absolute inset-0 opacity-25"
-              style={{
-                backgroundImage:
-                  "repeating-linear-gradient(45deg, rgba(255,255,255,0.3) 0, rgba(255,255,255,0.3) 6px, transparent 6px, transparent 12px)",
-              }}
-            />
-          </div>
-        </div>
+      {/* Solid Clean Bar */}
+      <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all duration-500 ease-out ${barColorClass}`}
+          style={{ width: `${fillWidth}%` }}
+        />
       </div>
 
       {/* Sublabel / Keterangan di Bawah Bar */}
@@ -186,18 +150,13 @@ export function StudentMilestoneCard({
       
       {/* Header Utama Card */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-            <Award className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-white leading-tight">
-              Milestone & Capaian Belajar Siswa
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Pantau progres kehadiran kelas dan rata-rata evaluasi nilai Anda.
-            </p>
-          </div>
+        <div>
+          <h3 className="text-base font-bold text-slate-900 dark:text-white leading-tight">
+            Milestone & Capaian Belajar Siswa
+          </h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Pantau progres kehadiran kelas dan rata-rata evaluasi nilai Anda.
+          </p>
         </div>
 
         <Link
@@ -441,7 +400,7 @@ export function StudentMilestoneCard({
         </div>
 
         {/* =========================================================
-            KOLOM KANAN (5/12): PROGRESS BAR NILAI (GLOSSY & PIN)
+            KOLOM KANAN (5/12): PROGRESS BAR NILAI (CLEAN & MINIMAL)
         ========================================================= */}
         <div className="lg:col-span-5 space-y-4">
           <div className="flex items-center justify-between pb-1">
@@ -453,8 +412,8 @@ export function StudentMilestoneCard({
             </span>
           </div>
 
-          {/* Bar 1: Rata-Rata Nilai Asesmen (Cyan to Blue Gradient) */}
-          <GlossyPinBar
+          {/* Bar 1: Rata-Rata Nilai Asesmen */}
+          <CleanProgressBar
             label="Rata-rata Asesmen"
             value={academic.averageScore}
             sublabel={
@@ -462,9 +421,7 @@ export function StudentMilestoneCard({
                 ? `${academic.scoredCount ?? 0} dari ${academic.totalEvaluations} evaluasi telah dinilai`
                 : "Belum ada nilai terbit"
             }
-            gradientClass="from-cyan-400 via-blue-500 to-indigo-600"
-            pinBgClass="bg-gradient-to-r from-cyan-500 to-blue-600 shadow-blue-500/20"
-            pinArrowClass="border-t-blue-600"
+            barColorClass="bg-blue-600"
             badgeText={
               academic.averageScore !== null
                 ? academic.averageScore >= 80
@@ -476,8 +433,8 @@ export function StudentMilestoneCard({
             }
           />
 
-          {/* Bar 2: Ujian & Kuis (Purple to Violet Gradient) */}
-          <GlossyPinBar
+          {/* Bar 2: Ujian & Kuis */}
+          <CleanProgressBar
             label="Ujian & Kuis"
             value={academic.examAverage ?? null}
             sublabel={
@@ -485,13 +442,11 @@ export function StudentMilestoneCard({
                 ? "Rata-rata evaluasi kuis dan ujian"
                 : "Belum ada nilai ujian & kuis"
             }
-            gradientClass="from-fuchsia-400 via-purple-500 to-violet-600"
-            pinBgClass="bg-gradient-to-r from-fuchsia-500 to-purple-600 shadow-purple-500/20"
-            pinArrowClass="border-t-purple-600"
+            barColorClass="bg-indigo-600"
           />
 
-          {/* Bar 3: Tugas & Latihan (Amber to Orange Gradient) */}
-          <GlossyPinBar
+          {/* Bar 3: Tugas & Latihan */}
+          <CleanProgressBar
             label="Tugas & Latihan"
             value={academic.homeworkAverage ?? null}
             sublabel={
@@ -499,9 +454,7 @@ export function StudentMilestoneCard({
                 ? "Penyelesaian latihan dan tugas mandiri"
                 : "Belum ada tugas atau latihan"
             }
-            gradientClass="from-amber-400 via-orange-500 to-rose-500"
-            pinBgClass="bg-gradient-to-r from-amber-500 to-orange-500 shadow-orange-500/20"
-            pinArrowClass="border-t-orange-500"
+            barColorClass="bg-amber-500"
           />
 
           {/* Modul Belajar Footer Link */}

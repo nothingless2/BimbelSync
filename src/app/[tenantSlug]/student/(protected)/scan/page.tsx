@@ -145,7 +145,7 @@ export default function StudentScanPage() {
             <div className="bg-orange-50 dark:bg-orange-900/10 p-4 rounded-xl text-sm text-orange-800 dark:text-orange-300 text-left mb-6">
               <p className="font-semibold mb-2">Cara mengaktifkan kamera:</p>
               <ol className="list-decimal pl-4 space-y-1">
-                <li>Klik ikon gembok 🔒 di dekat URL web browser.</li>
+                <li>Klik ikon gembok di samping alamat web browser.</li>
                 <li>Cari pengaturan <strong>Kamera</strong> atau <strong>Camera</strong>.</li>
                 <li>Ubah dari <em>Block</em> menjadi <em>Allow</em>.</li>
                 <li>Refresh halaman ini.</li>

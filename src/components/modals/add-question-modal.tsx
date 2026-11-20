@@ -314,7 +314,7 @@ export function AddQuestionModal({
                         : "text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
                     }`}
                   >
-                    📐 Matriks & Vektor
+                    Matriks & Vektor
                   </button>
                   <button
                     type="button"
@@ -325,7 +325,7 @@ export function AddQuestionModal({
                         : "text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
                     }`}
                   >
-                    ➗ Aljabar & Persamaan
+                    Aljabar & Persamaan
                   </button>
                   <button
                     type="button"
@@ -336,7 +336,7 @@ export function AddQuestionModal({
                         : "text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
                     }`}
                   >
-                    ∫ Kalkulus & Trigo
+                    Kalkulus & Trigo
                   </button>
                   <button
                     type="button"
@@ -347,7 +347,7 @@ export function AddQuestionModal({
                         : "text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
                     }`}
                   >
-                    🔣 Simbol & Yunani
+                    Simbol & Yunani
                   </button>
                   <button
                     type="button"
@@ -358,7 +358,7 @@ export function AddQuestionModal({
                         : "text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
                     }`}
                   >
-                    🧪 Fisika & Kimia
+                    Fisika & Kimia
                   </button>
                   <button
                     type="button"
@@ -369,7 +369,7 @@ export function AddQuestionModal({
                         : "text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
                     }`}
                   >
-                    📖 Bahasa & Wacana
+                    Bahasa & Wacana
                   </button>
                 </div>
 

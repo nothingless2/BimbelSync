@@ -60,23 +60,22 @@ export function StudentBillingBanner({
     : `/${tenantSlug}/student/invoices`;
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none animate-in fade-in duration-300">
-      {/* Header: Alert Icon + Title */}
-      <div className="flex items-center gap-2 mb-2">
-        <div className="w-6 h-6 rounded-full bg-red-100 dark:bg-red-950/50 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
-          <AlertCircle size={14} />
-        </div>
-        <h4 className="text-xs sm:text-sm font-bold text-red-950 dark:text-red-200">
-          Menunggu Pembayaran (Tagihan SPP)
+    <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200/90 dark:border-slate-800 shadow-sm animate-in fade-in duration-300">
+      {/* Header: Label + Semantic Status Pill */}
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Tagihan SPP Aktif
         </h4>
+        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/50">
+          Menunggu Pembayaran
+        </span>
       </div>
 
-      {/* Due Date Badge */}
+      {/* Due Date Info */}
       {formattedDate && (
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900/40 text-red-600 dark:text-red-300 text-[11px] font-medium mb-3">
-          <Clock size={12} />
-          <span>Batas Pembayaran: {formattedDate}</span>
-        </div>
+        <p className="text-xs text-rose-600 dark:text-rose-400 font-medium mb-1">
+          Jatuh tempo: {formattedDate}
+        </p>
       )}
 
       {/* Big Prominent Amount */}
